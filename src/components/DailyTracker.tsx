@@ -108,14 +108,28 @@ export default function DailyTracker() {
   const totalIncome = entries.reduce((s, e) => s + e.income, 0);
   const daysTracked = entries.length;
   const dailyAvg = daysTracked > 0 ? (totalSubmissions / daysTracked).toFixed(1) : '0';
-  const gap = goal - totalSubmissions;
-  const pctOfGoal = goal > 0 ? ((totalSubmissions / goal) * 100).toFixed(1) : '0';
   const convRate = totalVisitors > 0 ? ((totalSubmissions / totalVisitors) * 100).toFixed(1) : '0';
 
   // Days remaining in month
   const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
   const daysRemaining = daysInMonth - daysTracked;
+  const gap = goal - totalSubmissions;
   const neededPerDay = daysRemaining > 0 ? Math.ceil(gap / daysRemaining) : 0;
+
+  // "Should Be At" — expected progress based on days tracked
+  const shouldBeAt = Math.round(goal / daysInMonth * daysTracked);
+  const aheadBehind = totalSubmissions - shouldBeAt;
+
+  // Projected End-of-Month
+  const projectedEOM = daysTracked > 0 ? Math.round((totalSubmissions / daysTracked) * daysInMonth) : 0;
+  const projectedPctOfGoal = goal > 0 ? ((projectedEOM / goal) * 100).toFixed(1) : '0';
+
+  // Income projections
+  const projectedIncome = daysTracked > 0 ? Math.round((totalIncome / daysTracked) * daysInMonth) : 0;
+
+  // Progress bar percentages
+  const progressPct = goal > 0 ? Math.min((totalSubmissions / goal) * 100, 100) : 0;
+  const pacePct = goal > 0 ? Math.min((shouldBeAt / goal) * 100, 100) : 0;
 
   // Chart data: stacked bar (online blue + hybrid gold + prime red) with goal line
   const chartData = {
@@ -198,33 +212,96 @@ export default function DailyTracker() {
         </div>
       )}
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      {/* Stat cards — 6 across */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {/* 1. MTD Submissions */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div className="text-2xl font-bold text-gray-900">{totalSubmissions.toLocaleString()}</div>
           <div className="text-sm text-gray-500 mt-1">MTD Submissions</div>
         </div>
+
+        {/* 2. Should Be At */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-gray-900">{goal.toLocaleString()}</div>
-          <div className="text-sm text-gray-500 mt-1">Monthly Goal</div>
+          <div className="text-2xl font-bold text-gray-900">{shouldBeAt.toLocaleString()}</div>
+          <div className="text-sm text-gray-500 mt-1">Should Be At (Day {daysTracked})</div>
         </div>
-        <div className={`bg-white rounded-lg shadow-sm border p-4 ${gap > 0 ? 'border-amber-200' : 'border-green-200'}`}>
-          <div className={`text-2xl font-bold ${gap > 0 ? 'text-amber-600' : 'text-green-600'}`}>
-            {gap > 0 ? `-${gap.toLocaleString()}` : `+${Math.abs(gap).toLocaleString()}`}
+
+        {/* 3. Ahead/Behind */}
+        <div className={`bg-white rounded-lg shadow-sm border p-4 ${aheadBehind >= 0 ? 'border-green-200' : 'border-amber-200'}`}>
+          <div className={`text-2xl font-bold ${aheadBehind >= 0 ? 'text-green-600' : 'text-amber-600'}`}>
+            {aheadBehind >= 0 ? `+${aheadBehind.toLocaleString()}` : aheadBehind.toLocaleString()}
           </div>
-          <div className="text-sm text-gray-500 mt-1">Gap to Goal ({pctOfGoal}%)</div>
+          <div className="text-sm text-gray-500 mt-1">{aheadBehind >= 0 ? 'Ahead of Pace' : 'Behind Pace'}</div>
         </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-gray-900">{dailyAvg}</div>
-          <div className="text-sm text-gray-500 mt-1">Daily Avg</div>
-        </div>
+
+        {/* 4. Daily Target Needed */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div className="text-2xl font-bold text-gray-900">{daysRemaining > 0 ? neededPerDay : '--'}</div>
-          <div className="text-sm text-gray-500 mt-1">Needed/Day</div>
+          <div className="text-sm text-gray-500 mt-1">Needed/Day ({daysRemaining} left)</div>
         </div>
+
+        {/* 5. Projected EOM */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-gray-900">{convRate}%</div>
-          <div className="text-sm text-gray-500 mt-1">Conversion ({totalVisitors.toLocaleString()} vis)</div>
+          <div className="text-2xl font-bold text-gray-900">{daysTracked > 0 ? projectedEOM.toLocaleString() : '--'}</div>
+          <div className="text-sm text-gray-500 mt-1">Projected EOM</div>
+        </div>
+
+        {/* 6. Will Hit X% of Goal */}
+        <div className={`bg-white rounded-lg shadow-sm border p-4 ${
+          daysTracked > 0 && parseFloat(projectedPctOfGoal) >= 100 ? 'border-green-200' : 'border-gray-200'
+        }`}>
+          <div className={`text-2xl font-bold ${
+            daysTracked > 0 && parseFloat(projectedPctOfGoal) >= 100 ? 'text-green-600' : 'text-gray-900'
+          }`}>
+            {daysTracked > 0 ? `${projectedPctOfGoal}%` : '--'}
+          </div>
+          <div className="text-sm text-gray-500 mt-1">Will Hit % of Goal</div>
+        </div>
+      </div>
+
+      {/* Progress bar with pace marker */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-medium text-gray-700">Progress to Goal</h3>
+          <span className="text-sm text-gray-500">
+            {totalSubmissions.toLocaleString()} / {goal.toLocaleString()}
+          </span>
+        </div>
+        <div className="relative h-6 bg-gray-100 rounded-full overflow-visible">
+          {/* Blue fill — current progress */}
+          <div
+            className="absolute top-0 left-0 h-full bg-blue-500 rounded-full transition-all duration-500"
+            style={{ width: `${progressPct}%` }}
+          />
+          {/* Orange pace marker */}
+          <div
+            className="absolute top-0 h-full w-0.5 bg-orange-500 z-10"
+            style={{ left: `${pacePct}%` }}
+          >
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs text-orange-600 font-medium">
+              Pace
+            </div>
+            <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs text-orange-600">
+              {shouldBeAt.toLocaleString()}
+            </div>
+          </div>
+          {/* Percentage label inside bar */}
+          {progressPct > 8 && (
+            <div className="absolute inset-0 flex items-center justify-center text-xs font-medium text-white z-10">
+              {progressPct.toFixed(1)}%
+            </div>
+          )}
+        </div>
+        {/* Legend */}
+        <div className="flex items-center gap-4 mt-6 text-xs text-gray-500">
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block w-3 h-3 rounded-sm bg-blue-500" />
+            Current Progress
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block w-3 h-0.5 bg-orange-500" />
+            Expected Pace (Day {daysTracked}/{daysInMonth})
+          </span>
         </div>
       </div>
 
@@ -317,8 +394,8 @@ export default function DailyTracker() {
         </div>
       </div>
 
-      {/* Sub-totals by type */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* Sub-totals by type + Conversion */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center">
           <div className="text-xl font-bold text-blue-600">{totalOnline.toLocaleString()}</div>
           <div className="text-sm text-gray-500">Online</div>
@@ -330,6 +407,34 @@ export default function DailyTracker() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center">
           <div className="text-xl font-bold text-red-600">{totalPrime.toLocaleString()}</div>
           <div className="text-sm text-gray-500">Prime</div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center">
+          <div className="text-xl font-bold text-gray-900">{convRate}%</div>
+          <div className="text-sm text-gray-500">Conversion ({totalVisitors.toLocaleString()} visitors)</div>
+        </div>
+      </div>
+
+      {/* Income section */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="text-sm text-gray-500 mb-1">Income Earned</div>
+          <div className="text-2xl font-bold text-green-600">
+            ${totalIncome.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+          </div>
+          <div className="text-xs text-gray-400 mt-1">
+            ${daysTracked > 0 ? (totalIncome / daysTracked).toFixed(0) : '0'}/day avg
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="text-sm text-gray-500 mb-1">Projected Income</div>
+          <div className="text-2xl font-bold text-green-600">
+            {daysTracked > 0
+              ? `$${projectedIncome.toLocaleString()}`
+              : '--'}
+          </div>
+          <div className="text-xs text-gray-400 mt-1">
+            Based on {daysTracked} day{daysTracked !== 1 ? 's' : ''} tracked
+          </div>
         </div>
       </div>
 
