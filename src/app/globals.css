@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+:root {
+  --tp-blue: #2563eb;
+  --tp-gold: #d97706;
+  --tp-red: #dc2626;
+  --tp-green: #16a34a;
+  --tp-gray: #6b7280;
+}
+
+body {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  background: #f9fafb;
+  color: #111827;
+}
