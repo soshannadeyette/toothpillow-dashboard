@@ -13,7 +13,7 @@ import {
   Legend,
   Filler,
 } from 'chart.js';
-import { Bar } from 'react-chartjs-2';
+import { Bar, Line } from 'react-chartjs-2';
 import { fetchSubmissions, upsertSubmission, currentYear, currentMonth } from '@/lib/api';
 import type { DailySubmission } from '@/lib/types';
 import { MONTHLY_GOALS_2026, MONTH_NAMES } from '@/lib/types';
@@ -41,6 +41,10 @@ export default function DailyTracker() {
   const goal = MONTHLY_GOALS_2026.find(
     (g) => g.month === selectedMonth && g.year === selectedYear
   )?.total ?? 0;
+
+  const monthGoal = MONTHLY_GOALS_2026.find(
+    (g) => g.month === selectedMonth && g.year === selectedYear
+  );
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -180,6 +184,16 @@ export default function DailyTracker() {
       y: { stacked: true, beginAtZero: true },
     },
   };
+
+  // Daily Submissions Breakdown line chart
+  const dailyTarget = monthGoal
+    ? Math.round((monthGoal.online + monthGoal.hybrid + monthGoal.prime) / daysInMonth)
+    : 0;
+
+  const breakdownLabels = entries.map((e) => {
+    const d = new Date(e.date + 'T12:00:00');
+    return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+  });
 
   return (
     <div className="space-y-6">
@@ -405,6 +419,85 @@ export default function DailyTracker() {
           )}
         </div>
       </div>
+
+      {/* Daily Submissions Breakdown — line chart */}
+      {entries.length > 0 && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-sm font-bold text-gray-700 mb-3">Daily Submissions Breakdown</h3>
+          <div style={{ height: 380 }}>
+            <Line
+              data={{
+                labels: breakdownLabels,
+                datasets: [
+                  {
+                    label: 'Online',
+                    data: entries.map((d) => d.online),
+                    borderColor: '#8CD1C8',
+                    backgroundColor: 'rgba(140,209,200,0.15)',
+                    borderWidth: 2.5,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#8CD1C8',
+                    tension: 0.4,
+                    fill: true,
+                  },
+                  {
+                    label: 'Hybrid',
+                    data: entries.map((d) => d.hybrid),
+                    borderColor: '#E5A04B',
+                    backgroundColor: 'rgba(229,160,75,0.12)',
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#E5A04B',
+                    tension: 0.4,
+                    fill: true,
+                  },
+                  {
+                    label: 'Prime',
+                    data: entries.map((d) => d.prime),
+                    borderColor: '#E88B8B',
+                    backgroundColor: 'rgba(232,139,139,0.1)',
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#E88B8B',
+                    tension: 0.4,
+                    fill: true,
+                  },
+                  {
+                    label: `Daily Target (${dailyTarget}/day)`,
+                    data: entries.map(() => dailyTarget),
+                    borderColor: '#E5A04B',
+                    borderDash: [8, 5],
+                    borderWidth: 2.5,
+                    pointRadius: 0,
+                    fill: false,
+                    tension: 0,
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { position: 'top' },
+                  tooltip: {
+                    callbacks: {
+                      afterBody: (ctx) => {
+                        const idx = ctx[0].dataIndex;
+                        const d = entries[idx];
+                        return `Total: ${d.online + d.hybrid + d.prime}`;
+                      },
+                    },
+                  },
+                },
+                scales: {
+                  x: { grid: { display: false } },
+                  y: { beginAtZero: true },
+                },
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Sub-totals by type + Conversion */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
