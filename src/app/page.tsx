@@ -8,6 +8,7 @@ import OnlineTrends from '@/components/OnlineTrends';
 import ReferrerView from '@/components/ReferrerView';
 import PaidAds from '@/components/PaidAds';
 import AmbassadorGrowth from '@/components/AmbassadorGrowth';
+import GoalEditor from '@/components/GoalEditor';
 
 const TABS = [
   { id: 'daily', label: 'Daily Tracker' },
@@ -17,6 +18,7 @@ const TABS = [
   { id: 'referrer', label: 'Referrer' },
   { id: 'paid', label: 'Paid Ads' },
   { id: 'ambassador', label: 'Ambassador Growth' },
+  { id: 'settings', label: 'Settings' },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
@@ -61,6 +63,7 @@ export default function Dashboard() {
         {activeTab === 'referrer' && <ReferrerView />}
         {activeTab === 'paid' && <PaidAds />}
         {activeTab === 'ambassador' && <AmbassadorGrowth />}
+        {activeTab === 'settings' && <GoalEditor />}
       </main>
     </div>
   );
