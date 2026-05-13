@@ -3,7 +3,8 @@
  * No localStorage anywhere. Ever.
  */
 
-import type { DailySubmission, GoogleAdsDaily, MonthlySummary } from './types';
+import type { DailySubmission, GoogleAdsDaily, MonthlySummary, MonthGoal } from './types';
+import { MONTHLY_GOALS_2026 } from './types';
 
 const BASE = '';
 
@@ -81,4 +82,29 @@ export function currentMonth(): number {
 
 export function currentYear(): number {
     return new Date().getFullYear();
+}
+
+// ---- Monthly Goals (Settings) ----
+
+export async function fetchMonthlyGoals(): Promise<MonthGoal[]> {
+    try {
+        const res = await fetch(`${BASE}/api/settings?key=monthly_goals_2026`);
+        if (!res.ok) return MONTHLY_GOALS_2026;
+        const data = await res.json();
+        if (data && data.length > 0 && data[0].value) {
+            return JSON.parse(data[0].value) as MonthGoal[];
+        }
+        return MONTHLY_GOALS_2026;
+    } catch {
+        return MONTHLY_GOALS_2026;
+    }
+}
+
+export async function saveMonthlyGoals(goals: MonthGoal[]): Promise<void> {
+    const res = await fetch(`${BASE}/api/settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'monthly_goals_2026', value: JSON.stringify(goals) }),
+    });
+    if (!res.ok) throw new Error(await res.text());
 }
