@@ -389,6 +389,113 @@ export default function OnlineTrends() {
         />
       </div>
 
+      {/* Section 1.5: Daily Submissions Breakdown (current month line chart) */}
+      {(() => {
+        const currentMonthSubs = dailySubs
+          .filter((d) => {
+            const dt = new Date(d.date + 'T12:00:00');
+            return dt.getMonth() + 1 === currentMonth && dt.getFullYear() === currentYear;
+          })
+          .sort((a, b) => a.date.localeCompare(b.date));
+
+        if (currentMonthSubs.length === 0) return null;
+
+        const dailyTarget = Math.round(
+          ((() => {
+            const totalDays = daysInMonth(currentMonth, currentYear);
+            // Get the monthly goal — use online + hybrid + prime goal
+            const onlineGoal = 1562; // May 2026 from MONTHLY_GOALS
+            const hybridGoal = 405;
+            const primeGoal = 25;
+            return (onlineGoal + hybridGoal + primeGoal) / totalDays;
+          })())
+        );
+
+        const labels = currentMonthSubs.map((d) => {
+          const dt = new Date(d.date + 'T12:00:00');
+          return `${String(dt.getMonth() + 1).padStart(2, '0')}/${String(dt.getDate()).padStart(2, '0')}`;
+        });
+
+        return (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <h3 className="text-sm font-bold text-gray-700 mb-3">Daily Submissions Breakdown</h3>
+            <div style={{ height: 380 }}>
+              <Line
+                data={{
+                  labels,
+                  datasets: [
+                    {
+                      label: 'Online',
+                      data: currentMonthSubs.map((d) => d.online),
+                      borderColor: '#8CD1C8',
+                      backgroundColor: 'rgba(140,209,200,0.15)',
+                      borderWidth: 2.5,
+                      pointRadius: 4,
+                      pointBackgroundColor: '#8CD1C8',
+                      tension: 0.4,
+                      fill: true,
+                    },
+                    {
+                      label: 'Hybrid',
+                      data: currentMonthSubs.map((d) => d.hybrid),
+                      borderColor: '#E5A04B',
+                      backgroundColor: 'rgba(229,160,75,0.12)',
+                      borderWidth: 2,
+                      pointRadius: 4,
+                      pointBackgroundColor: '#E5A04B',
+                      tension: 0.4,
+                      fill: true,
+                    },
+                    {
+                      label: 'Prime',
+                      data: currentMonthSubs.map((d) => d.prime),
+                      borderColor: '#E88B8B',
+                      backgroundColor: 'rgba(232,139,139,0.1)',
+                      borderWidth: 2,
+                      pointRadius: 4,
+                      pointBackgroundColor: '#E88B8B',
+                      tension: 0.4,
+                      fill: true,
+                    },
+                    {
+                      label: `Daily Target (${dailyTarget}/day)`,
+                      data: currentMonthSubs.map(() => dailyTarget),
+                      borderColor: '#E5A04B',
+                      borderDash: [8, 5],
+                      borderWidth: 2.5,
+                      pointRadius: 0,
+                      fill: false,
+                      tension: 0,
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                      callbacks: {
+                        afterBody: (ctx) => {
+                          const idx = ctx[0].dataIndex;
+                          const d = currentMonthSubs[idx];
+                          const total = d.online + d.hybrid + d.prime;
+                          return `Total: ${total}`;
+                        },
+                      },
+                    },
+                  },
+                  scales: {
+                    x: { grid: { display: false } },
+                    y: { beginAtZero: true },
+                  },
+                }}
+              />
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Section 2: Cumulative Online Trajectory */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">

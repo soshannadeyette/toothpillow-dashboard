@@ -212,50 +212,62 @@ export default function DailyTracker() {
         </div>
       )}
 
-      {/* Stat cards — 6 across */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {/* 1. MTD Submissions */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-gray-900">{totalSubmissions.toLocaleString()}</div>
-          <div className="text-sm text-gray-500 mt-1">MTD Submissions</div>
+      {/* Month title */}
+      <h2 className="text-xl font-bold text-gray-900">
+        {MONTH_NAMES[selectedMonth]} {selectedYear} Submission Tracker
+      </h2>
+
+      {/* Stat cards — 2x3 grid matching old dashboard */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* 1. Month-to-Date */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-gray-700 p-5">
+          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Month-to-Date</div>
+          <div className="text-4xl font-bold text-gray-900">{totalSubmissions.toLocaleString()}</div>
+          <div className="text-sm text-gray-600 mt-1">Total Submissions</div>
+          <div className="text-xs text-gray-400 mt-0.5">{totalOnline} online, {totalHybrid} hybrid, {totalPrime} prime</div>
         </div>
 
         {/* 2. Should Be At */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-gray-900">{shouldBeAt.toLocaleString()}</div>
-          <div className="text-sm text-gray-500 mt-1">Should Be At (Day {daysTracked})</div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-gray-700 p-5">
+          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Should Be At (Day {daysTracked})</div>
+          <div className="text-4xl font-bold text-amber-500">{shouldBeAt.toLocaleString()}</div>
+          <div className="text-sm text-gray-600 mt-1">Target for End of Today</div>
         </div>
 
-        {/* 3. Ahead/Behind */}
-        <div className={`bg-white rounded-lg shadow-sm border p-4 ${aheadBehind >= 0 ? 'border-green-200' : 'border-amber-200'}`}>
-          <div className={`text-2xl font-bold ${aheadBehind >= 0 ? 'text-green-600' : 'text-amber-600'}`}>
+        {/* 3. Ahead / Behind */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-gray-700 p-5">
+          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Ahead / Behind</div>
+          <div className={`text-4xl font-bold ${aheadBehind >= 0 ? 'text-green-600' : 'text-red-500'}`}>
             {aheadBehind >= 0 ? `+${aheadBehind.toLocaleString()}` : aheadBehind.toLocaleString()}
           </div>
-          <div className="text-sm text-gray-500 mt-1">{aheadBehind >= 0 ? 'Ahead of Pace' : 'Behind Pace'}</div>
+          <div className="text-sm text-gray-600 mt-1">{aheadBehind >= 0 ? 'Ahead of Target' : 'Behind Target'}</div>
         </div>
 
         {/* 4. Daily Target Needed */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-gray-900">{daysRemaining > 0 ? neededPerDay : '--'}</div>
-          <div className="text-sm text-gray-500 mt-1">Needed/Day ({daysRemaining} left)</div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-gray-700 p-5">
+          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Daily Target Needed</div>
+          <div className="text-4xl font-bold text-amber-500">{daysRemaining > 0 ? neededPerDay : '--'}</div>
+          <div className="text-sm text-gray-600 mt-1">Per Day to Hit Goal</div>
         </div>
 
-        {/* 5. Projected EOM */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-gray-900">{daysTracked > 0 ? projectedEOM.toLocaleString() : '--'}</div>
-          <div className="text-sm text-gray-500 mt-1">Projected EOM</div>
-        </div>
-
-        {/* 6. Will Hit X% of Goal */}
-        <div className={`bg-white rounded-lg shadow-sm border p-4 ${
-          daysTracked > 0 && parseFloat(projectedPctOfGoal) >= 100 ? 'border-green-200' : 'border-gray-200'
-        }`}>
-          <div className={`text-2xl font-bold ${
-            daysTracked > 0 && parseFloat(projectedPctOfGoal) >= 100 ? 'text-green-600' : 'text-gray-900'
-          }`}>
-            {daysTracked > 0 ? `${projectedPctOfGoal}%` : '--'}
+        {/* 5. Projected End-of-Month */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-gray-700 p-5">
+          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Projected End-of-Month</div>
+          <div className={`text-4xl font-bold ${daysTracked > 0 && projectedEOM >= goal ? 'text-green-600' : 'text-red-500'}`}>
+            {daysTracked > 0 ? projectedEOM.toLocaleString() : '--'}
           </div>
-          <div className="text-sm text-gray-500 mt-1">Will Hit % of Goal</div>
+          <div className="text-sm text-gray-600 mt-1">At Current Pace</div>
+        </div>
+
+        {/* 6. Will Hit */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-gray-700 p-5">
+          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Will Hit</div>
+          <div className={`text-4xl font-bold ${
+            daysTracked > 0 && parseFloat(projectedPctOfGoal) >= 100 ? 'text-green-600' : 'text-purple-500'
+          }`}>
+            {daysTracked > 0 ? `${Math.round(parseFloat(projectedPctOfGoal))}%` : '--'}
+          </div>
+          <div className="text-sm text-gray-600 mt-1">Of {goal.toLocaleString()} Goal</div>
         </div>
       </div>
 
