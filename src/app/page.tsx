@@ -27,26 +27,33 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<TabId>('daily');
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={{ background: '#FFFFFF' }}>
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <h1 className="text-xl font-semibold text-gray-900">
+      <header style={{ backgroundColor: '#1B2A4A' }} className="px-6 py-5">
+        <h1 className="text-2xl font-semibold text-white">
           Toothpillow Submission Dashboard
         </h1>
       </header>
 
       {/* Tab bar */}
-      <nav className="bg-white border-b border-gray-200 px-6">
-        <div className="flex gap-1 overflow-x-auto">
+      <nav className="bg-white px-6" style={{ borderBottom: '2px solid #e0e0e0' }}>
+        <div className="flex gap-2 overflow-x-auto">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'text-blue-600 border-blue-600'
-                  : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
-              }`}
+              className="px-6 py-4 text-sm font-medium transition-colors whitespace-nowrap"
+              style={{
+                borderBottom: activeTab === tab.id ? '3px solid #FDBE67' : '3px solid transparent',
+                color: activeTab === tab.id ? '#1B2A4A' : '#666',
+                background: 'transparent',
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== tab.id) e.currentTarget.style.backgroundColor = '#f5f5f5';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
             >
               {tab.label}
             </button>
@@ -55,7 +62,7 @@ export default function Dashboard() {
       </nav>
 
       {/* Tab content */}
-      <main className="p-6 max-w-7xl mx-auto">
+      <main className="p-6" style={{ maxWidth: 1400, margin: '0 auto' }}>
         {activeTab === 'daily' && <DailyTracker />}
         {activeTab === 'weekly' && <WeeklyReport />}
         {activeTab === 'annual' && <AnnualView />}
