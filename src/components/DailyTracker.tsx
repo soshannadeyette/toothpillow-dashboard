@@ -347,60 +347,60 @@ export default function DailyTracker() {
         </div>
       </div>
 
-      {/* Stat cards — 2x3 grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20 }}>
+      {/* Stat cards — responsive grid matching HTML dashboard */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20, marginBottom: 30 }}>
         {/* 1. Month-to-Date */}
-        <div className={card} style={{ ...cardShadow, borderLeft: '4px solid #3A6EA4' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Month-to-Date</div>
-          <div style={{ fontSize: 32, fontWeight: 'bold', color: '#1B2A4A' }}>{totalSubmissions.toLocaleString()}</div>
-          <div style={{ fontSize: 13, color: '#666', marginTop: 4 }}>Total Submissions</div>
-          <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{totalOnline} online, {totalHybrid} hybrid, {totalPrime} prime</div>
+        <div className={card} style={cardShadow}>
+          <div style={{ fontSize: '0.85em', color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Month-to-Date</div>
+          <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#333', marginBottom: 5 }}>{totalSubmissions.toLocaleString()}</div>
+          <div style={{ fontSize: '0.9em', color: '#666' }}>Total Submissions</div>
+          <div style={{ fontSize: '0.75em', color: '#666', marginTop: 3 }}>{totalOnline} online, {totalHybrid} hybrid, {totalPrime} prime</div>
         </div>
 
         {/* 2. Should Be At */}
-        <div className={card} style={{ ...cardShadow, borderLeft: '4px solid #FDBE67' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Should Be At (Day {daysTracked})</div>
-          <div style={{ fontSize: 32, fontWeight: 'bold', color: '#FF9800' }}>{shouldBeAt.toLocaleString()}</div>
-          <div style={{ fontSize: 13, color: '#666', marginTop: 4 }}>Target for End of Today</div>
+        <div className={card} style={cardShadow}>
+          <div style={{ fontSize: '0.85em', color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Should Be At (Day {daysTracked})</div>
+          <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#FDBE67', marginBottom: 5 }}>{shouldBeAt.toLocaleString()}</div>
+          <div style={{ fontSize: '0.9em', color: '#666' }}>Target for End of Today</div>
         </div>
 
         {/* 3. Ahead / Behind */}
-        <div className={card} style={{ ...cardShadow, borderLeft: `4px solid ${aheadBehind >= 0 ? '#4CAF50' : '#dc2626'}` }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Ahead / Behind</div>
-          <div style={{ fontSize: 32, fontWeight: 'bold', color: aheadBehind >= 0 ? '#4CAF50' : '#dc2626' }}>
+        <div className={card} style={cardShadow}>
+          <div style={{ fontSize: '0.85em', color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Ahead / Behind</div>
+          <div style={{ fontSize: '2em', fontWeight: 'bold', color: aheadBehind >= 0 ? '#8CD1C8' : '#DD5759', marginBottom: 5 }}>
             {aheadBehind >= 0 ? `+${aheadBehind.toLocaleString()}` : aheadBehind.toLocaleString()}
           </div>
-          <div style={{ fontSize: 13, color: '#666', marginTop: 4 }}>{aheadBehind >= 0 ? 'Ahead of Target' : 'Behind Target'}</div>
+          <div style={{ fontSize: '0.9em', color: '#666' }}>{aheadBehind >= 0 ? 'Ahead of Target' : 'Behind Target'}</div>
         </div>
 
         {/* 4. Daily Target Needed */}
-        <div className={card} style={{ ...cardShadow, borderLeft: '4px solid #FF9800' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Daily Target Needed</div>
-          <div style={{ fontSize: 32, fontWeight: 'bold', color: '#FF9800' }}>{daysRemaining > 0 ? neededPerDay : '--'}</div>
-          <div style={{ fontSize: 13, color: '#666', marginTop: 4 }}>Per Day to Hit Goal</div>
+        <div className={card} style={cardShadow}>
+          <div style={{ fontSize: '0.85em', color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Daily Target Needed</div>
+          <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#FDBE67', marginBottom: 5 }}>{daysRemaining > 0 ? neededPerDay : '--'}</div>
+          <div style={{ fontSize: '0.9em', color: '#666' }}>Per Day to Hit Goal</div>
         </div>
 
         {/* 5. Projected End-of-Month */}
-        <div className={card} style={{ ...cardShadow, borderLeft: `4px solid ${daysTracked > 0 && projectedEOM >= goal ? '#4CAF50' : '#dc2626'}` }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Projected End-of-Month</div>
-          <div style={{ fontSize: 32, fontWeight: 'bold', color: daysTracked > 0 && projectedEOM >= goal ? '#4CAF50' : '#dc2626' }}>
+        <div className={card} style={cardShadow}>
+          <div style={{ fontSize: '0.85em', color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Projected End-of-Month</div>
+          <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#B26CA6', marginBottom: 5 }}>
             {daysTracked > 0 ? projectedEOM.toLocaleString() : '--'}
           </div>
-          <div style={{ fontSize: 13, color: '#666', marginTop: 4 }}>At Current Pace</div>
+          <div style={{ fontSize: '0.9em', color: '#666' }}>At Current Pace</div>
         </div>
 
         {/* 6. Will Hit */}
-        <div className={card} style={{ ...cardShadow, borderLeft: '4px solid #3A6EA4' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Will Hit</div>
-          <div style={{ fontSize: 32, fontWeight: 'bold', color: daysTracked > 0 && parseFloat(projectedPctOfGoal) >= 100 ? '#4CAF50' : '#B26CA6' }}>
+        <div className={card} style={cardShadow}>
+          <div style={{ fontSize: '0.85em', color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Will Hit</div>
+          <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#B26CA6', marginBottom: 5 }}>
             {daysTracked > 0 ? `${Math.round(parseFloat(projectedPctOfGoal))}%` : '--'}
           </div>
-          <div style={{ fontSize: 13, color: '#666', marginTop: 4 }}>Of {goal.toLocaleString()} Goal</div>
+          <div style={{ fontSize: '0.9em', color: '#666' }}>Of {goal.toLocaleString()} Goal</div>
         </div>
       </div>
 
       {/* Progress bar with pace marker */}
-      <div className={card} style={cardShadow}>
+      <div style={{ background: 'white', borderRadius: 15, padding: 30, marginBottom: 20, boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 13, color: '#666' }}>
           <span>Progress to Goal</span>
           <span>{totalSubmissions.toLocaleString()} / {goal.toLocaleString()}</span>
