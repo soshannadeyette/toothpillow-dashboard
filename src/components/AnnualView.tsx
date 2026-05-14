@@ -14,8 +14,8 @@ import {
   Filler,
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
-import { fetchAnnualSummaries, upsertMonthlySummary, currentMonth, currentYear } from '@/lib/api';
-import type { MonthlySummary } from '@/lib/types';
+import { fetchAnnualSummaries, upsertMonthlySummary, fetchSubmissions, currentMonth, currentYear } from '@/lib/api';
+import type { MonthlySummary, DailySubmission } from '@/lib/types';
 import { MONTHLY_GOALS_2026, MONTH_NAMES } from '@/lib/types';
 
 ChartJS.register(
@@ -116,16 +116,74 @@ export default function AnnualView() {
   async function loadData() {
     setLoading(true);
     try {
-      const [r2026, r2025] = await Promise.all([
+      const [r2026, r2025, dailyEntries] = await Promise.all([
         fetchAnnualSummaries(2026),
         fetchAnnualSummaries(2025),
+        fetchSubmissions(thisYear, thisMonth),
       ]);
-      setData2026(r2026 || []);
+
+      let merged = (r2026 || []).slice();
+
+      // Build current month summary from daily_submissions if not already in monthly_summary
+      if (dailyEntries && dailyEntries.length > 0) {
+        const hasMonth = merged.some(m => m.month === thisMonth && m.year === thisYear);
+        const totalOnline = dailyEntries.reduce((s: number, e: DailySubmission) => s + (e.online || 0), 0);
+        const totalHybrid = dailyEntries.reduce((s: number, e: DailySubmission) => s + (e.hybrid || 0), 0);
+        const totalPrime = dailyEntries.reduce((s: number, e: DailySubmission) => s + (e.prime || 0), 0);
+        const totalSubs = totalOnline + totalHybrid + totalPrime;
+        const totalVisitors = dailyEntries.reduce((s: number, e: DailySubmission) => s + (e.visitors || 0), 0);
+        const totalIncome = dailyEntries.reduce((s: number, e: DailySubmission) => s + (e.income || 0), 0);
+        const goalObj = (MONTHLY_GOALS_2026 as { month: number; total: number }[]).find(g => g.month === thisMonth);
+        const convRate = totalVisitors > 0 ? parseFloat(((totalSubs / totalVisitors) * 100).toFixed(2)) : 0;
+
+        const liveSummary: MonthlySummary = {
+          year: thisYear,
+          month: thisMonth,
+          month_name: MN[thisMonth] || '',
+          goal: goalObj?.total || 0,
+          total_submissions: totalSubs,
+          online_submissions: totalOnline,
+          hybrid_submissions: totalHybrid,
+          prime_submissions: totalPrime,
+          total_income: totalIncome,
+          total_visitors: totalVisitors,
+          usa_visitors: 0,
+          conversion_rate: convRate,
+          usa_conversion_rate: 0,
+          days_tracked: dailyEntries.length,
+          daily_avg: dailyEntries.length > 0 ? parseFloat((totalSubs / dailyEntries.length).toFixed(1)) : 0,
+        };
+
+        if (hasMonth) {
+          // Merge: daily tracker data overrides submission counts, keep visitor data from monthly_summary if set
+          merged = merged.map(m => {
+            if (m.month === thisMonth && m.year === thisYear) {
+              return {
+                ...liveSummary,
+                total_visitors: m.total_visitors || liveSummary.total_visitors,
+                usa_visitors: m.usa_visitors || liveSummary.usa_visitors,
+                conversion_rate: (m.total_visitors || liveSummary.total_visitors) > 0
+                  ? parseFloat(((totalSubs / (m.total_visitors || liveSummary.total_visitors)) * 100).toFixed(2))
+                  : convRate,
+                usa_conversion_rate: m.usa_conversion_rate || 0,
+              };
+            }
+            return m;
+          });
+        } else {
+          merged.push(liveSummary);
+        }
+      }
+
+      setData2026(merged);
       setData2025(r2025 || []);
     } finally {
       setLoading(false);
     }
   }
+
+  // Month names helper used before allMonthLabels is defined
+  const MN = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
 
   useEffect(() => {
     loadData();
@@ -169,7 +227,6 @@ export default function AnnualView() {
   const goalPctVal = ytdGoal > 0 ? (ytdSubs / ytdGoal) * 100 : 0;
 
   // Ambassador commission YTD
-  const MN = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
   const ytdAmbComm = months2026.reduce((s, m) => s + (AMB_COMMISSIONS[MN[m.month]] || 0), 0);
   const ytdCombinedIncome = ytdIncome + ytdAmbComm;
   const monthsTracked = months2026.filter(m => m.total_submissions > 0).length;
