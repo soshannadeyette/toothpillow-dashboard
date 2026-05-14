@@ -456,7 +456,7 @@ export default function AnnualView() {
 
       {/* ===== 3. Monthly Performance Chart ===== */}
       <section className="bg-white rounded-xl shadow p-5">
-        <Bar data={monthlyChartData} options={monthlyChartOptions} />
+        <Bar data={monthlyChartData as any} options={monthlyChartOptions} />
       </section>
 
       {/* ===== 4. Monthly Performance Table ===== */}
