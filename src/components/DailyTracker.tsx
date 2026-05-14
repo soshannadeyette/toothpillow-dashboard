@@ -20,7 +20,7 @@ import { MONTHLY_GOALS_2026, MONTH_NAMES } from '@/lib/types';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler);
 
-/* ── 2025 historical monthly totals ── */
+/* ââ 2025 historical monthly totals ââ */
 const HIST_2025: Record<number, { total: number; days: number; avg: number }> = {
   1: { total: 1434, days: 31, avg: 46.3 },
   2: { total: 1560, days: 28, avg: 55.7 },
@@ -36,7 +36,7 @@ const HIST_2025: Record<number, { total: number; days: number; avg: number }> = 
   12: { total: 1253, days: 31, avg: 40.4 },
 };
 
-/* ── OKR Objectives & Key Results ── */
+/* ââ OKR Objectives & Key Results ââ */
 const OKR_OBJECTIVES = [
   {
     title: 'O1: Strengthen Ambassador Activation',
@@ -64,7 +64,7 @@ const OKR_OBJECTIVES = [
   },
 ];
 
-/* ── Shared styles ── */
+/* ââ Shared styles ââ */
 const card = 'bg-white p-5';
 const cardShadow = { borderRadius: 12, boxShadow: '0 4px 15px rgba(0,0,0,0.08)' };
 
@@ -239,7 +239,7 @@ export default function DailyTracker() {
     },
   };
 
-  /* ── YOY Chart Data ── */
+  /* ââ YOY Chart Data ââ */
   const yoyLabels = MONTH_NAMES.slice(1).map((n) => n.slice(0, 3));
 
   const actual2026ByMonth: Record<number, number> = {};
@@ -248,6 +248,12 @@ export default function DailyTracker() {
   });
   if (selectedYear === 2026 && totalSubmissions > 0) {
     actual2026ByMonth[selectedMonth] = totalSubmissions;
+  }
+
+  // Projected values for the current month (daily avg Ã days in month)
+  const projected2026ByMonth: Record<number, number> = {};
+  if (selectedYear === 2026 && daysTracked > 0) {
+    projected2026ByMonth[selectedMonth] = projectedEOM;
   }
 
   const yoyChartData = {
@@ -263,6 +269,12 @@ export default function DailyTracker() {
         label: '2026 Actual',
         data: Array.from({ length: 12 }, (_, i) => actual2026ByMonth[i + 1] ?? 0),
         backgroundColor: '#3A6EA4',
+        borderRadius: 3,
+      },
+      {
+        label: '2026 Projected',
+        data: Array.from({ length: 12 }, (_, i) => projected2026ByMonth[i + 1] ?? 0),
+        backgroundColor: '#B26CA6',
         borderRadius: 3,
       },
       {
@@ -347,7 +359,7 @@ export default function DailyTracker() {
         </div>
       </div>
 
-      {/* Stat cards — responsive grid matching HTML dashboard */}
+      {/* Stat cards â responsive grid matching HTML dashboard */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20, marginBottom: 30 }}>
         {/* 1. Month-to-Date */}
         <div className={card} style={cardShadow}>
@@ -588,9 +600,9 @@ export default function DailyTracker() {
         </table>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */}
       {/*  Monthly Submissions: 2025 vs 2026                        */}
-      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */}
       <div className={card} style={cardShadow}>
         <h3 className="tp-section-header" style={{ fontSize: 16 }}>
           Monthly Submissions: 2025 vs 2026
@@ -606,6 +618,7 @@ export default function DailyTracker() {
                 <th style={{ padding: '12px 10px', textAlign: 'left', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase' }}>Month</th>
                 <th style={{ padding: '12px 10px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase' }}>2025</th>
                 <th style={{ padding: '12px 10px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase' }}>2026</th>
+                <th style={{ padding: '12px 10px', fontWeight: 600, color: '#B26CA6', fontSize: 12, textTransform: 'uppercase' }}>Projected</th>
                 <th style={{ padding: '12px 10px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase' }}>Goal</th>
                 <th style={{ padding: '12px 10px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase' }}>YOY Change</th>
               </tr>
@@ -615,6 +628,7 @@ export default function DailyTracker() {
                 const m = i + 1;
                 const h = HIST_2025[m]?.total ?? 0;
                 const a = actual2026ByMonth[m] ?? 0;
+                const p = projected2026ByMonth[m] ?? 0;
                 const g = MONTHLY_GOALS_2026[i]?.total ?? 0;
                 const yoyPct = h > 0 && a > 0 ? (((a - h) / h) * 100).toFixed(1) : null;
                 return (
@@ -623,10 +637,11 @@ export default function DailyTracker() {
                     onMouseLeave={(ev) => ev.currentTarget.style.backgroundColor = 'transparent'}>
                     <td style={{ padding: '10px', textAlign: 'left', color: '#1B2A4A', fontWeight: 600 }}>{MONTH_NAMES[m].slice(0, 3)}</td>
                     <td style={{ padding: '10px', color: '#666' }}>{h.toLocaleString()}</td>
-                    <td style={{ padding: '10px', color: '#3A6EA4', fontWeight: 600 }}>{a > 0 ? a.toLocaleString() : '—'}</td>
+                    <td style={{ padding: '10px', color: '#3A6EA4', fontWeight: 600 }}>{a > 0 ? a.toLocaleString() : 'â'}</td>
+                    <td style={{ padding: '10px', color: '#B26CA6', fontWeight: 600 }}>{p > 0 ? p.toLocaleString() : 'â'}</td>
                     <td style={{ padding: '10px', color: '#dc2626' }}>{g.toLocaleString()}</td>
                     <td style={{ padding: '10px', fontWeight: 600, color: yoyPct !== null && parseFloat(yoyPct) >= 0 ? '#4CAF50' : '#dc2626' }}>
-                      {yoyPct !== null ? `${parseFloat(yoyPct) >= 0 ? '+' : ''}${yoyPct}%` : '—'}
+                      {yoyPct !== null ? `${parseFloat(yoyPct) >= 0 ? '+' : ''}${yoyPct}%` : 'â'}
                     </td>
                   </tr>
                 );
@@ -636,9 +651,9 @@ export default function DailyTracker() {
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */}
       {/*  OKR: Objectives & Key Results                            */}
-      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <h3 className="tp-section-header" style={{ fontSize: 16 }}>
           Objectives &amp; Key Results
