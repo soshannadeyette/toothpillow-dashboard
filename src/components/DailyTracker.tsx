@@ -34,7 +34,6 @@ export default function DailyTracker() {
   const [formHybrid, setFormHybrid] = useState('');
   const [formPrime, setFormPrime] = useState('');
   const [formVisitors, setFormVisitors] = useState('');
-  const [formIncome, setFormIncome] = useState('');
 
   const tableRef = useRef<HTMLDivElement>(null);
 
@@ -77,14 +76,13 @@ export default function DailyTracker() {
         hybrid,
         prime,
         visitors: parseInt(formVisitors) || 0,
-        income: parseFloat(formIncome) || online * 5,
+        income: online * 5,
       });
       // Clear form
       setFormOnline('');
       setFormHybrid('');
       setFormPrime('');
       setFormVisitors('');
-      setFormIncome('');
       // Reload
       await loadData();
     } catch (e) {
@@ -100,7 +98,6 @@ export default function DailyTracker() {
     setFormHybrid(String(entry.hybrid));
     setFormPrime(String(entry.prime));
     setFormVisitors(String(entry.visitors));
-    setFormIncome(String(entry.income));
   };
 
   // Computed stats
@@ -381,16 +378,6 @@ export default function DailyTracker() {
               value={formVisitors}
               onChange={(e) => setFormVisitors(e.target.value)}
               placeholder="0"
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm w-24"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-gray-500 mb-1">Income ($)</label>
-            <input
-              type="number"
-              value={formIncome}
-              onChange={(e) => setFormIncome(e.target.value)}
-              placeholder="auto"
               className="border border-gray-300 rounded-md px-3 py-2 text-sm w-24"
             />
           </div>
