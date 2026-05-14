@@ -14,7 +14,8 @@ export async function GET(request: NextRequest) {
 
     if (year && month) {
         const startDate = `${year}-${month.padStart(2, '0')}-01`;
-        const endDate = `${year}-${month.padStart(2, '0')}-31`;
+        const lastDay = new Date(Number(year), Number(month), 0).getDate();
+                const endDate = `${year}-${month.padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
         query = query.gte('date', startDate).lte('date', endDate);
     } else if (year) {
         query = query.gte('date', `${year}-01-01`).lte('date', `${year}-12-31`);
