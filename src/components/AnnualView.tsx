@@ -140,7 +140,7 @@ export default function AnnualView() {
   const ytdPrime = months2026.reduce((s, m) => s + (m.prime_submissions || 0), 0);
   const ytdGoal = months2026.reduce((s, m) => s + (m.goal || 0), 0);
   const ytdVisitors = months2026.reduce((s, m) => s + (m.total_visitors || 0), 0);
-  const ytdIncome = ytdOnline * 5;
+  const ytdIncome = months2026.reduce((s, m) => s + (m.total_income || 0), 0);
   const ytdConvAll = months2026.filter(m => m.conversion_rate != null);
   const ytdConvAvg = ytdConvAll.length
     ? ytdConvAll.reduce((s, m) => s + (m.conversion_rate || 0), 0) / ytdConvAll.length
@@ -306,7 +306,7 @@ export default function AnnualView() {
   // Build cumulative income for table
   let cumIncome = 0;
   const incomeRows = months2026.map(m => {
-    const income = (m.online_submissions || 0) * 5;
+    const income = m.total_income || 0;
     cumIncome += income;
     return { ...m, income, cumIncome };
   });
@@ -449,7 +449,7 @@ export default function AnnualView() {
             <div className="text-2xl font-bold" style={{ color: TP.green }}>
               {fmtDollar(ytdIncome)}
             </div>
-            <div className="text-xs text-gray-400">$5/online sub</div>
+            <div className="text-xs text-gray-400">from Supabase</div>
           </div>
         </div>
       </section>
@@ -822,7 +822,7 @@ export default function AnnualView() {
             <div className="text-2xl font-bold" style={{ color: TP.green }}>
               {fmtDollar(ytdIncome)}
             </div>
-            <div className="text-xs text-gray-400 mt-1">$5 per online submission</div>
+            <div className="text-xs text-gray-400 mt-1">actual income tracked</div>
           </div>
           <div
             className="rounded-xl p-4"
