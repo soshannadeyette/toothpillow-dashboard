@@ -256,39 +256,70 @@ export default function DailyTracker() {
     projected2026ByMonth[selectedMonth] = projectedEOM;
   }
 
+  // Totals for subtitle
+  const total2025 = Object.values(HIST_2025).reduce((s, v) => s + v.total, 0);
+  const total2026SoFar = Object.values(actual2026ByMonth).reduce((s, v) => s + v, 0);
+
+  // Goal remaining per month (stacked on top of actual)
+  const goalRemaining2026 = Array.from({ length: 12 }, (_, i) => {
+    const m = i + 1;
+    const actual = actual2026ByMonth[m] ?? 0;
+    const goalVal = MONTHLY_GOALS_2026[i]?.total ?? 0;
+    return actual > 0 ? Math.max(0, goalVal - actual) : goalVal;
+  });
+
   const yoyChartData = {
     labels: yoyLabels,
     datasets: [
       {
         label: '2025 Actual',
         data: Array.from({ length: 12 }, (_, i) => HIST_2025[i + 1]?.total ?? 0),
-        backgroundColor: '#94a3b8',
+        backgroundColor: '#C9A0DC',
         borderRadius: 3,
+        stack: 'stack2025',
       },
       {
         label: '2026 Actual',
         data: Array.from({ length: 12 }, (_, i) => actual2026ByMonth[i + 1] ?? 0),
         backgroundColor: '#3A6EA4',
         borderRadius: 3,
+        stack: 'stack2026',
       },
       {
-        label: '2026 Projected',
-        data: Array.from({ length: 12 }, (_, i) => projected2026ByMonth[i + 1] ?? 0),
-        backgroundColor: '#B26CA6',
+        label: 'Goal Remaining',
+        data: goalRemaining2026,
+        backgroundColor: 'rgba(58, 110, 164, 0.18)',
         borderRadius: 3,
-      },
-      {
-        label: '2026 Goal',
-        data: MONTHLY_GOALS_2026.map((g) => g.total),
-        type: 'line' as const,
-        borderColor: '#dc2626',
-        borderWidth: 2,
-        borderDash: [6, 3],
-        pointRadius: 3,
-        pointBackgroundColor: '#dc2626',
-        fill: false,
+        stack: 'stack2026',
       },
     ],
+  };
+
+  // Custom plugin: data labels on bars
+  const barLabelPlugin = {
+    id: 'barLabels',
+    afterDatasetsDraw(chart: any) {
+      const { ctx } = chart;
+      chart.data.datasets.forEach((dataset: any, dsIdx: number) => {
+        const meta = chart.getDatasetMeta(dsIdx);
+        if (!meta.visible) return;
+        meta.data.forEach((bar: any, idx: number) => {
+          const value = dataset.data[idx];
+          if (!value || value === 0) return;
+          ctx.save();
+          ctx.fillStyle = dsIdx === 2 ? '#999' : '#444';
+          ctx.font = 'bold 10px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          const label = value >= 1000 ? value.toLocaleString() : String(value);
+          const barHeight = bar.height ?? (bar.base - bar.y);
+          if (barHeight > 14) {
+            ctx.fillText(label, bar.x, bar.y + barHeight / 2);
+          }
+          ctx.restore();
+        });
+      });
+    },
   };
 
   const yoyChartOptions = {
@@ -601,14 +632,17 @@ export default function DailyTracker() {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════ */}
-      {/*  Monthly Submissions: 2025 vs 2026                        */}
+      {/*  Monthly Enrollments — 2025 vs. 2026                        */}
       {/* ═══════════════════════════════════════════════════════════ */}
       <div className={card} style={cardShadow}>
         <h3 className="tp-section-header" style={{ fontSize: 16 }}>
           Monthly Submissions: 2025 vs 2026
         </h3>
+        <div style={{ fontSize: 13, color: '#666', marginBottom: 12 }}>
+          2025: {total2025.toLocaleString()} | 2026 so far: {total2026SoFar.toLocaleString()}
+        </div>
         <div style={{ height: 360 }}>
-          <Chart type="bar" data={yoyChartData} options={yoyChartOptions} />
+          <Bar data={yoyChartData} options={yoyChartOptions} plugins={[barLabelPlugin]} />
         </div>
         {/* Summary table */}
         <div className="tp-table" style={{ marginTop: 16 }}>
@@ -618,7 +652,6 @@ export default function DailyTracker() {
                 <th style={{ padding: '12px 10px', textAlign: 'left', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase' }}>Month</th>
                 <th style={{ padding: '12px 10px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase' }}>2025</th>
                 <th style={{ padding: '12px 10px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase' }}>2026</th>
-                <th style={{ padding: '12px 10px', fontWeight: 600, color: '#B26CA6', fontSize: 12, textTransform: 'uppercase' }}>Projected</th>
                 <th style={{ padding: '12px 10px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase' }}>Goal</th>
                 <th style={{ padding: '12px 10px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase' }}>YOY Change</th>
               </tr>
@@ -628,8 +661,7 @@ export default function DailyTracker() {
                 const m = i + 1;
                 const h = HIST_2025[m]?.total ?? 0;
                 const a = actual2026ByMonth[m] ?? 0;
-                const p = projected2026ByMonth[m] ?? 0;
-                const g = MONTHLY_GOALS_2026[i]?.total ?? 0;
+                                const g = MONTHLY_GOALS_2026[i]?.total ?? 0;
                 const yoyPct = h > 0 && a > 0 ? (((a - h) / h) * 100).toFixed(1) : null;
                 return (
                   <tr key={m} style={{ borderBottom: '1px solid #e0e0e0' }}
@@ -638,7 +670,6 @@ export default function DailyTracker() {
                     <td style={{ padding: '10px', textAlign: 'left', color: '#1B2A4A', fontWeight: 600 }}>{MONTH_NAMES[m].slice(0, 3)}</td>
                     <td style={{ padding: '10px', color: '#666' }}>{h.toLocaleString()}</td>
                     <td style={{ padding: '10px', color: '#3A6EA4', fontWeight: 600 }}>{a > 0 ? a.toLocaleString() : '—'}</td>
-                    <td style={{ padding: '10px', color: '#B26CA6', fontWeight: 600 }}>{p > 0 ? p.toLocaleString() : '—'}</td>
                     <td style={{ padding: '10px', color: '#dc2626' }}>{g.toLocaleString()}</td>
                     <td style={{ padding: '10px', fontWeight: 600, color: yoyPct !== null && parseFloat(yoyPct) >= 0 ? '#4CAF50' : '#dc2626' }}>
                       {yoyPct !== null ? `${parseFloat(yoyPct) >= 0 ? '+' : ''}${yoyPct}%` : '—'}
@@ -669,7 +700,7 @@ export default function DailyTracker() {
               <thead style={{ backgroundColor: '#f5f5f5' }}>
                 <tr>
                   <th style={{ textAlign: 'left', padding: '12px 16px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase', borderBottom: '1px solid #e0e0e0' }}>Key Result</th>
-                  <th style={{ textAlign: 'left', padding: '12px 16px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase', borderBottom: '1px solid #e0e0e0' }}>Baseline</th>
+                  <th style={{ textAlign: 'left', padding: '12x 16px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase', borderBottom: '1px solid #e0e0e0' }}>Baseline</th>
                   <th style={{ textAlign: 'left', padding: '12px 16px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase', borderBottom: '1px solid #e0e0e0' }}>Target</th>
                 </tr>
               </thead>
