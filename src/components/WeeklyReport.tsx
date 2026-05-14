@@ -391,29 +391,48 @@ export default function WeeklyReport() {
 
       {week && (
         <>
+          {/* ===== WEEK HEADER ===== */}
+          <div className="mb-2">
+            <h2 className="text-2xl font-bold text-[#3A6EA4] flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-[#3A6EA4] inline-block"></span>
+              {(() => {
+                const parts = week.label.split(' - ');
+                const s = new Date(parts[0] + '/2026');
+                const e = new Date(parts[1] + '/2026');
+                return `${MONTH_NAMES[s.getMonth()]} ${s.getDate()} â ${MONTH_NAMES[e.getMonth()]} ${e.getDate()}`;
+              })()}
+            </h2>
+            <div className="h-1 bg-[#3A6EA4] rounded-full mt-2"></div>
+          </div>
+
           {/* ===== WEEK STATS ===== */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="text-2xl font-bold text-gray-900">{week.total}</div>
-              <div className="text-sm text-gray-500 mt-1">Week Total</div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-gray-400 p-4">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Week Total</div>
+              <div className="text-3xl font-bold text-gray-900 mt-1">{week.total}</div>
+              <div className="text-sm text-gray-400 mt-1">{week.entries.length} {week.entries.length === 1 ? 'day' : 'days'} tracked</div>
             </div>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="text-2xl font-bold text-blue-600">{week.online}</div>
-              <div className="text-sm text-gray-500 mt-1">Online</div>
-            </div>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="text-2xl font-bold text-amber-600">{week.hybrid}</div>
-              <div className="text-sm text-gray-500 mt-1">Hybrid</div>
-            </div>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="text-2xl font-bold text-red-600">{week.prime}</div>
-              <div className="text-sm text-gray-500 mt-1">Prime</div>
-            </div>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="text-2xl font-bold text-gray-900">
-                {(week.total / (week.entries.length || 1)).toFixed(1)}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-amber-500 p-4">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Daily Average</div>
+              <div className="text-3xl font-bold text-amber-500 mt-1">
+                {Math.round(week.total / (week.entries.length || 1))}
               </div>
-              <div className="text-sm text-gray-500 mt-1">Daily Avg</div>
+              <div className="text-sm text-gray-400 mt-1">Per day</div>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-teal-500 p-4">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Online</div>
+              <div className="text-3xl font-bold text-teal-600 mt-1">{week.online}</div>
+              <div className="text-sm text-gray-400 mt-1">{week.total > 0 ? Math.round((week.online / week.total) * 100) : 0}% of total</div>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-amber-400 p-4">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Hybrid</div>
+              <div className="text-3xl font-bold text-amber-500 mt-1">{week.hybrid}</div>
+              <div className="text-sm text-gray-400 mt-1">{week.total > 0 ? Math.round((week.hybrid / week.total) * 100) : 0}% of total</div>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-red-400 p-4">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Prime</div>
+              <div className="text-3xl font-bold text-red-500 mt-1">{week.prime}</div>
+              <div className="text-sm text-gray-400 mt-1">{week.total > 0 ? Math.round((week.prime / week.total) * 100) : 0}% of total</div>
             </div>
           </div>
 
