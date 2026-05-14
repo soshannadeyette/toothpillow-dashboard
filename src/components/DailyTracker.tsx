@@ -64,6 +64,10 @@ const OKR_OBJECTIVES = [
   },
 ];
 
+/* ── Shared styles ── */
+const card = 'bg-white p-5';
+const cardShadow = { borderRadius: 12, boxShadow: '0 4px 15px rgba(0,0,0,0.08)' };
+
 export default function DailyTracker() {
   const [entries, setEntries] = useState<DailySubmission[]>([]);
   const [loading, setLoading] = useState(true);
@@ -110,7 +114,7 @@ export default function DailyTracker() {
   useEffect(() => {
     fetchAnnualSummaries(2026)
       .then((data) => setAnnualSummaries(data))
-      .catch(() => {}); // silent fail — chart just shows goals + 2025
+      .catch(() => {}); // silent fail
   }, []);
 
   const handleSave = async () => {
@@ -170,7 +174,7 @@ export default function DailyTracker() {
   const gap = goal - totalSubmissions;
   const neededPerDay = daysRemaining > 0 ? Math.ceil(gap / daysRemaining) : 0;
 
-  // "Should Be At" — expected progress based on days tracked
+  // "Should Be At"
   const shouldBeAt = Math.round(goal / daysInMonth * daysTracked);
   const aheadBehind = totalSubmissions - shouldBeAt;
 
@@ -195,13 +199,13 @@ export default function DailyTracker() {
       {
         label: 'Online',
         data: entries.map((e) => e.online),
-        backgroundColor: '#2563eb',
+        backgroundColor: '#3A6EA4',
         stack: 'stack',
       },
       {
         label: 'Hybrid',
         data: entries.map((e) => e.hybrid),
-        backgroundColor: '#d97706',
+        backgroundColor: '#FDBE67',
         stack: 'stack',
       },
       {
@@ -236,15 +240,12 @@ export default function DailyTracker() {
   };
 
   /* ── YOY Chart Data ── */
-  const yoyLabels = MONTH_NAMES.slice(1).map((n) => n.slice(0, 3)); // Jan, Feb, ...
+  const yoyLabels = MONTH_NAMES.slice(1).map((n) => n.slice(0, 3));
 
-  // Build 2026 actual totals from annual summaries
   const actual2026ByMonth: Record<number, number> = {};
   annualSummaries.forEach((s) => {
     actual2026ByMonth[s.month] = s.total_submissions;
   });
-
-  // Also include current month from live entries if it's 2026
   if (selectedYear === 2026 && totalSubmissions > 0) {
     actual2026ByMonth[selectedMonth] = totalSubmissions;
   }
@@ -261,7 +262,7 @@ export default function DailyTracker() {
       {
         label: '2026 Actual',
         data: Array.from({ length: 12 }, (_, i) => actual2026ByMonth[i + 1] ?? 0),
-        backgroundColor: '#2563eb',
+        backgroundColor: '#3A6EA4',
         borderRadius: 3,
       },
       {
@@ -306,13 +307,13 @@ export default function DailyTracker() {
   };
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* Month selector */}
-      <div className="flex items-center gap-3">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <select
           value={selectedMonth}
           onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-          className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+          style={{ border: '1px solid #ccc', borderRadius: 8, padding: '10px 14px', fontSize: 14 }}
         >
           {MONTH_NAMES.slice(1).map((name, i) => (
             <option key={i + 1} value={i + 1}>
@@ -323,7 +324,7 @@ export default function DailyTracker() {
         <select
           value={selectedYear}
           onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-          className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+          style={{ border: '1px solid #ccc', borderRadius: 8, padding: '10px 14px', fontSize: 14 }}
         >
           <option value={2025}>2025</option>
           <option value={2026}>2026</option>
@@ -331,199 +332,160 @@ export default function DailyTracker() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', padding: '12px 16px', borderRadius: 8, fontSize: 14 }}>
           {error}
         </div>
       )}
 
-      {/* Month title */}
-      <h2 className="text-xl font-bold text-gray-900">
-        {MONTH_NAMES[selectedMonth]} {selectedYear} Submission Tracker
-      </h2>
+      {/* Goal banner */}
+      <div style={{ backgroundColor: '#1B2A4A', color: '#FFFFFF', padding: 15, borderRadius: 12, textAlign: 'center', fontWeight: 600 }}>
+        <div style={{ fontSize: 16, marginBottom: 4 }}>
+          {MONTH_NAMES[selectedMonth]} {selectedYear} Goal
+        </div>
+        <div style={{ fontSize: 28, fontWeight: 'bold' }}>
+          {goal.toLocaleString()} Submissions
+        </div>
+      </div>
 
-      {/* Stat cards — 2x3 grid matching old dashboard */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Stat cards — 2x3 grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20 }}>
         {/* 1. Month-to-Date */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-gray-700 p-5">
-          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Month-to-Date</div>
-          <div className="text-4xl font-bold text-gray-900">{totalSubmissions.toLocaleString()}</div>
-          <div className="text-sm text-gray-600 mt-1">Total Submissions</div>
-          <div className="text-xs text-gray-400 mt-0.5">{totalOnline} online, {totalHybrid} hybrid, {totalPrime} prime</div>
+        <div className={card} style={{ ...cardShadow, borderLeft: '4px solid #3A6EA4' }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Month-to-Date</div>
+          <div style={{ fontSize: 32, fontWeight: 'bold', color: '#1B2A4A' }}>{totalSubmissions.toLocaleString()}</div>
+          <div style={{ fontSize: 13, color: '#666', marginTop: 4 }}>Total Submissions</div>
+          <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{totalOnline} online, {totalHybrid} hybrid, {totalPrime} prime</div>
         </div>
 
         {/* 2. Should Be At */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-gray-700 p-5">
-          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Should Be At (Day {daysTracked})</div>
-          <div className="text-4xl font-bold text-amber-500">{shouldBeAt.toLocaleString()}</div>
-          <div className="text-sm text-gray-600 mt-1">Target for End of Today</div>
+        <div className={card} style={{ ...cardShadow, borderLeft: '4px solid #FDBE67' }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Should Be At (Day {daysTracked})</div>
+          <div style={{ fontSize: 32, fontWeight: 'bold', color: '#FF9800' }}>{shouldBeAt.toLocaleString()}</div>
+          <div style={{ fontSize: 13, color: '#666', marginTop: 4 }}>Target for End of Today</div>
         </div>
 
         {/* 3. Ahead / Behind */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-gray-700 p-5">
-          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Ahead / Behind</div>
-          <div className={`text-4xl font-bold ${aheadBehind >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+        <div className={card} style={{ ...cardShadow, borderLeft: `4px solid ${aheadBehind >= 0 ? '#4CAF50' : '#dc2626'}` }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Ahead / Behind</div>
+          <div style={{ fontSize: 32, fontWeight: 'bold', color: aheadBehind >= 0 ? '#4CAF50' : '#dc2626' }}>
             {aheadBehind >= 0 ? `+${aheadBehind.toLocaleString()}` : aheadBehind.toLocaleString()}
           </div>
-          <div className="text-sm text-gray-600 mt-1">{aheadBehind >= 0 ? 'Ahead of Target' : 'Behind Target'}</div>
+          <div style={{ fontSize: 13, color: '#666', marginTop: 4 }}>{aheadBehind >= 0 ? 'Ahead of Target' : 'Behind Target'}</div>
         </div>
 
         {/* 4. Daily Target Needed */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-gray-700 p-5">
-          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Daily Target Needed</div>
-          <div className="text-4xl font-bold text-amber-500">{daysRemaining > 0 ? neededPerDay : '--'}</div>
-          <div className="text-sm text-gray-600 mt-1">Per Day to Hit Goal</div>
+        <div className={card} style={{ ...cardShadow, borderLeft: '4px solid #FF9800' }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Daily Target Needed</div>
+          <div style={{ fontSize: 32, fontWeight: 'bold', color: '#FF9800' }}>{daysRemaining > 0 ? neededPerDay : '--'}</div>
+          <div style={{ fontSize: 13, color: '#666', marginTop: 4 }}>Per Day to Hit Goal</div>
         </div>
 
         {/* 5. Projected End-of-Month */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-gray-700 p-5">
-          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Projected End-of-Month</div>
-          <div className={`text-4xl font-bold ${daysTracked > 0 && projectedEOM >= goal ? 'text-green-600' : 'text-red-500'}`}>
+        <div className={card} style={{ ...cardShadow, borderLeft: `4px solid ${daysTracked > 0 && projectedEOM >= goal ? '#4CAF50' : '#dc2626'}` }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Projected End-of-Month</div>
+          <div style={{ fontSize: 32, fontWeight: 'bold', color: daysTracked > 0 && projectedEOM >= goal ? '#4CAF50' : '#dc2626' }}>
             {daysTracked > 0 ? projectedEOM.toLocaleString() : '--'}
           </div>
-          <div className="text-sm text-gray-600 mt-1">At Current Pace</div>
+          <div style={{ fontSize: 13, color: '#666', marginTop: 4 }}>At Current Pace</div>
         </div>
 
         {/* 6. Will Hit */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-gray-700 p-5">
-          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Will Hit</div>
-          <div className={`text-4xl font-bold ${
-            daysTracked > 0 && parseFloat(projectedPctOfGoal) >= 100 ? 'text-green-600' : 'text-purple-500'
-          }`}>
+        <div className={card} style={{ ...cardShadow, borderLeft: '4px solid #3A6EA4' }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Will Hit</div>
+          <div style={{ fontSize: 32, fontWeight: 'bold', color: daysTracked > 0 && parseFloat(projectedPctOfGoal) >= 100 ? '#4CAF50' : '#B26CA6' }}>
             {daysTracked > 0 ? `${Math.round(parseFloat(projectedPctOfGoal))}%` : '--'}
           </div>
-          <div className="text-sm text-gray-600 mt-1">Of {goal.toLocaleString()} Goal</div>
+          <div style={{ fontSize: 13, color: '#666', marginTop: 4 }}>Of {goal.toLocaleString()} Goal</div>
         </div>
       </div>
 
       {/* Progress bar with pace marker */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-medium text-gray-700">Progress to Goal</h3>
-          <span className="text-sm text-gray-500">
-            {totalSubmissions.toLocaleString()} / {goal.toLocaleString()}
-          </span>
+      <div className={card} style={cardShadow}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 13, color: '#666' }}>
+          <span>Progress to Goal</span>
+          <span>{totalSubmissions.toLocaleString()} / {goal.toLocaleString()}</span>
         </div>
-        <div className="relative h-6 bg-gray-100 rounded-full overflow-visible">
-          {/* Blue fill — current progress */}
+        <div style={{ position: 'relative', height: 25, backgroundColor: '#e0e0e0', borderRadius: 12, overflow: 'visible' }}>
+          {/* Gradient fill */}
           <div
-            className="absolute top-0 left-0 h-full bg-blue-500 rounded-full transition-all duration-500"
-            style={{ width: `${progressPct}%` }}
+            className="tp-progress-fill"
+            style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: `${progressPct}%`, transition: 'width 0.3s' }}
           />
           {/* Orange pace marker */}
-          <div
-            className="absolute top-0 h-full w-0.5 bg-orange-500 z-10"
-            style={{ left: `${pacePct}%` }}
-          >
-            <div className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs text-orange-600 font-medium">
-              Pace
-            </div>
-            <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs text-orange-600">
-              {shouldBeAt.toLocaleString()}
-            </div>
+          <div style={{ position: 'absolute', top: 0, height: '100%', width: 2, backgroundColor: '#FF9800', left: `${pacePct}%`, zIndex: 10, transition: 'left 0.3s' }}>
+            <div style={{ position: 'absolute', top: -20, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', fontSize: 11, color: '#FF9800', fontWeight: 500 }}>Pace</div>
+            <div style={{ position: 'absolute', bottom: -20, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', fontSize: 11, color: '#FF9800' }}>{shouldBeAt.toLocaleString()}</div>
           </div>
-          {/* Percentage label inside bar */}
+          {/* Percentage label */}
           {progressPct > 8 && (
-            <div className="absolute inset-0 flex items-center justify-center text-xs font-medium text-white z-10">
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 500, color: '#fff', zIndex: 10 }}>
               {progressPct.toFixed(1)}%
             </div>
           )}
         </div>
-        {/* Legend */}
-        <div className="flex items-center gap-4 mt-6 text-xs text-gray-500">
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block w-3 h-3 rounded-sm bg-blue-500" />
+        <div style={{ display: 'flex', gap: 16, marginTop: 24, fontSize: 12, color: '#999' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ display: 'inline-block', width: 12, height: 12, borderRadius: 2, background: 'linear-gradient(to right, #3A6EA4, #FDBE67)' }} />
             Current Progress
           </span>
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block w-3 h-0.5 bg-orange-500" />
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ display: 'inline-block', width: 12, height: 2, backgroundColor: '#FF9800' }} />
             Expected Pace (Day {daysTracked}/{daysInMonth})
           </span>
         </div>
       </div>
 
       {/* Entry form */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">Add / Update Entry</h3>
-        <div className="flex flex-wrap gap-3 items-end">
+      <div className={card} style={cardShadow}>
+        <h3 style={{ fontSize: 14, fontWeight: 600, color: '#1B2A4A', marginBottom: 12 }}>Add / Update Entry</h3>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'flex-end' }}>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Date</label>
-            <input
-              type="date"
-              value={formDate}
-              onChange={(e) => setFormDate(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm w-40"
-            />
+            <label style={{ display: 'block', fontSize: 12, color: '#999', marginBottom: 4 }}>Date</label>
+            <input type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)}
+              style={{ border: '1px solid #ccc', borderRadius: 8, padding: '10px 12px', fontSize: 14, width: 160 }} />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Online</label>
-            <input
-              type="number"
-              value={formOnline}
-              onChange={(e) => setFormOnline(e.target.value)}
-              placeholder="0"
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm w-20"
-            />
+            <label style={{ display: 'block', fontSize: 12, color: '#999', marginBottom: 4 }}>Online</label>
+            <input type="number" value={formOnline} onChange={(e) => setFormOnline(e.target.value)} placeholder="0"
+              style={{ border: '1px solid #ccc', borderRadius: 8, padding: '10px 12px', fontSize: 14, width: 80 }} />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Hybrid</label>
-            <input
-              type="number"
-              value={formHybrid}
-              onChange={(e) => setFormHybrid(e.target.value)}
-              placeholder="0"
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm w-20"
-            />
+            <label style={{ display: 'block', fontSize: 12, color: '#999', marginBottom: 4 }}>Hybrid</label>
+            <input type="number" value={formHybrid} onChange={(e) => setFormHybrid(e.target.value)} placeholder="0"
+              style={{ border: '1px solid #ccc', borderRadius: 8, padding: '10px 12px', fontSize: 14, width: 80 }} />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Prime</label>
-            <input
-              type="number"
-              value={formPrime}
-              onChange={(e) => setFormPrime(e.target.value)}
-              placeholder="0"
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm w-20"
-            />
+            <label style={{ display: 'block', fontSize: 12, color: '#999', marginBottom: 4 }}>Prime</label>
+            <input type="number" value={formPrime} onChange={(e) => setFormPrime(e.target.value)} placeholder="0"
+              style={{ border: '1px solid #ccc', borderRadius: 8, padding: '10px 12px', fontSize: 14, width: 80 }} />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Visitors</label>
-            <input
-              type="number"
-              value={formVisitors}
-              onChange={(e) => setFormVisitors(e.target.value)}
-              placeholder="0"
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm w-24"
-            />
+            <label style={{ display: 'block', fontSize: 12, color: '#999', marginBottom: 4 }}>Visitors</label>
+            <input type="number" value={formVisitors} onChange={(e) => setFormVisitors(e.target.value)} placeholder="0"
+              style={{ border: '1px solid #ccc', borderRadius: 8, padding: '10px 12px', fontSize: 14, width: 96 }} />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Income ($)</label>
-            <input
-              type="number"
-              value={formIncome}
-              onChange={(e) => setFormIncome(e.target.value)}
-              placeholder="auto"
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm w-24"
-            />
+            <label style={{ display: 'block', fontSize: 12, color: '#999', marginBottom: 4 }}>Income ($)</label>
+            <input type="number" value={formIncome} onChange={(e) => setFormIncome(e.target.value)} placeholder="auto"
+              style={{ border: '1px solid #ccc', borderRadius: 8, padding: '10px 12px', fontSize: 14, width: 96 }} />
           </div>
-          <button
-            onClick={handleSave}
-            disabled={saving || !formDate}
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+          <button onClick={handleSave} disabled={saving || !formDate}
+            style={{ padding: '12px 25px', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', backgroundColor: '#1B2A4A', color: '#FFFFFF', opacity: saving || !formDate ? 0.5 : 1 }}>
             {saving ? 'Saving...' : 'Save'}
           </button>
         </div>
       </div>
 
       {/* Chart */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">
-          {MONTH_NAMES[selectedMonth]} {selectedYear} — Daily Submissions
+      <div className={card} style={cardShadow}>
+        <h3 className="tp-section-header" style={{ fontSize: 16 }}>
+          {MONTH_NAMES[selectedMonth]} {selectedYear} - Daily Submissions
         </h3>
         <div style={{ height: 300 }}>
           {loading ? (
-            <div className="flex items-center justify-center h-full text-gray-400">Loading chart...</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999' }}>Loading chart...</div>
           ) : entries.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-gray-400">No data for this month</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999' }}>No data for this month</div>
           ) : (
             <Bar data={chartData} options={chartOptions} />
           )}
@@ -531,109 +493,95 @@ export default function DailyTracker() {
       </div>
 
       {/* Sub-totals by type + Conversion */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center">
-          <div className="text-xl font-bold text-blue-600">{totalOnline.toLocaleString()}</div>
-          <div className="text-sm text-gray-500">Online</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
+        <div className={card} style={{ ...cardShadow, textAlign: 'center', borderLeft: '4px solid #3A6EA4' }}>
+          <div style={{ fontSize: 24, fontWeight: 'bold', color: '#3A6EA4' }}>{totalOnline.toLocaleString()}</div>
+          <div style={{ fontSize: 13, color: '#999' }}>Online</div>
         </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center">
-          <div className="text-xl font-bold text-amber-600">{totalHybrid.toLocaleString()}</div>
-          <div className="text-sm text-gray-500">Hybrid</div>
+        <div className={card} style={{ ...cardShadow, textAlign: 'center', borderLeft: '4px solid #FDBE67' }}>
+          <div style={{ fontSize: 24, fontWeight: 'bold', color: '#d97706' }}>{totalHybrid.toLocaleString()}</div>
+          <div style={{ fontSize: 13, color: '#999' }}>Hybrid</div>
         </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center">
-          <div className="text-xl font-bold text-red-600">{totalPrime.toLocaleString()}</div>
-          <div className="text-sm text-gray-500">Prime</div>
+        <div className={card} style={{ ...cardShadow, textAlign: 'center', borderLeft: '4px solid #dc2626' }}>
+          <div style={{ fontSize: 24, fontWeight: 'bold', color: '#dc2626' }}>{totalPrime.toLocaleString()}</div>
+          <div style={{ fontSize: 13, color: '#999' }}>Prime</div>
         </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center">
-          <div className="text-xl font-bold text-gray-900">{convRate}%</div>
-          <div className="text-sm text-gray-500">Conversion ({totalVisitors.toLocaleString()} visitors)</div>
+        <div className={card} style={{ ...cardShadow, textAlign: 'center', borderLeft: '4px solid #3A6EA4' }}>
+          <div style={{ fontSize: 24, fontWeight: 'bold', color: '#1B2A4A' }}>{convRate}%</div>
+          <div style={{ fontSize: 13, color: '#999' }}>Conversion ({totalVisitors.toLocaleString()} visitors)</div>
         </div>
       </div>
 
       {/* Income section */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-sm text-gray-500 mb-1">Income Earned</div>
-          <div className="text-2xl font-bold text-green-600">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20 }}>
+        <div className={card} style={{ ...cardShadow, borderLeft: '4px solid #4CAF50' }}>
+          <div style={{ fontSize: 13, color: '#999', marginBottom: 4 }}>Income Earned</div>
+          <div style={{ fontSize: 28, fontWeight: 'bold', color: '#4CAF50' }}>
             ${totalIncome.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </div>
-          <div className="text-xs text-gray-400 mt-1">
+          <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
             ${daysTracked > 0 ? (totalIncome / daysTracked).toFixed(0) : '0'}/day avg
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-sm text-gray-500 mb-1">Projected Income</div>
-          <div className="text-2xl font-bold text-green-600">
-            {daysTracked > 0
-              ? `$${projectedIncome.toLocaleString()}`
-              : '--'}
+        <div className={card} style={{ ...cardShadow, borderLeft: '4px solid #4CAF50' }}>
+          <div style={{ fontSize: 13, color: '#999', marginBottom: 4 }}>Projected Income</div>
+          <div style={{ fontSize: 28, fontWeight: 'bold', color: '#4CAF50' }}>
+            {daysTracked > 0 ? `$${projectedIncome.toLocaleString()}` : '--'}
           </div>
-          <div className="text-xs text-gray-400 mt-1">
+          <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
             Based on {daysTracked} day{daysTracked !== 1 ? 's' : ''} tracked
           </div>
         </div>
       </div>
 
       {/* Data table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" ref={tableRef}>
-        <table className="w-full text-sm text-left">
-          <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
+      <div className="tp-table" ref={tableRef} style={{ overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff' }}>
+          <thead style={{ backgroundColor: '#f5f5f5' }}>
             <tr>
-              <th className="px-3 py-2 font-medium">Date</th>
-              <th className="px-3 py-2 font-medium text-right">Online</th>
-              <th className="px-3 py-2 font-medium text-right">Hybrid</th>
-              <th className="px-3 py-2 font-medium text-right">Prime</th>
-              <th className="px-3 py-2 font-medium text-right">Total</th>
-              <th className="px-3 py-2 font-medium text-right">Visitors</th>
-              <th className="px-3 py-2 font-medium text-right">Income</th>
+              <th style={{ padding: '15px', textAlign: 'left', fontWeight: 600, color: '#1B2A4A', fontSize: 13, borderBottom: '1px solid #e0e0e0' }}>Date</th>
+              <th style={{ padding: '15px', textAlign: 'right', fontWeight: 600, color: '#1B2A4A', fontSize: 13, borderBottom: '1px solid #e0e0e0' }}>Online</th>
+              <th style={{ padding: '15px', textAlign: 'right', fontWeight: 600, color: '#1B2A4A', fontSize: 13, borderBottom: '1px solid #e0e0e0' }}>Hybrid</th>
+              <th style={{ padding: '15px', textAlign: 'right', fontWeight: 600, color: '#1B2A4A', fontSize: 13, borderBottom: '1px solid #e0e0e0' }}>Prime</th>
+              <th style={{ padding: '15px', textAlign: 'right', fontWeight: 600, color: '#1B2A4A', fontSize: 13, borderBottom: '1px solid #e0e0e0' }}>Total</th>
+              <th style={{ padding: '15px', textAlign: 'right', fontWeight: 600, color: '#1B2A4A', fontSize: 13, borderBottom: '1px solid #e0e0e0' }}>Visitors</th>
+              <th style={{ padding: '15px', textAlign: 'right', fontWeight: 600, color: '#1B2A4A', fontSize: 13, borderBottom: '1px solid #e0e0e0' }}>Income</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr>
-                <td colSpan={7} className="px-3 py-8 text-center text-gray-400">
-                  Loading...
-                </td>
-              </tr>
+              <tr><td colSpan={7} style={{ padding: '32px 15px', textAlign: 'center', color: '#999' }}>Loading...</td></tr>
             ) : entries.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-3 py-8 text-center text-gray-400">
-                  No entries yet
-                </td>
-              </tr>
+              <tr><td colSpan={7} style={{ padding: '32px 15px', textAlign: 'center', color: '#999' }}>No entries yet</td></tr>
             ) : (
               entries.map((e) => {
                 const total = e.total ?? e.online + e.hybrid + e.prime;
                 const d = new Date(e.date + 'T12:00:00');
                 const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
                 return (
-                  <tr
-                    key={e.date}
-                    onClick={() => handleRowClick(e)}
-                    className="cursor-pointer hover:bg-blue-50"
-                  >
-                    <td className="px-3 py-2 border-t border-gray-100">
-                      {dayName} {d.getMonth() + 1}/{d.getDate()}
-                    </td>
-                    <td className="px-3 py-2 border-t border-gray-100 text-right text-blue-600">{e.online}</td>
-                    <td className="px-3 py-2 border-t border-gray-100 text-right text-amber-600">{e.hybrid}</td>
-                    <td className="px-3 py-2 border-t border-gray-100 text-right text-red-600">{e.prime}</td>
-                    <td className="px-3 py-2 border-t border-gray-100 text-right font-medium">{total}</td>
-                    <td className="px-3 py-2 border-t border-gray-100 text-right">{e.visitors.toLocaleString()}</td>
-                    <td className="px-3 py-2 border-t border-gray-100 text-right">${e.income}</td>
+                  <tr key={e.date} onClick={() => handleRowClick(e)} style={{ cursor: 'pointer' }}
+                    onMouseEnter={(ev) => ev.currentTarget.style.backgroundColor = '#f9f9f9'}
+                    onMouseLeave={(ev) => ev.currentTarget.style.backgroundColor = 'transparent'}>
+                    <td style={{ padding: '12px 15px', borderBottom: '1px solid #e0e0e0', fontSize: 13 }}>{dayName} {d.getMonth() + 1}/{d.getDate()}</td>
+                    <td style={{ padding: '12px 15px', borderBottom: '1px solid #e0e0e0', fontSize: 13, textAlign: 'right', color: '#3A6EA4' }}>{e.online}</td>
+                    <td style={{ padding: '12px 15px', borderBottom: '1px solid #e0e0e0', fontSize: 13, textAlign: 'right', color: '#d97706' }}>{e.hybrid}</td>
+                    <td style={{ padding: '12px 15px', borderBottom: '1px solid #e0e0e0', fontSize: 13, textAlign: 'right', color: '#dc2626' }}>{e.prime}</td>
+                    <td style={{ padding: '12px 15px', borderBottom: '1px solid #e0e0e0', fontSize: 13, textAlign: 'right', fontWeight: 600 }}>{total}</td>
+                    <td style={{ padding: '12px 15px', borderBottom: '1px solid #e0e0e0', fontSize: 13, textAlign: 'right' }}>{e.visitors.toLocaleString()}</td>
+                    <td style={{ padding: '12px 15px', borderBottom: '1px solid #e0e0e0', fontSize: 13, textAlign: 'right' }}>${e.income}</td>
                   </tr>
                 );
               })
             )}
             {entries.length > 0 && (
-              <tr className="bg-gray-50 font-medium">
-                <td className="px-3 py-2 border-t border-gray-200">Total</td>
-                <td className="px-3 py-2 border-t border-gray-200 text-right text-blue-600">{totalOnline}</td>
-                <td className="px-3 py-2 border-t border-gray-200 text-right text-amber-600">{totalHybrid}</td>
-                <td className="px-3 py-2 border-t border-gray-200 text-right text-red-600">{totalPrime}</td>
-                <td className="px-3 py-2 border-t border-gray-200 text-right">{totalSubmissions}</td>
-                <td className="px-3 py-2 border-t border-gray-200 text-right">{totalVisitors.toLocaleString()}</td>
-                <td className="px-3 py-2 border-t border-gray-200 text-right">${totalIncome}</td>
+              <tr style={{ backgroundColor: '#f5f5f5', fontWeight: 600 }}>
+                <td style={{ padding: '12px 15px', borderTop: '2px solid #e0e0e0', fontSize: 13 }}>Total</td>
+                <td style={{ padding: '12px 15px', borderTop: '2px solid #e0e0e0', fontSize: 13, textAlign: 'right', color: '#3A6EA4' }}>{totalOnline}</td>
+                <td style={{ padding: '12px 15px', borderTop: '2px solid #e0e0e0', fontSize: 13, textAlign: 'right', color: '#d97706' }}>{totalHybrid}</td>
+                <td style={{ padding: '12px 15px', borderTop: '2px solid #e0e0e0', fontSize: 13, textAlign: 'right', color: '#dc2626' }}>{totalPrime}</td>
+                <td style={{ padding: '12px 15px', borderTop: '2px solid #e0e0e0', fontSize: 13, textAlign: 'right' }}>{totalSubmissions}</td>
+                <td style={{ padding: '12px 15px', borderTop: '2px solid #e0e0e0', fontSize: 13, textAlign: 'right' }}>{totalVisitors.toLocaleString()}</td>
+                <td style={{ padding: '12px 15px', borderTop: '2px solid #e0e0e0', fontSize: 13, textAlign: 'right' }}>${totalIncome}</td>
               </tr>
             )}
           </tbody>
@@ -643,23 +591,23 @@ export default function DailyTracker() {
       {/* ═══════════════════════════════════════════════════════════ */}
       {/*  Monthly Submissions: 2025 vs 2026                        */}
       {/* ═══════════════════════════════════════════════════════════ */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <h3 className="text-base font-semibold text-gray-800 mb-4">
+      <div className={card} style={cardShadow}>
+        <h3 className="tp-section-header" style={{ fontSize: 16 }}>
           Monthly Submissions: 2025 vs 2026
         </h3>
         <div style={{ height: 360 }}>
           <Chart type="bar" data={yoyChartData} options={yoyChartOptions} />
         </div>
         {/* Summary table */}
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full text-xs text-center border-collapse">
-            <thead>
-              <tr className="text-gray-500 uppercase">
-                <th className="px-2 py-1.5 text-left font-medium">Month</th>
-                <th className="px-2 py-1.5 font-medium">2025</th>
-                <th className="px-2 py-1.5 font-medium">2026</th>
-                <th className="px-2 py-1.5 font-medium">Goal</th>
-                <th className="px-2 py-1.5 font-medium">YOY Change</th>
+        <div className="tp-table" style={{ marginTop: 16 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, textAlign: 'center' }}>
+            <thead style={{ backgroundColor: '#f5f5f5' }}>
+              <tr>
+                <th style={{ padding: '12px 10px', textAlign: 'left', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase' }}>Month</th>
+                <th style={{ padding: '12px 10px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase' }}>2025</th>
+                <th style={{ padding: '12px 10px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase' }}>2026</th>
+                <th style={{ padding: '12px 10px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase' }}>Goal</th>
+                <th style={{ padding: '12px 10px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase' }}>YOY Change</th>
               </tr>
             </thead>
             <tbody>
@@ -670,12 +618,14 @@ export default function DailyTracker() {
                 const g = MONTHLY_GOALS_2026[i]?.total ?? 0;
                 const yoyPct = h > 0 && a > 0 ? (((a - h) / h) * 100).toFixed(1) : null;
                 return (
-                  <tr key={m} className="border-t border-gray-100">
-                    <td className="px-2 py-1.5 text-left text-gray-700 font-medium">{MONTH_NAMES[m].slice(0, 3)}</td>
-                    <td className="px-2 py-1.5 text-gray-600">{h.toLocaleString()}</td>
-                    <td className="px-2 py-1.5 text-blue-600 font-medium">{a > 0 ? a.toLocaleString() : '—'}</td>
-                    <td className="px-2 py-1.5 text-red-600">{g.toLocaleString()}</td>
-                    <td className={`px-2 py-1.5 font-medium ${yoyPct !== null && parseFloat(yoyPct) >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                  <tr key={m} style={{ borderBottom: '1px solid #e0e0e0' }}
+                    onMouseEnter={(ev) => ev.currentTarget.style.backgroundColor = '#f9f9f9'}
+                    onMouseLeave={(ev) => ev.currentTarget.style.backgroundColor = 'transparent'}>
+                    <td style={{ padding: '10px', textAlign: 'left', color: '#1B2A4A', fontWeight: 600 }}>{MONTH_NAMES[m].slice(0, 3)}</td>
+                    <td style={{ padding: '10px', color: '#666' }}>{h.toLocaleString()}</td>
+                    <td style={{ padding: '10px', color: '#3A6EA4', fontWeight: 600 }}>{a > 0 ? a.toLocaleString() : '—'}</td>
+                    <td style={{ padding: '10px', color: '#dc2626' }}>{g.toLocaleString()}</td>
+                    <td style={{ padding: '10px', fontWeight: 600, color: yoyPct !== null && parseFloat(yoyPct) >= 0 ? '#4CAF50' : '#dc2626' }}>
                       {yoyPct !== null ? `${parseFloat(yoyPct) >= 0 ? '+' : ''}${yoyPct}%` : '—'}
                     </td>
                   </tr>
@@ -689,47 +639,38 @@ export default function DailyTracker() {
       {/* ═══════════════════════════════════════════════════════════ */}
       {/*  OKR: Objectives & Key Results                            */}
       {/* ═══════════════════════════════════════════════════════════ */}
-      <div className="space-y-4">
-        <h3 className="text-base font-semibold text-gray-800">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <h3 className="tp-section-header" style={{ fontSize: 16 }}>
           Objectives &amp; Key Results
         </h3>
         {OKR_OBJECTIVES.map((obj, idx) => (
-          <div
-            key={idx}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
-          >
+          <div key={idx} className="tp-table" style={{ overflow: 'hidden' }}>
             {/* Colored header bar */}
-            <div
-              className="px-4 py-3 text-white font-semibold text-sm"
-              style={{ backgroundColor: obj.color }}
-            >
+            <div style={{ padding: '12px 16px', color: '#fff', fontWeight: 600, fontSize: 14, backgroundColor: obj.color }}>
               {obj.title}
             </div>
-
             {/* Key result table */}
-            <div className="p-0">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr>
-                    <th className="text-left px-4 py-2 font-medium text-gray-600 text-xs uppercase">Key Result</th>
-                    <th className="text-left px-4 py-2 font-medium text-gray-600 text-xs uppercase">Baseline</th>
-                    <th className="text-left px-4 py-2 font-medium text-gray-600 text-xs uppercase">Target</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="px-4 py-3 text-gray-800">{obj.keyResult}</td>
-                    <td className="px-4 py-3 text-gray-500 text-sm">{obj.baseline}</td>
-                    <td className="px-4 py-3 text-gray-800 font-semibold text-sm">{obj.target}</td>
-                  </tr>
-                  <tr>
-                    <td colSpan={3} className="px-4 py-3 text-gray-600 text-sm border-t border-gray-100 leading-relaxed">
-                      <span className="font-semibold text-gray-700">Current work:</span> {obj.activities}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff' }}>
+              <thead style={{ backgroundColor: '#f5f5f5' }}>
+                <tr>
+                  <th style={{ textAlign: 'left', padding: '12px 16px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase', borderBottom: '1px solid #e0e0e0' }}>Key Result</th>
+                  <th style={{ textAlign: 'left', padding: '12px 16px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase', borderBottom: '1px solid #e0e0e0' }}>Baseline</th>
+                  <th style={{ textAlign: 'left', padding: '12px 16px', fontWeight: 600, color: '#1B2A4A', fontSize: 12, textTransform: 'uppercase', borderBottom: '1px solid #e0e0e0' }}>Target</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={{ padding: '12px 16px', fontSize: 13, color: '#333' }}>{obj.keyResult}</td>
+                  <td style={{ padding: '12px 16px', fontSize: 13, color: '#666' }}>{obj.baseline}</td>
+                  <td style={{ padding: '12px 16px', fontSize: 13, color: '#1B2A4A', fontWeight: 600 }}>{obj.target}</td>
+                </tr>
+                <tr>
+                  <td colSpan={3} style={{ padding: '12px 16px', fontSize: 13, color: '#666', borderTop: '1px solid #e0e0e0', lineHeight: 1.6 }}>
+                    <span style={{ fontWeight: 600, color: '#1B2A4A' }}>Current work:</span> {obj.activities}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         ))}
       </div>
