@@ -29,24 +29,30 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen" style={{ background: '#FFFFFF' }}>
       {/* Header */}
-      <header style={{ backgroundColor: '#1B2A4A' }} className="px-6 py-5">
-        <h1 className="text-2xl font-semibold text-white">
-          Toothpillow Submission Dashboard
+      <header className="px-6 py-5" style={{ marginBottom: 10 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 'bold', color: '#1B2A4A' }}>
+          Submission Tracking Dashboard
         </h1>
       </header>
 
       {/* Tab bar */}
       <nav className="bg-white px-6" style={{ borderBottom: '2px solid #e0e0e0' }}>
-        <div className="flex gap-2 overflow-x-auto">
+        <div style={{ display: 'flex', gap: 10, overflowX: 'auto' }}>
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className="px-6 py-4 text-sm font-medium transition-colors whitespace-nowrap"
               style={{
+                padding: '15px 30px',
+                border: 'none',
+                backgroundColor: '#FFFFFF',
+                color: activeTab === tab.id ? '#1B2A4A' : '#333',
+                fontSize: 14,
+                fontWeight: 500,
+                cursor: 'pointer',
                 borderBottom: activeTab === tab.id ? '3px solid #FDBE67' : '3px solid transparent',
-                color: activeTab === tab.id ? '#1B2A4A' : '#666',
-                background: 'transparent',
+                transition: 'all 0.3s',
+                whiteSpace: 'nowrap' as const,
               }}
               onMouseEnter={(e) => {
                 if (activeTab !== tab.id) e.currentTarget.style.backgroundColor = '#f5f5f5';
