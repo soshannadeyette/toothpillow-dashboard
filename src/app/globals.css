@@ -1,15 +1,64 @@
 @import "tailwindcss";
 
 :root {
-  --tp-blue: #2563eb;
-  --tp-gold: #d97706;
+  --tp-navy: #1B2A4A;
+  --tp-blue: #3A6EA4;
+  --tp-gold: #FDBE67;
+  --tp-orange: #FF9800;
+  --tp-green: #4CAF50;
   --tp-red: #dc2626;
-  --tp-green: #16a34a;
-  --tp-gray: #6b7280;
+  --tp-light-blue: #B6CAE3;
+  --tp-bg: #FFFFFF;
 }
 
 body {
-  font-family: var(--font-inter), system-ui, sans-serif;
-  background: #f9fafb;
-  color: #111827;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: #FFFFFF;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Brand card styling */
+.tp-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  padding: 20px;
+}
+
+.tp-card-blue { border-left: 4px solid #3A6EA4; }
+.tp-card-gold { border-left: 4px solid #FDBE67; }
+.tp-card-orange { border-left: 4px solid #FF9800; }
+.tp-card-green { border-left: 4px solid #4CAF50; }
+
+/* Section header with blue dot */
+.tp-section-header {
+  font-size: 20px;
+  font-weight: bold;
+  color: #1B2A4A;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #B6CAE3;
+  position: relative;
+  padding-left: 20px;
+}
+.tp-section-header::before {
+  content: '\2022';
+  color: #3A6EA4;
+  position: absolute;
+  left: 0;
+  font-size: 24px;
+}
+
+/* Progress bar gradient */
+.tp-progress-fill {
+  background: linear-gradient(to right, #3A6EA4, #FDBE67);
+  border-radius: 12px;
+}
+
+/* Table styling */
+.tp-table {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
 }
