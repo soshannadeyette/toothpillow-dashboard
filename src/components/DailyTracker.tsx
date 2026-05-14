@@ -13,12 +13,56 @@ import {
   Legend,
   Filler,
 } from 'chart.js';
-import { Bar, Line } from 'react-chartjs-2';
-import { fetchSubmissions, upsertSubmission, currentYear, currentMonth } from '@/lib/api';
-import type { DailySubmission } from '@/lib/types';
+import { Bar } from 'react-chartjs-2';
+import { fetchSubmissions, upsertSubmission, fetchAnnualSummaries, currentYear, currentMonth } from '@/lib/api';
+import type { DailySubmission, MonthlySummary } from '@/lib/types';
 import { MONTHLY_GOALS_2026, MONTH_NAMES } from '@/lib/types';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler);
+
+/* ── 2025 historical monthly totals ── */
+const HIST_2025: Record<number, { total: number; days: number; avg: number }> = {
+  1: { total: 1434, days: 31, avg: 46.3 },
+  2: { total: 1560, days: 28, avg: 55.7 },
+  3: { total: 1513, days: 31, avg: 48.8 },
+  4: { total: 1665, days: 30, avg: 55.5 },
+  5: { total: 1360, days: 31, avg: 43.9 },
+  6: { total: 1098, days: 30, avg: 36.6 },
+  7: { total: 2690, days: 31, avg: 86.8 },
+  8: { total: 2542, days: 31, avg: 82.0 },
+  9: { total: 1601, days: 30, avg: 53.4 },
+  10: { total: 1508, days: 31, avg: 48.6 },
+  11: { total: 1609, days: 30, avg: 53.6 },
+  12: { total: 1253, days: 31, avg: 40.4 },
+};
+
+/* ── OKR Objectives & Key Results ── */
+const OKR_OBJECTIVES = [
+  {
+    title: 'O1: Strengthen Ambassador Activation',
+    color: '#3A6EA4',
+    keyResult: '% of ambassadors who have ever had a submission',
+    baseline: '64% (251 of 428)',
+    target: '75% by end of Q2',
+    activities: 'Launch ambassador course in Circle.so, ambassador dashboard live (waiting on dev), build and roll out ambassador onboarding program, promote Launch Incentive program, develop ambassador e-book, develop downline builder program for top ambassadors, ambassador text outreach',
+  },
+  {
+    title: 'O2: Execute Paid Media & Partnerships',
+    color: '#B26CA6',
+    keyResult: 'Contracted Q2 placements completed on schedule',
+    baseline: '~50% complete (Alex Clark, Daily Wire, Discover Ag in flight)',
+    target: '100% executed by end of Q2; 2 new Q3/Q4 placements signed',
+    activities: 'Alex Clark / Culture Apothecary (newsletter #3 4/17, ad reads, filming 5/13, founder episode 6/1), Daily Wire / Michael Knowles (ad read 4/27), Discover Ag (ad reads 4/23 + 4/30), research and secure 2-3 new podcast/ad read placements for Q3+Q4, optimize Google Ads',
+  },
+  {
+    title: 'O3: Improve Online Conversion Rate',
+    color: '#8CD1C8',
+    keyResult: 'Online assessment conversion rate',
+    baseline: '3.5% (March 2026)',
+    target: '4.0% by end of June 2026',
+    activities: 'FAQ page, Plans & Pricing page, adult landing page, research page, script and produce eWebinar, on-page SEO (title tags, meta descriptions, structural)',
+  },
+];
 
 export default function DailyTracker() {
   const [entries, setEntries] = useState<DailySubmission[]>([]);
@@ -28,22 +72,22 @@ export default function DailyTracker() {
   const [selectedYear, setSelectedYear] = useState(currentYear());
   const [selectedMonth, setSelectedMonth] = useState(currentMonth());
 
+  // Annual summaries for the YOY chart
+  const [annualSummaries, setAnnualSummaries] = useState<MonthlySummary[]>([]);
+
   // Form state for new/edit entry
   const [formDate, setFormDate] = useState(new Date().toISOString().slice(0, 10));
   const [formOnline, setFormOnline] = useState('');
   const [formHybrid, setFormHybrid] = useState('');
   const [formPrime, setFormPrime] = useState('');
   const [formVisitors, setFormVisitors] = useState('');
+  const [formIncome, setFormIncome] = useState('');
 
   const tableRef = useRef<HTMLDivElement>(null);
 
   const goal = MONTHLY_GOALS_2026.find(
     (g) => g.month === selectedMonth && g.year === selectedYear
   )?.total ?? 0;
-
-  const monthGoal = MONTHLY_GOALS_2026.find(
-    (g) => g.month === selectedMonth && g.year === selectedYear
-  );
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -62,6 +106,13 @@ export default function DailyTracker() {
     loadData();
   }, [loadData]);
 
+  // Fetch 2026 annual summaries for the YOY chart
+  useEffect(() => {
+    fetchAnnualSummaries(2026)
+      .then((data) => setAnnualSummaries(data))
+      .catch(() => {}); // silent fail — chart just shows goals + 2025
+  }, []);
+
   const handleSave = async () => {
     if (!formDate) return;
     setSaving(true);
@@ -76,13 +127,14 @@ export default function DailyTracker() {
         hybrid,
         prime,
         visitors: parseInt(formVisitors) || 0,
-        income: online * 5,
+        income: parseFloat(formIncome) || online * 5,
       });
       // Clear form
       setFormOnline('');
       setFormHybrid('');
       setFormPrime('');
       setFormVisitors('');
+      setFormIncome('');
       // Reload
       await loadData();
     } catch (e) {
@@ -98,6 +150,7 @@ export default function DailyTracker() {
     setFormHybrid(String(entry.hybrid));
     setFormPrime(String(entry.prime));
     setFormVisitors(String(entry.visitors));
+    setFormIncome(String(entry.income));
   };
 
   // Computed stats
@@ -182,15 +235,75 @@ export default function DailyTracker() {
     },
   };
 
-  // Daily Submissions Breakdown line chart
-  const dailyTarget = monthGoal
-    ? Math.round((monthGoal.online + monthGoal.hybrid + monthGoal.prime) / daysInMonth)
-    : 0;
+  /* ── YOY Chart Data ── */
+  const yoyLabels = MONTH_NAMES.slice(1).map((n) => n.slice(0, 3)); // Jan, Feb, ...
 
-  const breakdownLabels = entries.map((e) => {
-    const d = new Date(e.date + 'T12:00:00');
-    return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+  // Build 2026 actual totals from annual summaries
+  const actual2026ByMonth: Record<number, number> = {};
+  annualSummaries.forEach((s) => {
+    actual2026ByMonth[s.month] = s.total_submissions;
   });
+
+  // Also include current month from live entries if it's 2026
+  if (selectedYear === 2026 && totalSubmissions > 0) {
+    actual2026ByMonth[selectedMonth] = totalSubmissions;
+  }
+
+  const yoyChartData = {
+    labels: yoyLabels,
+    datasets: [
+      {
+        label: '2025 Actual',
+        data: Array.from({ length: 12 }, (_, i) => HIST_2025[i + 1]?.total ?? 0),
+        backgroundColor: '#94a3b8',
+        borderRadius: 3,
+      },
+      {
+        label: '2026 Actual',
+        data: Array.from({ length: 12 }, (_, i) => actual2026ByMonth[i + 1] ?? 0),
+        backgroundColor: '#2563eb',
+        borderRadius: 3,
+      },
+      {
+        label: '2026 Goal',
+        data: MONTHLY_GOALS_2026.map((g) => g.total),
+        type: 'line' as const,
+        borderColor: '#dc2626',
+        borderWidth: 2,
+        borderDash: [6, 3],
+        pointRadius: 3,
+        pointBackgroundColor: '#dc2626',
+        fill: false,
+      },
+    ],
+  };
+
+  const yoyChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top' as const },
+      tooltip: {
+        callbacks: {
+          label: (ctx: { dataset: { label?: string }; parsed: { y: number | null } }) => {
+            const val = ctx.parsed.y;
+            return `${ctx.dataset.label}: ${val != null ? val.toLocaleString() : '0'}`;
+          },
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (val: string | number) => {
+            const n = typeof val === 'string' ? parseFloat(val) : val;
+            return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
+          },
+        },
+      },
+    },
+  };
 
   return (
     <div className="space-y-6">
@@ -381,6 +494,16 @@ export default function DailyTracker() {
               className="border border-gray-300 rounded-md px-3 py-2 text-sm w-24"
             />
           </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Income ($)</label>
+            <input
+              type="number"
+              value={formIncome}
+              onChange={(e) => setFormIncome(e.target.value)}
+              placeholder="auto"
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm w-24"
+            />
+          </div>
           <button
             onClick={handleSave}
             disabled={saving || !formDate}
@@ -406,85 +529,6 @@ export default function DailyTracker() {
           )}
         </div>
       </div>
-
-      {/* Daily Submissions Breakdown — line chart */}
-      {entries.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <h3 className="text-sm font-bold text-gray-700 mb-3">Daily Submissions Breakdown</h3>
-          <div style={{ height: 380 }}>
-            <Line
-              data={{
-                labels: breakdownLabels,
-                datasets: [
-                  {
-                    label: 'Online',
-                    data: entries.map((d) => d.online),
-                    borderColor: '#8CD1C8',
-                    backgroundColor: 'rgba(140,209,200,0.15)',
-                    borderWidth: 2.5,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#8CD1C8',
-                    tension: 0.4,
-                    fill: true,
-                  },
-                  {
-                    label: 'Hybrid',
-                    data: entries.map((d) => d.hybrid),
-                    borderColor: '#E5A04B',
-                    backgroundColor: 'rgba(229,160,75,0.12)',
-                    borderWidth: 2,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#E5A04B',
-                    tension: 0.4,
-                    fill: true,
-                  },
-                  {
-                    label: 'Prime',
-                    data: entries.map((d) => d.prime),
-                    borderColor: '#E88B8B',
-                    backgroundColor: 'rgba(232,139,139,0.1)',
-                    borderWidth: 2,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#E88B8B',
-                    tension: 0.4,
-                    fill: true,
-                  },
-                  {
-                    label: `Daily Target (${dailyTarget}/day)`,
-                    data: entries.map(() => dailyTarget),
-                    borderColor: '#E5A04B',
-                    borderDash: [8, 5],
-                    borderWidth: 2.5,
-                    pointRadius: 0,
-                    fill: false,
-                    tension: 0,
-                  },
-                ],
-              }}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { position: 'top' },
-                  tooltip: {
-                    callbacks: {
-                      afterBody: (ctx) => {
-                        const idx = ctx[0].dataIndex;
-                        const d = entries[idx];
-                        return `Total: ${d.online + d.hybrid + d.prime}`;
-                      },
-                    },
-                  },
-                },
-                scales: {
-                  x: { grid: { display: false } },
-                  y: { beginAtZero: true },
-                },
-              }}
-            />
-          </div>
-        </div>
-      )}
 
       {/* Sub-totals by type + Conversion */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -594,6 +638,100 @@ export default function DailyTracker() {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/*  Monthly Submissions: 2025 vs 2026                        */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <h3 className="text-base font-semibold text-gray-800 mb-4">
+          Monthly Submissions: 2025 vs 2026
+        </h3>
+        <div style={{ height: 360 }}>
+          <Bar data={yoyChartData} options={yoyChartOptions} />
+        </div>
+        {/* Summary table */}
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full text-xs text-center border-collapse">
+            <thead>
+              <tr className="text-gray-500 uppercase">
+                <th className="px-2 py-1.5 text-left font-medium">Month</th>
+                <th className="px-2 py-1.5 font-medium">2025</th>
+                <th className="px-2 py-1.5 font-medium">2026</th>
+                <th className="px-2 py-1.5 font-medium">Goal</th>
+                <th className="px-2 py-1.5 font-medium">YOY Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 12 }, (_, i) => {
+                const m = i + 1;
+                const h = HIST_2025[m]?.total ?? 0;
+                const a = actual2026ByMonth[m] ?? 0;
+                const g = MONTHLY_GOALS_2026[i]?.total ?? 0;
+                const yoyPct = h > 0 && a > 0 ? (((a - h) / h) * 100).toFixed(1) : null;
+                return (
+                  <tr key={m} className="border-t border-gray-100">
+                    <td className="px-2 py-1.5 text-left text-gray-700 font-medium">{MONTH_NAMES[m].slice(0, 3)}</td>
+                    <td className="px-2 py-1.5 text-gray-600">{h.toLocaleString()}</td>
+                    <td className="px-2 py-1.5 text-blue-600 font-medium">{a > 0 ? a.toLocaleString() : '—'}</td>
+                    <td className="px-2 py-1.5 text-red-600">{g.toLocaleString()}</td>
+                    <td className={`px-2 py-1.5 font-medium ${yoyPct !== null && parseFloat(yoyPct) >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                      {yoyPct !== null ? `${parseFloat(yoyPct) >= 0 ? '+' : ''}${yoyPct}%` : '—'}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/*  OKR: Objectives & Key Results                            */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      <div className="space-y-4">
+        <h3 className="text-base font-semibold text-gray-800">
+          Objectives &amp; Key Results
+        </h3>
+        {OKR_OBJECTIVES.map((obj, idx) => (
+          <div
+            key={idx}
+            className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+          >
+            {/* Colored header bar */}
+            <div
+              className="px-4 py-3 text-white font-semibold text-sm"
+              style={{ backgroundColor: obj.color }}
+            >
+              {obj.title}
+            </div>
+
+            {/* Key result table */}
+            <div className="p-0">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr>
+                    <th className="text-left px-4 py-2 font-medium text-gray-600 text-xs uppercase">Key Result</th>
+                    <th className="text-left px-4 py-2 font-medium text-gray-600 text-xs uppercase">Baseline</th>
+                    <th className="text-left px-4 py-2 font-medium text-gray-600 text-xs uppercase">Target</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="px-4 py-3 text-gray-800">{obj.keyResult}</td>
+                    <td className="px-4 py-3 text-gray-500 text-sm">{obj.baseline}</td>
+                    <td className="px-4 py-3 text-gray-800 font-semibold text-sm">{obj.target}</td>
+                  </tr>
+                  <tr>
+                    <td colSpan={3} className="px-4 py-3 text-gray-600 text-sm border-t border-gray-100 leading-relaxed">
+                      <span className="font-semibold text-gray-700">Current work:</span> {obj.activities}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
