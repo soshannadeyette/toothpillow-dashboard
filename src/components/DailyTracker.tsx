@@ -636,7 +636,7 @@ export default function DailyTracker() {
       {/* ═══════════════════════════════════════════════════════════ */}
       <div className={card} style={cardShadow}>
         <h3 className="tp-section-header" style={{ fontSize: 16 }}>
-          Monthly Submissions: 2025 vs 2026
+          Monthly Enrollments — 2025 vs. 2026
         </h3>
         <div style={{ fontSize: 13, color: '#666', marginBottom: 12 }}>
           2025: {total2025.toLocaleString()} | 2026 so far: {total2026SoFar.toLocaleString()}
