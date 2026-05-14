@@ -20,7 +20,7 @@ import { MONTHLY_GOALS_2026, MONTH_NAMES } from '@/lib/types';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler);
 
-/* ââ TP Kids Color Palette ââââââââââââââââââââââââââââââ */
+/* -- TP Kids Color Palette ------------------------------ */
 const TP = {
   blue:       '#3A6EA4',
   skyBlue:    '#B6CAE3',
@@ -138,7 +138,7 @@ export default function DailyTracker() {
   const gap = goal - totalSubmissions;
   const neededPerDay = daysRemaining > 0 ? Math.ceil(gap / daysRemaining) : 0;
 
-  // "Should Be At" â expected progress based on days tracked
+  // "Should Be At" -- expected progress based on days tracked
   const shouldBeAt = Math.round(goal / daysInMonth * daysTracked);
   const aheadBehind = totalSubmissions - shouldBeAt;
 
@@ -203,7 +203,7 @@ export default function DailyTracker() {
     },
   };
 
-  // Daily Submissions Breakdown â line chart with per-type trends and daily target
+  // Daily Submissions Breakdown -- line chart with per-type trends and daily target
   const dailyTarget = monthGoal
     ? Math.round((monthGoal.online + monthGoal.hybrid + monthGoal.prime) / daysInMonth)
     : 0;
@@ -249,7 +249,7 @@ export default function DailyTracker() {
         {MONTH_NAMES[selectedMonth]} {selectedYear} Submission Tracker
       </h2>
 
-      {/* Stat cards â 2x3 grid matching old dashboard */}
+      {/* Stat cards -- 2x3 grid matching old dashboard */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* 1. Month-to-Date */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5" style={{ borderLeft: `4px solid ${TP.navy}` }}>
@@ -310,7 +310,7 @@ export default function DailyTracker() {
           </span>
         </div>
         <div className="relative h-6 bg-gray-100 rounded-full overflow-visible">
-          {/* Blue fill â current progress */}
+          {/* Blue fill -- current progress */}
           <div
             className="absolute top-0 left-0 h-full rounded-full transition-all duration-500"
             style={{ width: `${progressPct}%`, backgroundColor: TP.blue }}
@@ -424,7 +424,7 @@ export default function DailyTracker() {
       {/* Stacked bar chart */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <h3 className="text-sm font-medium text-gray-700 mb-3">
-          {MONTH_NAMES[selectedMonth]} {selectedYear} â Daily Submissions
+          {MONTH_NAMES[selectedMonth]} {selectedYear} -- Daily Submissions
         </h3>
         <div style={{ height: 300 }}>
           {loading ? (
@@ -437,7 +437,7 @@ export default function DailyTracker() {
         </div>
       </div>
 
-      {/* Daily Submissions Breakdown â line chart with per-type trends */}
+      {/* Daily Submissions Breakdown -- line chart with per-type trends */}
       {entries.length > 0 && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <h3 className="text-sm font-bold text-gray-700 mb-3">Daily Submissions Breakdown</h3>
