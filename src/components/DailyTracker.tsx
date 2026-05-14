@@ -20,7 +20,7 @@ import { MONTHLY_GOALS_2026, MONTH_NAMES } from '@/lib/types';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler);
 
-/* ââ 2025 historical monthly totals ââ */
+/* ── 2025 historical monthly totals ── */
 const HIST_2025: Record<number, { total: number; days: number; avg: number }> = {
   1: { total: 1434, days: 31, avg: 46.3 },
   2: { total: 1560, days: 28, avg: 55.7 },
@@ -36,7 +36,7 @@ const HIST_2025: Record<number, { total: number; days: number; avg: number }> = 
   12: { total: 1253, days: 31, avg: 40.4 },
 };
 
-/* ââ OKR Objectives & Key Results ââ */
+/* ── OKR Objectives & Key Results ── */
 const OKR_OBJECTIVES = [
   {
     title: 'O1: Strengthen Ambassador Activation',
@@ -64,7 +64,7 @@ const OKR_OBJECTIVES = [
   },
 ];
 
-/* ââ Shared styles ââ */
+/* ── Shared styles ── */
 const card = 'bg-white p-5';
 const cardShadow = { borderRadius: 12, boxShadow: '0 4px 15px rgba(0,0,0,0.08)' };
 
@@ -239,7 +239,7 @@ export default function DailyTracker() {
     },
   };
 
-  /* ââ YOY Chart Data ââ */
+  /* ── YOY Chart Data ── */
   const yoyLabels = MONTH_NAMES.slice(1).map((n) => n.slice(0, 3));
 
   const actual2026ByMonth: Record<number, number> = {};
@@ -359,7 +359,7 @@ export default function DailyTracker() {
         </div>
       </div>
 
-      {/* Stat cards â responsive grid matching HTML dashboard */}
+      {/* Stat cards — responsive grid matching HTML dashboard */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20, marginBottom: 30 }}>
         {/* 1. Month-to-Date */}
         <div className={card} style={cardShadow}>
@@ -600,9 +600,9 @@ export default function DailyTracker() {
         </table>
       </div>
 
-      {/* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       {/*  Monthly Submissions: 2025 vs 2026                        */}
-      {/* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       <div className={card} style={cardShadow}>
         <h3 className="tp-section-header" style={{ fontSize: 16 }}>
           Monthly Submissions: 2025 vs 2026
@@ -637,11 +637,11 @@ export default function DailyTracker() {
                     onMouseLeave={(ev) => ev.currentTarget.style.backgroundColor = 'transparent'}>
                     <td style={{ padding: '10px', textAlign: 'left', color: '#1B2A4A', fontWeight: 600 }}>{MONTH_NAMES[m].slice(0, 3)}</td>
                     <td style={{ padding: '10px', color: '#666' }}>{h.toLocaleString()}</td>
-                    <td style={{ padding: '10px', color: '#3A6EA4', fontWeight: 600 }}>{a > 0 ? a.toLocaleString() : 'â'}</td>
-                    <td style={{ padding: '10px', color: '#B26CA6', fontWeight: 600 }}>{p > 0 ? p.toLocaleString() : 'â'}</td>
+                    <td style={{ padding: '10px', color: '#3A6EA4', fontWeight: 600 }}>{a > 0 ? a.toLocaleString() : '—'}</td>
+                    <td style={{ padding: '10px', color: '#B26CA6', fontWeight: 600 }}>{p > 0 ? p.toLocaleString() : '—'}</td>
                     <td style={{ padding: '10px', color: '#dc2626' }}>{g.toLocaleString()}</td>
                     <td style={{ padding: '10px', fontWeight: 600, color: yoyPct !== null && parseFloat(yoyPct) >= 0 ? '#4CAF50' : '#dc2626' }}>
-                      {yoyPct !== null ? `${parseFloat(yoyPct) >= 0 ? '+' : ''}${yoyPct}%` : 'â'}
+                      {yoyPct !== null ? `${parseFloat(yoyPct) >= 0 ? '+' : ''}${yoyPct}%` : '—'}
                     </td>
                   </tr>
                 );
@@ -651,9 +651,9 @@ export default function DailyTracker() {
         </div>
       </div>
 
-      {/* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       {/*  OKR: Objectives & Key Results                            */}
-      {/* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <h3 className="tp-section-header" style={{ fontSize: 16 }}>
           Objectives &amp; Key Results
