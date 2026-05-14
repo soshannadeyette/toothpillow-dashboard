@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,205 +11,874 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler,
 } from 'chart.js';
-import { Bar } from 'react-chartjs-2';
-import { fetchAnnualSummaries } from '@/lib/api';
+import { Bar, Line } from 'react-chartjs-2';
+import { fetchAnnualSummaries, upsertMonthlySummary, currentMonth, currentYear } from '@/lib/api';
 import type { MonthlySummary } from '@/lib/types';
 import { MONTHLY_GOALS_2026, MONTH_NAMES } from '@/lib/types';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
+
+const TP = {
+  blue: '#3A6EA4',
+  skyBlue: '#B6CAE3',
+  lightBlue: '#D6E5F7',
+  cream: '#FEF8EE',
+  green: '#8CD1C8',
+  yellow: '#FDBE67',
+  peach: '#FBCCC5',
+  red: '#DD5759',
+  darkPurple: '#B26CA6',
+  lightPurple: '#DDBBD9',
+  bubblegum: '#F6AACB',
+  maroon: '#D46476',
+  text: '#333333',
+  navy: '#1B2A4A',
+};
+
+// Per-month online/hybrid/prime goals derived from MONTHLY_GOALS_2026
+// Fallback in case the type only has total goals
+const ONLINE_GOALS_2026: Record<number, number> = {
+  1: 1067, 2: 1174, 3: 1291, 4: 1420, 5: 1562, 6: 1718,
+  7: 1890, 8: 2079, 9: 2287, 10: 2516, 11: 2767, 12: 3044,
+};
+const HYBRID_GOALS_2026: Record<number, number> = {
+  1: 363, 2: 401, 3: 444, 4: 355, 5: 405, 6: 460,
+  7: 500, 8: 500, 9: 500, 10: 500, 11: 500, 12: 500,
+};
+const PRIME_GOAL = 25;
+
+function pct(val: number, total: number): string {
+  if (!total) return '0%';
+  return (val / total * 100).toFixed(1) + '%';
+}
+
+function fmtPct(val: number | null | undefined): string {
+  if (val == null) return '--';
+  return val.toFixed(2) + '%';
+}
+
+function fmtDollar(val: number): string {
+  return '$' + val.toLocaleString();
+}
+
+function goalPctColor(val: number): string {
+  if (val >= 90) return TP.green;
+  if (val >= 70) return TP.yellow;
+  return TP.red;
+}
 
 export default function AnnualView() {
-  const [summaries, setSummaries] = useState<MonthlySummary[]>([]);
+  const [data2026, setData2026] = useState<MonthlySummary[]>([]);
+  const [data2025, setData2025] = useState<MonthlySummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState('');
+
+  const thisMonth = currentMonth();
+  const thisYear = currentYear();
+
+  const [visitorInput, setVisitorInput] = useState('');
+  const [usaVisitorInput, setUsaVisitorInput] = useState('');
+
+  async function loadData() {
+    setLoading(true);
+    try {
+      const [r2026, r2025] = await Promise.all([
+        fetchAnnualSummaries(2026),
+        fetchAnnualSummaries(2025),
+      ]);
+      setData2026(r2026 || []);
+      setData2025(r2025 || []);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function load() {
-      try {
-        const data = await fetchAnnualSummaries(2026);
-        setSummaries(data);
-      } catch {
-        // handle silently
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
+    loadData();
   }, []);
 
-  const ytdTotal = summaries.reduce((s, m) => s + m.total_submissions, 0);
-  const ytdGoal = summaries.reduce((s, m) => s + m.goal, 0);
-  const ytdOnline = summaries.reduce((s, m) => s + m.online_submissions, 0);
-  const ytdHybrid = summaries.reduce((s, m) => s + m.hybrid_submissions, 0);
-  const ytdPrime = summaries.reduce((s, m) => s + m.prime_submissions, 0);
-  const ytdVisitors = summaries.reduce((s, m) => s + m.total_visitors, 0);
-  const ytdIncome = summaries.reduce((s, m) => s + m.total_income, 0);
+  async function handleSaveVisitors() {
+    setSaving(true);
+    setSaveMsg('');
+    try {
+      await upsertMonthlySummary({
+        year: thisYear,
+        month: thisMonth,
+        total_visitors: visitorInput ? parseInt(visitorInput, 10) : undefined,
+        usa_visitors: usaVisitorInput ? parseInt(usaVisitorInput, 10) : undefined,
+      });
+      setSaveMsg('Saved successfully.');
+      await loadData();
+    } catch (e) {
+      setSaveMsg('Error saving. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  }
 
-  // Stacked bar chart — submissions vs goal by month
-  const chartLabels = summaries.map((m) => MONTH_NAMES[m.month]?.slice(0, 3) || `M${m.month}`);
-  const goals = summaries.map((m) => {
-    const g = MONTHLY_GOALS_2026.find((g) => g.month === m.month);
-    return g?.total ?? m.goal;
-  });
+  // ---- Derived values ----
+  const months2026 = data2026.slice().sort((a, b) => a.month - b.month);
+  const months2025 = data2025.slice().sort((a, b) => a.month - b.month);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const chartData: any = {
-    labels: chartLabels,
+  // YTD totals
+  const ytdSubs = months2026.reduce((s, m) => s + (m.total_submissions || 0), 0);
+  const ytdOnline = months2026.reduce((s, m) => s + (m.online_submissions || 0), 0);
+  const ytdHybrid = months2026.reduce((s, m) => s + (m.hybrid_submissions || 0), 0);
+  const ytdPrime = months2026.reduce((s, m) => s + (m.prime_submissions || 0), 0);
+  const ytdGoal = months2026.reduce((s, m) => s + (m.goal || 0), 0);
+  const ytdVisitors = months2026.reduce((s, m) => s + (m.total_visitors || 0), 0);
+  const ytdIncome = ytdOnline * 5;
+  const ytdConvAll = months2026.filter(m => m.conversion_rate != null);
+  const ytdConvAvg = ytdConvAll.length
+    ? ytdConvAll.reduce((s, m) => s + (m.conversion_rate || 0), 0) / ytdConvAll.length
+    : 0;
+  const goalPctVal = ytdGoal > 0 ? (ytdSubs / ytdGoal) * 100 : 0;
+
+  // Chart labels
+  const allMonthLabels = MONTH_NAMES
+    ? (MONTH_NAMES as string[]).slice(1, 13)
+    : ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  function getMonthVal(rows: MonthlySummary[], monthIdx: number, field: keyof MonthlySummary): number {
+    const row = rows.find(r => r.month === monthIdx + 1);
+    return row ? (row[field] as number) || 0 : 0;
+  }
+
+  // Monthly perf chart
+  const monthlyChartData = {
+    labels: allMonthLabels,
     datasets: [
       {
         label: 'Online',
-        data: summaries.map((m) => m.online_submissions),
-        backgroundColor: '#2563eb',
-        stack: 'stack',
+        data: allMonthLabels.map((_, i) => getMonthVal(months2026, i, 'online_submissions')),
+        backgroundColor: TP.blue,
+        stack: 'stack0',
       },
       {
         label: 'Hybrid',
-        data: summaries.map((m) => m.hybrid_submissions),
-        backgroundColor: '#d97706',
-        stack: 'stack',
+        data: allMonthLabels.map((_, i) => getMonthVal(months2026, i, 'hybrid_submissions')),
+        backgroundColor: TP.yellow,
+        stack: 'stack0',
       },
       {
         label: 'Prime',
-        data: summaries.map((m) => m.prime_submissions),
-        backgroundColor: '#dc2626',
-        stack: 'stack',
+        data: allMonthLabels.map((_, i) => getMonthVal(months2026, i, 'prime_submissions')),
+        backgroundColor: TP.red,
+        stack: 'stack0',
       },
       {
-        type: 'line' as const,
         label: 'Goal',
-        data: goals,
+        data: allMonthLabels.map((_, i) => {
+          const row = months2026.find(r => r.month === i + 1);
+          const fallbackGoal = (MONTHLY_GOALS_2026 as { month: number; total: number }[]).find(g => g.month === i + 1);
+          return row?.goal || fallbackGoal?.total || 0;
+        }),
+        type: 'line' as const,
         borderColor: '#6b7280',
-        borderDash: [6, 3],
+        borderDash: [6, 4],
         borderWidth: 2,
-        pointRadius: 0,
+        pointRadius: 3,
         fill: false,
+        backgroundColor: 'transparent',
+        stack: undefined,
       },
     ],
   };
 
+  const monthlyChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' as const },
+      title: { display: true, text: '2026 Monthly Submissions vs Goal' },
+    },
+    scales: {
+      x: { stacked: true },
+      y: { stacked: true, beginAtZero: true },
+    },
+  };
+
+  // Conversion line charts
+  const convChartData = {
+    labels: allMonthLabels,
+    datasets: [
+      {
+        label: 'Conversion Rate (%)',
+        data: allMonthLabels.map((_, i) => {
+          const row = months2026.find(r => r.month === i + 1);
+          return row?.conversion_rate ?? null;
+        }),
+        borderColor: TP.blue,
+        backgroundColor: TP.lightBlue + '55',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+      },
+    ],
+  };
+
+  const usaConvChartData = {
+    labels: allMonthLabels,
+    datasets: [
+      {
+        label: 'USA Conversion Rate (%)',
+        data: allMonthLabels.map((_, i) => {
+          const row = months2026.find(r => r.month === i + 1);
+          return row?.usa_conversion_rate ?? null;
+        }),
+        borderColor: TP.blue,
+        backgroundColor: TP.lightBlue + '55',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+      },
+    ],
+  };
+
+  const convChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' as const },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (v: number | string) => v + '%',
+        },
+      },
+    },
+  };
+
+  // Traffic comparison
+  const traffic2025Total = months2025.reduce((s, m) => s + (m.total_visitors || 0), 0);
+  const traffic2026Total = ytdVisitors;
+  const yoyChangePct = traffic2025Total > 0
+    ? ((traffic2026Total - traffic2025Total) / traffic2025Total * 100).toFixed(1)
+    : '--';
+  const avgMonthly2026 = months2026.length > 0
+    ? Math.round(traffic2026Total / months2026.length)
+    : 0;
+
+  const trafficChartData = {
+    labels: allMonthLabels,
+    datasets: [
+      {
+        label: '2025 Visitors',
+        data: allMonthLabels.map((_, i) => getMonthVal(months2025, i, 'total_visitors')),
+        backgroundColor: TP.lightPurple,
+      },
+      {
+        label: '2026 Visitors',
+        data: allMonthLabels.map((_, i) => getMonthVal(months2026, i, 'total_visitors')),
+        backgroundColor: TP.blue,
+      },
+    ],
+  };
+
+  const trafficChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' as const },
+      title: { display: true, text: 'Website Visitors: 2025 vs 2026' },
+    },
+    scales: { y: { beginAtZero: true } },
+  };
+
+  // Income
+  const monthsTracked = months2026.filter(m => (m.total_submissions || 0) > 0).length;
+  const projectedFullYear = monthsTracked > 0
+    ? Math.round((ytdIncome / monthsTracked) * 12)
+    : 0;
+
+  // Build cumulative income for table
+  let cumIncome = 0;
+  const incomeRows = months2026.map(m => {
+    const income = (m.online_submissions || 0) * 5;
+    cumIncome += income;
+    return { ...m, income, cumIncome };
+  });
+
   if (loading) {
-    return <div className="text-gray-400 py-12 text-center">Loading annual data...</div>;
+    return (
+      <div className="flex items-center justify-center h-64 text-gray-500">
+        Loading annual data...
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      {/* YTD stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-gray-900">{ytdTotal.toLocaleString()}</div>
-          <div className="text-sm text-gray-500 mt-1">YTD Submissions</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-gray-900">{ytdGoal.toLocaleString()}</div>
-          <div className="text-sm text-gray-500 mt-1">YTD Goal</div>
-        </div>
-        <div className={`bg-white rounded-lg shadow-sm border p-4 ${ytdTotal >= ytdGoal ? 'border-green-200' : 'border-amber-200'}`}>
-          <div className={`text-2xl font-bold ${ytdTotal >= ytdGoal ? 'text-green-600' : 'text-amber-600'}`}>
-            {((ytdTotal / ytdGoal) * 100).toFixed(1)}%
-          </div>
-          <div className="text-sm text-gray-500 mt-1">% of Goal</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-blue-600">{ytdOnline.toLocaleString()}</div>
-          <div className="text-sm text-gray-500 mt-1">Online</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-amber-600">{ytdHybrid.toLocaleString()}</div>
-          <div className="text-sm text-gray-500 mt-1">Hybrid</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-gray-900">${ytdIncome.toLocaleString()}</div>
-          <div className="text-sm text-gray-500 mt-1">YTD Income</div>
-        </div>
-      </div>
+    <div className="space-y-8 p-4" style={{ color: TP.text }}>
 
-      {/* Chart */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">2026 Submission Mix vs Goal</h3>
-        <div style={{ height: 350 }}>
-          {summaries.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-gray-400">No data yet</div>
-          ) : (
-            <Bar
-              data={chartData}
+      {/* ===== 1. Visitor Data Entry ===== */}
+      <section className="bg-white rounded-xl shadow p-5">
+        <h2 className="text-lg font-semibold mb-4" style={{ color: TP.navy }}>
+          Update Visitor Data -- {allMonthLabels[thisMonth - 1]} {thisYear}
+        </h2>
+        <div className="flex flex-wrap gap-4 items-end">
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-600">
+              GA4 Unique Visitors
+            </label>
+            <input
+              type="number"
+              className="border border-gray-300 rounded-lg px-3 py-2 w-44 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              value={visitorInput}
+              onChange={e => setVisitorInput(e.target.value)}
+              placeholder="e.g. 12500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-600">
+              USA Only Visitors
+            </label>
+            <input
+              type="number"
+              className="border border-gray-300 rounded-lg px-3 py-2 w-44 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              value={usaVisitorInput}
+              onChange={e => setUsaVisitorInput(e.target.value)}
+              placeholder="e.g. 10800"
+            />
+          </div>
+          <button
+            onClick={handleSaveVisitors}
+            disabled={saving}
+            className="px-5 py-2 rounded-lg font-semibold text-white transition-opacity"
+            style={{ backgroundColor: TP.blue, opacity: saving ? 0.6 : 1 }}
+          >
+            {saving ? 'Saving...' : 'Save Visitors'}
+          </button>
+          {saveMsg && (
+            <span
+              className="text-sm font-medium"
+              style={{ color: saveMsg.startsWith('Error') ? TP.red : TP.green }}
+            >
+              {saveMsg}
+            </span>
+          )}
+        </div>
+      </section>
+
+      {/* ===== 2. YTD Summary Cards ===== */}
+      <section>
+        <h2 className="text-lg font-semibold mb-3" style={{ color: TP.navy }}>
+          Year-to-Date Summary
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div
+            className="bg-white rounded-xl shadow p-4"
+            style={{ borderLeft: `4px solid ${TP.navy}` }}
+          >
+            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">YTD Submissions</div>
+            <div className="text-2xl font-bold" style={{ color: TP.navy }}>
+              {ytdSubs.toLocaleString()}
+            </div>
+            <div className="text-xs mt-1 space-x-1">
+              <span style={{ color: TP.blue }}>{ytdOnline.toLocaleString()} online</span>
+              <span style={{ color: '#d97706' }}>{ytdHybrid.toLocaleString()} hybrid</span>
+              <span style={{ color: TP.red }}>{ytdPrime.toLocaleString()} prime</span>
+            </div>
+          </div>
+
+          <div
+            className="bg-white rounded-xl shadow p-4"
+            style={{ borderLeft: `4px solid ${TP.navy}` }}
+          >
+            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">YTD Goal</div>
+            <div className="text-2xl font-bold" style={{ color: TP.navy }}>
+              {ytdGoal.toLocaleString()}
+            </div>
+          </div>
+
+          <div
+            className="bg-white rounded-xl shadow p-4"
+            style={{ borderLeft: `4px solid ${goalPctVal >= 100 ? TP.green : TP.red}` }}
+          >
+            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">% of Goal</div>
+            <div
+              className="text-2xl font-bold"
+              style={{ color: goalPctVal >= 100 ? TP.green : TP.red }}
+            >
+              {goalPctVal.toFixed(1)}%
+            </div>
+            <div className="text-xs text-gray-400">
+              {ytdGoal - ytdSubs > 0
+                ? (ytdGoal - ytdSubs).toLocaleString() + ' remaining'
+                : 'Goal met!'}
+            </div>
+          </div>
+
+          <div
+            className="bg-white rounded-xl shadow p-4"
+            style={{ borderLeft: `4px solid ${TP.blue}` }}
+          >
+            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">YTD Visitors</div>
+            <div className="text-2xl font-bold" style={{ color: TP.blue }}>
+              {ytdVisitors.toLocaleString()}
+            </div>
+          </div>
+
+          <div
+            className="bg-white rounded-xl shadow p-4"
+            style={{ borderLeft: `4px solid ${TP.yellow}` }}
+          >
+            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">YTD Conversion</div>
+            <div className="text-2xl font-bold" style={{ color: '#d97706' }}>
+              {fmtPct(ytdConvAvg)}
+            </div>
+            <div className="text-xs text-gray-400">avg across months</div>
+          </div>
+
+          <div
+            className="bg-white rounded-xl shadow p-4"
+            style={{ borderLeft: `4px solid ${TP.green}` }}
+          >
+            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">YTD Income</div>
+            <div className="text-2xl font-bold" style={{ color: TP.green }}>
+              {fmtDollar(ytdIncome)}
+            </div>
+            <div className="text-xs text-gray-400">$5/online sub</div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== 3. Monthly Performance Chart ===== */}
+      <section className="bg-white rounded-xl shadow p-5">
+        <Bar data={monthlyChartData} options={monthlyChartOptions} />
+      </section>
+
+      {/* ===== 4. Monthly Performance Table ===== */}
+      <section className="bg-white rounded-xl shadow p-5">
+        <h2 className="text-lg font-semibold mb-4" style={{ color: TP.navy }}>
+          Monthly Performance
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead>
+              <tr className="border-b border-gray-200">
+                {[
+                  'Month','Online','Hybrid','Prime','Total','Goal','Gap',
+                  '% Goal','Visitors','Conv %','USA Visitors','USA Conv %','Daily Avg',
+                ].map(h => (
+                  <th key={h} className="py-2 px-2 font-semibold text-gray-600 whitespace-nowrap">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {months2026.map(m => {
+                const goalObj = (MONTHLY_GOALS_2026 as { month: number; total: number }[]).find(g => g.month === m.month);
+                const goal = m.goal || goalObj?.total || 0;
+                const gap = (m.total_submissions || 0) - goal;
+                const gpct = goal > 0 ? (m.total_submissions || 0) / goal * 100 : 0;
+                return (
+                  <tr key={m.month} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-2 px-2 font-medium">{m.month_name || allMonthLabels[m.month - 1]}</td>
+                    <td className="py-2 px-2" style={{ color: TP.blue }}>
+                      {(m.online_submissions || 0).toLocaleString()}
+                    </td>
+                    <td className="py-2 px-2" style={{ color: '#d97706' }}>
+                      {(m.hybrid_submissions || 0).toLocaleString()}
+                    </td>
+                    <td className="py-2 px-2" style={{ color: TP.red }}>
+                      {(m.prime_submissions || 0).toLocaleString()}
+                    </td>
+                    <td className="py-2 px-2 font-semibold">
+                      {(m.total_submissions || 0).toLocaleString()}
+                    </td>
+                    <td className="py-2 px-2 text-gray-500">{goal.toLocaleString()}</td>
+                    <td
+                      className="py-2 px-2 font-medium"
+                      style={{ color: gap >= 0 ? TP.green : TP.red }}
+                    >
+                      {gap >= 0 ? '+' : ''}{gap.toLocaleString()}
+                    </td>
+                    <td
+                      className="py-2 px-2 font-medium"
+                      style={{ color: gpct >= 100 ? TP.green : TP.red }}
+                    >
+                      {gpct.toFixed(1)}%
+                    </td>
+                    <td className="py-2 px-2">{(m.total_visitors || 0).toLocaleString()}</td>
+                    <td className="py-2 px-2">{fmtPct(m.conversion_rate)}</td>
+                    <td className="py-2 px-2">{(m.usa_visitors || 0).toLocaleString()}</td>
+                    <td className="py-2 px-2">{fmtPct(m.usa_conversion_rate)}</td>
+                    <td className="py-2 px-2">{m.daily_avg != null ? m.daily_avg.toFixed(1) : '--'}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr className="font-bold bg-gray-50">
+                <td className="py-2 px-2">TOTAL</td>
+                <td className="py-2 px-2" style={{ color: TP.blue }}>
+                  {ytdOnline.toLocaleString()}
+                </td>
+                <td className="py-2 px-2" style={{ color: '#d97706' }}>
+                  {ytdHybrid.toLocaleString()}
+                </td>
+                <td className="py-2 px-2" style={{ color: TP.red }}>
+                  {ytdPrime.toLocaleString()}
+                </td>
+                <td className="py-2 px-2">{ytdSubs.toLocaleString()}</td>
+                <td className="py-2 px-2 text-gray-500">{ytdGoal.toLocaleString()}</td>
+                <td
+                  className="py-2 px-2"
+                  style={{ color: ytdSubs - ytdGoal >= 0 ? TP.green : TP.red }}
+                >
+                  {ytdSubs - ytdGoal >= 0 ? '+' : ''}{(ytdSubs - ytdGoal).toLocaleString()}
+                </td>
+                <td
+                  className="py-2 px-2"
+                  style={{ color: goalPctVal >= 100 ? TP.green : TP.red }}
+                >
+                  {goalPctVal.toFixed(1)}%
+                </td>
+                <td className="py-2 px-2">{ytdVisitors.toLocaleString()}</td>
+                <td className="py-2 px-2">--</td>
+                <td className="py-2 px-2">
+                  {months2026.reduce((s, m) => s + (m.usa_visitors || 0), 0).toLocaleString()}
+                </td>
+                <td className="py-2 px-2">--</td>
+                <td className="py-2 px-2">--</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+
+      {/* ===== 5. Monthly Conversion Rate Charts ===== */}
+      <section>
+        <h2 className="text-lg font-semibold mb-3" style={{ color: TP.navy }}>
+          Conversion Rate Trends
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl shadow p-5">
+            <h3 className="text-sm font-semibold mb-3 text-gray-600">
+              Conversion Rate by Month
+            </h3>
+            <Line
+              data={convChartData}
               options={{
-                responsive: true,
-                maintainAspectRatio: false,
+                ...convChartOptions,
                 plugins: {
-                  legend: { position: 'top' },
-                  tooltip: {
-                    callbacks: {
-                      afterBody: (ctx) => {
-                        const idx = ctx[0].dataIndex;
-                        const m = summaries[idx];
-                        return `Total: ${m.total_submissions.toLocaleString()} | Goal: ${goals[idx].toLocaleString()}`;
-                      },
-                    },
-                  },
-                },
-                scales: {
-                  x: { stacked: true },
-                  y: { stacked: true, beginAtZero: true },
+                  ...convChartOptions.plugins,
+                  title: { display: false },
                 },
               }}
             />
-          )}
+          </div>
+          <div className="bg-white rounded-xl shadow p-5">
+            <h3 className="text-sm font-semibold mb-3 text-gray-600">
+              USA Conversion Rate by Month
+            </h3>
+            <Line
+              data={usaConvChartData}
+              options={{
+                ...convChartOptions,
+                plugins: {
+                  ...convChartOptions.plugins,
+                  title: { display: false },
+                },
+              }}
+            />
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Monthly breakdown table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
-            <tr>
-              <th className="px-3 py-2 font-medium">Month</th>
-              <th className="px-3 py-2 font-medium text-right">Online</th>
-              <th className="px-3 py-2 font-medium text-right">Hybrid</th>
-              <th className="px-3 py-2 font-medium text-right">Prime</th>
-              <th className="px-3 py-2 font-medium text-right">Total</th>
-              <th className="px-3 py-2 font-medium text-right">Goal</th>
-              <th className="px-3 py-2 font-medium text-right">Gap</th>
-              <th className="px-3 py-2 font-medium text-right">% Goal</th>
-              <th className="px-3 py-2 font-medium text-right">Visitors</th>
-              <th className="px-3 py-2 font-medium text-right">Conv %</th>
-              <th className="px-3 py-2 font-medium text-right">USA Conv %</th>
-              <th className="px-3 py-2 font-medium text-right">Daily Avg</th>
-            </tr>
-          </thead>
-          <tbody>
-            {summaries.map((m) => {
-              const gap = m.goal - m.total_submissions;
-              const pct = m.goal > 0 ? ((m.total_submissions / m.goal) * 100).toFixed(1) : '--';
-              return (
-                <tr key={m.month} className="hover:bg-gray-50">
-                  <td className="px-3 py-2 border-t border-gray-100 font-medium">{m.month_name}</td>
-                  <td className="px-3 py-2 border-t border-gray-100 text-right text-blue-600">
-                    {m.online_submissions.toLocaleString()}
-                  </td>
-                  <td className="px-3 py-2 border-t border-gray-100 text-right text-amber-600">
-                    {m.hybrid_submissions.toLocaleString()}
-                  </td>
-                  <td className="px-3 py-2 border-t border-gray-100 text-right text-red-600">
-                    {m.prime_submissions.toLocaleString()}
-                  </td>
-                  <td className="px-3 py-2 border-t border-gray-100 text-right font-medium">
-                    {m.total_submissions.toLocaleString()}
-                  </td>
-                  <td className="px-3 py-2 border-t border-gray-100 text-right">{m.goal.toLocaleString()}</td>
-                  <td className={`px-3 py-2 border-t border-gray-100 text-right ${gap > 0 ? 'text-amber-600' : 'text-green-600'}`}>
-                    {gap > 0 ? `-${gap}` : `+${Math.abs(gap)}`}
-                  </td>
-                  <td className="px-3 py-2 border-t border-gray-100 text-right">{pct}%</td>
-                  <td className="px-3 py-2 border-t border-gray-100 text-right">{m.total_visitors.toLocaleString()}</td>
-                  <td className="px-3 py-2 border-t border-gray-100 text-right">{m.conversion_rate}%</td>
-                  <td className="px-3 py-2 border-t border-gray-100 text-right">{m.usa_conversion_rate}%</td>
-                  <td className="px-3 py-2 border-t border-gray-100 text-right">{m.daily_avg}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      {/* ===== 6. Goal Tracking by Type ===== */}
+      <section className="bg-white rounded-xl shadow p-5">
+        <h2 className="text-lg font-semibold mb-4" style={{ color: TP.navy }}>
+          Goal Tracking by Submission Type
+        </h2>
+
+        {/* Summary cards */}
+        {(() => {
+          const onlineGoalYTD = months2026.reduce((s, m) => s + (ONLINE_GOALS_2026[m.month] || 0), 0);
+          const hybridGoalYTD = months2026.reduce((s, m) => s + (HYBRID_GOALS_2026[m.month] || 0), 0);
+          const primeGoalYTD = months2026.length * PRIME_GOAL;
+          const onlinePct = onlineGoalYTD > 0 ? ytdOnline / onlineGoalYTD * 100 : 0;
+          const hybridPct = hybridGoalYTD > 0 ? ytdHybrid / hybridGoalYTD * 100 : 0;
+          const primePct = primeGoalYTD > 0 ? ytdPrime / primeGoalYTD * 100 : 0;
+
+          return (
+            <>
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div
+                  className="rounded-xl p-4"
+                  style={{ backgroundColor: TP.lightBlue }}
+                >
+                  <div className="text-xs uppercase tracking-wide mb-1" style={{ color: TP.blue }}>
+                    Online YTD % to Goal
+                  </div>
+                  <div className="text-2xl font-bold" style={{ color: TP.blue }}>
+                    {onlinePct.toFixed(1)}%
+                  </div>
+                  <div className="text-xs mt-1" style={{ color: TP.blue }}>
+                    {ytdOnline.toLocaleString()} / {onlineGoalYTD.toLocaleString()}
+                  </div>
+                </div>
+                <div
+                  className="rounded-xl p-4"
+                  style={{ backgroundColor: '#FEF3C7' }}
+                >
+                  <div className="text-xs uppercase tracking-wide mb-1" style={{ color: '#d97706' }}>
+                    Hybrid YTD % to Goal
+                  </div>
+                  <div className="text-2xl font-bold" style={{ color: '#d97706' }}>
+                    {hybridPct.toFixed(1)}%
+                  </div>
+                  <div className="text-xs mt-1" style={{ color: '#d97706' }}>
+                    {ytdHybrid.toLocaleString()} / {hybridGoalYTD.toLocaleString()}
+                  </div>
+                </div>
+                <div
+                  className="rounded-xl p-4"
+                  style={{ backgroundColor: '#FEE2E2' }}
+                >
+                  <div className="text-xs uppercase tracking-wide mb-1" style={{ color: TP.red }}>
+                    Prime YTD % to Goal
+                  </div>
+                  <div className="text-2xl font-bold" style={{ color: TP.red }}>
+                    {primePct.toFixed(1)}%
+                  </div>
+                  <div className="text-xs mt-1" style={{ color: TP.red }}>
+                    {ytdPrime.toLocaleString()} / {primeGoalYTD.toLocaleString()}
+                  </div>
+                </div>
+              </div>
+
+              {/* Per-month type goal table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="py-2 px-2 font-semibold text-gray-600">Month</th>
+                      <th className="py-2 px-2 font-semibold text-gray-600" style={{ color: TP.blue }}>Online</th>
+                      <th className="py-2 px-2 font-semibold text-gray-600" style={{ color: TP.blue }}>Online Goal</th>
+                      <th className="py-2 px-2 font-semibold text-gray-600" style={{ color: TP.blue }}>%</th>
+                      <th className="py-2 px-2 font-semibold text-gray-600" style={{ color: '#d97706' }}>Hybrid</th>
+                      <th className="py-2 px-2 font-semibold text-gray-600" style={{ color: '#d97706' }}>Hybrid Goal</th>
+                      <th className="py-2 px-2 font-semibold text-gray-600" style={{ color: '#d97706' }}>%</th>
+                      <th className="py-2 px-2 font-semibold text-gray-600" style={{ color: TP.red }}>Prime</th>
+                      <th className="py-2 px-2 font-semibold text-gray-600" style={{ color: TP.red }}>Prime Goal</th>
+                      <th className="py-2 px-2 font-semibold text-gray-600" style={{ color: TP.red }}>%</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {months2026.map(m => {
+                      const og = ONLINE_GOALS_2026[m.month] || 0;
+                      const hg = HYBRID_GOALS_2026[m.month] || 0;
+                      const pg = PRIME_GOAL;
+                      const opct = og > 0 ? (m.online_submissions || 0) / og * 100 : 0;
+                      const hpct = hg > 0 ? (m.hybrid_submissions || 0) / hg * 100 : 0;
+                      const ppct = pg > 0 ? (m.prime_submissions || 0) / pg * 100 : 0;
+                      return (
+                        <tr key={m.month} className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="py-2 px-2 font-medium">{m.month_name || allMonthLabels[m.month - 1]}</td>
+                          <td className="py-2 px-2" style={{ color: TP.blue }}>{(m.online_submissions || 0).toLocaleString()}</td>
+                          <td className="py-2 px-2 text-gray-500">{og.toLocaleString()}</td>
+                          <td className="py-2 px-2 font-medium rounded" style={{ color: goalPctColor(opct) }}>
+                            {opct.toFixed(1)}%
+                          </td>
+                          <td className="py-2 px-2" style={{ color: '#d97706' }}>{(m.hybrid_submissions || 0).toLocaleString()}</td>
+                          <td className="py-2 px-2 text-gray-500">{hg.toLocaleString()}</td>
+                          <td className="py-2 px-2 font-medium" style={{ color: goalPctColor(hpct) }}>
+                            {hpct.toFixed(1)}%
+                          </td>
+                          <td className="py-2 px-2" style={{ color: TP.red }}>{(m.prime_submissions || 0).toLocaleString()}</td>
+                          <td className="py-2 px-2 text-gray-500">{pg}</td>
+                          <td className="py-2 px-2 font-medium" style={{ color: goalPctColor(ppct) }}>
+                            {ppct.toFixed(1)}%
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          );
+        })()}
+      </section>
+
+      {/* ===== 7. Website Traffic 2025 vs 2026 ===== */}
+      <section className="bg-white rounded-xl shadow p-5">
+        <h2 className="text-lg font-semibold mb-4" style={{ color: TP.navy }}>
+          Website Traffic -- 2025 vs 2026
+        </h2>
+
+        {/* Stat cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="rounded-xl p-4 border border-gray-200">
+            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">2026 YTD Visitors</div>
+            <div className="text-2xl font-bold" style={{ color: TP.blue }}>
+              {traffic2026Total.toLocaleString()}
+            </div>
+          </div>
+          <div className="rounded-xl p-4 border border-gray-200">
+            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">2025 Full Year</div>
+            <div className="text-2xl font-bold" style={{ color: TP.darkPurple }}>
+              {traffic2025Total.toLocaleString()}
+            </div>
+          </div>
+          <div className="rounded-xl p-4 border border-gray-200">
+            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">YOY Change</div>
+            <div
+              className="text-2xl font-bold"
+              style={{
+                color: typeof yoyChangePct === 'string' && yoyChangePct !== '--'
+                  ? parseFloat(yoyChangePct) >= 0 ? TP.green : TP.red
+                  : TP.text,
+              }}
+            >
+              {yoyChangePct !== '--' && parseFloat(yoyChangePct as string) >= 0 ? '+' : ''}
+              {yoyChangePct}%
+            </div>
+          </div>
+          <div className="rounded-xl p-4 border border-gray-200">
+            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Avg Monthly (2026)</div>
+            <div className="text-2xl font-bold" style={{ color: TP.blue }}>
+              {avgMonthly2026.toLocaleString()}
+            </div>
+          </div>
+        </div>
+
+        {/* Chart */}
+        <div className="mb-6">
+          <Bar data={trafficChartData} options={trafficChartOptions} />
+        </div>
+
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead>
+              <tr className="border-b border-gray-200">
+                {[
+                  'Month',
+                  '2025 Visitors','2026 Visitors','YOY Change',
+                  '2025 Subs','2026 Subs',
+                  '2025 Conv %','2026 Conv %',
+                ].map(h => (
+                  <th key={h} className="py-2 px-2 font-semibold text-gray-600 whitespace-nowrap">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {allMonthLabels.map((label, i) => {
+                const r25 = months2025.find(m => m.month === i + 1);
+                const r26 = months2026.find(m => m.month === i + 1);
+                const v25 = r25?.total_visitors || 0;
+                const v26 = r26?.total_visitors || 0;
+                const yoy = v25 > 0 ? ((v26 - v25) / v25 * 100) : null;
+                return (
+                  <tr key={label} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-2 px-2 font-medium">{label}</td>
+                    <td className="py-2 px-2" style={{ color: TP.darkPurple }}>{v25.toLocaleString()}</td>
+                    <td className="py-2 px-2" style={{ color: TP.blue }}>{v26.toLocaleString()}</td>
+                    <td
+                      className="py-2 px-2 font-medium"
+                      style={{ color: yoy == null ? TP.text : yoy >= 0 ? TP.green : TP.red }}
+                    >
+                      {yoy == null ? '--' : (yoy >= 0 ? '+' : '') + yoy.toFixed(1) + '%'}
+                    </td>
+                    <td className="py-2 px-2 text-gray-500">{(r25?.total_submissions || 0).toLocaleString()}</td>
+                    <td className="py-2 px-2">{(r26?.total_submissions || 0).toLocaleString()}</td>
+                    <td className="py-2 px-2 text-gray-500">{fmtPct(r25?.conversion_rate)}</td>
+                    <td className="py-2 px-2">{fmtPct(r26?.conversion_rate)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* ===== 8. Income Analysis ===== */}
+      <section className="bg-white rounded-xl shadow p-5">
+        <h2 className="text-lg font-semibold mb-4" style={{ color: TP.navy }}>
+          Income Analysis
+        </h2>
+
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div
+            className="rounded-xl p-4"
+            style={{ borderLeft: `4px solid ${TP.green}` }}
+          >
+            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">YTD Income</div>
+            <div className="text-2xl font-bold" style={{ color: TP.green }}>
+              {fmtDollar(ytdIncome)}
+            </div>
+            <div className="text-xs text-gray-400 mt-1">$5 per online submission</div>
+          </div>
+          <div
+            className="rounded-xl p-4"
+            style={{ borderLeft: `4px solid ${TP.blue}` }}
+          >
+            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Projected Full Year</div>
+            <div className="text-2xl font-bold" style={{ color: TP.blue }}>
+              {fmtDollar(projectedFullYear)}
+            </div>
+            <div className="text-xs text-gray-400 mt-1">
+              Based on {monthsTracked} month{monthsTracked !== 1 ? 's' : ''} tracked
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead>
+              <tr className="border-b border-gray-200">
+                {['Month','Submissions','Income','$/Sub Avg','Cumulative Income'].map(h => (
+                  <th key={h} className="py-2 px-2 font-semibold text-gray-600 whitespace-nowrap">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {incomeRows.map(m => {
+                const subs = m.total_submissions || 0;
+                const perSub = subs > 0 ? (m.income / subs).toFixed(2) : '--';
+                return (
+                  <tr key={m.month} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-2 px-2 font-medium">{m.month_name || allMonthLabels[m.month - 1]}</td>
+                    <td className="py-2 px-2">{subs.toLocaleString()}</td>
+                    <td className="py-2 px-2" style={{ color: TP.green }}>{fmtDollar(m.income)}</td>
+                    <td className="py-2 px-2 text-gray-500">{perSub !== '--' ? '$' + perSub : '--'}</td>
+                    <td className="py-2 px-2 font-semibold" style={{ color: TP.blue }}>
+                      {fmtDollar(m.cumIncome)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr className="font-bold bg-gray-50">
+                <td className="py-2 px-2">TOTAL</td>
+                <td className="py-2 px-2">{ytdSubs.toLocaleString()}</td>
+                <td className="py-2 px-2" style={{ color: TP.green }}>{fmtDollar(ytdIncome)}</td>
+                <td className="py-2 px-2 text-gray-500">
+                  {ytdSubs > 0 ? '$' + (ytdIncome / ytdSubs).toFixed(2) : '--'}
+                </td>
+                <td className="py-2 px-2" style={{ color: TP.blue }}>{fmtDollar(ytdIncome)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+
     </div>
   );
 }
