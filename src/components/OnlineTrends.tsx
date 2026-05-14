@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -20,14 +20,43 @@ import { MONTH_NAMES } from '@/lib/types';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler);
 
-// ---- Hardcoded historical data ----
+/* ────── TP Kids Color Palette ────── */
+const TP = {
+  blue: '#3A6EA4', skyBlue: '#B6CAE3', lightBlue: '#D6E5F7',
+  cream: '#FEF8EE', green: '#8CD1C8', yellow: '#FDBE67',
+  peach: '#FBCCC5', red: '#DD5759', darkPurple: '#B26CA6',
+  lightPurple: '#DDBBD9', bubblegum: '#F6AACB', maroon: '#D46476',
+  text: '#333333', navy: '#1B2A4A',
+};
 
-const online2024: Record<number, number> = {1:429, 2:343, 3:1371, 4:618, 5:746, 6:1322, 7:629, 8:931, 9:1373, 10:673, 11:658, 12:878};
-const online2025: Record<number, number> = {1:1098, 2:1205, 3:1114, 4:1124, 5:898, 6:652, 7:2057, 8:1954, 9:1147, 10:1078, 11:1240, 12:889};
-const hybrid2024: Record<number, number> = {1:179, 2:121, 3:467, 4:240, 5:237, 6:305, 7:258, 8:285, 9:414, 10:268, 11:270, 12:265};
-const hybrid2025: Record<number, number> = {1:328, 2:343, 3:381, 4:525, 5:416, 6:378, 7:505, 8:512, 9:389, 10:385, 11:336, 12:325};
-const prime2024: Record<number, number> = {1:12, 2:8, 3:21, 4:11, 5:14, 6:13, 7:14, 8:12, 9:11, 10:10, 11:9, 12:11};
-const prime2025: Record<number, number> = {1:4, 2:9, 3:15, 4:14, 5:14, 6:9, 7:26, 8:12, 9:14, 10:12, 11:15, 12:12};
+/* ────── Hardcoded historical data (SOURCE OF TRUTH from submission-dashboard.html) ────── */
+
+const online2024: Record<number, number> = {
+  1: 623, 2: 476, 3: 1875, 4: 889, 5: 995, 6: 1659,
+  7: 865, 8: 1080, 9: 1654, 10: 830, 11: 828, 12: 1069,
+};
+const online2025: Record<number, number> = {
+  1: 1327, 2: 1464, 3: 1279, 4: 1186, 5: 1031, 6: 787,
+  7: 2386, 8: 2178, 9: 1180, 10: 975, 11: 1135, 12: 776,
+};
+
+const hybrid2024: Record<number, number> = {
+  1: 0, 2: 0, 3: 0, 4: 0, 5: 6, 6: 6,
+  7: 48, 8: 148, 9: 129, 10: 105, 11: 91, 12: 76,
+};
+const hybrid2025: Record<number, number> = {
+  1: 81, 2: 77, 3: 214, 4: 461, 5: 319, 6: 288,
+  7: 292, 8: 351, 9: 406, 10: 526, 11: 460, 12: 452,
+};
+
+const prime2024: Record<number, number> = {
+  1: 0, 2: 0, 3: 1, 4: 1, 5: 3, 6: 1,
+  7: 0, 8: 2, 9: 16, 10: 19, 11: 24, 12: 13,
+};
+const prime2025: Record<number, number> = {
+  1: 25, 2: 20, 3: 19, 4: 18, 5: 9, 6: 23,
+  7: 11, 8: 13, 9: 14, 10: 7, 11: 13, 12: 25,
+};
 
 const MONTH_ABBR = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -35,28 +64,17 @@ function daysInMonth(month: number, year: number): number {
   return new Date(year, month, 0).getDate();
 }
 
-function pctChange(current: number, previous: number): { diff: number; pct: number } {
-  const diff = current - previous;
-  const pct = previous === 0 ? (current > 0 ? 100 : 0) : (diff / previous) * 100;
-  return { diff, pct };
-}
-
-function formatPct(n: number): string {
-  const sign = n >= 0 ? '+' : '';
-  return `${sign}${n.toFixed(1)}%`;
-}
-
-function formatDiff(n: number): string {
-  const sign = n >= 0 ? '+' : '';
-  return `${sign}${n.toLocaleString()}`;
-}
-
-// ---- Component ----
+/* ────── Component ────── */
 
 export default function OnlineTrends() {
   const [summaries2026, setSummaries2026] = useState<MonthlySummary[]>([]);
   const [dailySubs, setDailySubs] = useState<DailySubmission[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Refs for diff-label plugins (they need stable references to diff arrays)
+  const onlineDiffRef = useRef<DiffRow[]>([]);
+  const hybridDiffRef = useRef<DiffRow[]>([]);
+  const primeDiffRef = useRef<DiffRow[]>([]);
 
   useEffect(() => {
     async function load() {
@@ -78,14 +96,18 @@ export default function OnlineTrends() {
     load();
   }, []);
 
-  // ---- Derive 2026 monthly data ----
+  /* ────── Derive 2026 monthly data ────── */
 
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
   const currentYear = now.getFullYear();
-  const today = now.getDate();
 
-  const { online2026, hybrid2026, prime2026, currentMonthProjection, lastCompletedMonth } = useMemo(() => {
+  const {
+    online2026, hybrid2026, prime2026,
+    mtdDays, mtdOnline, mtdHybrid, mtdPrime,
+    projOnline, projHybrid, projPrime,
+    totalDaysInMonth, lastMonthWithData,
+  } = useMemo(() => {
     const online: Record<number, number> = {};
     const hybrid: Record<number, number> = {};
     const prime: Record<number, number> = {};
@@ -99,94 +121,58 @@ export default function OnlineTrends() {
 
     // Current month from daily submissions
     const currentMonthSubs = dailySubs.filter((d) => {
-      const dt = new Date(d.date);
+      const dt = new Date(d.date + 'T12:00:00');
       return dt.getMonth() + 1 === currentMonth && dt.getFullYear() === currentYear;
     });
 
-    let projOnline = 0;
-    let projHybrid = 0;
-    let projPrime = 0;
-    let actualOnline = 0;
-    let actualHybrid = 0;
-    let actualPrime = 0;
-    let daysTracked = currentMonthSubs.length;
+    let days = currentMonthSubs.length;
     const totalDays = daysInMonth(currentMonth, currentYear);
+    let actOnline = 0, actHybrid = 0, actPrime = 0;
+    let pOnline = 0, pHybrid = 0, pPrime = 0;
 
-    if (daysTracked > 0) {
-      actualOnline = currentMonthSubs.reduce((s, d) => s + d.online, 0);
-      actualHybrid = currentMonthSubs.reduce((s, d) => s + d.hybrid, 0);
-      actualPrime = currentMonthSubs.reduce((s, d) => s + d.prime, 0);
-      projOnline = Math.round((actualOnline / daysTracked) * totalDays);
-      projHybrid = Math.round((actualHybrid / daysTracked) * totalDays);
-      projPrime = Math.round((actualPrime / daysTracked) * totalDays);
-      online[currentMonth] = projOnline;
-      hybrid[currentMonth] = projHybrid;
-      prime[currentMonth] = projPrime;
+    if (days > 0) {
+      actOnline = currentMonthSubs.reduce((s, d) => s + d.online, 0);
+      actHybrid = currentMonthSubs.reduce((s, d) => s + d.hybrid, 0);
+      actPrime = currentMonthSubs.reduce((s, d) => s + d.prime, 0);
+      pOnline = Math.round((actOnline / days) * totalDays);
+      pHybrid = Math.round((actHybrid / days) * totalDays);
+      pPrime = Math.round((actPrime / days) * totalDays);
+      online[currentMonth] = actOnline; // actual MTD (projected used separately)
+      hybrid[currentMonth] = actHybrid;
+      prime[currentMonth] = actPrime;
     }
 
-    // Determine last completed month (months in summaries that are not the current month)
-    const completedMonths = summaries2026
-      .filter((s) => s.month !== currentMonth || currentYear !== 2026)
-      .map((s) => s.month);
-    const lastCompleted = completedMonths.length > 0 ? Math.max(...completedMonths) : 0;
+    // Determine last month with any online data
+    let lastWithData = 0;
+    for (let m = 1; m <= 12; m++) {
+      if (online[m] && online[m] > 0) lastWithData = m;
+    }
 
     return {
       online2026: online,
       hybrid2026: hybrid,
       prime2026: prime,
-      currentMonthProjection: {
-        actualOnline,
-        actualHybrid,
-        actualPrime,
-        projOnline,
-        projHybrid,
-        projPrime,
-        daysTracked,
-        totalDays,
-      },
-      lastCompletedMonth: lastCompleted,
+      mtdDays: days,
+      mtdOnline: actOnline,
+      mtdHybrid: actHybrid,
+      mtdPrime: actPrime,
+      projOnline: pOnline,
+      projHybrid: pHybrid,
+      projPrime: pPrime,
+      totalDaysInMonth: totalDays,
+      lastMonthWithData: lastWithData,
     };
   }, [summaries2026, dailySubs, currentMonth, currentYear]);
 
-  // Determine the highest month we have 2026 data for (completed + current if data exists)
-  const maxMonth2026 = Math.max(lastCompletedMonth, currentMonthProjection.daysTracked > 0 ? currentMonth : 0);
-
-  // ---- Section 1: YOY Summary Cards ----
-
-  const ytdOnline2026 = Array.from({ length: lastCompletedMonth }, (_, i) => online2026[i + 1] || 0).reduce((a, b) => a + b, 0);
-  const ytdOnline2025 = Array.from({ length: lastCompletedMonth }, (_, i) => online2025[i + 1] || 0).reduce((a, b) => a + b, 0);
-  const ytdChange = pctChange(ytdOnline2026, ytdOnline2025);
-
-  // Feb+ lift (exclude Jan)
-  const febPlusOnline2026 = Array.from({ length: Math.max(0, lastCompletedMonth - 1) }, (_, i) => online2026[i + 2] || 0).reduce((a, b) => a + b, 0);
-  const febPlusOnline2025 = Array.from({ length: Math.max(0, lastCompletedMonth - 1) }, (_, i) => online2025[i + 2] || 0).reduce((a, b) => a + b, 0);
-  const febPlusChange = pctChange(febPlusOnline2026, febPlusOnline2025);
-
-  // Current month vs same month 2025
-  const curMonthActual = currentMonthProjection.actualOnline;
-  const curMonthProj = currentMonthProjection.projOnline;
-  const sameMonth2025 = online2025[currentMonth] || 0;
-  const curMonthChange = pctChange(curMonthProj, sameMonth2025);
-
-  // Full year 2025 vs 2024
-  const total2025 = Object.values(online2025).reduce((a, b) => a + b, 0);
-  const total2024 = Object.values(online2024).reduce((a, b) => a + b, 0);
-  const fullYearChange = pctChange(total2025, total2024);
-
-  // ---- Section 2: Cumulative trajectory ----
+  /* ────── Cumulative Trajectory Data ────── */
 
   const cumulativeData = useMemo(() => {
-    const months = Array.from({ length: 12 }, (_, i) => i + 1);
-    let cum2024 = 0;
-    let cum2025 = 0;
-    let cum2026 = 0;
-
-    const data2024: (number | null)[] = [];
-    const data2025: (number | null)[] = [];
+    let cum2024 = 0, cum2025 = 0, cum2026 = 0;
+    const data2024: number[] = [];
+    const data2025: number[] = [];
     const data2026: (number | null)[] = [];
-    const data2026Proj: (number | null)[] = [];
 
-    for (const m of months) {
+    for (let m = 1; m <= 12; m++) {
       cum2024 += online2024[m] || 0;
       data2024.push(cum2024);
 
@@ -196,354 +182,332 @@ export default function OnlineTrends() {
       if (m < currentMonth && online2026[m] !== undefined) {
         cum2026 += online2026[m];
         data2026.push(cum2026);
-        data2026Proj.push(null);
-      } else if (m === currentMonth && currentMonthProjection.daysTracked > 0) {
-        // Actual up to now
-        const actualCum = cum2026 + currentMonthProjection.actualOnline;
-        data2026.push(actualCum);
-        // Projected line includes this month's projection
-        const projCum = cum2026 + currentMonthProjection.projOnline;
-        data2026Proj.push(projCum);
-        cum2026 += currentMonthProjection.projOnline;
+      } else if (m === currentMonth && mtdDays > 0) {
+        // Use projected for the cumulative line (matches original)
+        cum2026 += projOnline;
+        data2026.push(cum2026);
+      } else if (m <= lastMonthWithData && online2026[m]) {
+        cum2026 += online2026[m];
+        data2026.push(cum2026);
       } else {
         data2026.push(null);
-        data2026Proj.push(null);
       }
     }
 
-    return { months, data2024, data2025, data2026, data2026Proj };
-  }, [online2026, currentMonthProjection, currentMonth]);
+    return { data2024, data2025, data2026 };
+  }, [online2026, currentMonth, mtdDays, projOnline, lastMonthWithData]);
 
-  // ---- Chart builders ----
+  /* ────── Diff rows for bar charts + table ────── */
 
-  function buildGroupedBarData(
-    data2024: Record<number, number>,
-    data2025: Record<number, number>,
-    data2026: Record<number, number>,
-    color2024: string,
-    color2025: string,
-    color2026: string,
-    color2026Light: string,
-    label: string,
-  ) {
-    const months: number[] = [];
-    for (let m = 1; m <= 12; m++) {
-      if (m <= maxMonth2026) months.push(m);
-    }
-
-    const labels = months.map((m) => MONTH_ABBR[m]);
-    const vals2024 = months.map((m) => data2024[m] || 0);
-    const vals2025 = months.map((m) => data2025[m] || 0);
-    const vals2026Actual = months.map((m) => {
-      if (m === currentMonth && currentMonthProjection.daysTracked > 0) {
-        if (label === 'Online') return currentMonthProjection.actualOnline;
-        if (label === 'Hybrid') return currentMonthProjection.actualHybrid;
-        if (label === 'Prime') return currentMonthProjection.actualPrime;
-      }
-      return data2026[m] || 0;
-    });
-    const vals2026Proj = months.map((m) => {
-      if (m === currentMonth && currentMonthProjection.daysTracked > 0) {
-        let proj = 0;
-        if (label === 'Online') proj = currentMonthProjection.projOnline - currentMonthProjection.actualOnline;
-        else if (label === 'Hybrid') proj = currentMonthProjection.projHybrid - currentMonthProjection.actualHybrid;
-        else if (label === 'Prime') proj = currentMonthProjection.projPrime - currentMonthProjection.actualPrime;
-        return Math.max(0, proj);
-      }
-      return 0;
-    });
-
-    const hasProjection = vals2026Proj.some((v) => v > 0);
-
-    const datasets = [
-      { label: '2024', data: vals2024, backgroundColor: color2024 },
-      { label: '2025', data: vals2025, backgroundColor: color2025 },
-      { label: '2026', data: vals2026Actual, backgroundColor: color2026 },
-    ];
-
-    if (hasProjection) {
-      datasets.push({
-        label: '2026 (projected)',
-        data: vals2026Proj,
-        backgroundColor: color2026Light,
-      });
-    }
-
-    return { labels, datasets };
+  interface DiffRow {
+    month: string;
+    v2024: number;
+    v2025: number;
+    v2026: number;
+    diff: number;
+    isInProgress: boolean;
+    projectedRemainder: number;
+    projected: number;
   }
 
-  // ---- Table builder ----
-
-  function buildTableRows(
+  function buildDiffRows(
     data2024: Record<number, number>,
     data2025: Record<number, number>,
     data2026: Record<number, number>,
-    label: string,
-  ) {
-    const rows: {
-      month: number;
-      name: string;
-      val2024: number;
-      val2025: number;
-      val2026: number;
-      isCurrent: boolean;
-      isProjected: boolean;
-      vs25: number;
-      vs24: number;
-    }[] = [];
+    mtdActual: number,
+    projectedFull: number,
+  ): DiffRow[] {
+    const rows: DiffRow[] = [];
+    for (let m = 1; m <= lastMonthWithData; m++) {
+      const v24 = data2024[m] || 0;
+      const v25 = data2025[m] || 0;
+      let v26 = data2026[m] || 0;
+      const isInProg = m === currentMonth && mtdDays > 0;
+      let projected = 0;
+      let projRemainder = 0;
 
-    for (let m = 1; m <= 12; m++) {
-      if (m > maxMonth2026) break;
-      const isCurrent = m === currentMonth && currentMonthProjection.daysTracked > 0;
-      let val2026 = data2026[m] || 0;
-      if (isCurrent) {
-        if (label === 'Online') val2026 = currentMonthProjection.projOnline;
-        else if (label === 'Hybrid') val2026 = currentMonthProjection.projHybrid;
-        else if (label === 'Prime') val2026 = currentMonthProjection.projPrime;
+      if (isInProg) {
+        v26 = mtdActual;
+        projected = projectedFull;
+        projRemainder = Math.max(0, projected - v26);
       }
+
+      const diff = (isInProg ? projected : v26) - v25;
+
       rows.push({
-        month: m,
-        name: MONTH_NAMES[m],
-        val2024: data2024[m] || 0,
-        val2025: data2025[m] || 0,
-        val2026,
-        isCurrent,
-        isProjected: isCurrent,
-        vs25: val2026 - (data2025[m] || 0),
-        vs24: val2026 - (data2024[m] || 0),
+        month: MONTH_ABBR[m],
+        v2024: v24,
+        v2025: v25,
+        v2026: v26,
+        diff,
+        isInProgress: isInProg,
+        projectedRemainder: projRemainder,
+        projected,
       });
     }
     return rows;
   }
 
-  // ---- Render ----
+  const onlineDiff = useMemo(
+    () => buildDiffRows(online2024, online2025, online2026, mtdOnline, projOnline),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [online2026, mtdOnline, projOnline, lastMonthWithData],
+  );
+  const hybridDiff = useMemo(
+    () => buildDiffRows(hybrid2024, hybrid2025, hybrid2026, mtdHybrid, projHybrid),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [hybrid2026, mtdHybrid, projHybrid, lastMonthWithData],
+  );
+  const primeDiff = useMemo(
+    () => buildDiffRows(prime2024, prime2025, prime2026, mtdPrime, projPrime),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [prime2026, mtdPrime, projPrime, lastMonthWithData],
+  );
 
-  if (loading) {
-    return <div className="text-gray-400 py-12 text-center">Loading trends data...</div>;
+  // Keep refs in sync for plugins
+  onlineDiffRef.current = onlineDiff;
+  hybridDiffRef.current = hybridDiff;
+  primeDiffRef.current = primeDiff;
+
+  /* ────── Chart Builders ────── */
+
+  function buildBarChartData(
+    rows: DiffRow[],
+    label: string,
+    color2025: string,
+    border2025: string,
+  ) {
+    return {
+      labels: rows.map((r) => r.month),
+      datasets: [
+        {
+          label: `2024 ${label}`,
+          data: rows.map((r) => r.v2024),
+          backgroundColor: 'rgba(153,153,153,0.35)',
+          borderColor: '#999999',
+          borderWidth: 1,
+          borderRadius: 3,
+          stack: 'stack2024',
+        },
+        {
+          label: `2025 ${label}`,
+          data: rows.map((r) => r.v2025),
+          backgroundColor: color2025,
+          borderColor: border2025,
+          borderWidth: 1,
+          borderRadius: 3,
+          stack: 'stack2025',
+        },
+        {
+          label: `2026 ${label} (Actual)`,
+          data: rows.map((r) => r.v2026),
+          backgroundColor: 'rgba(58,110,164,0.75)',
+          borderColor: TP.blue,
+          borderWidth: 1,
+          borderRadius: 3,
+          stack: 'stack2026',
+        },
+        {
+          label: '2026 Projected',
+          data: rows.map((r) => r.projectedRemainder),
+          backgroundColor: 'rgba(58,110,164,0.18)',
+          borderColor: 'rgba(58,110,164,0.35)',
+          borderWidth: 1,
+          borderRadius: 3,
+          stack: 'stack2026',
+        },
+      ],
+    };
   }
 
-  const onlineBarData = buildGroupedBarData(online2024, online2025, online2026, '#999999', '#8CD1C8', '#3A6EA4', '#94b8d8', 'Online');
-  const hybridBarData = buildGroupedBarData(hybrid2024, hybrid2025, hybrid2026, '#999999', '#B6CAE3', '#d97706', '#f0c96e', 'Hybrid');
-  const primeBarData = buildGroupedBarData(prime2024, prime2025, prime2026, '#999999', '#E5A04B', '#dc2626', '#f08080', 'Prime');
-  const onlineTableRows = buildTableRows(online2024, online2025, online2026, 'Online');
+  // Plugin factory: draws diff labels above each bar group
+  function makeDiffLabelPlugin(id: string, diffRef: React.MutableRefObject<DiffRow[]>) {
+    return {
+      id,
+      afterDraw(chart: ChartJS) {
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.font = 'bold 10px sans-serif';
+        ctx.textAlign = 'center' as CanvasTextAlign;
+        const metaProj = chart.getDatasetMeta(3);
+        const metaActual = chart.getDatasetMeta(2);
+        diffRef.current.forEach((row, i) => {
+          let bar;
+          if (row.isInProgress && metaProj.data[i] && row.projectedRemainder > 0) {
+            bar = metaProj.data[i];
+          } else if (metaActual.data[i]) {
+            bar = metaActual.data[i];
+          }
+          if (!bar) return;
+          ctx.fillStyle = row.diff >= 0 ? '#28a745' : TP.red;
+          let label = (row.diff >= 0 ? '+' : '') + row.diff.toLocaleString();
+          if (row.isInProgress) label += ' (proj)';
+          ctx.fillText(label, bar.x, bar.y - 6);
+        });
+        ctx.restore();
+      },
+    };
+  }
 
-  const groupedBarOptions = {
+  const barChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: 'top' as const },
+      legend: {
+        position: 'bottom' as const,
+        labels: { padding: 15, usePointStyle: true, font: { size: 11 } },
+      },
+      tooltip: {
+        callbacks: {
+          afterBody: function (context: { dataIndex: number }[]) {
+            const idx = context[0].dataIndex;
+            const row = onlineDiffRef.current[idx];
+            if (!row) return '';
+            const diff25 = row.diff;
+            const val26 = row.isInProgress ? row.projected : row.v2026;
+            const diff24 = val26 - row.v2024;
+            return `vs 2025: ${diff25 >= 0 ? '+' : ''}${diff25.toLocaleString()}\nvs 2024: ${diff24 >= 0 ? '+' : ''}${diff24.toLocaleString()}`;
+          },
+        },
+      },
     },
     scales: {
-      x: { grid: { display: false } },
-      y: { beginAtZero: true },
+      y: {
+        beginAtZero: true,
+        stacked: true,
+        grid: { color: 'rgba(0,0,0,0.05)' },
+        ticks: { color: '#666' },
+      },
+      x: {
+        stacked: true,
+        grid: { display: false },
+        ticks: { color: '#666' },
+      },
     },
   };
 
+  // Need separate tooltip callbacks for hybrid and prime
+  function makeBarOptions(diffRef: React.MutableRefObject<DiffRow[]>) {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom' as const,
+          labels: { padding: 15, usePointStyle: true, font: { size: 11 } },
+        },
+        tooltip: {
+          callbacks: {
+            afterBody: function (context: { dataIndex: number }[]) {
+              const idx = context[0].dataIndex;
+              const row = diffRef.current[idx];
+              if (!row) return '';
+              const diff25 = row.diff;
+              const val26 = row.isInProgress ? row.projected : row.v2026;
+              const diff24 = val26 - row.v2024;
+              return `vs 2025: ${diff25 >= 0 ? '+' : ''}${diff25.toLocaleString()}\nvs 2024: ${diff24 >= 0 ? '+' : ''}${diff24.toLocaleString()}`;
+            },
+          },
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          stacked: true,
+          grid: { color: 'rgba(0,0,0,0.05)' },
+          ticks: { color: '#666' },
+        },
+        x: {
+          stacked: true,
+          grid: { display: false },
+          ticks: { color: '#666' },
+        },
+      },
+    };
+  }
+
+  /* ────── Render ────── */
+
+  if (loading) {
+    return <div style={{ color: '#999', padding: '48px 0', textAlign: 'center' }}>Loading trends data...</div>;
+  }
+
+  const onlineBarData = buildBarChartData(onlineDiff, 'Online', 'rgba(178,108,166,0.45)', TP.darkPurple);
+  const hybridBarData = buildBarChartData(hybridDiff, 'Hybrid', 'rgba(91,168,140,0.45)', '#5BA88C');
+  const primeBarData = buildBarChartData(primeDiff, 'Prime', 'rgba(229,160,75,0.45)', '#E5A04B');
+
   return (
-    <div className="space-y-6">
-      {/* Section 1: YOY Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <SummaryCard
-          title="YTD Online 2026 vs 2025"
-          subtitle={`${lastCompletedMonth > 0 ? MONTH_ABBR[1] : '--'}${lastCompletedMonth > 1 ? '–' + MONTH_ABBR[lastCompletedMonth] : ''} completed months`}
-          value2026={ytdOnline2026}
-          valuePrev={ytdOnline2025}
-          diff={ytdChange.diff}
-          pct={ytdChange.pct}
-        />
-        <SummaryCard
-          title="Feb+ Lift"
-          subtitle={`Feb${lastCompletedMonth > 2 ? '–' + MONTH_ABBR[lastCompletedMonth] : ''} (excl. Jan anomaly)`}
-          value2026={febPlusOnline2026}
-          valuePrev={febPlusOnline2025}
-          diff={febPlusChange.diff}
-          pct={febPlusChange.pct}
-        />
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-            {MONTH_NAMES[currentMonth]} 2026 vs 2025
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-gray-900">{curMonthActual.toLocaleString()}</span>
-            <span className="text-sm text-gray-400">actual</span>
-          </div>
-          <div className="text-sm text-gray-500 mt-1">
-            Proj: {curMonthProj.toLocaleString()} ({currentMonthProjection.daysTracked}d tracked / {currentMonthProjection.totalDays}d)
-          </div>
-          <div className="text-sm mt-1">
-            vs {sameMonth2025.toLocaleString()} in &apos;25:{' '}
-            <span className={curMonthChange.diff >= 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
-              {formatDiff(curMonthChange.diff)} ({formatPct(curMonthChange.pct)})
-            </span>
-          </div>
-        </div>
-        <SummaryCard
-          title="Full Year 2025 vs 2024"
-          subtitle="12 months completed"
-          value2026={total2025}
-          valuePrev={total2024}
-          diff={fullYearChange.diff}
-          pct={fullYearChange.pct}
-          labelCurrent="2025"
-          labelPrev="2024"
-        />
+    <div style={{ maxWidth: 900, margin: '0 auto' }}>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: 24 }}>
+        <h2 style={{ fontSize: 22, fontWeight: 700, color: TP.text, margin: 0 }}>Online Submissions</h2>
+        <p style={{ fontSize: 13, color: '#888', marginTop: 4 }}>
+          2024 vs 2025 vs 2026 -- Tracking online growth independent of hybrid and prime
+        </p>
       </div>
 
-      {/* Section 1.5: Daily Submissions Breakdown (current month line chart) */}
-      {(() => {
-        const currentMonthSubs = dailySubs
-          .filter((d) => {
-            const dt = new Date(d.date + 'T12:00:00');
-            return dt.getMonth() + 1 === currentMonth && dt.getFullYear() === currentYear;
-          })
-          .sort((a, b) => a.date.localeCompare(b.date));
-
-        if (currentMonthSubs.length === 0) return null;
-
-        const dailyTarget = Math.round(
-          ((() => {
-            const totalDays = daysInMonth(currentMonth, currentYear);
-            // Get the monthly goal — use online + hybrid + prime goal
-            const onlineGoal = 1562; // May 2026 from MONTHLY_GOALS
-            const hybridGoal = 405;
-            const primeGoal = 25;
-            return (onlineGoal + hybridGoal + primeGoal) / totalDays;
-          })())
-        );
-
-        const labels = currentMonthSubs.map((d) => {
-          const dt = new Date(d.date + 'T12:00:00');
-          return `${String(dt.getMonth() + 1).padStart(2, '0')}/${String(dt.getDate()).padStart(2, '0')}`;
-        });
-
-        return (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <h3 className="text-sm font-bold text-gray-700 mb-3">Daily Submissions Breakdown</h3>
-            <div style={{ height: 380 }}>
-              <Line
-                data={{
-                  labels,
-                  datasets: [
-                    {
-                      label: 'Online',
-                      data: currentMonthSubs.map((d) => d.online),
-                      borderColor: '#8CD1C8',
-                      backgroundColor: 'rgba(140,209,200,0.15)',
-                      borderWidth: 2.5,
-                      pointRadius: 4,
-                      pointBackgroundColor: '#8CD1C8',
-                      tension: 0.4,
-                      fill: true,
-                    },
-                    {
-                      label: 'Hybrid',
-                      data: currentMonthSubs.map((d) => d.hybrid),
-                      borderColor: '#E5A04B',
-                      backgroundColor: 'rgba(229,160,75,0.12)',
-                      borderWidth: 2,
-                      pointRadius: 4,
-                      pointBackgroundColor: '#E5A04B',
-                      tension: 0.4,
-                      fill: true,
-                    },
-                    {
-                      label: 'Prime',
-                      data: currentMonthSubs.map((d) => d.prime),
-                      borderColor: '#E88B8B',
-                      backgroundColor: 'rgba(232,139,139,0.1)',
-                      borderWidth: 2,
-                      pointRadius: 4,
-                      pointBackgroundColor: '#E88B8B',
-                      tension: 0.4,
-                      fill: true,
-                    },
-                    {
-                      label: `Daily Target (${dailyTarget}/day)`,
-                      data: currentMonthSubs.map(() => dailyTarget),
-                      borderColor: '#E5A04B',
-                      borderDash: [8, 5],
-                      borderWidth: 2.5,
-                      pointRadius: 0,
-                      fill: false,
-                      tension: 0,
-                    },
-                  ],
-                }}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: { position: 'top' },
-                    tooltip: {
-                      callbacks: {
-                        afterBody: (ctx) => {
-                          const idx = ctx[0].dataIndex;
-                          const d = currentMonthSubs[idx];
-                          const total = d.online + d.hybrid + d.prime;
-                          return `Total: ${total}`;
-                        },
-                      },
-                    },
-                  },
-                  scales: {
-                    x: { grid: { display: false } },
-                    y: { beginAtZero: true },
-                  },
-                }}
-              />
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* Section 2: Cumulative Online Trajectory */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-          <span className="inline-block w-2.5 h-2.5 rounded-full bg-blue-600" />
-          Cumulative Online Trajectory
-        </h3>
-        <div style={{ height: 380 }}>
+      {/* ──── Section 1: Cumulative Online Trajectory ──── */}
+      <SectionHeader color={TP.blue} label="Cumulative Online Submissions" />
+      <ChartCard
+        title="Online Submissions -- Cumulative (2024 / 2025 / 2026)"
+        subtitle="Are your online submissions growing year over year?"
+      >
+        <div style={{ height: 400 }}>
           <Line
             data={{
               labels: MONTH_ABBR.slice(1),
               datasets: [
                 {
-                  label: '2024',
-                  data: cumulativeData.data2024,
-                  borderColor: '#999999',
-                  backgroundColor: 'rgba(153,153,153,0.1)',
-                  borderWidth: 2,
-                  pointRadius: 3,
-                  tension: 0.1,
-                },
-                {
-                  label: '2025',
-                  data: cumulativeData.data2025,
-                  borderColor: '#8CD1C8',
-                  backgroundColor: 'rgba(140,209,200,0.1)',
-                  borderWidth: 2,
-                  pointRadius: 3,
-                  tension: 0.1,
-                },
-                {
-                  label: '2026',
+                  label: '2026 Online',
                   data: cumulativeData.data2026,
-                  borderColor: '#3A6EA4',
-                  backgroundColor: 'rgba(58,110,164,0.1)',
-                  borderWidth: 2.5,
-                  pointRadius: 4,
-                  tension: 0.1,
+                  borderColor: TP.blue,
+                  backgroundColor: 'rgba(58,110,164,0.08)',
+                  borderWidth: 3,
+                  pointRadius: cumulativeData.data2026.map((v, i) => {
+                    if (v === null) return 0;
+                    return i + 1 === currentMonth ? 6 : 5;
+                  }),
+                  pointBackgroundColor: cumulativeData.data2026.map((_, i) =>
+                    i + 1 === currentMonth ? '#fff' : TP.blue
+                  ),
+                  pointBorderColor: TP.blue,
+                  pointBorderWidth: 2,
+                  fill: false,
+                  tension: 0.3,
+                  spanGaps: false,
+                  segment: {
+                    borderDash: (ctx: { p1DataIndex: number }) =>
+                      ctx.p1DataIndex >= currentMonth - 1 ? [6, 4] : [],
+                  },
                 },
                 {
-                  label: '2026 (projected)',
-                  data: cumulativeData.data2026Proj,
-                  borderColor: '#3A6EA4',
-                  borderDash: [6, 4],
+                  label: '2025 Online',
+                  data: cumulativeData.data2025,
+                  borderColor: TP.darkPurple,
                   backgroundColor: 'transparent',
                   borderWidth: 2,
                   pointRadius: 4,
-                  pointStyle: 'triangle',
-                  tension: 0.1,
+                  pointBackgroundColor: TP.darkPurple,
+                  pointBorderColor: '#fff',
+                  pointBorderWidth: 1,
+                  fill: false,
+                  tension: 0.3,
+                  spanGaps: true,
+                },
+                {
+                  label: '2024 Online',
+                  data: cumulativeData.data2024,
+                  borderColor: '#999999',
+                  backgroundColor: 'transparent',
+                  borderWidth: 2,
+                  borderDash: [6, 3],
+                  pointRadius: 3,
+                  pointBackgroundColor: '#999999',
+                  pointBorderColor: '#fff',
+                  pointBorderWidth: 1,
+                  fill: false,
+                  tension: 0.3,
+                  spanGaps: true,
                 },
               ],
             }}
@@ -551,172 +515,215 @@ export default function OnlineTrends() {
               responsive: true,
               maintainAspectRatio: false,
               plugins: {
-                legend: { position: 'top' },
+                legend: {
+                  position: 'bottom',
+                  labels: { padding: 15, usePointStyle: true, font: { size: 11 } },
+                },
                 tooltip: {
                   callbacks: {
                     label: (ctx) => {
-                      const val = ctx.parsed.y;
-                      if (val === null) return '';
-                      return `${ctx.dataset.label}: ${val.toLocaleString()}`;
+                      if (ctx.raw === null) return '';
+                      return `${ctx.dataset.label}: ${(ctx.raw as number).toLocaleString()}`;
                     },
                   },
                 },
               },
               scales: {
-                x: { grid: { display: false } },
-                y: { beginAtZero: true },
+                y: {
+                  beginAtZero: true,
+                  title: { display: true, text: 'Cumulative Online Submissions', color: TP.text, font: { weight: 'bold' } },
+                  grid: { color: 'rgba(0,0,0,0.05)' },
+                  ticks: { color: '#666' },
+                },
+                x: { grid: { display: false }, ticks: { color: '#666' } },
               },
-              spanGaps: false,
             }}
           />
         </div>
-      </div>
+      </ChartCard>
 
-      {/* Section 3: Monthly Online Comparison (Grouped Bar) */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-          <span className="inline-block w-2.5 h-2.5 rounded-full bg-blue-600" />
-          Monthly Online Comparison
-        </h3>
-        <div style={{ height: 350 }}>
-          {onlineBarData.labels.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-gray-400">No 2026 data yet</div>
+      {/* ──── Section 2: Monthly Online Comparison (Bar) ──── */}
+      <SectionHeader color={TP.darkPurple} label="Monthly Online Comparison" />
+      <ChartCard title="Online Submissions: 2024 vs 2025 vs 2026">
+        <div style={{ height: 300 }}>
+          {onlineDiff.length === 0 ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999' }}>
+              No 2026 data yet
+            </div>
           ) : (
-            <Bar data={onlineBarData} options={groupedBarOptions} />
+            <Bar
+              data={onlineBarData as any}
+              options={barChartOptions as any}
+              plugins={[makeDiffLabelPlugin('onlineDiffLabels', onlineDiffRef) as any]}
+            />
           )}
         </div>
-      </div>
+      </ChartCard>
 
-      {/* Section 4: Monthly Online Breakdown Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-          <span className="inline-block w-2.5 h-2.5 rounded-full bg-blue-600" />
-          Monthly Online Breakdown
-        </h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
+      {/* ──── Section 3: Monthly Online Breakdown Table ──── */}
+      <SectionHeader color={TP.green} label="Monthly Online Breakdown" />
+      <div style={{
+        background: '#fff',
+        borderRadius: 8,
+        border: '1px solid #e5e7eb',
+        padding: 16,
+        marginBottom: 24,
+      }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
+              <th style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 600, color: '#666', fontSize: 12, textTransform: 'uppercase' }}>Month</th>
+              <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 600, color: '#666', fontSize: 12, textTransform: 'uppercase' }}>2024</th>
+              <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 600, color: '#666', fontSize: 12, textTransform: 'uppercase' }}>2025</th>
+              <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 600, color: '#666', fontSize: 12, textTransform: 'uppercase' }}>2026</th>
+              <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 600, color: '#666', fontSize: 12, textTransform: 'uppercase' }}>vs &apos;25</th>
+              <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 600, color: '#666', fontSize: 12, textTransform: 'uppercase' }}>vs &apos;24</th>
+            </tr>
+          </thead>
+          <tbody>
+            {onlineDiff.map((row, idx) => {
+              const projVal = row.isInProgress ? projOnline : row.v2026;
+              const diff25 = projVal - row.v2025;
+              const diff24 = projVal - row.v2024;
+              return (
+                <tr key={idx} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                  <td style={{ padding: '8px 12px', fontWeight: 600, color: TP.text }}>
+                    {row.month}{row.isInProgress ? ' *' : ''}
+                  </td>
+                  <td style={{ padding: '8px 12px', textAlign: 'right', color: '#999' }}>
+                    {row.v2024.toLocaleString()}
+                  </td>
+                  <td style={{ padding: '8px 12px', textAlign: 'right', color: TP.text }}>
+                    {row.v2025.toLocaleString()}
+                  </td>
+                  <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 600, color: TP.text }}>
+                    {row.isInProgress ? (
+                      <>
+                        {row.v2026.toLocaleString()}
+                        <span style={{ color: '#999', fontWeight: 400 }}> → {projOnline.toLocaleString()}</span>
+                      </>
+                    ) : (
+                      row.v2026.toLocaleString()
+                    )}
+                  </td>
+                  <td style={{
+                    padding: '8px 12px',
+                    textAlign: 'right',
+                    fontWeight: 600,
+                    color: diff25 >= 0 ? '#28a745' : TP.red,
+                  }}>
+                    {diff25 >= 0 ? '+' : ''}{diff25.toLocaleString()}{row.isInProgress ? '*' : ''}
+                  </td>
+                  <td style={{
+                    padding: '8px 12px',
+                    textAlign: 'right',
+                    fontWeight: 600,
+                    color: diff24 >= 0 ? '#28a745' : TP.red,
+                  }}>
+                    {diff24 >= 0 ? '+' : ''}{diff24.toLocaleString()}{row.isInProgress ? '*' : ''}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+          {onlineDiff.some((r) => r.isInProgress) && (
+            <tfoot>
               <tr>
-                <th className="px-3 py-2 font-medium">Month</th>
-                <th className="px-3 py-2 font-medium text-right">2024</th>
-                <th className="px-3 py-2 font-medium text-right">2025</th>
-                <th className="px-3 py-2 font-medium text-right">2026</th>
-                <th className="px-3 py-2 font-medium text-right">vs &apos;25</th>
-                <th className="px-3 py-2 font-medium text-right">vs &apos;24</th>
+                <td colSpan={6} style={{ padding: 8, fontSize: '0.8em', color: '#999' }}>
+                  * In progress -- projected based on {mtdDays} of {totalDaysInMonth} days
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {onlineTableRows.map((row) => (
-                <tr key={row.month} className="hover:bg-gray-50">
-                  <td className="px-3 py-2 border-t border-gray-100 font-medium">
-                    {row.name}
-                    {row.isProjected && <span className="text-xs text-gray-400 ml-1">*proj</span>}
-                  </td>
-                  <td className="px-3 py-2 border-t border-gray-100 text-right text-gray-500">{row.val2024.toLocaleString()}</td>
-                  <td className="px-3 py-2 border-t border-gray-100 text-right text-teal-600">{row.val2025.toLocaleString()}</td>
-                  <td className="px-3 py-2 border-t border-gray-100 text-right font-semibold text-blue-700">{row.val2026.toLocaleString()}</td>
-                  <td className={`px-3 py-2 border-t border-gray-100 text-right font-medium ${row.vs25 >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatDiff(row.vs25)}
-                  </td>
-                  <td className={`px-3 py-2 border-t border-gray-100 text-right font-medium ${row.vs24 >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatDiff(row.vs24)}
-                  </td>
-                </tr>
-              ))}
-              {onlineTableRows.length > 0 && (
-                <tr className="bg-gray-50 font-semibold">
-                  <td className="px-3 py-2 border-t border-gray-200">Total</td>
-                  <td className="px-3 py-2 border-t border-gray-200 text-right text-gray-500">
-                    {onlineTableRows.reduce((s, r) => s + r.val2024, 0).toLocaleString()}
-                  </td>
-                  <td className="px-3 py-2 border-t border-gray-200 text-right text-teal-600">
-                    {onlineTableRows.reduce((s, r) => s + r.val2025, 0).toLocaleString()}
-                  </td>
-                  <td className="px-3 py-2 border-t border-gray-200 text-right text-blue-700">
-                    {onlineTableRows.reduce((s, r) => s + r.val2026, 0).toLocaleString()}
-                  </td>
-                  <td className={`px-3 py-2 border-t border-gray-200 text-right ${onlineTableRows.reduce((s, r) => s + r.vs25, 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatDiff(onlineTableRows.reduce((s, r) => s + r.vs25, 0))}
-                  </td>
-                  <td className={`px-3 py-2 border-t border-gray-200 text-right ${onlineTableRows.reduce((s, r) => s + r.vs24, 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatDiff(onlineTableRows.reduce((s, r) => s + r.vs24, 0))}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            </tfoot>
+          )}
+        </table>
       </div>
 
-      {/* Section 5: Hybrid Comparison (Grouped Bar) */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-          <span className="inline-block w-2.5 h-2.5 rounded-full bg-amber-600" />
-          Monthly Hybrid Comparison
-        </h3>
-        <div style={{ height: 350 }}>
-          {hybridBarData.labels.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-gray-400">No 2026 data yet</div>
+      {/* ──── Section 4: Monthly Hybrid Comparison (Bar) ──── */}
+      <SectionHeader color="#5BA88C" label="Monthly Hybrid Comparison" />
+      <ChartCard title="Hybrid Submissions: 2024 vs 2025 vs 2026">
+        <div style={{ height: 300 }}>
+          {hybridDiff.length === 0 ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999' }}>
+              No 2026 data yet
+            </div>
           ) : (
-            <Bar data={hybridBarData} options={groupedBarOptions} />
+            <Bar
+              data={hybridBarData as any}
+              options={makeBarOptions(hybridDiffRef) as any}
+              plugins={[makeDiffLabelPlugin('hybridDiffLabels', hybridDiffRef) as any]}
+            />
           )}
         </div>
-      </div>
+      </ChartCard>
 
-      {/* Section 6: Prime Comparison (Grouped Bar) */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-          <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-600" />
-          Monthly Prime Comparison
-        </h3>
-        <div style={{ height: 350 }}>
-          {primeBarData.labels.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-gray-400">No 2026 data yet</div>
+      {/* ──── Section 5: Monthly Prime Comparison (Bar) ──── */}
+      <SectionHeader color="#E5A04B" label="Monthly Prime Comparison" />
+      <ChartCard title="Prime Submissions: 2024 vs 2025 vs 2026">
+        <div style={{ height: 300 }}>
+          {primeDiff.length === 0 ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999' }}>
+              No 2026 data yet
+            </div>
           ) : (
-            <Bar data={primeBarData} options={groupedBarOptions} />
+            <Bar
+              data={primeBarData as any}
+              options={makeBarOptions(primeDiffRef) as any}
+              plugins={[makeDiffLabelPlugin('primeDiffLabels', primeDiffRef) as any]}
+            />
           )}
         </div>
-      </div>
+      </ChartCard>
     </div>
   );
 }
 
-// ---- Reusable Summary Card ----
+/* ────── Reusable Sub-Components ────── */
 
-function SummaryCard({
+function SectionHeader({ color, label }: { color: string; label: string }) {
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      marginTop: 30,
+      marginBottom: 12,
+      fontWeight: 700,
+      fontSize: 15,
+      color: '#333',
+    }}>
+      <span style={{
+        width: 10,
+        height: 10,
+        borderRadius: '50%',
+        backgroundColor: color,
+        display: 'inline-block',
+        flexShrink: 0,
+      }} />
+      <span>{label}</span>
+    </div>
+  );
+}
+
+function ChartCard({
   title,
   subtitle,
-  value2026,
-  valuePrev,
-  diff,
-  pct,
-  labelCurrent = '2026',
-  labelPrev = '2025',
+  children,
 }: {
   title: string;
-  subtitle: string;
-  value2026: number;
-  valuePrev: number;
-  diff: number;
-  pct: number;
-  labelCurrent?: string;
-  labelPrev?: string;
+  subtitle?: string;
+  children: React.ReactNode;
 }) {
-  const isPositive = diff >= 0;
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{title}</div>
-      <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-bold text-gray-900">{value2026.toLocaleString()}</span>
-        <span className="text-xs text-gray-400">{labelCurrent}</span>
-      </div>
-      <div className="text-sm text-gray-500 mt-1">
-        vs {valuePrev.toLocaleString()} ({labelPrev})
-      </div>
-      <div className={`text-sm font-semibold mt-1 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-        {formatDiff(diff)} ({formatPct(pct)})
-      </div>
-      <div className="text-xs text-gray-400 mt-1">{subtitle}</div>
+    <div style={{
+      background: '#fff',
+      borderRadius: 8,
+      border: '1px solid #e5e7eb',
+      padding: 16,
+      marginBottom: 24,
+    }}>
+      <div style={{ fontWeight: 600, fontSize: 14, color: '#333', marginBottom: subtitle ? 2 : 12 }}>{title}</div>
+      {subtitle && <div style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>{subtitle}</div>}
+      {children}
     </div>
   );
 }
