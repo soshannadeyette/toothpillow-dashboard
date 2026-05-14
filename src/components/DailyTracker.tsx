@@ -13,7 +13,7 @@ import {
   Legend,
   Filler,
 } from 'chart.js';
-import { Bar } from 'react-chartjs-2';
+import { Bar, Chart } from 'react-chartjs-2';
 import { fetchSubmissions, upsertSubmission, fetchAnnualSummaries, currentYear, currentMonth } from '@/lib/api';
 import type { DailySubmission, MonthlySummary } from '@/lib/types';
 import { MONTHLY_GOALS_2026, MONTH_NAMES } from '@/lib/types';
@@ -648,7 +648,7 @@ export default function DailyTracker() {
           Monthly Submissions: 2025 vs 2026
         </h3>
         <div style={{ height: 360 }}>
-          <Bar data={yoyChartData} options={yoyChartOptions} />
+          <Chart type="bar" data={yoyChartData} options={yoyChartOptions} />
         </div>
         {/* Summary table */}
         <div className="mt-4 overflow-x-auto">
