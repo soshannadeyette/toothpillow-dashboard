@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef, useMemo } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,400 +11,1030 @@ import {
   Title,
   Tooltip,
   Legend,
+  type ChartOptions,
+  type ChartData,
+  type Plugin,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend);
 
-// ---------------------------------------------------------------------------
-// Hardcoded data
-// ---------------------------------------------------------------------------
-const combSubsYear: Record<number, number> = { 2023: 1807, 2024: 10366, 2025: 6530, 2026: 2368 };
-const ambSubsYear: Record<number, number> = { 2023: 461, 2024: 435, 2025: 561, 2026: 220 };
-const infSubsYear: Record<number, number> = { 2023: 1346, 2024: 9931, 2025: 5969, 2026: 2148 };
+/* ════════════════════════════════════════════════════════════════════════════
+   TP Kids Color Palette
+   ════════════════════════════════════════════════════════════════════════ */
+const TP = {
+  navy: '#1B2A4A',
+  blue: '#3A6EA4',
+  lightBlue: '#B6CAE3',
+  teal: '#8CD1C8',
+  gold: '#FDBE67',
+  purple: '#B26CA6',
+  red: '#DD5759',
+};
 
-const addsTotalYear: Record<number, number> = { 2023: 40, 2024: 134, 2025: 170, 2026: 75 };
-const addsAmbYear: Record<number, number> = { 2023: 11, 2024: 73, 2025: 141, 2026: 63 };
-const addsInfYear: Record<number, number> = { 2023: 29, 2024: 61, 2025: 29, 2026: 12 };
+/* ════════════════════════════════════════════════════════════════════════════
+   DATA — all from the HTML source of truth
+   ════════════════════════════════════════════════════════════════════════ */
+
+const ambSubs: Record<string, number> = {
+  '2023-01':9,'2023-02':20,'2023-03':10,'2023-04':16,'2023-05':14,'2023-06':219,'2023-07':81,'2023-08':15,'2023-09':22,'2023-10':17,'2023-11':22,'2023-12':20,
+  '2024-01':14,'2024-02':16,'2024-03':29,'2024-04':31,'2024-05':32,'2024-06':24,'2024-07':36,'2024-08':47,'2024-09':71,'2024-10':32,'2024-11':40,'2024-12':63,
+  '2025-01':60,'2025-02':69,'2025-03':64,'2025-04':59,'2025-05':46,'2025-06':45,'2025-07':27,'2025-08':48,'2025-09':39,'2025-10':39,'2025-11':38,'2025-12':27,
+  '2026-01':50,'2026-02':56,'2026-03':52,'2026-04':36,
+};
+const infSubs: Record<string, number> = {
+  '2023-10':6,'2023-11':294,'2023-12':1039,
+  '2024-01':431,'2024-02':315,'2024-03':1593,'2024-04':569,'2024-05':654,'2024-06':1253,'2024-07':485,'2024-08':594,'2024-09':1124,'2024-10':498,'2024-11':367,'2024-12':515,
+  '2025-01':522,'2025-02':606,'2025-03':521,'2025-04':513,'2025-05':429,'2025-06':331,'2025-07':906,'2025-08':439,'2025-09':290,'2025-10':273,'2025-11':486,'2025-12':273,
+  '2026-01':312,'2026-02':514,'2026-03':462,'2026-04':148,
+};
+
+const newAddsAmb: Record<string, number> = {
+  '2024-01':4,'2024-02':7,'2024-03':7,'2024-04':6,'2024-05':3,'2024-06':7,'2024-07':10,'2024-08':2,'2024-09':6,'2024-10':7,'2024-11':7,'2024-12':7,
+  '2025-01':7,'2025-02':84,'2025-03':7,'2025-04':6,'2025-05':5,'2025-06':6,'2025-07':1,'2025-08':15,'2025-09':2,'2025-10':1,'2025-11':6,'2025-12':1,
+  '2026-01':6,'2026-02':13,'2026-03':10,'2026-04':26,
+};
+const newAddsInf: Record<string, number> = {
+  '2024-01':1,'2024-02':8,'2024-03':3,'2024-04':4,'2024-05':9,'2024-06':2,'2024-07':7,'2024-08':2,'2024-09':4,'2024-10':6,'2024-11':6,'2024-12':9,
+  '2025-01':11,'2025-02':3,'2025-03':7,'2025-04':2,'2025-05':0,'2025-06':3,'2025-07':0,'2025-08':1,'2025-09':0,'2025-10':0,'2025-11':1,'2025-12':1,
+  '2026-01':3,'2026-02':1,'2026-03':3,'2026-04':5,
+};
+
+const ambSubsYear: Record<number, number> = {2023:465, 2024:435, 2025:554, 2026:241};
+const infSubsYear: Record<number, number> = {2023:1342, 2024:8383, 2025:5576, 2026:1565};
+const combSubsYear: Record<number, number> = {2023:1807, 2024:8818, 2025:6130, 2026:1806};
+const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:63};
+const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:30, 2026:12};
+const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:75};
+
+const halfCarriedBy: Record<number, number> = {2023:1, 2024:2, 2025:5, 2026:7};
+const tenPlusByYear: Record<number, number> = {2023:8, 2024:40, 2025:55, 2026:30};
+const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:346};
+const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:1460};
+
+const ANN = 12 / 4.26;
 
 const recruit26 = [
-  { label: 'Jan', amb: 5, inf: 3 },
-  { label: 'Feb', amb: 13, inf: 1 },
-  { label: 'Mar', amb: 10, inf: 3 },
-  { label: 'Apr', amb: 28, inf: 5 },
-  { label: 'May', amb: 7, inf: 0 },
+  {label:'Jan', amb:5, inf:3, accent:'#B6CAE3'},
+  {label:'Feb', amb:13, inf:1, accent:'#8CD1C8'},
+  {label:'Mar', amb:10, inf:3, accent:'#3A6EA4'},
+  {label:'Apr', amb:28, inf:5, accent:'#FDBE67'},
+  {label:'May', amb:7, inf:0, accent:'#B26CA6', tag:'through 5/8'},
 ];
 
-const baseByYear: Record<number, number> = { 2023: 517, 2024: 2898, 2025: 4642, 2026: 1460 };
+const concRows = [
+  {y:'2023', n:1, color:'#FDBE67', names:'Kendra'},
+  {y:'2024', n:2, color:'#FDBE67', names:'Lauren, Kendra'},
+  {y:'2025', n:5, color:'#8CD1C8', names:'Sosh, Shannon, Lauren, Kendra, Ginny'},
+  {y:'2026', n:7, color:'#8CD1C8', names:'Shannon, Sosh, Lauren, Kendra, Talia, Amy B., Melody'},
+];
 
-const halfCarriedBy: Record<number, number> = { 2023: 1, 2024: 2, 2025: 5, 2026: 7 };
-const tenPlusByYear: Record<number, number> = { 2023: 8, 2024: 40, 2025: 55, 2026: 30 };
+const moversData: Record<string, {y25:number; y26:number; type:string}> = {
+  'Shannon Tripp':        {y25:866,  y26:247, type:'Inf'},
+  'Lauren Johnson NNM':   {y25:831,  y26:144, type:'Inf'},
+  'Kendra Needham':       {y25:386,  y26:133, type:'Inf'},
+  'Soshanna Salsman':     {y25:914,  y26:155, type:'Inf'},
+  'Ginny Yurich':         {y25:291,  y26:73,  type:'Inf'},
+  'Amy Bernhard':         {y25:112,  y26:91,  type:'Inf'},
+  'Melody Brandon':       {y25:123,  y26:71,  type:'Inf'},
+  'Jeff Cruz':            {y25:84,   y26:104, type:'Inf'},
+  'Ellen Fisher':         {y25:53,   y26:54,  type:'Inf'},
+  'Jasyra Santiago-Hines':{y25:57,   y26:63,  type:'Inf'},
+  'Taylor Kulik':         {y25:103,  y26:42,  type:'Inf'},
+  'Eden Lee':             {y25:185,  y26:38,  type:'Inf'},
+  'Katelyn Alsop':        {y25:0,    y26:40,  type:'Inf'},
+  'Thuy Improta':         {y25:245,  y26:22,  type:'Inf'},
+  'Erin Wilkins':         {y25:111,  y26:12,  type:'Inf'},
+  'Eryn Carroll NMM':     {y25:104,  y26:12,  type:'Inf'},
+  'Devon Kuntzman':       {y25:90,   y26:13,  type:'Inf'},
+  'Amy Erickson':         {y25:51,   y26:25,  type:'Inf'},
+  'Ashley Turner':        {y25:39,   y26:21,  type:'Inf'},
+  'Taylor Moran':         {y25:62,   y26:18,  type:'Inf'},
+  'Jennie Hoglund':       {y25:29,   y26:24,  type:'Inf'},
+  'Lauren Stadler':       {y25:93,   y26:24,  type:'Inf'},
+  'Carly Brown':          {y25:0,    y26:13,  type:'Inf'},
+  'Taylor Weimar':        {y25:0,    y26:13,  type:'Inf'},
+  'Emily Boazman':        {y25:0,    y26:12,  type:'Inf'},
+  'Karalynne Call':       {y25:25,   y26:10,  type:'Inf'},
+  'Dr. Ameet Trivedi':    {y25:105,  y26:5,   type:'Inf'},
+  'Wendy Ostapuk':        {y25:104,  y26:3,   type:'Inf'},
+  'Emily Morrow':         {y25:31,   y26:5,   type:'Inf'},
+  'Michelle Keijner':     {y25:13,   y26:14,  type:'Amb'},
+  'Melina Moses':         {y25:28,   y26:12,  type:'Amb'},
+  'Laura Manns':          {y25:0,    y26:10,  type:'Amb'},
+  'Brianna Reiser':       {y25:22,   y26:9,   type:'Amb'},
+  'Hillary Ha':           {y25:0,    y26:9,   type:'Amb'},
+  'Elise Hylden':         {y25:20,   y26:8,   type:'Amb'},
+  'Tiffany Hubbard':      {y25:11,   y26:6,   type:'Amb'},
+  'Rachel Jayroe':        {y25:0,    y26:6,   type:'Amb'},
+  'Lauren Peter':         {y25:37,   y26:5,   type:'Amb'},
+  'Karyna Cast Korotkykh':{y25:24,   y26:5,   type:'Amb'},
+  'Courtland Nall':       {y25:10,   y26:5,   type:'Amb'},
+  'Ashley Vogt':          {y25:0,    y26:5,   type:'Amb'},
+  'Erin Rice':            {y25:22,   y26:3,   type:'Amb'},
+  'Jennee Guerrero':      {y25:18,   y26:3,   type:'Amb'},
+  'Cy Tidwell':           {y25:12,   y26:3,   type:'Amb'},
+  'Anna Brayton':         {y25:19,   y26:3,   type:'Amb'},
+  "Tania O'Donnell":      {y25:0,    y26:3,   type:'Amb'},
+  'Michelle Melerine':    {y25:13,   y26:2,   type:'Amb'},
+  'Jessica Klick':        {y25:9,    y26:1,   type:'Amb'},
+  'Heather Reed':         {y25:4,    y26:1,   type:'Amb'},
+};
 
-const years = [2023, 2024, 2025, 2026];
+const launchBonusData = [
+  {name:'Katelyn Alsop (James)',onboard:'01/19/2026',is2026:true,winStart:'01/19/2026',winEnd:'01/19/2027',bonusSubs:38,tier:1,earned:250},
+  {name:'Shannon Tripp',onboard:'06/27/2025',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:37,tier:1,earned:250},
+  {name:'Soshanna Salsman',onboard:'04/30/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:28,tier:1,earned:250},
+  {name:'Lauren Johnson NNM',onboard:'05/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:25,tier:1,earned:250},
+  {name:'Kendra Needham',onboard:'11/01/2023',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:20,tier:0,earned:0},
+  {name:'Jeff Cruz Talia_likeitis',onboard:'08/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:18,tier:0,earned:0},
+  {name:'Ginny Yurich',onboard:'06/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:10,tier:0,earned:0},
+  {name:'Jasyra Santiago-Hines',onboard:'02/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:10,tier:0,earned:0},
+  {name:'Amy Bernhard',onboard:'08/25/2025',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:9,tier:0,earned:0},
+  {name:'Carly Brown',onboard:'04/21/2026',is2026:true,winStart:'04/21/2026',winEnd:'04/21/2027',bonusSubs:9,tier:0,earned:0},
+  {name:'Thuy Improta *ministry*',onboard:'07/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:7,tier:0,earned:0},
+  {name:'Emily Boazman',onboard:'04/02/2026',is2026:true,winStart:'04/02/2026',winEnd:'04/02/2027',bonusSubs:6,tier:0,earned:0},
+  {name:'Rachel Jayroe',onboard:'02/06/2026',is2026:true,winStart:'02/06/2026',winEnd:'02/06/2027',bonusSubs:6,tier:0,earned:0},
+  {name:'Eden Lee loverlees',onboard:'12/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:5,tier:0,earned:0},
+  {name:'Hillary Ha',onboard:'08/05/2025',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:5,tier:0,earned:0},
+  {name:'Karalynne Call *Just Ingredients*',onboard:'08/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:5,tier:0,earned:0},
+  {name:'Melody Brandon',onboard:'04/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:5,tier:0,earned:0},
+  {name:'Taylor Kulik',onboard:'02/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:5,tier:0,earned:0},
+  {name:'Courtland Nall',onboard:'08/04/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:4,tier:0,earned:0},
+  {name:'Melina Moses',onboard:'03/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:4,tier:0,earned:0},
+  {name:'Eryn Carroll NMM',onboard:'07/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:3,tier:0,earned:0},
+  {name:'Meghan Joy Yancy',onboard:'01/20/2026',is2026:true,winStart:'01/20/2026',winEnd:'01/20/2027',bonusSubs:3,tier:0,earned:0},
+  {name:'Michelle Keijner',onboard:'03/25/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:3,tier:0,earned:0},
+];
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+/* ════════════════════════════════════════════════════════════════════════════
+   Helpers
+   ════════════════════════════════════════════════════════════════════════ */
+const years = [2023, 2024, 2025, 2026] as const;
+const MONTHS_JAN24_APR26: string[] = [];
+for (let y = 2024; y <= 2026; y++) {
+  const end = y === 2026 ? 4 : 12;
+  for (let m = 1; m <= end; m++) {
+    MONTHS_JAN24_APR26.push(`${y}-${String(m).padStart(2, '0')}`);
+  }
+}
+const MONTH_LABELS_SHORT = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function fmtMonthLabel(key: string): string {
+  const [yr, mo] = key.split('-');
+  return `${MONTH_LABELS_SHORT[parseInt(mo, 10)]} '${yr.slice(2)}`;
+}
+
 function pctChange(prev: number, curr: number): string {
   if (prev === 0) return 'N/A';
   const pct = ((curr - prev) / prev) * 100;
   return `${pct >= 0 ? '+' : ''}${pct.toFixed(0)}%`;
 }
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
+function annualize(ytd: number): number {
+  return Math.round(ytd * ANN);
+}
+
+/* Shared chart font config for legend */
+const legendFont = { usePointStyle: true as const, padding: 16 };
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Component
+   ════════════════════════════════════════════════════════════════════════ */
 export default function AmbassadorGrowth() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const barOptions: any = {
+  /* ── Computed paces ── */
+  const ambPace = annualize(ambSubsYear[2026]);
+  const infPace = annualize(infSubsYear[2026]);
+  const combPace = annualize(combSubsYear[2026]);
+  const basePace = annualize(baseByYear[2026]);
+  const addsAmbPace = annualize(addsAmbYear[2026]);
+  const infAddsPace = annualize(addsInfYear[2026]);
+  const tenPlus2026Pace = annualize(tenPlusByYear[2026]);
+  const ambSubsPace = annualize(ambSubsYear[2026]);
+
+  /* ── Movers computation ── */
+  const moverAnnFactor = 12 / 4.27;
+  const moversComputed = useMemo(() => {
+    const entries = Object.entries(moversData).map(([name, d]) => {
+      const pace = Math.round(d.y26 * moverAnnFactor);
+      const pctChg = d.y25 > 0 ? ((pace - d.y25) / d.y25) * 100 : null;
+      return { name, ...d, pace, pctChg };
+    });
+    const up = entries
+      .filter(e => e.pctChg !== null && e.pctChg > 0)
+      .sort((a, b) => (b.pctChg ?? 0) - (a.pctChg ?? 0))
+      .slice(0, 11);
+    const newEntrants = entries
+      .filter(e => e.y25 === 0 && e.y26 > 0)
+      .sort((a, b) => b.y26 - a.y26)
+      .slice(0, 11 - up.length);
+    const trendingUp = [...up, ...newEntrants].slice(0, 11);
+    const down = entries
+      .filter(e => e.pctChg !== null && (e.pctChg ?? 0) < 0 && e.y25 > 0)
+      .sort((a, b) => (a.pctChg ?? 0) - (b.pctChg ?? 0))
+      .slice(0, 11);
+    return { trendingUp, trendingDown: down };
+  }, []);
+
+  /* ── Launch bonus summary ── */
+  const tier1Count = launchBonusData.filter(d => d.tier >= 1).length;
+  const approachingTier1 = launchBonusData.filter(d => d.bonusSubs >= 15 && d.bonusSubs < 25).length;
+  const totalEarned = launchBonusData.reduce((s, d) => s + d.earned, 0);
+
+  /* ── Refs for chart plugins (stable reference pattern) ── */
+  const ambOnlyLabelRef = useRef<{actual: number[]; paceVal: number}>({actual: [ambSubsYear[2023], ambSubsYear[2024], ambSubsYear[2025], ambSubsYear[2026]], paceVal: ambPace});
+  ambOnlyLabelRef.current = {actual: [ambSubsYear[2023], ambSubsYear[2024], ambSubsYear[2025], ambSubsYear[2026]], paceVal: ambPace};
+
+  /* ── Chart: 2026 Recruitment stacked bar ── */
+  const recruitChartData: ChartData<'bar'> = {
+    labels: recruit26.map(r => r.label),
+    datasets: [
+      {
+        label: 'Ambassador',
+        data: recruit26.map(r => r.amb),
+        backgroundColor: TP.blue,
+        borderRadius: 4,
+      },
+      {
+        label: 'Influencer',
+        data: recruit26.map(r => r.inf),
+        backgroundColor: TP.gold,
+        borderRadius: 4,
+      },
+    ],
+  };
+  const recruitChartOpts: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: 'top' as const },
-      tooltip: { mode: 'index' as const, intersect: false },
+      legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+      tooltip: { mode: 'index', intersect: false },
     },
-    scales: {
-      y: { beginAtZero: true },
-    },
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const stackedBarOptions: any = {
-    ...barOptions,
     scales: {
       x: { stacked: true },
       y: { stacked: true, beginAtZero: true },
     },
   };
 
-  // Monthly recruitment chart (2026)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const recruitChartData: any = {
-    labels: recruit26.map((r) => r.label),
+  /* ── Chart: New Adds monthly stacked (Jan 2024 – Apr 2026) ── */
+  const newAddsChartData: ChartData<'bar'> = {
+    labels: MONTHS_JAN24_APR26.map(fmtMonthLabel),
     datasets: [
       {
         label: 'Ambassador',
-        data: recruit26.map((r) => r.amb),
-        backgroundColor: '#2563eb',
+        data: MONTHS_JAN24_APR26.map(k => newAddsAmb[k] ?? 0),
+        backgroundColor: TP.blue,
+        borderRadius: 4,
       },
       {
         label: 'Influencer',
-        data: recruit26.map((r) => r.inf),
-        backgroundColor: '#d97706',
+        data: MONTHS_JAN24_APR26.map(k => newAddsInf[k] ?? 0),
+        backgroundColor: TP.gold,
+        borderRadius: 4,
       },
     ],
   };
+  const newAddsChartOpts: ChartOptions<'bar'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+      tooltip: { mode: 'index', intersect: false },
+    },
+    scales: {
+      x: { stacked: true, ticks: { maxRotation: 45, font: { size: 10 } } },
+      y: { stacked: true, beginAtZero: true },
+    },
+  };
 
-  // New adds grouped bar (all years)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const addsChartData: any = {
-    labels: years.map(String),
+  /* ── Chart: Channel YOY grouped bar ── */
+  const channelChartData: ChartData<'bar'> = {
+    labels: ['2023', '2024', '2025', '2026 YTD', '2026 Pace'],
     datasets: [
       {
-        label: 'Ambassador Adds',
-        data: years.map((y) => addsAmbYear[y]),
-        backgroundColor: '#2563eb',
+        label: 'Influencer',
+        data: [infSubsYear[2023], infSubsYear[2024], infSubsYear[2025], infSubsYear[2026], infPace],
+        backgroundColor: [TP.teal, TP.teal, TP.teal, TP.teal + '80', TP.teal + '40'],
+        borderRadius: 4,
       },
       {
-        label: 'Influencer Adds',
-        data: years.map((y) => addsInfYear[y]),
-        backgroundColor: '#d97706',
+        label: 'Ambassador',
+        data: [ambSubsYear[2023], ambSubsYear[2024], ambSubsYear[2025], ambSubsYear[2026], ambPace],
+        backgroundColor: [TP.blue, TP.blue, TP.blue, TP.blue + '80', TP.blue + '40'],
+        borderRadius: 4,
       },
     ],
   };
+  const channelChartOpts: ChartOptions<'bar'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+      tooltip: { mode: 'index', intersect: false },
+    },
+    scales: {
+      y: { beginAtZero: true },
+    },
+  };
 
-  // Channel YOY grouped bar
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const channelChartData: any = {
-    labels: years.map(String),
+  /* ── Chart: Base Program stacked bar ── */
+  const baseChartData: ChartData<'bar'> = {
+    labels: ['2023', '2024', '2025', '2026 Pace'],
     datasets: [
       {
-        label: 'Influencer Submissions',
-        data: years.map((y) => infSubsYear[y]),
-        backgroundColor: '#d97706',
+        label: 'Base Program',
+        data: [baseByYear[2023], baseByYear[2024], baseByYear[2025], basePace],
+        backgroundColor: TP.blue,
+        borderRadius: 4,
       },
+      {
+        label: 'Mega-3',
+        data: [mega3ByYear[2023], mega3ByYear[2024], mega3ByYear[2025], Math.round(mega3ByYear[2026] * ANN)],
+        backgroundColor: TP.gold,
+        borderRadius: 4,
+      },
+    ],
+  };
+  const baseChartOpts: ChartOptions<'bar'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+      tooltip: { mode: 'index', intersect: false },
+    },
+    scales: {
+      x: { stacked: true },
+      y: { stacked: true, beginAtZero: true },
+    },
+  };
+
+  /* ── Chart: Ambassador-Only bar with custom labels ── */
+  const ambOnlyChartData: ChartData<'bar'> = {
+    labels: ['2023', '2024', '2025', '2026'],
+    datasets: [
       {
         label: 'Ambassador Submissions',
-        data: years.map((y) => ambSubsYear[y]),
-        backgroundColor: '#2563eb',
+        data: [ambSubsYear[2023], ambSubsYear[2024], ambSubsYear[2025], ambSubsYear[2026]],
+        backgroundColor: [TP.blue, TP.blue, TP.blue, TP.blue],
+        borderRadius: 4,
       },
-    ],
-  };
-
-  // Base program bar
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const baseChartData: any = {
-    labels: years.map(String),
-    datasets: [
       {
-        label: 'Base Program Submissions',
-        data: years.map((y) => baseByYear[y]),
-        backgroundColor: '#059669',
+        label: '2026 Projected',
+        data: [0, 0, 0, ambPace - ambSubsYear[2026]],
+        backgroundColor: [TP.blue + '00', TP.blue + '00', TP.blue + '00', TP.blue + '40'],
+        borderRadius: 4,
       },
     ],
   };
-
-  // Ambassador-only bar
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ambOnlyChartData: any = {
-    labels: years.map(String),
-    datasets: [
-      {
-        label: 'Ambassador-Only Submissions',
-        data: years.map((y) => ambSubsYear[y]),
-        backgroundColor: '#2563eb',
-      },
-    ],
+  const ambOnlyLabelPlugin: Plugin<'bar'> = useMemo(() => ({
+    id: 'ambOnlyLabels',
+    afterDraw(chart) {
+      const ctx = chart.ctx;
+      const ref = ambOnlyLabelRef.current;
+      ctx.save();
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillStyle = TP.navy;
+      ctx.textAlign = 'center';
+      const meta0 = chart.getDatasetMeta(0);
+      const meta1 = chart.getDatasetMeta(1);
+      for (let i = 0; i < 4; i++) {
+        const bar0 = meta0.data[i];
+        const bar1 = meta1.data[i];
+        if (i < 3) {
+          ctx.fillText(String(ref.actual[i]), bar0.x, bar0.y - 8);
+        } else {
+          const topY = Math.min(bar0.y, bar1.y);
+          ctx.fillText(`${ref.actual[3]} YTD`, bar0.x, topY - 22);
+          ctx.fillStyle = TP.blue + 'A0';
+          ctx.fillText(`~${ref.paceVal} pace`, bar0.x, topY - 6);
+          ctx.fillStyle = TP.navy;
+        }
+      }
+      ctx.restore();
+    },
+  }), []);
+  const ambOnlyChartOpts: ChartOptions<'bar'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { mode: 'index', intersect: false },
+    },
+    scales: {
+      x: { stacked: true },
+      y: { stacked: true, beginAtZero: true },
+    },
   };
 
-  // Concentration horizontal bars
-  const maxHalf = Math.max(...Object.values(halfCarriedBy));
+  /* ── Styles ── */
+  const sectionHeader: React.CSSProperties = {
+    fontSize: '1.5rem',
+    fontWeight: 700,
+    color: TP.navy,
+    marginBottom: '0.25rem',
+  };
+  const sectionSub: React.CSSProperties = {
+    fontSize: '0.875rem',
+    color: '#666',
+    marginBottom: '1.5rem',
+    lineHeight: 1.5,
+  };
+  const card: React.CSSProperties = {
+    background: '#fff',
+    borderRadius: 12,
+    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+    border: '1px solid #e5e7eb',
+    padding: '1.25rem',
+  };
+  const statCard = (borderColor: string): React.CSSProperties => ({
+    ...card,
+    borderTop: `4px solid ${borderColor}`,
+    textAlign: 'center' as const,
+  });
+  const chartWrap: React.CSSProperties = {
+    ...card,
+    padding: '1.5rem',
+  };
+  const gridRow = (cols: number): React.CSSProperties => ({
+    display: 'grid',
+    gridTemplateColumns: `repeat(${cols}, 1fr)`,
+    gap: '1rem',
+  });
+
+  const concMax = 9;
 
   return (
-    <div className="space-y-6">
-      {/* Hero Banner */}
-      <div className="rounded-lg p-6 text-white" style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%)' }}>
-        <h2 className="text-2xl font-bold">Sosh took over in February. Here&apos;s what changed.</h2>
-        <p className="mt-3 text-blue-100 leading-relaxed max-w-3xl">
-          Since Sosh stepped in as VP of Acquisition, the ambassador program has shifted from influencer-dependent viral spikes to a diversified, sustainable growth engine.
-          2026 YTD: {addsTotalYear[2026]} new ambassadors added ({addsAmbYear[2026]} airway, {addsInfYear[2026]} influencer), with April as the strongest add month since Feb 2025.
-          The base program (excluding mega-viral spikes) grew from {baseByYear[2023].toLocaleString()} in 2023 to {baseByYear[2025].toLocaleString()} in 2025, a {pctChange(baseByYear[2023], baseByYear[2025])} increase.
-          Concentration is improving: it took {halfCarriedBy[2023]} person to carry 50% of submissions in 2023, now it takes {halfCarriedBy[2026]} in 2026.
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+
+      {/* ════════ SECTION 1: Hero Banner ════════ */}
+      <div style={{
+        background: `linear-gradient(135deg, ${TP.navy} 0%, #2a4a6a 100%)`,
+        borderRadius: 12,
+        padding: '2.5rem 2rem',
+        color: '#fff',
+      }}>
+        <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '1rem' }}>
+          Sosh took over in February. Here&apos;s what changed.
+        </h2>
+        <p style={{ color: '#c8d8ec', lineHeight: 1.7, maxWidth: '56rem', fontSize: '0.95rem' }}>
+          In January 2026, the combined ambassador program (influencers + ambassadors) generated 365 submissions.
+          In February — Sosh&apos;s first full month — that jumped to 572, a 57% increase.
+          New ambassador recruitment is accelerating: 8 → 14 → 13 → 33 → 7 adds per month across Jan–May.
+          April finished with 33 new ambassadors + influencers onboarded — the strongest add month since the Feb 2025 mass onboarding.
+          May has 7 through the 8th.
         </p>
       </div>
 
-      {/* 2026 Recruitment Cards */}
+      {/* ════════ SECTION 2: Ambassador Recruitment — 2026 ════════ */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">2026 Monthly Recruitment</h3>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          {recruit26.map((r) => {
+        <h3 style={sectionHeader}>Ambassador Recruitment — 2026</h3>
+        <p style={sectionSub}>Monthly new adds for the current year.</p>
+
+        <div style={{ ...gridRow(5), marginBottom: '1.5rem' }}>
+          {recruit26.map(r => {
             const total = r.amb + r.inf;
+            const hasTag = 'tag' in r && r.tag;
             return (
-              <div key={r.label} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <p className="text-sm text-gray-500 font-medium">{r.label} 2026</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{total}</p>
-                <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
-                  <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-blue-600 inline-block" />
-                    AMB {r.amb}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-yellow-600 inline-block" />
-                    INF {r.inf}
-                  </span>
+              <div key={r.label} style={{
+                ...card,
+                borderTop: `4px solid ${r.accent}`,
+                textAlign: 'center',
+                position: 'relative',
+              }}>
+                {hasTag && (
+                  <span style={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    background: TP.purple,
+                    color: '#fff',
+                    fontSize: '0.6rem',
+                    padding: '2px 6px',
+                    borderRadius: 8,
+                    fontWeight: 600,
+                  }}>{r.tag}</span>
+                )}
+                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: TP.navy }}>{r.label}</div>
+                <div style={{ fontSize: '0.65rem', color: TP.purple, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, marginTop: 2 }}>NEW ADDS</div>
+                <div style={{ fontSize: '2.25rem', fontWeight: 800, color: TP.navy, margin: '0.25rem 0' }}>{total}</div>
+                <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '0.5rem', marginTop: '0.25rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', fontSize: '0.75rem', color: '#666' }}>
+                    <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 4, background: TP.blue, marginRight: 4, verticalAlign: 'middle' }} />AMB {r.amb}</span>
+                    <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 4, background: TP.gold, marginRight: 4, verticalAlign: 'middle' }} />INF {r.inf}</span>
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
-      </div>
 
-      {/* Monthly Recruitment Chart */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">2026 Monthly Recruitment (Stacked)</h3>
-        <div className="h-72">
-          <Bar data={recruitChartData} options={stackedBarOptions} />
+        <div style={chartWrap}>
+          <div style={{ height: 280 }}>
+            <Bar data={recruitChartData} options={recruitChartOpts} />
+          </div>
         </div>
       </div>
 
-      {/* New Adds Chart */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">New Adds by Year</h3>
-        <div className="h-72">
-          <Bar data={addsChartData} options={barOptions} />
-        </div>
-        <div className="mt-3 grid grid-cols-4 gap-2 text-center text-xs text-gray-500">
-          {years.map((y) => (
-            <div key={y}>
-              <span className="font-semibold text-gray-700">{y}</span>: {addsTotalYear[y]} total
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Channel YOY */}
+      {/* ════════ SECTION 3: New Ambassadors Added Per Month ════════ */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">Channel Year-over-Year</h3>
-        <div className="grid md:grid-cols-2 gap-4 mb-4">
-          {/* Influencer Table */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <h4 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">Influencer Channel</h4>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-1 text-gray-500">Year</th>
-                  <th className="text-right py-1 text-gray-500">Submissions</th>
-                  <th className="text-right py-1 text-gray-500">Adds</th>
-                  <th className="text-right py-1 text-gray-500">YOY</th>
-                </tr>
-              </thead>
-              <tbody>
-                {years.map((y, i) => (
-                  <tr key={y} className="border-b border-gray-100">
-                    <td className="py-1 font-medium text-gray-700">{y}</td>
-                    <td className="text-right text-gray-600">{infSubsYear[y].toLocaleString()}</td>
-                    <td className="text-right text-gray-600">{addsInfYear[y]}</td>
-                    <td className="text-right text-gray-500 text-xs">
-                      {i > 0 ? pctChange(infSubsYear[years[i - 1]], infSubsYear[y]) : '--'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <h3 style={sectionHeader}>New Ambassadors Added Per Month</h3>
+        <p style={sectionSub}>Yearly totals and monthly breakdown of ambassador and influencer onboarding.</p>
 
-          {/* Ambassador Table */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <h4 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">Ambassador Channel</h4>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-1 text-gray-500">Year</th>
-                  <th className="text-right py-1 text-gray-500">Submissions</th>
-                  <th className="text-right py-1 text-gray-500">Adds</th>
-                  <th className="text-right py-1 text-gray-500">YOY</th>
-                </tr>
-              </thead>
-              <tbody>
-                {years.map((y, i) => (
-                  <tr key={y} className="border-b border-gray-100">
-                    <td className="py-1 font-medium text-gray-700">{y}</td>
-                    <td className="text-right text-gray-600">{ambSubsYear[y].toLocaleString()}</td>
-                    <td className="text-right text-gray-600">{addsAmbYear[y]}</td>
-                    <td className="text-right text-gray-500 text-xs">
-                      {i > 0 ? pctChange(ambSubsYear[years[i - 1]], ambSubsYear[y]) : '--'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Channel grouped bar */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <h4 className="text-sm font-semibold text-gray-700 mb-3">Submissions by Channel & Year</h4>
-          <div className="h-72">
-            <Bar data={channelChartData} options={barOptions} />
-          </div>
-        </div>
-      </div>
-
-      {/* Base Program Chart */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Base Program (Excluding Viral Spikes)</h3>
-        <p className="text-sm text-gray-500 mb-4">Removes the top 3 mega-viral influencer months to show underlying program health.</p>
-        <div className="h-72">
-          <Bar data={baseChartData} options={barOptions} />
-        </div>
-        <div className="mt-3 flex flex-wrap gap-4 text-sm text-gray-600">
-          {years.map((y, i) => (
-            <span key={y}>
-              <span className="font-semibold">{y}</span>: {baseByYear[y].toLocaleString()}
-              {i > 0 && (
-                <span className={`ml-1 text-xs ${baseByYear[y] > baseByYear[years[i - 1]] ? 'text-green-600' : 'text-red-600'}`}>
-                  ({pctChange(baseByYear[years[i - 1]], baseByYear[y])})
-                </span>
-              )}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Ambassador-Only Chart */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Ambassador-Only Submissions</h3>
-        <p className="text-sm text-gray-500 mb-4">Submissions driven by Airway Ambassadors (excludes influencer channel).</p>
-        <div className="h-72">
-          <Bar data={ambOnlyChartData} options={barOptions} />
-        </div>
-        <div className="mt-3 flex flex-wrap gap-4 text-sm text-gray-600">
-          {years.map((y, i) => (
-            <span key={y}>
-              <span className="font-semibold">{y}</span>: {ambSubsYear[y].toLocaleString()}
-              {i > 0 && (
-                <span className={`ml-1 text-xs ${ambSubsYear[y] > ambSubsYear[years[i - 1]] ? 'text-green-600' : 'text-red-600'}`}>
-                  ({pctChange(ambSubsYear[years[i - 1]], ambSubsYear[y])})
-                </span>
-              )}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Program Health */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">Program Health</h3>
-        <div className="grid md:grid-cols-2 gap-4">
-          {/* Concentration: people needed to reach 50% */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <h4 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">People Needed to Reach 50% of Submissions</h4>
-            <p className="text-xs text-gray-500 mb-4">Higher is better. More people contributing means less concentration risk.</p>
-            <div className="space-y-3">
-              {years.map((y) => {
-                const val = halfCarriedBy[y];
-                const pct = maxHalf > 0 ? (val / maxHalf) * 100 : 0;
-                return (
-                  <div key={y}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="font-medium text-gray-700">{y}</span>
-                      <span className="font-bold text-gray-900">{val} {val === 1 ? 'person' : 'people'}</span>
-                    </div>
-                    <div className="w-full bg-gray-100 rounded-full h-4">
-                      <div
-                        className="h-4 rounded-full transition-all"
-                        style={{
-                          width: `${Math.max(pct, 8)}%`,
-                          backgroundColor: val >= 5 ? '#059669' : val >= 3 ? '#d97706' : '#dc2626',
-                        }}
-                      />
-                    </div>
+        <div style={{ ...gridRow(4), marginBottom: '1.5rem' }}>
+          {years.map(y => {
+            const total = addsTotalYear[y];
+            const amb = addsAmbYear[y];
+            const inf = addsInfYear[y];
+            const isPace = y === 2026;
+            return (
+              <div key={y} style={statCard(TP.blue)}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#666' }}>{y}{isPace ? ' YTD' : ''}</div>
+                <div style={{ fontSize: '2rem', fontWeight: 800, color: TP.navy }}>{total}</div>
+                <div style={{ fontSize: '0.75rem', color: '#888' }}>
+                  {amb} amb / {inf} inf
+                </div>
+                {isPace && (
+                  <div style={{ fontSize: '0.7rem', color: TP.purple, fontWeight: 600, marginTop: 4 }}>
+                    Pace: ~{annualize(total)}
                   </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 10+ submissions count */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <h4 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Ambassadors with 10+ Submissions</h4>
-            <p className="text-xs text-gray-500 mb-4">Active producers driving meaningful volume each year.</p>
-            <div className="space-y-3">
-              {years.map((y) => {
-                const val = tenPlusByYear[y];
-                const maxTen = Math.max(...Object.values(tenPlusByYear));
-                const pct = maxTen > 0 ? (val / maxTen) * 100 : 0;
-                return (
-                  <div key={y}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="font-medium text-gray-700">{y}</span>
-                      <span className="font-bold text-gray-900">{val}</span>
-                    </div>
-                    <div className="w-full bg-gray-100 rounded-full h-4">
-                      <div
-                        className="h-4 rounded-full bg-blue-600 transition-all"
-                        style={{ width: `${Math.max(pct, 8)}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Combined submissions context */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mt-4">
-          <h4 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">Combined Program Submissions by Year</h4>
-          <div className="grid grid-cols-4 gap-4 text-center">
-            {years.map((y) => (
-              <div key={y}>
-                <p className="text-2xl font-bold text-gray-900">{combSubsYear[y].toLocaleString()}</p>
-                <p className="text-sm text-gray-500">{y}</p>
+                )}
               </div>
-            ))}
+            );
+          })}
+        </div>
+
+        {/* Green callout */}
+        <div style={{
+          background: '#ecfdf5',
+          border: '1px solid #a7f3d0',
+          borderRadius: 10,
+          padding: '1.25rem 1.5rem',
+          marginBottom: '1.5rem',
+          lineHeight: 1.65,
+          fontSize: '0.875rem',
+          color: '#1a3a2a',
+        }}>
+          <strong>Ambassador recruitment is the growth story.</strong> Ambassador adds went from 73 (2024) to 141 (2025) to a 2026 pace of ~{addsAmbPace}.
+          Influencer adds have slowed (61 → 29 → pace ~{infAddsPace}), but that&apos;s because the ambassador channel is where the scalable growth is — these are parents who go through the program and refer others.
+          They don&apos;t require influencer outreach or management.
+        </div>
+
+        <div style={chartWrap}>
+          <div style={{ height: 320 }}>
+            <Bar data={newAddsChartData} options={newAddsChartOpts} />
           </div>
         </div>
+      </div>
+
+      {/* ════════ SECTION 4: Submissions by Channel — Year Over Year ════════ */}
+      <div>
+        <h3 style={sectionHeader}>Submissions by Channel — Year Over Year</h3>
+        <p style={sectionSub}>Comparing influencer and ambassador submission volume across years.</p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+          {/* Influencer card */}
+          <div style={{ ...card, borderTop: `4px solid ${TP.teal}` }}>
+            <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>Influencers</h4>
+            <table style={{ width: '100%', fontSize: '0.8rem', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
+                  <th style={{ textAlign: 'left', padding: '4px 0', color: '#888' }}>Year</th>
+                  <th style={{ textAlign: 'right', padding: '4px 0', color: '#888' }}>Submissions</th>
+                  <th style={{ textAlign: 'right', padding: '4px 0', color: '#888' }}>New Adds</th>
+                </tr>
+              </thead>
+              <tbody>
+                {years.map(y => (
+                  <tr key={y} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                    <td style={{ padding: '6px 0', fontWeight: 600, color: TP.navy }}>{y}{y === 2026 ? ' YTD' : ''}</td>
+                    <td style={{ textAlign: 'right', padding: '6px 0', color: '#444' }}>{infSubsYear[y].toLocaleString()}</td>
+                    <td style={{ textAlign: 'right', padding: '6px 0', color: '#444' }}>{addsInfYear[y]}</td>
+                  </tr>
+                ))}
+                <tr style={{ borderTop: '2px solid #e5e7eb', background: '#f9fafb' }}>
+                  <td style={{ padding: '6px 0', fontWeight: 700, color: TP.purple }}>2026 Pace</td>
+                  <td style={{ textAlign: 'right', padding: '6px 0', fontWeight: 700, color: TP.purple }}>~{infPace.toLocaleString()}</td>
+                  <td style={{ textAlign: 'right', padding: '6px 0', fontWeight: 700, color: TP.purple }}>~{infAddsPace}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Ambassador card */}
+          <div style={{ ...card, borderTop: `4px solid ${TP.blue}` }}>
+            <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>Ambassadors</h4>
+            <table style={{ width: '100%', fontSize: '0.8rem', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
+                  <th style={{ textAlign: 'left', padding: '4px 0', color: '#888' }}>Year</th>
+                  <th style={{ textAlign: 'right', padding: '4px 0', color: '#888' }}>Submissions</th>
+                  <th style={{ textAlign: 'right', padding: '4px 0', color: '#888' }}>New Adds</th>
+                </tr>
+              </thead>
+              <tbody>
+                {years.map(y => (
+                  <tr key={y} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                    <td style={{ padding: '6px 0', fontWeight: 600, color: TP.navy }}>{y}{y === 2026 ? ' YTD' : ''}</td>
+                    <td style={{ textAlign: 'right', padding: '6px 0', color: '#444' }}>{ambSubsYear[y].toLocaleString()}</td>
+                    <td style={{ textAlign: 'right', padding: '6px 0', color: '#444' }}>{addsAmbYear[y]}</td>
+                  </tr>
+                ))}
+                <tr style={{ borderTop: '2px solid #e5e7eb', background: '#f9fafb' }}>
+                  <td style={{ padding: '6px 0', fontWeight: 700, color: TP.purple }}>2026 Pace</td>
+                  <td style={{ textAlign: 'right', padding: '6px 0', fontWeight: 700, color: TP.purple }}>~{ambPace.toLocaleString()}</td>
+                  <td style={{ textAlign: 'right', padding: '6px 0', fontWeight: 700, color: TP.purple }}>~{addsAmbPace}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style={chartWrap}>
+          <div style={{ height: 320 }}>
+            <Bar data={channelChartData} options={channelChartOpts} />
+          </div>
+        </div>
+      </div>
+
+      {/* ════════ SECTION 5: Base Program Without Viral Spikes ════════ */}
+      <div>
+        <h3 style={sectionHeader}>The Real Growth Story — Base Program Without Viral Spikes</h3>
+        <p style={sectionSub}>
+          Lauren Johnson (NNM), Kendra Needham, and Ginny Yurich have produced viral moments that inflate yearly totals. Removing those three mega-influencers shows the true underlying program trajectory.
+        </p>
+
+        <div style={{ ...gridRow(4), marginBottom: '1.5rem' }}>
+          {years.map((y, i) => {
+            const val = baseByYear[y];
+            const isPace = y === 2026;
+            const yoy = i > 0 ? pctChange(baseByYear[years[i - 1]], val) : null;
+            const yoyPace = isPace ? pctChange(baseByYear[2025], basePace) : null;
+            return (
+              <div key={y} style={statCard(isPace ? TP.purple : TP.blue)}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#666' }}>{y}{isPace ? ' YTD' : ''}</div>
+                <div style={{ fontSize: '2rem', fontWeight: 800, color: TP.navy }}>{val.toLocaleString()}</div>
+                {yoy && !isPace && (
+                  <div style={{ fontSize: '0.7rem', color: val > baseByYear[years[i - 1]] ? '#16a34a' : TP.red, fontWeight: 600 }}>
+                    {yoy} vs {years[i - 1]}
+                  </div>
+                )}
+                {isPace && (
+                  <div style={{ fontSize: '0.7rem', color: TP.purple, fontWeight: 600, marginTop: 4 }}>
+                    Pace: ~{basePace.toLocaleString()} ({yoyPace} vs 2025)
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={chartWrap}>
+          <div style={{ height: 320 }}>
+            <Bar data={baseChartData} options={baseChartOpts} />
+          </div>
+        </div>
+      </div>
+
+      {/* ════════ SECTION 5b: Ambassador-Only Submissions ════════ */}
+      <div>
+        <h3 style={sectionHeader}>Ambassador-Only Submissions</h3>
+        <p style={sectionSub}>Submissions driven by Airway Ambassadors only (excludes influencer channel).</p>
+
+        <div style={{ ...gridRow(4), marginBottom: '1.5rem' }}>
+          {years.map((y, i) => {
+            const val = ambSubsYear[y];
+            const isPace = y === 2026;
+            return (
+              <div key={y} style={statCard(TP.blue)}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#666' }}>{y}{isPace ? ' YTD' : ''}</div>
+                <div style={{ fontSize: '2rem', fontWeight: 800, color: TP.navy }}>{val}</div>
+                {i > 0 && !isPace && (
+                  <div style={{ fontSize: '0.7rem', color: val > ambSubsYear[years[i - 1]] ? '#16a34a' : TP.red, fontWeight: 600 }}>
+                    {pctChange(ambSubsYear[years[i - 1]], val)} vs {years[i - 1]}
+                  </div>
+                )}
+                {isPace && (
+                  <div style={{ fontSize: '0.7rem', color: TP.purple, fontWeight: 600, marginTop: 4 }}>
+                    Pace: ~{ambPace}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={chartWrap}>
+          <div style={{ height: 320 }}>
+            <Bar data={ambOnlyChartData} options={ambOnlyChartOpts} plugins={[ambOnlyLabelPlugin]} />
+          </div>
+        </div>
+      </div>
+
+      {/* ════════ SECTION 6: Ambassador Program Health ════════ */}
+      <div>
+        <h3 style={sectionHeader}>Ambassador Program Health</h3>
+        <p style={sectionSub}>Measuring concentration risk and depth of the active producer base.</p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          {/* LEFT: People needed to reach 50% */}
+          <div style={card}>
+            <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>
+              People needed to reach 50%
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {concRows.map(row => {
+                const pct = (row.n / concMax) * 100;
+                return (
+                  <div key={row.y}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                      <span style={{ fontWeight: 700, color: TP.navy, fontSize: '0.85rem' }}>{row.y}</span>
+                      <span style={{ fontWeight: 800, color: TP.navy, fontSize: '1.1rem' }}>{row.n}</span>
+                    </div>
+                    <div style={{ background: '#f3f4f6', borderRadius: 6, height: 20, overflow: 'hidden' }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${Math.max(pct, 8)}%`,
+                        background: row.color,
+                        borderRadius: 6,
+                        transition: 'width 0.6s ease',
+                      }} />
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: '#888', marginTop: 3 }}>{row.names}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* RIGHT: Ambassadors with 10+ submissions */}
+          <div style={card}>
+            <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>
+              Ambassadors with 10+ submissions
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {years.map(y => {
+                const val = tenPlusByYear[y];
+                const maxVal = Math.max(...years.map(yr => yr === 2026 ? tenPlus2026Pace : tenPlusByYear[yr]));
+                const pct = (val / maxVal) * 100;
+                const pacePct = y === 2026 ? (tenPlus2026Pace / maxVal) * 100 : 0;
+                const barColors: Record<number, string> = { 2023: TP.gold, 2024: TP.teal, 2025: TP.blue, 2026: TP.blue };
+                return (
+                  <div key={y}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                      <span style={{ fontWeight: 700, color: TP.navy, fontSize: '0.85rem' }}>{y}</span>
+                      <span style={{ fontWeight: 800, color: TP.navy, fontSize: '1.1rem' }}>{val}</span>
+                    </div>
+                    <div style={{ position: 'relative', background: '#f3f4f6', borderRadius: 6, height: 20, overflow: 'hidden' }}>
+                      {y === 2026 && (
+                        <div style={{
+                          position: 'absolute',
+                          height: '100%',
+                          width: `${Math.max(pacePct, 8)}%`,
+                          background: barColors[y] + '40',
+                          borderRadius: 6,
+                        }} />
+                      )}
+                      <div style={{
+                        position: 'relative',
+                        height: '100%',
+                        width: `${Math.max(pct, 8)}%`,
+                        background: barColors[y],
+                        borderRadius: 6,
+                        transition: 'width 0.6s ease',
+                      }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ fontSize: '0.7rem', color: '#888', marginTop: 12 }}>
+              Solid = {tenPlusByYear[2026]} YTD · Faded = ~{tenPlus2026Pace} projected pace
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ════════ SECTION 6b: Individual Ambassador Performance vs 2025 ════════ */}
+      <div>
+        <h3 style={sectionHeader}>Individual Ambassador Performance vs 2025</h3>
+        <p style={sectionSub}>Top movers in each direction based on annualized 2026 pace compared to full-year 2025.</p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          {/* Trending Up */}
+          <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
+            <div style={{ background: '#16a34a', color: '#fff', padding: '0.75rem 1.25rem', fontWeight: 700, fontSize: '0.85rem' }}>
+              Trending Up vs 2025
+            </div>
+            <table style={{ width: '100%', fontSize: '0.75rem', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: '#f0fdf4', borderBottom: '2px solid #d1fae5' }}>
+                  <th style={{ textAlign: 'left', padding: '8px 12px', color: '#166534' }}>Name</th>
+                  <th style={{ textAlign: 'right', padding: '8px 8px', color: '#166534' }}>2025</th>
+                  <th style={{ textAlign: 'right', padding: '8px 8px', color: '#166534' }}>YTD</th>
+                  <th style={{ textAlign: 'right', padding: '8px 8px', color: '#166534' }}>Pace</th>
+                  <th style={{ textAlign: 'right', padding: '8px 12px', color: '#166534' }}>vs 25</th>
+                </tr>
+              </thead>
+              <tbody>
+                {moversComputed.trendingUp.map((m, i) => (
+                  <tr key={m.name} style={{ background: i % 2 === 0 ? '#f0fdf4' : '#fff', borderBottom: '1px solid #e5e7eb' }}>
+                    <td style={{ padding: '6px 12px', fontWeight: 600, color: TP.navy }}>
+                      {m.name}
+                      <span style={{ marginLeft: 6, fontSize: '0.6rem', color: m.type === 'Inf' ? TP.teal : TP.blue, fontWeight: 700 }}>
+                        {m.type}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: 'right', padding: '6px 8px', color: '#444' }}>{m.y25}</td>
+                    <td style={{ textAlign: 'right', padding: '6px 8px', color: '#444' }}>{m.y26}</td>
+                    <td style={{ textAlign: 'right', padding: '6px 8px', color: '#444' }}>{m.pace}</td>
+                    <td style={{ textAlign: 'right', padding: '6px 12px', fontWeight: 700, color: '#16a34a' }}>
+                      {m.y25 === 0 ? 'New' : `+${Math.round(m.pctChg ?? 0)}%`}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Trending Down */}
+          <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
+            <div style={{ background: TP.red, color: '#fff', padding: '0.75rem 1.25rem', fontWeight: 700, fontSize: '0.85rem' }}>
+              Trending Down vs 2025
+            </div>
+            <table style={{ width: '100%', fontSize: '0.75rem', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: '#fef2f2', borderBottom: '2px solid #fecaca' }}>
+                  <th style={{ textAlign: 'left', padding: '8px 12px', color: '#991b1b' }}>Name</th>
+                  <th style={{ textAlign: 'right', padding: '8px 8px', color: '#991b1b' }}>2025</th>
+                  <th style={{ textAlign: 'right', padding: '8px 8px', color: '#991b1b' }}>YTD</th>
+                  <th style={{ textAlign: 'right', padding: '8px 8px', color: '#991b1b' }}>Pace</th>
+                  <th style={{ textAlign: 'right', padding: '8px 12px', color: '#991b1b' }}>vs 25</th>
+                </tr>
+              </thead>
+              <tbody>
+                {moversComputed.trendingDown.map((m, i) => (
+                  <tr key={m.name} style={{ background: i % 2 === 0 ? '#fef2f2' : '#fff', borderBottom: '1px solid #e5e7eb' }}>
+                    <td style={{ padding: '6px 12px', fontWeight: 600, color: TP.navy }}>
+                      {m.name}
+                      <span style={{ marginLeft: 6, fontSize: '0.6rem', color: m.type === 'Inf' ? TP.teal : TP.blue, fontWeight: 700 }}>
+                        {m.type}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: 'right', padding: '6px 8px', color: '#444' }}>{m.y25}</td>
+                    <td style={{ textAlign: 'right', padding: '6px 8px', color: '#444' }}>{m.y26}</td>
+                    <td style={{ textAlign: 'right', padding: '6px 8px', color: '#444' }}>{m.pace}</td>
+                    <td style={{ textAlign: 'right', padding: '6px 12px', fontWeight: 700, color: TP.red }}>
+                      {Math.round(m.pctChg ?? 0)}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style={{ fontSize: '0.7rem', color: '#888', marginTop: 8, textAlign: 'center' }}>
+          Annualization factor: 12 / 4.27 = {moverAnnFactor.toFixed(2)}x. Pace = YTD x {moverAnnFactor.toFixed(2)}. &quot;New&quot; = no 2025 submissions on record.
+        </div>
+      </div>
+
+      {/* ════════ SECTION 7: Launch Bonus Tracker ════════ */}
+      <div>
+        <h3 style={sectionHeader}>Launch Bonus Tracker</h3>
+        <p style={sectionSub}>Tracking ambassador progress toward bonus tiers within their eligible windows.</p>
+
+        {/* KPI cards */}
+        <div style={{ ...gridRow(4), marginBottom: '1.5rem' }}>
+          <div style={{ ...card, borderLeft: `4px solid ${TP.teal}`, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: 1 }}>Tier 1 Reached ($250)</div>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: TP.navy }}>{tier1Count}</div>
+          </div>
+          <div style={{ ...card, borderLeft: `4px solid ${TP.gold}`, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: 1 }}>Approaching Tier 1</div>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: TP.navy }}>{approachingTier1}</div>
+          </div>
+          <div style={{ ...card, borderLeft: `4px solid ${TP.blue}`, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: 1 }}>Bonuses Earned</div>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: TP.navy }}>${totalEarned.toLocaleString()}</div>
+          </div>
+          <div style={{ ...card, borderLeft: `4px solid ${TP.purple}`, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: 1 }}>Ambassadors Tracked</div>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: TP.navy }}>66</div>
+          </div>
+        </div>
+
+        {/* Bonus rules note */}
+        <div style={{
+          background: '#f0f4ff',
+          border: '1px solid #c7d2fe',
+          borderRadius: 10,
+          padding: '1rem 1.25rem',
+          marginBottom: '1.5rem',
+          fontSize: '0.8rem',
+          lineHeight: 1.6,
+          color: '#333',
+        }}>
+          <strong>Bonus structure:</strong> $250 at 25 submissions (Tier 1), $1,250 at 50 submissions (Tier 2).
+          New 2026 onboards: window starts at their onboard date and runs for 12 months.
+          Pre-2026 ambassadors: window starts 4/1/2026 and runs through 3/31/2027.
+          Only submissions within the window count toward the bonus.
+        </div>
+
+        {/* Bonus table */}
+        <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
+          <table style={{ width: '100%', fontSize: '0.75rem', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: TP.blue, color: '#fff' }}>
+                <th style={{ textAlign: 'left', padding: '10px 12px' }}>Ambassador</th>
+                <th style={{ textAlign: 'center', padding: '10px 8px' }}>Window Start</th>
+                <th style={{ textAlign: 'center', padding: '10px 8px' }}>Window End</th>
+                <th style={{ textAlign: 'center', padding: '10px 8px' }}>Bonus Subs</th>
+                <th style={{ textAlign: 'center', padding: '10px 8px', minWidth: 140 }}>Progress</th>
+                <th style={{ textAlign: 'right', padding: '10px 8px' }}>Earned</th>
+                <th style={{ textAlign: 'center', padding: '10px 12px' }}>Next Tier</th>
+              </tr>
+            </thead>
+            <tbody>
+              {launchBonusData.map((row, i) => {
+                const pctToTier1 = Math.min((row.bonusSubs / 25) * 100, 100);
+                const pctToTier2 = Math.min((row.bonusSubs / 50) * 100, 100);
+                const barPct = row.tier >= 1 ? pctToTier2 : pctToTier1;
+                const barTarget = row.tier >= 1 ? 50 : 25;
+                const barColor = row.tier >= 1 ? TP.teal : row.bonusSubs >= 15 ? TP.gold : TP.lightBlue;
+                const nextTier = row.tier >= 1
+                  ? (row.bonusSubs >= 50 ? 'Complete' : `${50 - row.bonusSubs} to Tier 2`)
+                  : `${25 - row.bonusSubs} to Tier 1`;
+                return (
+                  <tr key={row.name} style={{ background: i % 2 === 0 ? '#f9fafb' : '#fff', borderBottom: '1px solid #e5e7eb' }}>
+                    <td style={{ padding: '8px 12px', fontWeight: 600, color: TP.navy }}>
+                      {row.name}
+                      {row.is2026 && (
+                        <span style={{
+                          marginLeft: 8,
+                          background: TP.purple,
+                          color: '#fff',
+                          fontSize: '0.55rem',
+                          padding: '1px 6px',
+                          borderRadius: 6,
+                          fontWeight: 700,
+                          verticalAlign: 'middle',
+                        }}>2026</span>
+                      )}
+                    </td>
+                    <td style={{ textAlign: 'center', padding: '8px 8px', color: '#555' }}>{row.winStart}</td>
+                    <td style={{ textAlign: 'center', padding: '8px 8px', color: '#555' }}>{row.winEnd}</td>
+                    <td style={{ textAlign: 'center', padding: '8px 8px', fontWeight: 700, color: TP.navy }}>{row.bonusSubs}</td>
+                    <td style={{ padding: '8px 8px' }}>
+                      <div style={{ position: 'relative', background: '#f3f4f6', borderRadius: 4, height: 16, overflow: 'hidden' }}>
+                        <div style={{
+                          height: '100%',
+                          width: `${Math.max(barPct, 3)}%`,
+                          background: barColor,
+                          borderRadius: 4,
+                          transition: 'width 0.4s ease',
+                        }} />
+                        <span style={{
+                          position: 'absolute',
+                          right: 4,
+                          top: 1,
+                          fontSize: '0.6rem',
+                          color: '#555',
+                          fontWeight: 600,
+                        }}>{row.bonusSubs}/{barTarget}</span>
+                      </div>
+                    </td>
+                    <td style={{ textAlign: 'right', padding: '8px 8px', fontWeight: 700, color: row.earned > 0 ? '#16a34a' : '#aaa' }}>
+                      {row.earned > 0 ? `$${row.earned}` : '—'}
+                    </td>
+                    <td style={{ textAlign: 'center', padding: '8px 12px', fontSize: '0.7rem', color: '#666' }}>{nextTier}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <div style={{ fontSize: '0.7rem', color: '#888', marginTop: 8, textAlign: 'center' }}>
+          44 additional ambassadors have 1–2 bonus-eligible submissions each and are not shown. Data as of 4/29/2026.
+        </div>
+      </div>
+
+      {/* ════════ SECTION 8: Bottom Line ════════ */}
+      <div style={{
+        background: 'linear-gradient(135deg, #dbeafe 0%, #d1fae5 100%)',
+        borderRadius: 12,
+        padding: '2.5rem 2rem',
+      }}>
+        <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: TP.navy, marginBottom: '1rem' }}>The bottom line</h3>
+        <p style={{ color: '#1a3a2a', lineHeight: 1.7, maxWidth: '56rem', fontSize: '0.95rem' }}>
+          The ambassador program generated 362 submissions in January 2026 before Sosh started.
+          In February, her first month, that jumped to 570 — a 57% increase.
+          New ambassador adds are accelerating month over month (8 → 14 → 13 → 22).
+          The ambassador-only channel is on pace for ~{ambPace} submissions this year, up from 561 in 2025 and 435 in 2024.
+          The base program — stripping out the three mega-influencers whose viral moments inflated 2024 — grew from 517 to 2,898 to 4,642 and is pacing at ~{basePace.toLocaleString()} in 2026.
+          In 2023, one person carried 50% of submissions. In 2026, it takes {halfCarriedBy[2026]}.
+          The program is broader, more diversified, and growing where it matters.
+        </p>
       </div>
     </div>
   );
