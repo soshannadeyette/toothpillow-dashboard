@@ -47,8 +47,11 @@ const META_MONTHLY = [
 ];
 
 const META_FUNNEL = { entered: 58, waitingInfo: 30, sentCheckout: 13, checkedOut: 0, amountReceived: 0, denied: 7, closedLost: 8 };
-const GOOGLE_FUNNEL = { entered: 91, waitingInfo: 57, sentToTxP: 10, txpApproved: 1, sentCheckout: 18, checkedOut: 3, amountReceived: 5286, denied: 0, closedLost: 0, referredOut: 2 };
-const GOOGLE_SF_ENTERED = 91; // Salesforce lead count for CPL scaling
+
+// Salesforce pipeline detail (update when new SF export is loaded)
+// These sub-stage breakdowns can't come from daily Supabase data
+const GOOGLE_SF_PIPELINE = { sentToTxP: 10, txpApproved: 1, sentCheckout: 18, referredOut: 2, denied: 0, closedLost: 0 };
+const GOOGLE_REVENUE: number = 5286; // Total checkout revenue — update with each new SF export
 
 /* ════════════════════════════════════════════
    COMPONENT
@@ -134,18 +137,19 @@ export default function PaidAds() {
   }, [sorted]);
 
   const googleTotalSpend = gT.spend;
-  const googleTotalLeads = Math.max(gT.started, GOOGLE_SF_ENTERED);
+  const googleTotalLeads = gT.started; // from Supabase daily started counts
   const googleDays = sorted.length || 1;
   const avgCPC = gT.clicks > 0 ? gT.spend / gT.clicks : 0;
   const googleCPL = googleTotalLeads > 0 ? googleTotalSpend / googleTotalLeads : 0;
 
-  // Submissions = past "Waiting on Info"
-  const googleSubmissions = (GOOGLE_FUNNEL.sentToTxP || 0) + (GOOGLE_FUNNEL.txpApproved || 0) + (GOOGLE_FUNNEL.sentCheckout || 0) + (GOOGLE_FUNNEL.checkedOut || 0) + (GOOGLE_FUNNEL.referredOut || 0);
+  // Submissions = completed the form (from Supabase daily finished counts)
+  const googleSubmissions = gT.finished;
   const googleCostPerSubmission = googleSubmissions > 0 ? googleTotalSpend / googleSubmissions : 0;
-  const googleCheckouts = GOOGLE_FUNNEL.checkedOut || 0;
+  const googleCheckouts = gT.treatment; // from Supabase daily treatment counts
   const googleCostPerCheckout = googleCheckouts > 0 ? googleTotalSpend / googleCheckouts : 0;
-  const googleRevenue = GOOGLE_FUNNEL.amountReceived || 0;
+  const googleRevenue = GOOGLE_REVENUE;
   const googleNet = googleRevenue - googleTotalSpend;
+  const googleWaitingInfo = googleTotalLeads - googleSubmissions; // started but not finished
 
   // Meta stats
   const metaCampaignMonths = META_MONTHLY.filter((m) => m.spend >= 1000);
@@ -201,14 +205,12 @@ export default function PaidAds() {
 
   /* ──── CPL over time data ──── */
   const cplChartData = useMemo(() => {
-    const rawFinished = sorted.reduce((s, e) => s + (e.finished || 0), 0);
-    const scale = rawFinished > 0 && GOOGLE_SF_ENTERED > 0 ? GOOGLE_SF_ENTERED / rawFinished : 1;
     let runSpend = 0, runLeads = 0;
     const labels: string[] = [];
     const data: number[] = [];
     sorted.forEach((e) => {
       runSpend += e.spend || 0;
-      runLeads += (e.finished || 0) * scale;
+      runLeads += e.started || 0;
       if (runLeads === 0) return;
       labels.push(e.date.substring(5).replace('-', '/'));
       data.push(parseFloat((runSpend / runLeads).toFixed(2)));
@@ -241,16 +243,16 @@ export default function PaidAds() {
     { label: 'Time Active', meta: `${metaCampaignMonthCount} months`, google: `${googleDays} days` },
     { label: 'Total Spend', meta: `$${Math.round(metaTotalSpend).toLocaleString()}`, google: `$${Math.round(googleTotalSpend).toLocaleString()}` },
     { label: 'Total Leads', meta: `${metaTotalLeads}`, google: `${googleTotalLeads}` },
-    { label: 'Waiting on Info', meta: `${META_FUNNEL.waitingInfo} of ${META_FUNNEL.entered} (${META_FUNNEL.entered > 0 ? (META_FUNNEL.waitingInfo / META_FUNNEL.entered * 100).toFixed(0) : 0}%)`, google: `${GOOGLE_FUNNEL.waitingInfo} of ${GOOGLE_FUNNEL.entered} (${GOOGLE_FUNNEL.entered > 0 ? (GOOGLE_FUNNEL.waitingInfo / GOOGLE_FUNNEL.entered * 100).toFixed(0) : 0}%)` },
+    { label: 'Waiting on Info', meta: `${META_FUNNEL.waitingInfo} of ${META_FUNNEL.entered} (${META_FUNNEL.entered > 0 ? (META_FUNNEL.waitingInfo / META_FUNNEL.entered * 100).toFixed(0) : 0}%)`, google: `${googleWaitingInfo} of ${googleTotalLeads} (${googleTotalLeads > 0 ? (googleWaitingInfo / googleTotalLeads * 100).toFixed(0) : 0}%)` },
     { label: 'Cost per Lead', meta: metaCPL > 0 ? `$${Math.round(metaCPL).toLocaleString()}` : 'No leads', google: googleCPL > 0 ? `$${Math.round(googleCPL).toLocaleString()}` : '--', highlight: true },
-    { label: 'Submissions (past waiting)', meta: `${metaSubmissions} of ${META_FUNNEL.entered} (${META_FUNNEL.entered > 0 ? (metaSubmissions / META_FUNNEL.entered * 100).toFixed(0) : 0}%)`, google: `${googleSubmissions} of ${GOOGLE_FUNNEL.entered} (${GOOGLE_FUNNEL.entered > 0 ? (googleSubmissions / GOOGLE_FUNNEL.entered * 100).toFixed(0) : 0}%)` },
+    { label: 'Submissions (past waiting)', meta: `${metaSubmissions} of ${META_FUNNEL.entered} (${META_FUNNEL.entered > 0 ? (metaSubmissions / META_FUNNEL.entered * 100).toFixed(0) : 0}%)`, google: `${googleSubmissions} of ${googleTotalLeads} (${googleTotalLeads > 0 ? (googleSubmissions / googleTotalLeads * 100).toFixed(0) : 0}%)` },
     { label: 'Cost per Submission', meta: metaCostPerSubmission > 0 ? `$${Math.round(metaCostPerSubmission).toLocaleString()}` : '--', google: googleCostPerSubmission > 0 ? `$${Math.round(googleCostPerSubmission).toLocaleString()}` : '--', highlight: true },
     { label: 'Cost per Checkout', meta: metaCostPerCheckout > 0 ? `$${Math.round(metaCostPerCheckout).toLocaleString()}` : '--', google: googleCostPerCheckout > 0 ? `$${Math.round(googleCostPerCheckout).toLocaleString()}` : '--', highlight: true },
     { label: 'Leads per Day', meta: metaTotalLeads > 0 ? (metaTotalLeads / (metaCampaignMonthCount * 30)).toFixed(2) : '0', google: googleTotalLeads > 0 ? (googleTotalLeads / googleDays).toFixed(2) : '0', highlight: true },
-    { label: 'Sent Checkout Link', meta: `${META_FUNNEL.sentCheckout} of ${META_FUNNEL.entered} (${META_FUNNEL.entered > 0 ? (META_FUNNEL.sentCheckout / META_FUNNEL.entered * 100).toFixed(0) : 0}%)`, google: `${GOOGLE_FUNNEL.sentCheckout} of ${GOOGLE_FUNNEL.entered} (${GOOGLE_FUNNEL.entered > 0 ? (GOOGLE_FUNNEL.sentCheckout / GOOGLE_FUNNEL.entered * 100).toFixed(0) : 0}%)` },
-    { label: 'Checked Out', meta: `${META_FUNNEL.checkedOut} -- $${(META_FUNNEL.amountReceived || 0).toLocaleString()}`, google: `${GOOGLE_FUNNEL.checkedOut} -- $${(GOOGLE_FUNNEL.amountReceived || 0).toLocaleString()}`, highlight: true },
-    { label: 'Denied / Closed Lost', meta: `${META_FUNNEL.denied + META_FUNNEL.closedLost} (${META_FUNNEL.entered > 0 ? ((META_FUNNEL.denied + META_FUNNEL.closedLost) / META_FUNNEL.entered * 100).toFixed(0) : 0}%)`, google: `${GOOGLE_FUNNEL.denied + GOOGLE_FUNNEL.closedLost} (${GOOGLE_FUNNEL.entered > 0 ? ((GOOGLE_FUNNEL.denied + GOOGLE_FUNNEL.closedLost) / GOOGLE_FUNNEL.entered * 100).toFixed(0) : 0}%)` },
-  ], [googleTotalSpend, googleTotalLeads, googleDays, googleCPL, googleSubmissions, googleCostPerSubmission, googleCostPerCheckout, metaCPL, metaSubmissions, metaCostPerSubmission, metaCostPerCheckout, metaTotalSpend, metaTotalLeads, metaCampaignMonthCount]);
+    { label: 'Sent Checkout Link', meta: `${META_FUNNEL.sentCheckout} of ${META_FUNNEL.entered} (${META_FUNNEL.entered > 0 ? (META_FUNNEL.sentCheckout / META_FUNNEL.entered * 100).toFixed(0) : 0}%)`, google: `${GOOGLE_SF_PIPELINE.sentCheckout} of ${googleTotalLeads} (${googleTotalLeads > 0 ? (GOOGLE_SF_PIPELINE.sentCheckout / googleTotalLeads * 100).toFixed(0) : 0}%)` },
+    { label: 'Checked Out', meta: `${META_FUNNEL.checkedOut} -- $${(META_FUNNEL.amountReceived || 0).toLocaleString()}`, google: `${googleCheckouts} -- $${googleRevenue.toLocaleString()}`, highlight: true },
+    { label: 'Denied / Closed Lost', meta: `${META_FUNNEL.denied + META_FUNNEL.closedLost} (${META_FUNNEL.entered > 0 ? ((META_FUNNEL.denied + META_FUNNEL.closedLost) / META_FUNNEL.entered * 100).toFixed(0) : 0}%)`, google: `${GOOGLE_SF_PIPELINE.denied + GOOGLE_SF_PIPELINE.closedLost} (${googleTotalLeads > 0 ? ((GOOGLE_SF_PIPELINE.denied + GOOGLE_SF_PIPELINE.closedLost) / googleTotalLeads * 100).toFixed(0) : 0}%)` },
+  ], [googleTotalSpend, googleTotalLeads, googleDays, googleCPL, googleSubmissions, googleCostPerSubmission, googleCostPerCheckout, googleCheckouts, googleRevenue, googleWaitingInfo, metaCPL, metaSubmissions, metaCostPerSubmission, metaCostPerCheckout, metaTotalSpend, metaTotalLeads, metaCampaignMonthCount]);
 
   const advantage = metaCPL > 0 && googleCPL > 0 ? Math.round(metaCPL / googleCPL) : 0;
 
@@ -278,7 +280,7 @@ export default function PaidAds() {
           <KPICard color={TP.yellow} label="Cost per Click" value={`$${avgCPC.toFixed(2)}`} sub={`${gT.clicks.toLocaleString()} clicks total`} />
           <KPICard color={TP.blue} label="Cost per Lead" value={`$${Math.round(googleCPL)}`} sub={`${googleTotalLeads} leads in Salesforce`} />
           <KPICard color={TP.darkPurple} label="Cost per Submission" value={`$${Math.round(googleCostPerSubmission)}`} sub={`${googleSubmissions} submitted (${googleTotalLeads > 0 ? (googleSubmissions / googleTotalLeads * 100).toFixed(0) : 0}% of leads)`} />
-          <KPICard color="#00C853" label="Cost per Checkout" value={googleCheckouts > 0 ? `$${Math.round(googleCostPerCheckout).toLocaleString()}` : '--'} sub={`${googleCheckouts} checkout${googleCheckouts !== 1 ? 's' : ''} ($${(GOOGLE_FUNNEL.amountReceived || 0).toLocaleString()} revenue)`} />
+          <KPICard color="#00C853" label="Cost per Checkout" value={googleCheckouts > 0 ? `$${Math.round(googleCostPerCheckout).toLocaleString()}` : '--'} sub={`${googleCheckouts} checkout${googleCheckouts !== 1 ? 's' : ''} ($${googleRevenue.toLocaleString()} revenue)`} />
         </div>
 
         {/* Chart 1: Clicks, CPC & Spend */}
@@ -424,11 +426,11 @@ export default function PaidAds() {
         <ChartLabel>Salesforce Pipeline</ChartLabel>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10, marginBottom: 12 }}>
           {[
-            { label: 'Waiting on Info', val: GOOGLE_FUNNEL.waitingInfo, color: '#999' },
-            { label: 'Sent to TxP', val: GOOGLE_FUNNEL.sentToTxP, color: TP.darkPurple },
-            { label: 'TxP Approved', val: GOOGLE_FUNNEL.txpApproved, color: TP.blue },
-            { label: 'Sent Checkout', val: GOOGLE_FUNNEL.sentCheckout, color: TP.yellow },
-            { label: 'Checked Out', val: GOOGLE_FUNNEL.checkedOut, color: '#00C853' },
+            { label: 'Waiting on Info', val: googleWaitingInfo, color: '#999' },
+            { label: 'Sent to TxP', val: GOOGLE_SF_PIPELINE.sentToTxP, color: TP.darkPurple },
+            { label: 'TxP Approved', val: GOOGLE_SF_PIPELINE.txpApproved, color: TP.blue },
+            { label: 'Sent Checkout', val: GOOGLE_SF_PIPELINE.sentCheckout, color: TP.yellow },
+            { label: 'Checked Out', val: googleCheckouts, color: '#00C853' },
           ].map((s) => (
             <div key={s.label} style={{
               background: '#fff', borderRadius: 10, padding: '14px 10px',
@@ -466,7 +468,7 @@ export default function PaidAds() {
             </div>
           </div>
           <div style={{ fontSize: '0.78em', color: '#888', marginTop: 10 }}>
-            2 checkouts: Anton Lovely ($1,745, 4/28) + Emma Chaves ($1,546, 4/30). 11 more at Sent Checkout stage.
+            {googleCheckouts} checkout{googleCheckouts !== 1 ? 's' : ''} totaling ${googleRevenue.toLocaleString()}. {GOOGLE_SF_PIPELINE.sentCheckout} more at Sent Checkout stage.
           </div>
         </div>
       </div>
