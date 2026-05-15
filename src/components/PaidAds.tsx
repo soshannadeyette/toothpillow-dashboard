@@ -200,6 +200,7 @@ export default function PaidAds() {
 
       draw('04/17', 'Switched to', 'Conversions', TP.navy);
       draw('05/01', 'Campaign Split', '50/50 New Build', TP.darkPurple);
+      draw('05/13', 'Budget Increase', '$150/campaign', '#00C853');
     },
   }), []);
 
@@ -575,7 +576,9 @@ export default function PaidAds() {
           <strong>Mar 2025--Mar 2026:</strong> Meta spent $25.6K total, 54 leads ($475/lead)<br />
           <strong>Late Mar 2026:</strong> Google Ads launched, Meta budget redirected<br />
           <strong>Apr 1:</strong> Meta paused (only $72 residual)<br />
-          <strong>Apr 17:</strong> Google switched from &quot;optimize for clicks&quot; to &quot;optimize for conversions&quot;
+          <strong>Apr 17:</strong> Google switched from &quot;optimize for clicks&quot; to &quot;optimize for conversions&quot;<br />
+          <strong>May 1:</strong> Campaign split 50/50 new build<br />
+          <strong>May 12:</strong> Budget increased to $150/campaign ($300/day total)
         </div>
       </div>
     </div>
