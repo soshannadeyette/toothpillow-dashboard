@@ -846,19 +846,39 @@ export default function AmbassadorGrowth() {
           <div style={{ height: 280 }}>
             <Bar
               data={{
-                labels: ['2023', '2024', '2025', '2026 YTD'],
+                labels: ['2023', '2024', '2025', '2026 YTD', '2026 Projected'],
                 datasets: [
                   {
                     label: 'Influencer',
-                    data: [activeInfByYear[2023], activeInfByYear[2024], activeInfByYear[2025], activeInfByYear[2026]],
+                    data: [activeInfByYear[2023], activeInfByYear[2024], activeInfByYear[2025], activeInfByYear[2026], 0],
                     backgroundColor: TP.teal,
                     borderRadius: 4,
+                    stack: 'actual',
                   },
                   {
                     label: 'Ambassador',
-                    data: [activeAmbByYear[2023], activeAmbByYear[2024], activeAmbByYear[2025], activeAmbByYear[2026]],
+                    data: [activeAmbByYear[2023], activeAmbByYear[2024], activeAmbByYear[2025], activeAmbByYear[2026], 0],
                     backgroundColor: TP.blue,
                     borderRadius: 4,
+                    stack: 'actual',
+                  },
+                  {
+                    label: 'Projected Influencer',
+                    data: [0, 0, 0, 0, Math.round(activeInfByYear[2026] * ANN)],
+                    backgroundColor: TP.teal + '30',
+                    borderColor: TP.teal + '60',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    stack: 'projected',
+                  },
+                  {
+                    label: 'Projected Ambassador',
+                    data: [0, 0, 0, 0, Math.round(activeAmbByYear[2026] * ANN)],
+                    backgroundColor: TP.blue + '30',
+                    borderColor: TP.blue + '60',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    stack: 'projected',
                   },
                 ],
               }}
@@ -866,8 +886,18 @@ export default function AmbassadorGrowth() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                  legend: { position: 'top' as const, labels: { usePointStyle: true, padding: 16, font: { size: 12 } } },
-                  tooltip: { mode: 'index' as const, intersect: false },
+                  legend: {
+                    position: 'top' as const,
+                    labels: {
+                      usePointStyle: true, padding: 16, font: { size: 12 },
+                      filter: (item: { text: string }) => !item.text.startsWith('Projected'),
+                    },
+                  },
+                  tooltip: {
+                    mode: 'index' as const, intersect: false,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    callbacks: { label: (ctx: any) => { if (ctx.parsed.y === 0) return ''; return `${ctx.dataset.label}: ${ctx.parsed.y}`; } },
+                  },
                 },
                 scales: {
                   x: { stacked: true },
