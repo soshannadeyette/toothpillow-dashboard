@@ -67,6 +67,11 @@ const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:71}
 const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:15};
 const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:87};
 
+// Active ambassadors with ≥1 submission per year (from Salesforce)
+const activeInfByYear: Record<number, number> = {2023:6, 2024:60, 2025:82, 2026:64};
+const activeAmbByYear: Record<number, number> = {2023:24, 2024:85, 2025:127, 2026:97};
+const activeTotalByYear: Record<number, number> = {2023:30, 2024:145, 2025:209, 2026:161};
+
 const halfCarriedBy: Record<number, number> = {2023:1, 2024:2, 2025:5, 2026:7};
 const tenPlusByYear: Record<number, number> = {2023:8, 2024:40, 2025:55, 2026:30};
 const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:346};
@@ -708,6 +713,84 @@ export default function AmbassadorGrowth() {
           <div style={{ height: 320 }}>
             <Bar data={ambOnlyChartData} options={ambOnlyChartOpts} plugins={[ambOnlyLabelPlugin]} />
           </div>
+        </div>
+      </div>
+
+      {/* ════════ SECTION 5c: Active Ambassadors Per Year ════════ */}
+      <div>
+        <h3 style={sectionHeader}>Active Ambassadors Per Year</h3>
+        <p style={sectionSub}>Ambassadors with at least 1 submission in the given year. 2026 is YTD through May 14.</p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.875rem', marginBottom: '1rem' }}>
+          {([2023, 2024, 2025, 2026] as const).map((y) => {
+            const total = activeTotalByYear[y];
+            const inf = activeInfByYear[y];
+            const amb = activeAmbByYear[y];
+            const label = y === 2026 ? '2026 YTD' : String(y);
+            const prev = y > 2023 ? activeTotalByYear[(y - 1) as 2023 | 2024 | 2025 | 2026] : 0;
+            const yoyPct = prev > 0 ? Math.round(((total - prev) / prev) * 100) : 0;
+            const yoyColor = yoyPct >= 0 ? TP.teal : TP.red;
+            return (
+              <div key={y} style={{ background: '#fff', borderRadius: 12, padding: '1.125rem', boxShadow: '0 4px 15px rgba(0,0,0,0.06)', textAlign: 'center', borderTop: `3px solid ${TP.blue}` }}>
+                <div style={{ fontSize: '0.78rem', color: '#888', fontWeight: 600 }}>{label}</div>
+                <div style={{ fontSize: '2rem', fontWeight: 800, color: TP.navy }}>{total}</div>
+                <div style={{ fontSize: '0.75rem', color: '#888', marginTop: 4 }}>{inf} inf · {amb} amb</div>
+                {y > 2023 && y < 2026 && (
+                  <div style={{ fontSize: '0.78rem', color: yoyColor, marginTop: 4, fontWeight: 600 }}>
+                    {yoyPct >= 0 ? '+' : ''}{yoyPct}% vs {y - 1}
+                  </div>
+                )}
+                {y === 2026 && (
+                  <div style={{ fontSize: '0.78rem', color: TP.teal, marginTop: 4, fontWeight: 600 }}>
+                    Pace: ~{Math.round(total * ANN)}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Bar chart */}
+        <div style={{ background: '#fff', borderRadius: 12, padding: '1rem', boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}>
+          <div style={{ height: 280 }}>
+            <Bar
+              data={{
+                labels: ['2023', '2024', '2025', '2026 YTD'],
+                datasets: [
+                  {
+                    label: 'Influencer',
+                    data: [activeInfByYear[2023], activeInfByYear[2024], activeInfByYear[2025], activeInfByYear[2026]],
+                    backgroundColor: TP.teal,
+                    borderRadius: 4,
+                  },
+                  {
+                    label: 'Ambassador',
+                    data: [activeAmbByYear[2023], activeAmbByYear[2024], activeAmbByYear[2025], activeAmbByYear[2026]],
+                    backgroundColor: TP.blue,
+                    borderRadius: 4,
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { position: 'top' as const, labels: { usePointStyle: true, padding: 16, font: { size: 12 } } },
+                  tooltip: { mode: 'index' as const, intersect: false },
+                },
+                scales: {
+                  x: { stacked: true },
+                  y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Active Ambassadors', font: { size: 11 } } },
+                },
+              } satisfies ChartOptions<'bar'>}
+            />
+          </div>
+        </div>
+
+        <div style={{ background: '#f0f7f4', borderRadius: 10, padding: '0.875rem 1.125rem', marginTop: '1rem', fontSize: '0.88rem', lineHeight: 1.6 }}>
+          <strong style={{ color: TP.navy }}>The base is widening.</strong>{' '}
+          In 2023, 30 people generated submissions. By 2025 that grew to 209. Even at 4.5 months into 2026, 161 people have already submitted at least once — on pace for ~{Math.round(activeTotalByYear[2026] * ANN)} for the year.
+          More people producing means less dependence on any single ambassador.
         </div>
       </div>
 
