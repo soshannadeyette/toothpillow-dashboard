@@ -329,20 +329,40 @@ export default function AmbassadorGrowth() {
   };
 
   /* ── Chart: New Adds monthly stacked (Jan 2024 – May 2026) ── */
+  const mayPaceFactor = 31 / 15; // May 2026: 15 days so far out of 31
+  const lastIdx26 = MONTHS_JAN24_MAY26.length - 1;
+  const mayAmbActual = newAddsAmb['2026-05'] ?? 0;
+  const mayInfActual = newAddsInf['2026-05'] ?? 0;
+  const mayAmbProj = Math.round(mayAmbActual * mayPaceFactor);
+  const mayInfProj = Math.round(mayInfActual * mayPaceFactor);
+
   const newAddsChartData: ChartData<'bar'> = {
     labels: MONTHS_JAN24_MAY26.map(fmtMonthLabel),
     datasets: [
+      {
+        label: 'Projected',
+        data: MONTHS_JAN24_MAY26.map((_, i) => i === lastIdx26 ? mayAmbProj + mayInfProj : 0),
+        backgroundColor: MONTHS_JAN24_MAY26.map((_, i) => i === lastIdx26 ? TP.blue + '20' : 'transparent'),
+        borderColor: MONTHS_JAN24_MAY26.map((_, i) => i === lastIdx26 ? TP.blue + '40' : 'transparent'),
+        borderWidth: 1,
+        borderRadius: 4,
+        stack: 'projected',
+        barPercentage: 1.0,
+        categoryPercentage: 0.85,
+      },
       {
         label: 'Ambassador',
         data: MONTHS_JAN24_MAY26.map(k => newAddsAmb[k] ?? 0),
         backgroundColor: TP.blue,
         borderRadius: 4,
+        stack: 'actual',
       },
       {
         label: 'Influencer',
         data: MONTHS_JAN24_MAY26.map(k => newAddsInf[k] ?? 0),
         backgroundColor: TP.gold,
         borderRadius: 4,
+        stack: 'actual',
       },
     ],
   };
@@ -350,8 +370,32 @@ export default function AmbassadorGrowth() {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
-      tooltip: { mode: 'index', intersect: false },
+      legend: {
+        position: 'top',
+        labels: {
+          usePointStyle: true,
+          padding: 16,
+          filter: (item: { text: string }) => item.text !== 'Projected',
+        },
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        callbacks: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          afterBody: (items: any[]) => {
+            if (items[0]?.dataIndex === lastIdx26) {
+              return `Projected full month: ${mayAmbProj + mayInfProj} (${mayAmbProj} amb + ${mayInfProj} inf)`;
+            }
+            return '';
+          },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          label: (ctx: any) => {
+            if (ctx.dataset.label === 'Projected') return '';
+            return `${ctx.dataset.label}: ${ctx.parsed.y}`;
+          },
+        },
+      },
     },
     scales: {
       x: { stacked: true, ticks: { maxRotation: 45, font: { size: 10 } } },
