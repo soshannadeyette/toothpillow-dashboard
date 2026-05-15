@@ -165,7 +165,9 @@ export default function AnnualView() {
                 conversion_rate: (m.total_visitors || liveSummary.total_visitors) > 0
                   ? parseFloat(((totalSubs / (m.total_visitors || liveSummary.total_visitors)) * 100).toFixed(2))
                   : convRate,
-                usa_conversion_rate: m.usa_conversion_rate || 0,
+                usa_conversion_rate: (m.usa_visitors || 0) > 0
+                  ? parseFloat(((totalSubs / (m.usa_visitors || liveSummary.usa_visitors)) * 100).toFixed(2))
+                  : 0,
               };
             }
             return m;
@@ -174,6 +176,19 @@ export default function AnnualView() {
           merged.push(liveSummary);
         }
       }
+
+      // Recompute conversion rates for ALL months from stored submissions/visitors
+      // This ensures rates are never stale after submission count updates
+      merged = merged.map(m => {
+        const subs = m.total_submissions || 0;
+        const vis = m.total_visitors || 0;
+        const usaVis = m.usa_visitors || 0;
+        return {
+          ...m,
+          conversion_rate: vis > 0 ? parseFloat(((subs / vis) * 100).toFixed(2)) : 0,
+          usa_conversion_rate: usaVis > 0 ? parseFloat(((subs / usaVis) * 100).toFixed(2)) : 0,
+        };
+      });
 
       setData2026(merged);
       setData2025(r2025 || []);
