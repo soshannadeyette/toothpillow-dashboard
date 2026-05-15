@@ -47,8 +47,8 @@ const META_MONTHLY = [
 ];
 
 const META_FUNNEL = { entered: 58, waitingInfo: 30, sentCheckout: 13, checkedOut: 0, amountReceived: 0, denied: 7, closedLost: 8 };
-const GOOGLE_FUNNEL = { entered: 69, waitingInfo: 46, sentToTxP: 7, txpApproved: 0, sentCheckout: 13, checkedOut: 2, amountReceived: 3291, denied: 0, closedLost: 0, referredOut: 1 };
-const GOOGLE_SF_ENTERED = 58; // Salesforce lead count for CPL scaling
+const GOOGLE_FUNNEL = { entered: 91, waitingInfo: 57, sentToTxP: 10, txpApproved: 1, sentCheckout: 18, checkedOut: 3, amountReceived: 5286, denied: 0, closedLost: 0, referredOut: 2 };
+const GOOGLE_SF_ENTERED = 91; // Salesforce lead count for CPL scaling
 
 /* ════════════════════════════════════════════
    COMPONENT
@@ -134,7 +134,7 @@ export default function PaidAds() {
   }, [sorted]);
 
   const googleTotalSpend = gT.spend;
-  const googleTotalLeads = Math.max(gT.finished, GOOGLE_SF_ENTERED);
+  const googleTotalLeads = Math.max(gT.started, GOOGLE_SF_ENTERED);
   const googleDays = sorted.length || 1;
   const avgCPC = gT.clicks > 0 ? gT.spend / gT.clicks : 0;
   const googleCPL = googleTotalLeads > 0 ? googleTotalSpend / googleTotalLeads : 0;
@@ -471,10 +471,10 @@ export default function PaidAds() {
         </div>
       </div>
 
-      {/* ═══════ SECTION 2: Google vs Meta — Why We Switched ═══════ */}
+      {/* ═══════ SECTION 2: Google vs Meta — Platform Comparison ═══════ */}
       <div style={{ marginBottom: 32 }}>
         <div style={{ fontSize: 16, fontWeight: 700, color: TP.navy, borderBottom: `2px solid ${TP.navy}`, paddingBottom: 8, marginBottom: 16 }}>
-          Google vs Meta -- Why We Switched
+          Google vs Meta -- Platform Comparison
         </div>
 
         <div style={{ overflowX: 'auto' }}>
@@ -482,8 +482,8 @@ export default function PaidAds() {
             <thead>
               <tr style={{ background: TP.navy }}>
                 <th style={{ padding: '12px 16px', textAlign: 'left', color: '#fff', width: '40%' }}>Metric</th>
-                <th style={{ padding: '12px 16px', textAlign: 'center', color: '#999', width: '30%' }}>Meta Ads (ended)</th>
-                <th style={{ padding: '12px 16px', textAlign: 'center', color: TP.green, width: '30%' }}>Google Ads (active)</th>
+                <th style={{ padding: '12px 16px', textAlign: 'center', color: '#999', width: '30%' }}>Meta Ads</th>
+                <th style={{ padding: '12px 16px', textAlign: 'center', color: TP.green, width: '30%' }}>Google Ads</th>
               </tr>
             </thead>
             <tbody>
@@ -504,7 +504,7 @@ export default function PaidAds() {
         {/* Cost advantage callout */}
         {advantage > 0 && (
           <div style={{ background: '#f0f7ed', borderLeft: '4px solid #5BA88C', borderRadius: 8, padding: '16px 20px', marginTop: 16 }}>
-            <div style={{ fontSize: '1.1em', fontWeight: 700, color: TP.navy }}>Google leads cost {advantage}x less than Meta.</div>
+            <div style={{ fontSize: '1.1em', fontWeight: 700, color: TP.navy }}>Google leads cost {advantage}x less per lead than Meta.</div>
             <div style={{ fontSize: '0.88em', color: '#555', marginTop: 6 }}>
               Meta spent ${Math.round(metaTotalSpend).toLocaleString()} over {metaCampaignMonthCount} months for {metaTotalLeads} leads (${Math.round(metaCPL)} each). Google has spent ${Math.round(googleTotalSpend).toLocaleString()} in {googleDays} days for {googleTotalLeads} leads (${Math.round(googleCPL)} each).
             </div>
