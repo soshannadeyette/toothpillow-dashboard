@@ -39,14 +39,14 @@ const TP = {
 const ambSubs: Record<string, number> = {
   '2023-01':9,'2023-02':20,'2023-03':10,'2023-04':16,'2023-05':14,'2023-06':219,'2023-07':81,'2023-08':15,'2023-09':22,'2023-10':17,'2023-11':22,'2023-12':20,
   '2024-01':14,'2024-02':16,'2024-03':29,'2024-04':31,'2024-05':32,'2024-06':24,'2024-07':36,'2024-08':47,'2024-09':71,'2024-10':32,'2024-11':40,'2024-12':63,
-  '2025-01':60,'2025-02':69,'2025-03':64,'2025-04':59,'2025-05':46,'2025-06':45,'2025-07':27,'2025-08':48,'2025-09':39,'2025-10':39,'2025-11':38,'2025-12':27,
-  '2026-01':50,'2026-02':56,'2026-03':52,'2026-04':36,
+  '2025-01':60,'2025-02':69,'2025-03':64,'2025-04':59,'2025-05':47,'2025-06':45,'2025-07':28,'2025-08':47,'2025-09':39,'2025-10':40,'2025-11':39,'2025-12':29,
+  '2026-01':53,'2026-02':58,'2026-03':64,'2026-04':64,'2026-05':16,
 };
 const infSubs: Record<string, number> = {
   '2023-10':6,'2023-11':294,'2023-12':1039,
   '2024-01':431,'2024-02':315,'2024-03':1593,'2024-04':569,'2024-05':654,'2024-06':1253,'2024-07':485,'2024-08':594,'2024-09':1124,'2024-10':498,'2024-11':367,'2024-12':515,
-  '2025-01':522,'2025-02':606,'2025-03':521,'2025-04':513,'2025-05':429,'2025-06':331,'2025-07':906,'2025-08':439,'2025-09':290,'2025-10':273,'2025-11':486,'2025-12':273,
-  '2026-01':312,'2026-02':514,'2026-03':462,'2026-04':148,
+  '2025-01':521,'2025-02':605,'2025-03':521,'2025-04':511,'2025-05':428,'2025-06':330,'2025-07':906,'2025-08':440,'2025-09':290,'2025-10':273,'2025-11':485,'2025-12':273,
+  '2026-01':312,'2026-02':517,'2026-03':463,'2026-04':237,'2026-05':88,
 };
 
 const newAddsAmb: Record<string, number> = {
@@ -60,9 +60,9 @@ const newAddsInf: Record<string, number> = {
   '2026-01':3,'2026-02':1,'2026-03':3,'2026-04':5,
 };
 
-const ambSubsYear: Record<number, number> = {2023:465, 2024:435, 2025:554, 2026:241};
-const infSubsYear: Record<number, number> = {2023:1342, 2024:8383, 2025:5576, 2026:1565};
-const combSubsYear: Record<number, number> = {2023:1807, 2024:8818, 2025:6130, 2026:1806};
+const ambSubsYear: Record<number, number> = {2023:465, 2024:435, 2025:566, 2026:255};
+const infSubsYear: Record<number, number> = {2023:1339, 2024:8398, 2025:5583, 2026:1617};
+const combSubsYear: Record<number, number> = {2023:1804, 2024:8833, 2025:6149, 2026:1872};
 const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:63};
 const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:30, 2026:12};
 const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:75};
@@ -72,14 +72,14 @@ const tenPlusByYear: Record<number, number> = {2023:8, 2024:40, 2025:55, 2026:30
 const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:346};
 const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:1460};
 
-const ANN = 12 / 4.26;
+const ANN = 12 / 4.45; // 4 full months + 14/31 of May through 5/14
 
 const recruit26 = [
   {label:'Jan', amb:5, inf:3, accent:'#B6CAE3'},
   {label:'Feb', amb:13, inf:1, accent:'#8CD1C8'},
   {label:'Mar', amb:10, inf:3, accent:'#3A6EA4'},
   {label:'Apr', amb:28, inf:5, accent:'#FDBE67'},
-  {label:'May', amb:7, inf:0, accent:'#B26CA6', tag:'through 5/8'},
+  {label:'May', amb:7, inf:0, accent:'#B26CA6', tag:'through 5/14'},
 ];
 
 const concRows = [
@@ -213,7 +213,7 @@ export default function AmbassadorGrowth() {
   const ambSubsPace = annualize(ambSubsYear[2026]);
 
   /* ── Movers computation ── */
-  const moverAnnFactor = 12 / 4.27;
+  const moverAnnFactor = 12 / 4.45;
   const moversComputed = useMemo(() => {
     const entries = Object.entries(moversData).map(([name, d]) => {
       const pace = Math.round(d.y26 * moverAnnFactor);
@@ -875,7 +875,7 @@ export default function AmbassadorGrowth() {
         </div>
 
         <div style={{ fontSize: '0.7rem', color: '#888', marginTop: 8, textAlign: 'center' }}>
-          Annualization factor: 12 / 4.27 = {moverAnnFactor.toFixed(2)}x. Pace = YTD x {moverAnnFactor.toFixed(2)}. &quot;New&quot; = no 2025 submissions on record.
+          Annualization factor: 12 / 4.45 = {moverAnnFactor.toFixed(2)}x. Pace = YTD x {moverAnnFactor.toFixed(2)}. &quot;New&quot; = no 2025 submissions on record.
         </div>
       </div>
 
@@ -1008,10 +1008,10 @@ export default function AmbassadorGrowth() {
       }}>
         <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: TP.navy, marginBottom: '1rem' }}>The bottom line</h3>
         <p style={{ color: '#1a3a2a', lineHeight: 1.7, maxWidth: '56rem', fontSize: '0.95rem' }}>
-          The ambassador program generated 362 submissions in January 2026 before Sosh started.
-          In February, her first month, that jumped to 570 — a 57% increase.
-          New ambassador adds are accelerating month over month (8 → 14 → 13 → 22).
-          The ambassador-only channel is on pace for ~{ambPace} submissions this year, up from 561 in 2025 and 435 in 2024.
+          The ambassador program generated 365 submissions in January 2026 before Sosh started.
+          In February, her first month, that jumped to 575 — a 58% increase.
+          New ambassador adds are accelerating month over month (8 → 14 → 13 → 33 → 7).
+          The ambassador-only channel is on pace for ~{ambPace} submissions this year, up from {ambSubsYear[2025]} in 2025 and {ambSubsYear[2024]} in 2024.
           The base program — stripping out the three mega-influencers whose viral moments inflated 2024 — grew from 517 to 2,898 to 4,642 and is pacing at ~{basePace.toLocaleString()} in 2026.
           In 2023, one person carried 50% of submissions. In 2026, it takes {halfCarriedBy[2026]}.
           The program is broader, more diversified, and growing where it matters.

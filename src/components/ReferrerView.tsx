@@ -74,32 +74,32 @@ const REFERRER_DATA: Record<string, RefMonth> = {
   "2024-10": {total:951, Parent:50, "Dental Office":98, "Airway Ambassador":32, Influencer:498, Podcast:6, Instagram:62, TikTok:1, Facebook:4, "Meta Ad":0, "Online Search":149, "Unknown Referral":43, "Unknown Professional Referral":8, Other:0},
   "2024-11": {total:937, Parent:65, "Dental Office":110, "Airway Ambassador":40, Influencer:367, Podcast:2, Instagram:103, TikTok:3, Facebook:5, "Meta Ad":0, "Online Search":170, "Unknown Referral":53, "Unknown Professional Referral":14, Other:5},
   "2024-12": {total:1154, Parent:79, "Dental Office":86, "Airway Ambassador":63, Influencer:515, Podcast:2, Instagram:127, TikTok:0, Facebook:7, "Meta Ad":0, "Online Search":206, "Unknown Referral":54, "Unknown Professional Referral":11, Other:4},
-  "2025-01": {total:1430, Parent:104, "Dental Office":111, "Airway Ambassador":60, Influencer:522, Podcast:1, Instagram:181, TikTok:4, Facebook:21, "Meta Ad":0, "Online Search":298, "Unknown Referral":108, "Unknown Professional Referral":14, Other:6},
-  "2025-02": {total:1557, Parent:77, "Dental Office":115, "Airway Ambassador":69, Influencer:606, Podcast:26, Instagram:185, TikTok:31, Facebook:11, "Meta Ad":0, "Online Search":330, "Unknown Referral":85, "Unknown Professional Referral":20, Other:2},
-  "2025-03": {total:1510, Parent:88, "Dental Office":238, "Airway Ambassador":64, Influencer:521, Podcast:30, Instagram:152, TikTok:12, Facebook:6, "Meta Ad":0, "Online Search":287, "Unknown Referral":88, "Unknown Professional Referral":20, Other:4},
-  "2025-04": {total:1663, Parent:85, "Dental Office":400, "Airway Ambassador":61, Influencer:512, Podcast:46, Instagram:120, TikTok:8, Facebook:12, "Meta Ad":0, "Online Search":251, "Unknown Referral":136, "Unknown Professional Referral":26, Other:6},
-  "2025-05": {total:1328, Parent:68, "Dental Office":289, "Airway Ambassador":46, Influencer:429, Podcast:7, Instagram:123, TikTok:5, Facebook:10, "Meta Ad":0, "Online Search":259, "Unknown Referral":57, "Unknown Professional Referral":22, Other:13},
-  "2025-06": {total:1039, Parent:63, "Dental Office":253, "Airway Ambassador":47, Influencer:332, Podcast:6, Instagram:78, TikTok:6, Facebook:8, "Meta Ad":0, "Online Search":177, "Unknown Referral":45, "Unknown Professional Referral":20, Other:4},
-  "2025-07": {total:2588, Parent:99, "Dental Office":244, "Airway Ambassador":29, Influencer:906, Podcast:721, Instagram:145, TikTok:7, Facebook:10, "Meta Ad":0, "Online Search":291, "Unknown Referral":115, "Unknown Professional Referral":19, Other:2},
-  "2025-08": {total:2478, Parent:90, "Dental Office":323, "Airway Ambassador":50, Influencer:440, Podcast:1008, Instagram:120, TikTok:7, Facebook:5, "Meta Ad":0, "Online Search":294, "Unknown Referral":116, "Unknown Professional Referral":19, Other:6},
+  "2025-01": {total:1429, Parent:104, "Dental Office":111, "Airway Ambassador":60, Influencer:521, Podcast:1, Instagram:181, TikTok:4, Facebook:21, "Meta Ad":0, "Online Search":298, "Unknown Referral":108, "Unknown Professional Referral":14, Other:6},
+  "2025-02": {total:1554, Parent:75, "Dental Office":115, "Airway Ambassador":69, Influencer:605, Podcast:26, Instagram:185, TikTok:31, Facebook:11, "Meta Ad":0, "Online Search":330, "Unknown Referral":85, "Unknown Professional Referral":20, Other:2},
+  "2025-03": {total:1508, Parent:88, "Dental Office":238, "Airway Ambassador":64, Influencer:521, Podcast:30, Instagram:152, TikTok:12, Facebook:6, "Meta Ad":0, "Online Search":285, "Unknown Referral":88, "Unknown Professional Referral":20, Other:4},
+  "2025-04": {total:1659, Parent:85, "Dental Office":399, "Airway Ambassador":59, Influencer:511, Podcast:46, Instagram:120, TikTok:8, Facebook:12, "Meta Ad":0, "Online Search":251, "Unknown Referral":136, "Unknown Professional Referral":26, Other:6},
+  "2025-05": {total:1326, Parent:67, "Dental Office":289, "Airway Ambassador":47, Influencer:428, Podcast:7, Instagram:123, TikTok:5, Facebook:10, "Meta Ad":0, "Online Search":259, "Unknown Referral":57, "Unknown Professional Referral":21, Other:13},
+  "2025-06": {total:1035, Parent:65, "Dental Office":252, "Airway Ambassador":45, Influencer:330, Podcast:6, Instagram:78, TikTok:6, Facebook:8, "Meta Ad":0, "Online Search":177, "Unknown Referral":45, "Unknown Professional Referral":20, Other:3},
+  "2025-07": {total:2589, Parent:102, "Dental Office":245, "Airway Ambassador":28, Influencer:906, Podcast:720, Instagram:145, TikTok:7, Facebook:10, "Meta Ad":0, "Online Search":292, "Unknown Referral":113, "Unknown Professional Referral":19, Other:2},
+  "2025-08": {total:2477, Parent:91, "Dental Office":322, "Airway Ambassador":47, Influencer:440, Podcast:1008, Instagram:120, TikTok:7, Facebook:5, "Meta Ad":0, "Online Search":294, "Unknown Referral":116, "Unknown Professional Referral":19, Other:8},
   "2025-09": {total:1550, Parent:75, "Dental Office":393, "Airway Ambassador":39, Influencer:290, Podcast:357, Instagram:91, TikTok:0, Facebook:4, "Meta Ad":1, "Online Search":197, "Unknown Referral":75, "Unknown Professional Referral":27, Other:1},
-  "2025-10": {total:1475, Parent:79, "Dental Office":509, "Airway Ambassador":39, Influencer:273, Podcast:200, Instagram:81, TikTok:1, Facebook:10, "Meta Ad":0, "Online Search":198, "Unknown Referral":62, "Unknown Professional Referral":18, Other:5},
-  "2025-11": {total:1591, Parent:75, "Dental Office":459, "Airway Ambassador":37, Influencer:486, Podcast:138, Instagram:66, TikTok:0, Facebook:13, "Meta Ad":0, "Online Search":221, "Unknown Referral":69, "Unknown Professional Referral":25, Other:2},
-  "2025-12": {total:1226, Parent:58, "Dental Office":453, "Airway Ambassador":26, Influencer:273, Podcast:75, Instagram:80, TikTok:2, Facebook:9, "Meta Ad":8, "Online Search":169, "Unknown Referral":48, "Unknown Professional Referral":23, Other:2},
-  "2026-01": {total:1412, Parent:80, "Dental Office":368, "Airway Ambassador":49, Influencer:312, Podcast:151, Instagram:87, TikTok:2, Facebook:16, "Meta Ad":12, "Online Search":234, "Unknown Referral":74, "Unknown Professional Referral":23, Other:4},
-  "2026-02": {total:1500, Parent:70, "Dental Office":313, "Airway Ambassador":55, Influencer:512, Podcast:92, Instagram:71, TikTok:3, Facebook:25, "Meta Ad":5, "Online Search":281, "Unknown Referral":46, "Unknown Professional Referral":27, Other:0},
-  "2026-03": {total:1609, Parent:90, "Dental Office":324, "Airway Ambassador":49, Influencer:462, Podcast:163, Instagram:74, TikTok:1, Facebook:11, "Meta Ad":2, "Online Search":340, "Unknown Referral":60, "Unknown Professional Referral":21, Other:12},
-  "2026-04": {total:1229, Parent:78, "Dental Office":261, "Airway Ambassador":62, Influencer:236, Podcast:125, Instagram:39, TikTok:1, Facebook:10, "Meta Ad":20, "Online Search":297, "Unknown Referral":70, "Unknown Professional Referral":26, Other:4},
+  "2025-10": {total:1475, Parent:78, "Dental Office":509, "Airway Ambassador":40, Influencer:273, Podcast:200, Instagram:81, TikTok:1, Facebook:10, "Meta Ad":0, "Online Search":198, "Unknown Referral":62, "Unknown Professional Referral":18, Other:5},
+  "2025-11": {total:1589, Parent:74, "Dental Office":459, "Airway Ambassador":39, Influencer:485, Podcast:138, Instagram:65, TikTok:0, Facebook:12, "Meta Ad":0, "Online Search":221, "Unknown Referral":69, "Unknown Professional Referral":25, Other:2},
+  "2025-12": {total:1226, Parent:57, "Dental Office":453, "Airway Ambassador":29, Influencer:273, Podcast:75, Instagram:79, TikTok:2, Facebook:9, "Meta Ad":8, "Online Search":169, "Unknown Referral":47, "Unknown Professional Referral":23, Other:2},
+  "2026-01": {total:1410, Parent:76, "Dental Office":367, "Airway Ambassador":53, Influencer:312, Podcast:151, Instagram:87, TikTok:2, Facebook:16, "Meta Ad":12, "Online Search":233, "Unknown Referral":74, "Unknown Professional Referral":23, Other:4},
+  "2026-02": {total:1503, Parent:66, "Dental Office":312, "Airway Ambassador":58, Influencer:517, Podcast:92, Instagram:70, TikTok:3, Facebook:25, "Meta Ad":5, "Online Search":282, "Unknown Referral":46, "Unknown Professional Referral":27, Other:0},
+  "2026-03": {total:1604, Parent:75, "Dental Office":321, "Airway Ambassador":64, Influencer:463, Podcast:163, Instagram:74, TikTok:1, Facebook:11, "Meta Ad":2, "Online Search":339, "Unknown Referral":58, "Unknown Professional Referral":21, Other:12},
+  "2026-04": {total:1229, Parent:76, "Dental Office":260, "Airway Ambassador":64, Influencer:237, Podcast:125, Instagram:39, TikTok:1, Facebook:10, "Meta Ad":0, "Online Search":297, "Unknown Referral":70, "Unknown Professional Referral":26, Other:24},
 };
 
 /* ────── May 2026 Projection (Salesforce snapshot + pace) ────── */
 const MAY_2026_SF: Record<string, number> = {
-  total: 248, Parent: 17, 'Dental Office': 58, 'Airway Ambassador': 5,
-  Influencer: 43, Podcast: 16, Instagram: 22, TikTok: 0, Facebook: 6,
-  'Meta Ad': 8, 'Online Search': 63, 'Unknown Referral': 9,
-  'Unknown Professional Referral': 0,
+  total: 451, Parent: 21, 'Dental Office': 107, 'Airway Ambassador': 16,
+  Influencer: 88, Podcast: 46, Instagram: 25, TikTok: 0, Facebook: 6,
+  'Meta Ad': 1, 'Online Search': 101, 'Unknown Referral': 24,
+  'Unknown Professional Referral': 1,
 };
-const MAY_2026_SF_DAYS = 8;
+const MAY_2026_SF_DAYS = 14;
 const MAY_2026_DAYS_IN_MONTH = 31;
 
 function buildMay2026Projected(): { actual: RefMonth; projected: RefMonth } {
