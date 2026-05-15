@@ -147,29 +147,76 @@ const moversData: Record<string, {y25:number; y26:number; type:string}> = {
 };
 
 const launchBonusData = [
-  {name:'Katelyn Alsop (James)',onboard:'01/19/2026',is2026:true,winStart:'01/19/2026',winEnd:'01/19/2027',bonusSubs:38,tier:1,earned:250},
-  {name:'Shannon Tripp',onboard:'06/27/2025',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:37,tier:1,earned:250},
-  {name:'Soshanna Salsman',onboard:'04/30/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:28,tier:1,earned:250},
-  {name:'Lauren Johnson NNM',onboard:'05/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:25,tier:1,earned:250},
-  {name:'Kendra Needham',onboard:'11/01/2023',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:20,tier:0,earned:0},
-  {name:'Jeff Cruz Talia_likeitis',onboard:'08/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:18,tier:0,earned:0},
-  {name:'Ginny Yurich',onboard:'06/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:10,tier:0,earned:0},
-  {name:'Jasyra Santiago-Hines',onboard:'02/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:10,tier:0,earned:0},
-  {name:'Amy Bernhard',onboard:'08/25/2025',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:9,tier:0,earned:0},
-  {name:'Carly Brown',onboard:'04/21/2026',is2026:true,winStart:'04/21/2026',winEnd:'04/21/2027',bonusSubs:9,tier:0,earned:0},
-  {name:'Thuy Improta *ministry*',onboard:'07/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:7,tier:0,earned:0},
-  {name:'Emily Boazman',onboard:'04/02/2026',is2026:true,winStart:'04/02/2026',winEnd:'04/02/2027',bonusSubs:6,tier:0,earned:0},
-  {name:'Rachel Jayroe',onboard:'02/06/2026',is2026:true,winStart:'02/06/2026',winEnd:'02/06/2027',bonusSubs:6,tier:0,earned:0},
-  {name:'Eden Lee loverlees',onboard:'12/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:5,tier:0,earned:0},
-  {name:'Hillary Ha',onboard:'08/05/2025',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:5,tier:0,earned:0},
-  {name:'Karalynne Call *Just Ingredients*',onboard:'08/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:5,tier:0,earned:0},
-  {name:'Melody Brandon',onboard:'04/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:5,tier:0,earned:0},
-  {name:'Taylor Kulik',onboard:'02/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:5,tier:0,earned:0},
-  {name:'Courtland Nall',onboard:'08/04/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:4,tier:0,earned:0},
-  {name:'Melina Moses',onboard:'03/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:4,tier:0,earned:0},
-  {name:'Eryn Carroll NMM',onboard:'07/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:3,tier:0,earned:0},
-  {name:'Meghan Joy Yancy',onboard:'01/20/2026',is2026:true,winStart:'01/20/2026',winEnd:'01/20/2027',bonusSubs:3,tier:0,earned:0},
-  {name:'Michelle Keijner',onboard:'03/25/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:3,tier:0,earned:0},
+  {name:'Shannon Tripp',bonusSubs:249,tier:1,earned:250},
+  {name:'Soshanna Salsman',bonusSubs:159,tier:1,earned:250},
+  {name:'Lauren Johnson NNM',bonusSubs:147,tier:1,earned:250},
+  {name:'Kendra Needham',bonusSubs:135,tier:1,earned:250},
+  {name:'Jeff Cruz Talia_likeitis',bonusSubs:107,tier:1,earned:250},
+  {name:'Amy Bernhard',bonusSubs:92,tier:1,earned:250},
+  {name:'Melody Brandon',bonusSubs:74,tier:1,earned:250},
+  {name:'Ginny Yurich',bonusSubs:73,tier:1,earned:250},
+  {name:'Jasyra Santiago-Hines',bonusSubs:67,tier:1,earned:250},
+  {name:'Ellen Fisher',bonusSubs:57,tier:1,earned:250},
+  {name:'Taylor Kulik',bonusSubs:43,tier:1,earned:250},
+  {name:'Katelyn Alsop (James)',bonusSubs:40,tier:1,earned:250},
+  {name:'Eden Lee loverlees',bonusSubs:38,tier:1,earned:250},
+  {name:'Amy Erickson',bonusSubs:30,tier:1,earned:250},
+  {name:'Jennie Hoglund',bonusSubs:24,tier:0,earned:0},
+  {name:'Lauren stadler',bonusSubs:24,tier:0,earned:0},
+  {name:'Thuy Improta *ministry*',bonusSubs:22,tier:0,earned:0},
+  {name:'Ashley Turner',bonusSubs:21,tier:0,earned:0},
+  {name:'Taylor Moran',bonusSubs:19,tier:0,earned:0},
+  {name:'Carly Brown',bonusSubs:16,tier:0,earned:0},
+  {name:'Emily Boazman',bonusSubs:15,tier:0,earned:0},
+  {name:'Eryn Carroll NMM',bonusSubs:14,tier:0,earned:0},
+  {name:'Michelle Keijner',bonusSubs:14,tier:0,earned:0},
+  {name:'Taylor Weimar',bonusSubs:14,tier:0,earned:0},
+  {name:'Devon Kuntzman *Transforming Toddlerhood*',bonusSubs:13,tier:0,earned:0},
+  {name:'Erin Wilkins essentiallyerin',bonusSubs:12,tier:0,earned:0},
+  {name:'Melina Moses',bonusSubs:12,tier:0,earned:0},
+  {name:'Karalynne Call *Just Ingredients*',bonusSubs:10,tier:0,earned:0},
+  {name:'Laura Manns',bonusSubs:10,tier:0,earned:0},
+  {name:'Brianna Reiser',bonusSubs:9,tier:0,earned:0},
+  {name:'Hillary Ha',bonusSubs:9,tier:0,earned:0},
+  {name:'Elise Hylden',bonusSubs:8,tier:0,earned:0},
+  {name:'Craig Clayton *Restoration Dentistry*',bonusSubs:7,tier:0,earned:0},
+  {name:'Rachel Jayroe',bonusSubs:7,tier:0,earned:0},
+  {name:'Karyna Cast Korotkykh',bonusSubs:6,tier:0,earned:0},
+  {name:'Mary Catherine Oechslin momnp',bonusSubs:6,tier:0,earned:0},
+  {name:'Sara Lininger',bonusSubs:6,tier:0,earned:0},
+  {name:'Tiffany Hubbard',bonusSubs:6,tier:0,earned:0},
+  {name:'Ashley Vogt',bonusSubs:5,tier:0,earned:0},
+  {name:'Courtland Nall',bonusSubs:5,tier:0,earned:0},
+  {name:'Dr. Ameet Trivedi truthdds',bonusSubs:5,tier:0,earned:0},
+  {name:'Emily Morrow',bonusSubs:5,tier:0,earned:0},
+  {name:'Jessi Meeks',bonusSubs:5,tier:0,earned:0},
+  {name:'Lauren Peter',bonusSubs:5,tier:0,earned:0},
+  {name:'Taylor Dukes',bonusSubs:5,tier:0,earned:0},
+  {name:'Amy Migdalia Williams',bonusSubs:4,tier:0,earned:0},
+  {name:'Bailey King',bonusSubs:4,tier:0,earned:0},
+  {name:'Brittany Lockie',bonusSubs:4,tier:0,earned:0},
+  {name:'Hilary Fritsch*',bonusSubs:4,tier:0,earned:0},
+  {name:'Janell Hampton',bonusSubs:4,tier:0,earned:0},
+  {name:'Jordan Schoen',bonusSubs:4,tier:0,earned:0},
+  {name:'Julia Lee',bonusSubs:4,tier:0,earned:0},
+  {name:'Kelsey Wall',bonusSubs:4,tier:0,earned:0},
+  {name:'Nikki Geib "Making Millistones"',bonusSubs:4,tier:0,earned:0},
+  {name:'Samantha Mauermann \'Acresandaprons\'',bonusSubs:4,tier:0,earned:0},
+  {name:'Tracy Gillet*',bonusSubs:4,tier:0,earned:0},
+  {name:'adina natan',bonusSubs:3,tier:0,earned:0},
+  {name:'Alicia Farmer',bonusSubs:3,tier:0,earned:0},
+  {name:'Amber Thompson',bonusSubs:3,tier:0,earned:0},
+  {name:'Anna Brayton riseandclimb',bonusSubs:3,tier:0,earned:0},
+  {name:'Carly Patterson',bonusSubs:3,tier:0,earned:0},
+  {name:'Cy Tidwell',bonusSubs:3,tier:0,earned:0},
+  {name:'Erin Rice',bonusSubs:3,tier:0,earned:0},
+  {name:'Jennee Guerrero',bonusSubs:3,tier:0,earned:0},
+  {name:'Jessica Beachy',bonusSubs:3,tier:0,earned:0},
+  {name:'Kayla Monson',bonusSubs:3,tier:0,earned:0},
+  {name:'Marissa Mason',bonusSubs:3,tier:0,earned:0},
+  {name:'Meghan Joy Yancy',bonusSubs:3,tier:0,earned:0},
+  {name:'Tania O’Donnell',bonusSubs:3,tier:0,earned:0},
+  {name:'Wendy Ostapuk toxinfreeish',bonusSubs:3,tier:0,earned:0},
 ];
 
 /* ════════════════════════════════════════════════════════════════════════════
@@ -983,7 +1030,7 @@ export default function AmbassadorGrowth() {
           </div>
           <div style={{ ...card, borderLeft: `4px solid ${TP.purple}`, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{ fontSize: '0.7rem', fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: 1 }}>Ambassadors Tracked</div>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: TP.navy }}>66</div>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: TP.navy }}>{launchBonusData.length}</div>
           </div>
         </div>
 
@@ -999,9 +1046,7 @@ export default function AmbassadorGrowth() {
           color: '#333',
         }}>
           <strong>Bonus structure:</strong> $250 at 25 submissions (Tier 1), $1,250 at 50 submissions (Tier 2).
-          New 2026 onboards: window starts at their onboard date and runs for 12 months.
-          Pre-2026 ambassadors: window starts 4/1/2026 and runs through 3/31/2027.
-          Only submissions within the window count toward the bonus.
+          Tracking all 2026 YTD submissions (1/1/2026 through 5/14/2026). 167 ambassadors with at least 1 submission.
         </div>
 
         {/* Bonus table */}
@@ -1010,9 +1055,7 @@ export default function AmbassadorGrowth() {
             <thead>
               <tr style={{ background: TP.blue, color: '#fff' }}>
                 <th style={{ textAlign: 'left', padding: '10px 12px' }}>Ambassador</th>
-                <th style={{ textAlign: 'center', padding: '10px 8px' }}>Window Start</th>
-                <th style={{ textAlign: 'center', padding: '10px 8px' }}>Window End</th>
-                <th style={{ textAlign: 'center', padding: '10px 8px' }}>Bonus Subs</th>
+                <th style={{ textAlign: 'center', padding: '10px 8px' }}>2026 Subs</th>
                 <th style={{ textAlign: 'center', padding: '10px 8px', minWidth: 140 }}>Progress</th>
                 <th style={{ textAlign: 'right', padding: '10px 8px' }}>Earned</th>
                 <th style={{ textAlign: 'center', padding: '10px 12px' }}>Next Tier</th>
@@ -1032,21 +1075,7 @@ export default function AmbassadorGrowth() {
                   <tr key={row.name} style={{ background: i % 2 === 0 ? '#f9fafb' : '#fff', borderBottom: '1px solid #e5e7eb' }}>
                     <td style={{ padding: '8px 12px', fontWeight: 600, color: TP.navy }}>
                       {row.name}
-                      {row.is2026 && (
-                        <span style={{
-                          marginLeft: 8,
-                          background: TP.purple,
-                          color: '#fff',
-                          fontSize: '0.55rem',
-                          padding: '1px 6px',
-                          borderRadius: 6,
-                          fontWeight: 700,
-                          verticalAlign: 'middle',
-                        }}>2026</span>
-                      )}
                     </td>
-                    <td style={{ textAlign: 'center', padding: '8px 8px', color: '#555' }}>{row.winStart}</td>
-                    <td style={{ textAlign: 'center', padding: '8px 8px', color: '#555' }}>{row.winEnd}</td>
                     <td style={{ textAlign: 'center', padding: '8px 8px', fontWeight: 700, color: TP.navy }}>{row.bonusSubs}</td>
                     <td style={{ padding: '8px 8px' }}>
                       <div style={{ position: 'relative', background: '#f3f4f6', borderRadius: 4, height: 16, overflow: 'hidden' }}>
@@ -1079,7 +1108,7 @@ export default function AmbassadorGrowth() {
         </div>
 
         <div style={{ fontSize: '0.7rem', color: '#888', marginTop: 8, textAlign: 'center' }}>
-          44 additional ambassadors have 1–2 bonus-eligible submissions each and are not shown. Data as of 4/29/2026.
+          97 additional ambassadors have 1–2 submissions each and are not shown. 167 total tracked. Data as of 5/14/2026.
         </div>
       </div>
 
