@@ -552,7 +552,7 @@ export default function PaidAds() {
             </tr>
           </thead>
           <tbody>
-            {sorted.map((e, idx) => (
+            {[...sorted].reverse().map((e, idx) => (
               <tr key={e.date} onClick={() => handleRowClick(e)} style={{ background: idx % 2 === 0 ? '#f9f9f9' : '#fff', cursor: 'pointer' }}>
                 <td style={{ padding: '6px 10px', whiteSpace: 'nowrap' }}>{e.date}</td>
                 <td style={{ padding: '6px 10px', textAlign: 'right' }}>${(e.spend || 0).toFixed(2)}</td>
