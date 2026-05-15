@@ -171,11 +171,11 @@ const launchBonusData = [
    Helpers
    ════════════════════════════════════════════════════════════════════════ */
 const years = [2023, 2024, 2025, 2026] as const;
-const MONTHS_JAN24_APR26: string[] = [];
+const MONTHS_JAN24_MAY26: string[] = [];
 for (let y = 2024; y <= 2026; y++) {
-  const end = y === 2026 ? 4 : 12;
+  const end = y === 2026 ? 5 : 12;
   for (let m = 1; m <= end; m++) {
-    MONTHS_JAN24_APR26.push(`${y}-${String(m).padStart(2, '0')}`);
+    MONTHS_JAN24_MAY26.push(`${y}-${String(m).padStart(2, '0')}`);
   }
 }
 const MONTH_LABELS_SHORT = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -276,19 +276,19 @@ export default function AmbassadorGrowth() {
     },
   };
 
-  /* ── Chart: New Adds monthly stacked (Jan 2024 – Apr 2026) ── */
+  /* ── Chart: New Adds monthly stacked (Jan 2024 – May 2026) ── */
   const newAddsChartData: ChartData<'bar'> = {
-    labels: MONTHS_JAN24_APR26.map(fmtMonthLabel),
+    labels: MONTHS_JAN24_MAY26.map(fmtMonthLabel),
     datasets: [
       {
         label: 'Ambassador',
-        data: MONTHS_JAN24_APR26.map(k => newAddsAmb[k] ?? 0),
+        data: MONTHS_JAN24_MAY26.map(k => newAddsAmb[k] ?? 0),
         backgroundColor: TP.blue,
         borderRadius: 4,
       },
       {
         label: 'Influencer',
-        data: MONTHS_JAN24_APR26.map(k => newAddsInf[k] ?? 0),
+        data: MONTHS_JAN24_MAY26.map(k => newAddsInf[k] ?? 0),
         backgroundColor: TP.gold,
         borderRadius: 4,
       },
