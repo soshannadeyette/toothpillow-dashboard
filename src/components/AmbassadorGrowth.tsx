@@ -1112,23 +1112,6 @@ export default function AmbassadorGrowth() {
         </div>
       </div>
 
-      {/* ════════ SECTION 8: Bottom Line ════════ */}
-      <div style={{
-        background: 'linear-gradient(135deg, #dbeafe 0%, #d1fae5 100%)',
-        borderRadius: 12,
-        padding: '2.5rem 2rem',
-      }}>
-        <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: TP.navy, marginBottom: '1rem' }}>The bottom line</h3>
-        <p style={{ color: '#1a3a2a', lineHeight: 1.7, maxWidth: '56rem', fontSize: '0.95rem' }}>
-          The ambassador program generated 365 submissions in January 2026 before Sosh started.
-          In February, her first month, that jumped to 575 — a 58% increase.
-          New ambassador adds are accelerating month over month (8 → 14 → 13 → 33 → 7).
-          The ambassador-only channel is on pace for ~{ambPace} submissions this year, up from {ambSubsYear[2025]} in 2025 and {ambSubsYear[2024]} in 2024.
-          The base program — stripping out the three mega-influencers whose viral moments inflated 2024 — grew from 517 to 2,898 to 4,642 and is pacing at ~{basePace.toLocaleString()} in 2026.
-          In 2023, one person carried 50% of submissions. In 2026, it takes {halfCarriedBy[2026]}.
-          The program is broader, more diversified, and growing where it matters.
-        </p>
-      </div>
     </div>
   );
 }
