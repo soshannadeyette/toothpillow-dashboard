@@ -52,20 +52,20 @@ const infSubs: Record<string, number> = {
 const newAddsAmb: Record<string, number> = {
   '2024-01':4,'2024-02':7,'2024-03':7,'2024-04':6,'2024-05':3,'2024-06':7,'2024-07':10,'2024-08':2,'2024-09':6,'2024-10':7,'2024-11':7,'2024-12':7,
   '2025-01':7,'2025-02':84,'2025-03':7,'2025-04':6,'2025-05':5,'2025-06':6,'2025-07':1,'2025-08':15,'2025-09':2,'2025-10':1,'2025-11':6,'2025-12':1,
-  '2026-01':6,'2026-02':13,'2026-03':10,'2026-04':26,
+  '2026-01':5,'2026-02':13,'2026-03':10,'2026-04':28,'2026-05':15,
 };
 const newAddsInf: Record<string, number> = {
   '2024-01':1,'2024-02':8,'2024-03':3,'2024-04':4,'2024-05':9,'2024-06':2,'2024-07':7,'2024-08':2,'2024-09':4,'2024-10':6,'2024-11':6,'2024-12':9,
   '2025-01':11,'2025-02':3,'2025-03':7,'2025-04':2,'2025-05':0,'2025-06':3,'2025-07':0,'2025-08':1,'2025-09':0,'2025-10':0,'2025-11':1,'2025-12':1,
-  '2026-01':3,'2026-02':1,'2026-03':3,'2026-04':5,
+  '2026-01':3,'2026-02':1,'2026-03':3,'2026-04':5,'2026-05':4,
 };
 
 const ambSubsYear: Record<number, number> = {2023:465, 2024:435, 2025:566, 2026:255};
 const infSubsYear: Record<number, number> = {2023:1339, 2024:8398, 2025:5583, 2026:1617};
 const combSubsYear: Record<number, number> = {2023:1804, 2024:8833, 2025:6149, 2026:1872};
-const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:63};
-const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:30, 2026:12};
-const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:75};
+const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:71};
+const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:15};
+const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:87};
 
 const halfCarriedBy: Record<number, number> = {2023:1, 2024:2, 2025:5, 2026:7};
 const tenPlusByYear: Record<number, number> = {2023:8, 2024:40, 2025:55, 2026:30};
@@ -79,7 +79,7 @@ const recruit26 = [
   {label:'Feb', amb:13, inf:1, accent:'#8CD1C8'},
   {label:'Mar', amb:10, inf:3, accent:'#3A6EA4'},
   {label:'Apr', amb:28, inf:5, accent:'#FDBE67'},
-  {label:'May', amb:7, inf:0, accent:'#B26CA6', tag:'through 5/14'},
+  {label:'May', amb:15, inf:4, accent:'#B26CA6', tag:'through 5/14'},
 ];
 
 const concRows = [
