@@ -466,25 +466,6 @@ export default function AmbassadorGrowth() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
 
-      {/* ════════ SECTION 1: Hero Banner ════════ */}
-      <div style={{
-        background: `linear-gradient(135deg, ${TP.navy} 0%, #2a4a6a 100%)`,
-        borderRadius: 12,
-        padding: '2.5rem 2rem',
-        color: '#fff',
-      }}>
-        <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '1rem' }}>
-          Sosh took over in February. Here&apos;s what changed.
-        </h2>
-        <p style={{ color: '#c8d8ec', lineHeight: 1.7, maxWidth: '56rem', fontSize: '0.95rem' }}>
-          In January 2026, the combined ambassador program (influencers + ambassadors) generated 365 submissions.
-          In February — Sosh&apos;s first full month — that jumped to 572, a 57% increase.
-          New ambassador recruitment is accelerating: 8 → 14 → 13 → 33 → 7 adds per month across Jan–May.
-          April finished with 33 new ambassadors + influencers onboarded — the strongest add month since the Feb 2025 mass onboarding.
-          May has 7 through the 8th.
-        </p>
-      </div>
-
       {/* ════════ SECTION 2: Ambassador Recruitment — 2026 ════════ */}
       <div>
         <h3 style={sectionHeader}>Ambassador Recruitment — 2026</h3>
