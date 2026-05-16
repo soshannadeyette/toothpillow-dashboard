@@ -293,6 +293,25 @@ export default function AnnualView() {
         fill: false,
         backgroundColor: 'transparent',
         stack: undefined,
+        yAxisID: 'y',
+      },
+      {
+        label: 'Visitors',
+        data: allMonthLabels.map((_, i) => {
+          const row = months2026.find(r => r.month === i + 1);
+          const v = row?.total_visitors || 0;
+          return v > 0 ? v : null;
+        }),
+        type: 'line' as const,
+        borderColor: TP.darkPurple,
+        borderWidth: 2,
+        pointRadius: 4,
+        pointBackgroundColor: TP.darkPurple,
+        fill: false,
+        backgroundColor: 'transparent',
+        stack: undefined,
+        yAxisID: 'y1',
+        tension: 0.3,
       },
     ],
   };
@@ -301,11 +320,23 @@ export default function AnnualView() {
     responsive: true,
     plugins: {
       legend: { position: 'top' as const },
-      title: { display: true, text: '2026 Monthly Submissions vs Goal' },
+      title: { display: true, text: '2026 Monthly Submissions vs Goal & Traffic' },
     },
     scales: {
       x: { stacked: true },
-      y: { stacked: true, beginAtZero: true },
+      y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Submissions' } },
+      y1: {
+        position: 'right' as const,
+        beginAtZero: true,
+        grid: { drawOnChartArea: false },
+        title: { display: true, text: 'Visitors' },
+        ticks: {
+          callback: (v: number | string) => {
+            const n = typeof v === 'string' ? parseFloat(v) : v;
+            return n >= 1000 ? (n / 1000).toFixed(0) + 'K' : n;
+          },
+        },
+      },
     },
   };
 
