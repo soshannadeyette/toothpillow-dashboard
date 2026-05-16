@@ -65,7 +65,7 @@ const AMB_COMMISSIONS: Record<string, number> = {
   'February': 2588.20,
   'March': 1441.40,
   'April': 1552.18,
-  'May': 1600.00,
+  'May': 3624.00,
 };
 
 // 2025 website traffic (from GA4)
