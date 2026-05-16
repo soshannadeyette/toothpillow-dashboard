@@ -3,7 +3,7 @@
  * No localStorage anywhere. Ever.
  */
 
-import type { DailySubmission, GoogleAdsDaily, MonthlySummary, MonthGoal } from './types';
+import type { DailySubmission, GoogleAdsDaily, MonthlySummary, MonthGoal, AuditPatient } from './types';
 import { MONTHLY_GOALS_2026 } from './types';
 
 const BASE = '';
@@ -68,6 +68,31 @@ export async function upsertMonthlySummary(entry: Partial<MonthlySummary>): Prom
     });
     if (!res.ok) throw new Error(await res.text());
     return res.json();
+}
+
+// ---- Audit Patients ----
+
+export async function fetchAuditPatients(status?: string): Promise<AuditPatient[]> {
+    const params = new URLSearchParams();
+    if (status) params.set('status', status);
+    const res = await fetch(`${BASE}/api/audit?${params}`);
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+}
+
+export async function upsertAuditPatient(entry: Partial<AuditPatient> & { name: string }): Promise<AuditPatient[]> {
+    const res = await fetch(`${BASE}/api/audit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(entry),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+}
+
+export async function deleteAuditPatient(id: number): Promise<void> {
+    const res = await fetch(`${BASE}/api/audit?id=${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error(await res.text());
 }
 
 // ---- Utility ----

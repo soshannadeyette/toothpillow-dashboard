@@ -82,6 +82,34 @@ export interface AdFunnel {
   referred_out: number;
 }
 
+export interface AuditPatient {
+  id?: number;
+  name: string;
+  email?: string;
+  phone?: string;
+  date_started: string;
+  stage: string;
+  missing?: string;
+  assigned_to?: string;
+  last_action?: string;
+  notes?: string;
+  sibling_name?: string;
+  sibling_status?: string;
+  status: string; // 'open' | 'resolved' | 'contacted'
+  created_at?: string;
+  updated_at?: string;
+}
+
+export const AUDIT_STAGES = [
+  'Started',
+  'Info Submitted',
+  'Waiting for Photos',
+  'Photos Uploaded',
+  'Under Review',
+  'Sent to Provider',
+  'Enrolled',
+] as const;
+
 export interface Setting {
   key: string;
   value: string;
