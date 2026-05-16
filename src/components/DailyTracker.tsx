@@ -86,17 +86,15 @@ export default function DailyTracker() {
     setSaving(true);
     setError(null);
     try {
-      const online = parseInt(formOnline) || 0;
-      const hybrid = parseInt(formHybrid) || 0;
-      const prime = parseInt(formPrime) || 0;
-      await upsertSubmission({
-        date: formDate,
-        online,
-        hybrid,
-        prime,
-        visitors: parseInt(formVisitors) || 0,
-        income: parseFloat(formIncome) || online * 5,
-      });
+      // Only send fields that have values — blank fields are omitted so
+      // the API preserves whatever is already in the database.
+      const payload: Record<string, unknown> = { date: formDate };
+      if (formOnline.trim() !== '')   payload.online   = parseInt(formOnline);
+      if (formHybrid.trim() !== '')   payload.hybrid   = parseInt(formHybrid);
+      if (formPrime.trim() !== '')    payload.prime    = parseInt(formPrime);
+      if (formVisitors.trim() !== '') payload.visitors = parseInt(formVisitors);
+      if (formIncome.trim() !== '')   payload.income   = parseFloat(formIncome);
+      await upsertSubmission(payload as Partial<import('@/lib/types').DailySubmission>);
       // Clear form
       setFormOnline('');
       setFormHybrid('');

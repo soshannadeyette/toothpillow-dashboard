@@ -27,27 +27,34 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/submissions — upsert a daily submission entry
+// Only updates fields that are explicitly provided; leaves others untouched.
 export async function POST(request: NextRequest) {
     const body = await request.json();
-    const { date, online, hybrid, prime, visitors, income } = body;
+    const { date } = body;
 
     if (!date) {
         return NextResponse.json({ error: 'Date is required' }, { status: 400 });
     }
 
+    // Fetch existing row so we can merge rather than overwrite
+    const { data: existing } = await supabase
+        .from('daily_submissions')
+        .select('*')
+        .eq('date', date)
+        .maybeSingle();
+
+    const merged = {
+        date,
+        online:   body.online   ?? existing?.online   ?? 0,
+        hybrid:   body.hybrid   ?? existing?.hybrid   ?? 0,
+        prime:    body.prime    ?? existing?.prime    ?? 0,
+        visitors: body.visitors ?? existing?.visitors ?? 0,
+        income:   body.income   ?? existing?.income   ?? 0,
+    };
+
     const { data, error } = await supabase
         .from('daily_submissions')
-        .upsert(
-            {
-                date,
-                online: online || 0,
-                hybrid: hybrid || 0,
-                prime: prime || 0,
-                visitors: visitors || 0,
-                income: income || (online || 0) * 5,
-            },
-            { onConflict: 'date' }
-        )
+        .upsert(merged, { onConflict: 'date' })
         .select();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
