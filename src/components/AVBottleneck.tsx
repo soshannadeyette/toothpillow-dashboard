@@ -73,6 +73,57 @@ const SPIKE_EVENTS: { year: number; month: number; label: string; type: 'influen
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+// Weekend assessment starts (May 16-17, 2026) — tracking who started but didn't finish
+interface WeekendPatient {
+  name: string;
+  referrer: string;
+  infoComplete?: boolean | null; // null = not checked yet
+  photosUploaded?: boolean | null;
+}
+
+const WEEKEND_PATIENTS: WeekendPatient[] = [
+  { name: 'Lauren Coyne', referrer: 'Unknown' },
+  { name: 'Jessica Dow', referrer: 'Unknown' },
+  { name: 'April Jackson', referrer: 'Unknown' },
+  { name: 'Allie Tropkoff', referrer: 'Unknown' },
+  { name: 'Suheidy Carrasco', referrer: 'Unknown' },
+  { name: 'Lisa Wagner', referrer: 'Unknown' },
+  { name: 'Michelle Wilson', referrer: 'Unknown' },
+  { name: 'Rachael Stedman', referrer: 'Unknown' },
+  { name: 'Jesse King', referrer: 'Unknown' },
+  { name: 'Sarah Boquette', referrer: 'Unknown' },
+  { name: 'Karen McClary', referrer: 'Unknown' },
+  { name: 'Kitty Coon', referrer: 'Unknown' },
+  { name: 'Victoria Guerrero', referrer: 'Unknown' },
+  { name: 'Charles de la Vergne', referrer: 'Unknown' },
+  { name: 'Christina Epperson Gregory', referrer: 'Unknown' },
+  { name: 'Andrea Enright', referrer: 'Carly Hartwig' },
+  { name: 'Kristy Buckwalter', referrer: 'Toothpillow Instagram' },
+  { name: 'Megan Hunter', referrer: 'Unknown' },
+  { name: 'Rebecca Moore', referrer: 'Unknown' },
+  { name: 'Darlene Villarreal', referrer: 'Unknown' },
+  { name: 'Amanda Salcido', referrer: 'Unknown' },
+  { name: 'Mary Gray', referrer: 'Unknown' },
+  { name: 'Mindy Larson', referrer: 'Unknown' },
+  { name: 'Hanna Ostrander', referrer: 'Unknown' },
+  { name: 'Alena Bardadin', referrer: 'Emily Boazman' },
+  { name: 'Renee Flitcroft', referrer: 'Emily Boazman' },
+  { name: 'Paige Salvador', referrer: 'Emily Boazman' },
+  { name: 'Tara Tillman', referrer: 'Unknown' },
+  { name: 'Amy Ruggeri', referrer: 'Unknown' },
+  { name: 'Carla Kenney', referrer: 'Emily Boazman' },
+  { name: 'Allison Velazquez', referrer: 'Emily Boazman' },
+  { name: 'Noralyn Alvarado', referrer: 'Unknown' },
+  { name: 'Morgan Ward', referrer: 'Emily Boazman' },
+  { name: 'Chloe Horvath', referrer: 'Emily Boazman' },
+  { name: 'Shannon Smith', referrer: 'Emily Boazman' },
+  { name: 'Ann Bausch', referrer: 'Emily Boazman' },
+  { name: 'Liz Vazquez', referrer: 'Emily Boazman' },
+  { name: 'Laura Velasquez', referrer: 'Emily Boazman' },
+  { name: 'Alena Kirby', referrer: 'Unknown' },
+  { name: 'Toya Frederick', referrer: 'Unknown' },
+];
+
 export default function AVBottleneck() {
   const [months2026, setMonths2026] = useState<MonthlySummary[]>([]);
   const [curMonthSubs, setCurMonthSubs] = useState<DailySubmission[]>([]);
@@ -462,6 +513,9 @@ export default function AVBottleneck() {
         </div>
       </div>
 
+      {/* Weekend Assessment Starts (May 16-17) */}
+      <WeekendAuditSection />
+
       {/* Key Takeaway */}
       <div className="bg-white rounded-lg border p-5" style={{ borderLeft: `4px solid ${TP.blue}` }}>
         <h3 className="text-base font-semibold mb-2" style={{ color: TP.navy }}>
@@ -484,6 +538,151 @@ export default function AVBottleneck() {
             The old pages had basic SEO and a sitemap, which contributed to higher organic traffic even without a formal SEO strategy.
             Without those pages ranking, the baseline has dropped, and there are no viral spikes to compensate.
           </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function WeekendAuditSection() {
+  // Referrer breakdown
+  const referrerCounts: Record<string, number> = {};
+  WEEKEND_PATIENTS.forEach(p => {
+    referrerCounts[p.referrer] = (referrerCounts[p.referrer] || 0) + 1;
+  });
+  const sortedReferrers = Object.entries(referrerCounts).sort((a, b) => b[1] - a[1]);
+  const referrerColors = [TP.blue, TP.green, TP.yellow, TP.red, TP.darkPurple, TP.bubblegum, TP.peach, TP.skyBlue];
+
+  const referrerChartData = {
+    labels: sortedReferrers.map(([r]) => r),
+    datasets: [{
+      data: sortedReferrers.map(([, c]) => c),
+      backgroundColor: sortedReferrers.map((_, i) => referrerColors[i % referrerColors.length]),
+      borderWidth: 1,
+      borderColor: '#fff',
+    }],
+  };
+
+  const referrerBarOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y' as const,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx: { raw: number }) => {
+            const pct = ((ctx.raw / WEEKEND_PATIENTS.length) * 100).toFixed(0);
+            return `${ctx.raw} patients (${pct}%)`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: { beginAtZero: true, title: { display: true, text: 'Patients', font: { size: 11 } } },
+    },
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-white rounded-lg border p-5">
+        <h3 className="text-base font-semibold mb-1" style={{ color: TP.navy }}>
+          Weekend Assessment Starts: May 16-17
+        </h3>
+        <p className="text-xs text-gray-400 mb-3">
+          {WEEKEND_PATIENTS.length} new patients started assessments this weekend. Check AV to see who completed info and photos.
+        </p>
+
+        {/* Referrer breakdown chart */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h4 className="text-sm font-medium mb-2" style={{ color: TP.navy }}>Referrer Breakdown</h4>
+            <div style={{ height: 160 }}>
+              <Bar data={referrerChartData} options={referrerBarOptions as never} />
+            </div>
+            <div className="mt-3 text-xs text-gray-500">
+              {sortedReferrers.map(([ref, count]) => (
+                <div key={ref} className="flex justify-between py-0.5">
+                  <span>{ref}</span>
+                  <span className="font-medium">{count} ({((count / WEEKEND_PATIENTS.length) * 100).toFixed(0)}%)</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Summary stats */}
+          <div className="space-y-3">
+            <div className="rounded border p-3">
+              <div className="text-xs text-gray-500">Total New Starts</div>
+              <div className="text-2xl font-bold" style={{ color: TP.navy }}>{WEEKEND_PATIENTS.length}</div>
+            </div>
+            <div className="rounded border p-3">
+              <div className="text-xs text-gray-500">Emily Boazman</div>
+              <div className="text-2xl font-bold" style={{ color: TP.green }}>
+                {referrerCounts['Emily Boazman'] || 0}
+                <span className="text-sm font-normal text-gray-400 ml-2">
+                  ({((referrerCounts['Emily Boazman'] || 0) / WEEKEND_PATIENTS.length * 100).toFixed(0)}%)
+                </span>
+              </div>
+            </div>
+            <div className="rounded border p-3">
+              <div className="text-xs text-gray-500">No Referrer Listed</div>
+              <div className="text-2xl font-bold" style={{ color: TP.yellow }}>
+                {referrerCounts['Unknown'] || 0}
+                <span className="text-sm font-normal text-gray-400 ml-2">
+                  ({((referrerCounts['Unknown'] || 0) / WEEKEND_PATIENTS.length * 100).toFixed(0)}%)
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Patient list table */}
+      <div className="bg-white rounded-lg border p-5">
+        <h4 className="text-sm font-semibold mb-2" style={{ color: TP.navy }}>
+          All {WEEKEND_PATIENTS.length} Patients — May 16-17
+        </h4>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b-2" style={{ borderColor: TP.navy }}>
+                <th className="text-left py-2 px-2">#</th>
+                <th className="text-left py-2 px-2">Name</th>
+                <th className="text-left py-2 px-2">Referrer</th>
+                <th className="text-center py-2 px-2">Info Complete</th>
+                <th className="text-center py-2 px-2">Photos Uploaded</th>
+              </tr>
+            </thead>
+            <tbody>
+              {WEEKEND_PATIENTS.map((p, i) => (
+                <tr key={i} className="border-b hover:bg-gray-50">
+                  <td className="py-1.5 px-2 text-gray-400">{i + 1}</td>
+                  <td className="py-1.5 px-2 font-medium">{p.name}</td>
+                  <td className="py-1.5 px-2">
+                    {p.referrer === 'Unknown' ? (
+                      <span className="text-gray-400">—</span>
+                    ) : (
+                      <span className="text-xs px-1.5 py-0.5 rounded" style={{
+                        background: p.referrer === 'Emily Boazman' ? TP.green + '30' :
+                                   p.referrer === 'Toothpillow Instagram' ? TP.blue + '30' :
+                                   TP.yellow + '30',
+                        color: TP.navy,
+                      }}>
+                        {p.referrer}
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-1.5 px-2 text-center">
+                    {p.infoComplete === true ? '✓' : p.infoComplete === false ? '✗' : '—'}
+                  </td>
+                  <td className="py-1.5 px-2 text-center">
+                    {p.photosUploaded === true ? '✓' : p.photosUploaded === false ? '✗' : '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
