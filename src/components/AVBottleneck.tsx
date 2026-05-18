@@ -167,14 +167,21 @@ export default function AVBottleneck() {
   if (loading) return <div className="text-center py-12 text-gray-500">Loading...</div>;
 
   // ---- ANALYSIS: Same-month comparison (apples to apples) ----
+  // For the current month, prorate 2025 to match the number of days we have in 2026
+  const cm = currentMonth();
+  const daysIn2026CurrentMonth = curMonthSubs.length;
+  const daysInFullMonth = (m: number) => new Date(2025, m, 0).getDate(); // days in month m of 2025
+
   const monthsWithBoth = MONTH_LABELS
     .map((_, i) => i + 1)
     .filter(m => TRAFFIC_2025[m] > 0 && (traffic2026[m] || 0) > 0);
 
   const comparisonRows = monthsWithBoth.map(m => {
-    const t25 = TRAFFIC_2025[m];
+    const isPartialMonth = m === cm && daysIn2026CurrentMonth > 0 && daysIn2026CurrentMonth < daysInFullMonth(m);
+    const prorateFactor = isPartialMonth ? daysIn2026CurrentMonth / daysInFullMonth(m) : 1;
+    const t25 = Math.round(TRAFFIC_2025[m] * prorateFactor);
     const t26 = traffic2026[m] || 0;
-    const s25 = SUBS_2025[m];
+    const s25 = Math.round(SUBS_2025[m] * prorateFactor);
     const s26 = subs2026[m] || 0;
     const tDiff = t26 - t25;
     const tPct = t25 > 0 ? (tDiff / t25 * 100) : 0;
@@ -182,7 +189,8 @@ export default function AVBottleneck() {
     const sPct = s25 > 0 ? (sDiff / s25 * 100) : 0;
     const conv25 = t25 > 0 ? (s25 / t25 * 100) : 0;
     const conv26 = t26 > 0 ? (s26 / t26 * 100) : 0;
-    return { month: m, label: MONTH_LABELS[m - 1], t25, t26, tDiff, tPct, s25, s26, sDiff, sPct, conv25, conv26 };
+    const prorated = isPartialMonth;
+    return { month: m, label: MONTH_LABELS[m - 1] + (prorated ? '*' : ''), t25, t26, tDiff, tPct, s25, s26, sDiff, sPct, conv25, conv26, prorated };
   });
 
   // Totals for months with both years of data
@@ -278,7 +286,10 @@ export default function AVBottleneck() {
       <div className="border-l-4 pl-4" style={{ borderColor: TP.blue }}>
         <h3 className="text-lg font-bold" style={{ color: TP.navy }}>1. Traffic: 2025 vs 2026 (Same Months)</h3>
         <p className="text-sm text-gray-500 mt-1">
-          Comparing {monthsWithBoth.length} months where we have data for both years. No cherry-picking.
+          Comparing {monthsWithBoth.length} months where we have data for both years.
+          {comparisonRows.some(r => r.prorated) && (
+            <span className="ml-1 italic">* Current month prorated to {daysIn2026CurrentMonth} days to match 2026 data so far.</span>
+          )}
         </p>
       </div>
 
