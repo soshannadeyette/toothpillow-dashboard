@@ -53,10 +53,12 @@ const FUNNEL_TOTAL = 92; // 179 total minus 87 blank-stage parent records
 interface IncompletePatient {
   name: string;
   referrer: string;
+  questionnaireComplete?: boolean | null; // true = done, false = not done, null/undefined = unknown
+  photosCompleted?: boolean | null;
 }
 
 const INCOMPLETE_ASSESSMENTS: IncompletePatient[] = [
-  { name: 'Jackson Coyne', referrer: 'Facebook' },
+  { name: 'Jackson Coyne', referrer: 'Facebook', questionnaireComplete: true, photosCompleted: false },
   { name: 'Forrest Dow', referrer: 'Lauren' },
   { name: 'Aleia Rodriguez', referrer: '' },
   { name: 'Rowan Wagner', referrer: 'Alex Clark' },
@@ -506,12 +508,45 @@ export default function AVBottleneck() {
         </div>
       </div>
 
-      {/* Full patient list */}
+      {/* Full patient list with status tracking */}
       <div className="bg-white rounded-lg border p-5">
         <h4 className="text-sm font-semibold mb-3" style={{ color: TP.navy }}>
-          60 Incomplete Assessments — WAITING: Needs Info
+          60 Incomplete Assessments — Drip Reminder Tracking
         </h4>
-        <p className="text-xs text-gray-400 mb-3">These patients started their assessment May 16-17 but have not submitted required information.</p>
+        <p className="text-xs text-gray-400 mb-3">
+          Track what happens after drip reminders. &quot;Questionnaire&quot; = filled out child info. &quot;Photos&quot; = uploaded required photos. Both must be complete for assessment to move forward.
+        </p>
+
+        {/* Status summary cards */}
+        {(() => {
+          const qYes = INCOMPLETE_ASSESSMENTS.filter(p => p.questionnaireComplete === true).length;
+          const qNo = INCOMPLETE_ASSESSMENTS.filter(p => p.questionnaireComplete === false).length;
+          const qUnknown = INCOMPLETE_ASSESSMENTS.filter(p => p.questionnaireComplete == null).length;
+          const pYes = INCOMPLETE_ASSESSMENTS.filter(p => p.photosCompleted === true).length;
+          const pNo = INCOMPLETE_ASSESSMENTS.filter(p => p.photosCompleted === false).length;
+          const pUnknown = INCOMPLETE_ASSESSMENTS.filter(p => p.photosCompleted == null).length;
+          return (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+              <div className="rounded border p-3 bg-green-50 border-green-200">
+                <div className="text-xs text-gray-500">Questionnaire Done</div>
+                <div className="text-lg font-bold" style={{ color: '#16a34a' }}>{qYes}</div>
+              </div>
+              <div className="rounded border p-3 bg-red-50 border-red-200">
+                <div className="text-xs text-gray-500">Questionnaire Not Done</div>
+                <div className="text-lg font-bold" style={{ color: TP.red }}>{qNo}</div>
+              </div>
+              <div className="rounded border p-3 bg-green-50 border-green-200">
+                <div className="text-xs text-gray-500">Photos Done</div>
+                <div className="text-lg font-bold" style={{ color: '#16a34a' }}>{pYes}</div>
+              </div>
+              <div className="rounded border p-3 bg-red-50 border-red-200">
+                <div className="text-xs text-gray-500">Photos Not Done</div>
+                <div className="text-lg font-bold" style={{ color: TP.red }}>{pNo}</div>
+              </div>
+            </div>
+          );
+        })()}
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -519,6 +554,8 @@ export default function AVBottleneck() {
                 <th className="text-left py-2 px-2 w-8">#</th>
                 <th className="text-left py-2 px-2">Child Name</th>
                 <th className="text-left py-2 px-2">Referrer</th>
+                <th className="text-center py-2 px-2">Questionnaire</th>
+                <th className="text-center py-2 px-2">Photos</th>
               </tr>
             </thead>
             <tbody>
@@ -535,6 +572,24 @@ export default function AVBottleneck() {
                         color: TP.navy,
                       }}>{p.referrer}</span>
                     ) : <span className="text-gray-400">—</span>}
+                  </td>
+                  <td className="py-1 px-2 text-center">
+                    {p.questionnaireComplete === true ? (
+                      <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700 font-medium">Done</span>
+                    ) : p.questionnaireComplete === false ? (
+                      <span className="text-xs px-2 py-0.5 rounded bg-red-100 text-red-600 font-medium">No</span>
+                    ) : (
+                      <span className="text-gray-300">—</span>
+                    )}
+                  </td>
+                  <td className="py-1 px-2 text-center">
+                    {p.photosCompleted === true ? (
+                      <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700 font-medium">Done</span>
+                    ) : p.photosCompleted === false ? (
+                      <span className="text-xs px-2 py-0.5 rounded bg-red-100 text-red-600 font-medium">No</span>
+                    ) : (
+                      <span className="text-gray-300">—</span>
+                    )}
                   </td>
                 </tr>
               ))}
