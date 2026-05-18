@@ -43,7 +43,7 @@ interface IncompletePatient {
 const INCOMPLETE_ASSESSMENTS: IncompletePatient[] = [
   { name: 'Jackson Coyne', referrer: 'Facebook', questionnaireComplete: true, photosCompleted: false },
   { name: 'Forrest Dow', referrer: 'Lauren', questionnaireComplete: true, photosCompleted: false },
-  { name: 'Aleia Rodriguez', referrer: '' },
+  { name: 'Aleia Rodriguez', referrer: '', questionnaireComplete: true, photosCompleted: false },
   { name: 'Rowan Wagner', referrer: 'Alex Clark' },
   { name: 'Savannah Wilson', referrer: '' },
   { name: 'Natalie Stedman', referrer: 'Podcast' },
