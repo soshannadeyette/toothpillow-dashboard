@@ -74,6 +74,17 @@ const TRAFFIC_2025: Record<number, number> = {
   7: 73193, 8: 37180, 9: 29179, 10: 28271, 11: 54674, 12: 36031,
 };
 
+// 2026 website traffic — GA4 sessions (pulled May 19, 2026)
+// May is partial (1-18 only); will be updated when month completes
+const TRAFFIC_2026: Record<number, number> = {
+  1: 49550, 2: 71217, 3: 64705, 4: 47844, 5: 25309,
+};
+
+// 2026 USA website traffic — estimated at 86.4% of worldwide (GA4 country filter)
+const USA_TRAFFIC_2026: Record<number, number> = {
+  1: 42811, 2: 61531, 3: 55905, 4: 41337, 5: 21867,
+};
+
 // 2025 submissions (for conversion calc)
 const SUBS_2025: Record<number, number> = {
   1: 1434, 2: 1560, 3: 1510, 4: 1663, 5: 1328, 6: 1039,
@@ -177,14 +188,15 @@ export default function AnnualView() {
         }
       }
 
-      // Recompute conversion rates for ALL months from stored submissions/visitors
-      // This ensures rates are never stale after submission count updates
+      // Inject hardcoded GA4 visitor data (source of truth) and recompute conversion rates
       merged = merged.map(m => {
         const subs = m.total_submissions || 0;
-        const vis = m.total_visitors || 0;
-        const usaVis = m.usa_visitors || 0;
+        const vis = TRAFFIC_2026[m.month] || m.total_visitors || 0;
+        const usaVis = USA_TRAFFIC_2026[m.month] || m.usa_visitors || 0;
         return {
           ...m,
+          total_visitors: vis,
+          usa_visitors: usaVis,
           conversion_rate: vis > 0 ? parseFloat(((subs / vis) * 100).toFixed(2)) : 0,
           usa_conversion_rate: usaVis > 0 ? parseFloat(((subs / usaVis) * 100).toFixed(2)) : 0,
         };
