@@ -8,7 +8,7 @@ import ReferrerView from '@/components/ReferrerView';
 import PaidAds from '@/components/PaidAds';
 import AmbassadorGrowth from '@/components/AmbassadorGrowth';
 import GoalEditor from '@/components/GoalEditor';
-import AVBottleneck from '@/components/AVBottleneck';
+import OrganicGrowth from '@/components/OrganicGrowth';
 
 const TABS = [
   { id: 'daily', label: 'Daily Tracker' },
@@ -17,7 +17,7 @@ const TABS = [
   { id: 'referrer', label: 'Referrer' },
   { id: 'paid', label: 'Paid Ads' },
   { id: 'ambassador', label: 'Ambassador Growth' },
-  { id: 'bottleneck', label: 'AV Bottleneck' },
+  { id: 'organic', label: 'Organic Growth' },
   { id: 'settings', label: 'Settings' },
 ] as const;
 
@@ -62,7 +62,7 @@ export default function Dashboard() {
         {activeTab === 'referrer' && <ReferrerView />}
         {activeTab === 'paid' && <PaidAds />}
         {activeTab === 'ambassador' && <AmbassadorGrowth />}
-        {activeTab === 'bottleneck' && <AVBottleneck />}
+        {activeTab === 'organic' && <OrganicGrowth />}
         {activeTab === 'settings' && <GoalEditor />}
       </main>
     </div>
