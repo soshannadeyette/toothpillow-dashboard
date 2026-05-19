@@ -22,10 +22,11 @@ const TP = {
    HARDCODED GSC DATA — Source of truth
    Data exported from Google Search Console on May 18, 2026
    Property verified ~Feb 2025, 16 months of history available
-   SEO program started: May 18, 2026
+   Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
+   SEO program reset date: May 19, 2026
    ════════════════════════════════════════════ */
 
-const SEO_START_DATE = '2026-05-18';
+const SEO_START_DATE = '2026-05-19';
 
 const GSC_MONTHLY = [
   { month: '2025-02', clicks: 18183, impressions: 541298, ctr: 3.4, position: 72.4 },
@@ -196,14 +197,32 @@ export default function OrganicGrowth() {
   const prior = GSC_MONTHLY[GSC_MONTHLY.length - 3]; // March
   const mayPartial = GSC_MONTHLY[GSC_MONTHLY.length - 1]; // May partial
 
-  // Pre-SEO baseline: average of last 3 full months before May 18
-  const baseline3mo = useMemo(() => {
-    const months = GSC_MONTHLY.filter(m => m.month >= '2026-02' && m.month <= '2026-04');
-    const avgClicks = Math.round(months.reduce((s, m) => s + m.clicks, 0) / months.length);
-    const avgImps = Math.round(months.reduce((s, m) => s + m.impressions, 0) / months.length);
-    const avgCtr = parseFloat((months.reduce((s, m) => s + m.ctr, 0) / months.length).toFixed(1));
-    const avgPos = parseFloat((months.reduce((s, m) => s + m.position, 0) / months.length).toFixed(1));
-    return { avgClicks, avgImps, avgCtr, avgPos };
+  // Pre-SEO baseline: all data through May 18, 2026
+  // 464 days of data (Feb 8 2025 – May 17 2026), computed from daily CSV export
+  const baseline = useMemo(() => {
+    // Full-period daily averages (464 days)
+    const totalClicks = 224596;
+    const totalImpressions = 5043548;
+    const totalDays = 464;
+    const avgClicksDay = Math.round(totalClicks / totalDays);
+    const avgClicksMo = Math.round(avgClicksDay * 30);
+    const avgImpsMo = Math.round(totalImpressions / totalDays * 30);
+    const avgCtr = parseFloat((totalClicks / totalImpressions * 100).toFixed(1));
+    const avgPos = 40.9;
+
+    // Recent 90-day window (Feb 17 – May 17 2026) for comparison
+    const recent90Clicks = 11252;
+    const recent90Imps = 2581 * 30; // daily avg * 30
+    const recent90Ctr = 14.5;
+    const recent90Pos = 20.9;
+
+    return {
+      avgClicksMo, avgImpsMo, avgCtr, avgPos,
+      recent90ClicksMo: Math.round(recent90Clicks),
+      recent90ImpsMo: Math.round(recent90Imps),
+      recent90Ctr, recent90Pos,
+      totalClicks, totalImpressions, totalDays,
+    };
   }, []);
 
   // Monthly clicks chart data
@@ -213,8 +232,8 @@ export default function OrganicGrowth() {
       {
         label: 'Clicks',
         data: GSC_MONTHLY.map(m => m.clicks),
-        backgroundColor: GSC_MONTHLY.map(m => m.month >= '2026-05' ? TP.green : TP.blue),
-        borderColor: GSC_MONTHLY.map(m => m.month >= '2026-05' ? TP.green : TP.blue),
+        backgroundColor: GSC_MONTHLY.map(m => TP.blue),
+        borderColor: GSC_MONTHLY.map(m => TP.blue),
         borderWidth: 1,
         borderRadius: 4,
       },
@@ -245,7 +264,7 @@ export default function OrganicGrowth() {
             borderDash: [6, 4],
             label: {
               display: true,
-              content: 'SEO Program Start',
+              content: 'SEO Reset — May 19',
               position: 'start' as const,
               backgroundColor: TP.red,
               color: '#fff',
@@ -274,7 +293,7 @@ export default function OrganicGrowth() {
         label: 'Weekly Clicks',
         data: GSC_WEEKLY.map(w => w.clicks),
         type: 'bar' as const,
-        backgroundColor: GSC_WEEKLY.map(w => w.week >= '2026-05-12' ? `${TP.green}CC` : `${TP.blue}99`),
+        backgroundColor: GSC_WEEKLY.map(w => `${TP.blue}99`),
         borderRadius: 3,
         yAxisID: 'y',
         order: 2,
@@ -344,7 +363,7 @@ export default function OrganicGrowth() {
         borderColor: TP.darkPurple,
         backgroundColor: `${TP.darkPurple}20`,
         pointRadius: 4,
-        pointBackgroundColor: GSC_MONTHLY.map(m => m.month >= '2026-05' ? TP.green : TP.darkPurple),
+        pointBackgroundColor: GSC_MONTHLY.map(m => TP.darkPurple),
         borderWidth: 2,
         tension: 0.3,
         fill: true,
@@ -391,7 +410,7 @@ export default function OrganicGrowth() {
       <div>
         <h2 style={{ fontSize: 22, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Organic Search Growth</h2>
         <p style={{ fontSize: 13, color: '#888' }}>
-          Google Search Console data from Feb 2025 to May 2026. SEO program started May 18, 2026.
+          Google Search Console data from Feb 2025 to present. SEO program reset date: May 19, 2026.
         </p>
       </div>
 
@@ -400,29 +419,48 @@ export default function OrganicGrowth() {
         background: `linear-gradient(135deg, ${TP.navy} 0%, ${TP.blue} 100%)`,
         borderRadius: 10, padding: '16px 20px', color: '#fff',
       }}>
-        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>
-          Pre-SEO Baseline (Feb–Apr 2026 average)
+        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>
+          Pre-SEO Baseline (Feb 8, 2025 – May 18, 2026)
         </div>
-        <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
-          <div>
-            <span style={{ fontSize: 12, opacity: 0.7 }}>Clicks/mo</span>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>{baseline3mo.avgClicks.toLocaleString()}</div>
-          </div>
-          <div>
-            <span style={{ fontSize: 12, opacity: 0.7 }}>Impressions/mo</span>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>{fmtK(baseline3mo.avgImps)}</div>
-          </div>
-          <div>
-            <span style={{ fontSize: 12, opacity: 0.7 }}>Avg CTR</span>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>{baseline3mo.avgCtr}%</div>
-          </div>
-          <div>
-            <span style={{ fontSize: 12, opacity: 0.7 }}>Avg Position</span>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>{baseline3mo.avgPos}</div>
+        <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 12 }}>
+          {baseline.totalDays} days of data before SEO program. Reset date: May 19, 2026. Everything after this is measured against these numbers.
+        </div>
+        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+          <div style={{ minWidth: 140 }}>
+            <span style={{ fontSize: 11, opacity: 0.7 }}>Full-Period Avg</span>
+            <div style={{ display: 'flex', gap: 24, marginTop: 4 }}>
+              <div>
+                <div style={{ fontSize: 10, opacity: 0.5 }}>Clicks/mo</div>
+                <div style={{ fontSize: 18, fontWeight: 700 }}>{baseline.avgClicksMo.toLocaleString()}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, opacity: 0.5 }}>Impr/mo</div>
+                <div style={{ fontSize: 18, fontWeight: 700 }}>{fmtK(baseline.avgImpsMo)}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, opacity: 0.5 }}>CTR</div>
+                <div style={{ fontSize: 18, fontWeight: 700 }}>{baseline.avgCtr}%</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, opacity: 0.5 }}>Position</div>
+                <div style={{ fontSize: 18, fontWeight: 700 }}>{baseline.avgPos}</div>
+              </div>
+            </div>
           </div>
         </div>
-        <div style={{ fontSize: 11, opacity: 0.6, marginTop: 8 }}>
-          These are the numbers to beat. SEO changes deployed May 18, 2026. Track weekly from here.
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.15)', marginTop: 12, paddingTop: 10, display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ fontSize: 10, opacity: 0.5 }}>Last 90 Days — Clicks/mo</div>
+            <div style={{ fontSize: 16, fontWeight: 700 }}>{baseline.recent90ClicksMo.toLocaleString()}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 10, opacity: 0.5 }}>Last 90 Days — CTR</div>
+            <div style={{ fontSize: 16, fontWeight: 700 }}>{baseline.recent90Ctr}%</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 10, opacity: 0.5 }}>Last 90 Days — Position</div>
+            <div style={{ fontSize: 16, fontWeight: 700 }}>{baseline.recent90Pos}</div>
+          </div>
         </div>
       </div>
 
@@ -532,7 +570,7 @@ export default function OrganicGrowth() {
 
       {/* Data source note */}
       <div style={{ fontSize: 11, color: '#aaa', textAlign: 'center', padding: '8px 0' }}>
-        Data source: Google Search Console export (May 18, 2026). Property: https://www.toothpillow.com/. Date range: Feb 8, 2025 – May 17, 2026.
+        Data source: Google Search Console export (May 18, 2026). Property: https://www.toothpillow.com/. Baseline: Feb 8, 2025 – May 18, 2026. SEO reset: May 19, 2026.
       </div>
     </div>
   );
