@@ -50,7 +50,7 @@ const META_FUNNEL = { entered: 58, waitingInfo: 30, sentCheckout: 13, checkedOut
 
 // Salesforce pipeline detail (update when new SF export is loaded)
 // These sub-stage breakdowns can't come from daily Supabase data
-const GOOGLE_SF_PIPELINE = { sentToTxP: 10, txpApproved: 1, sentCheckout: 19, referredOut: 2, denied: 0, closedLost: 0 };
+const GOOGLE_SF_PIPELINE = { sentToTxP: 9, txpApproved: 0, sentCheckout: 20, referredOut: 2, denied: 0, closedLost: 0 };
 const GOOGLE_REVENUE: number = 5286; // Total checkout revenue — update with each new SF export
 
 /* ════════════════════════════════════════════
