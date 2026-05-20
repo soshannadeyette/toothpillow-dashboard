@@ -240,46 +240,32 @@ export default function AVDiagnostics() {
   };
 
   // ── Chart 3: Stacked bar — starts that completed vs stuck waiting ──
-  // For May, show actual + projected remainder as lighter segments
-  const projFwdRemainder = projFwd - completionEst[completionEst.length - 1];
-  const projWaitRemainder = projWaiting - latest.waiting;
+  // Two datasets only. May uses projected totals with transparent fill.
+  const fwdData = AV_DATA.map((d, i) => d.partial ? projFwd : completionEst[i]);
+  const waitData = AV_DATA.map(d => d.partial ? projWaiting : d.waiting);
+  const greenBgs = AV_DATA.map(d => d.partial ? 'rgba(29,158,117,0.25)' : 'rgba(29,158,117,0.7)');
+  const redBgs = AV_DATA.map(d => d.partial ? 'rgba(226,75,74,0.25)' : 'rgba(226,75,74,0.7)');
+  const greenBorders = AV_DATA.map(d => d.partial ? 'rgba(29,158,117,0.6)' : 'rgba(29,158,117,0)');
+  const redBorders = AV_DATA.map(d => d.partial ? 'rgba(226,75,74,0.6)' : 'rgba(226,75,74,0)');
 
   const stackedData = {
     labels,
     datasets: [
-      // Green block (bottom): actual + projected remainder grouped together
       {
         label: 'Moved forward',
-        data: completionEst,
-        backgroundColor: 'rgba(29,158,117,0.7)',
-        borderRadius: 0,
-        stack: 'stack0',
-      },
-      {
-        label: 'Moved forward (projected)',
-        data: [...AV_DATA.slice(0, -1).map(() => null as number | null), projFwdRemainder],
-        backgroundColor: 'rgba(29,158,117,0.15)',
+        data: fwdData,
+        backgroundColor: greenBgs,
+        borderColor: greenBorders,
         borderWidth: 1.5,
-        borderColor: 'rgba(29,158,117,0.5)',
         borderRadius: 0,
-        stack: 'stack0',
       },
-      // Red block (top): actual + projected remainder grouped together
       {
         label: 'Stuck waiting',
-        data: AV_DATA.map(d => d.waiting),
-        backgroundColor: 'rgba(226,75,74,0.7)',
-        borderRadius: 0,
-        stack: 'stack0',
-      },
-      {
-        label: 'Stuck waiting (projected)',
-        data: [...AV_DATA.slice(0, -1).map(() => null as number | null), projWaitRemainder],
-        backgroundColor: 'rgba(226,75,74,0.15)',
+        data: waitData,
+        backgroundColor: redBgs,
+        borderColor: redBorders,
         borderWidth: 1.5,
-        borderColor: 'rgba(226,75,74,0.5)',
         borderRadius: 4,
-        stack: 'stack0',
       },
     ],
   };
@@ -374,7 +360,7 @@ export default function AVDiagnostics() {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(29,158,117,0.7)' }} /> Moved forward</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(226,75,74,0.7)' }} /> Stuck in waiting</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(150,150,150,0.2)', border: '1px dashed #999' }} /> Projected remainder</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(150,150,150,0.15)', border: '1.5px solid rgba(150,150,150,0.5)' }} /> Projected (May)</span>
         </div>
         <div style={{ height: 280 }}>
           <Bar data={stackedData} options={stackedOpts as any} />
