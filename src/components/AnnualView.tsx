@@ -74,15 +74,15 @@ const TRAFFIC_2025: Record<number, number> = {
   7: 73193, 8: 37180, 9: 29179, 10: 28271, 11: 54674, 12: 36031,
 };
 
-// 2026 website traffic — GA4 sessions (pulled May 19, 2026)
+// 2026 website traffic — GA4 Total Users (pulled May 19, 2026)
 // May is partial (1-18 only); will be updated when month completes
 const TRAFFIC_2026: Record<number, number> = {
-  1: 49550, 2: 71217, 3: 64705, 4: 47844, 5: 25309,
+  1: 37320, 2: 51480, 3: 39218, 4: 30311, 5: 16900,
 };
 
 // 2026 USA website traffic — estimated at 86.4% of worldwide (GA4 country filter)
 const USA_TRAFFIC_2026: Record<number, number> = {
-  1: 42811, 2: 61531, 3: 55905, 4: 41337, 5: 21867,
+  1: 32244, 2: 44479, 3: 33884, 4: 26189, 5: 14602,
 };
 
 // 2025 submissions (for conversion calc)
