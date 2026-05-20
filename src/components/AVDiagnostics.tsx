@@ -381,10 +381,6 @@ export default function AVDiagnostics() {
                 <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Start rate</th>
                 <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Wait %</th>
                 <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Moved fwd</th>
-                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#3A6EA4', fontWeight: 600, borderLeft: '2px solid #E5E7EB' }}>Proj traffic</th>
-                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#3A6EA4', fontWeight: 600 }}>Proj starts</th>
-                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#3A6EA4', fontWeight: 600 }}>Proj waiting</th>
-                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#3A6EA4', fontWeight: 600 }}>Proj fwd</th>
               </tr>
             </thead>
             <tbody>
@@ -392,7 +388,6 @@ export default function AVDiagnostics() {
                 const sr = startRates[i];
                 const wp = waitPcts[i];
                 const fwd = completionEst[i];
-                const showProj = d.partial;
                 return (
                   <tr key={d.label} style={{ borderBottom: '1px solid #F3F4F6' }}>
                     <td style={{ padding: '8px 10px', fontWeight: 500 }}>
@@ -404,25 +399,22 @@ export default function AVDiagnostics() {
                     <td style={{ padding: '8px 10px', textAlign: 'right' }}>{sr}%</td>
                     <td style={{ padding: '8px 10px', textAlign: 'right' }}>{wp}%</td>
                     <td style={{ padding: '8px 10px', textAlign: 'right' }}>{num(fwd)}</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', borderLeft: '2px solid #E5E7EB', color: '#3A6EA4', fontStyle: 'italic' }}>
-                      {showProj ? num(proj(d.traffic)) : '—'}
-                    </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>
-                      {showProj ? num(proj(d.starts)) : '—'}
-                    </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>
-                      {showProj ? num(proj(d.waiting)) : '—'}
-                    </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>
-                      {showProj ? num(proj(d.starts) - proj(d.waiting)) : '—'}
-                    </td>
                   </tr>
                 );
               })}
+              <tr style={{ borderBottom: '1px solid #F3F4F6', background: '#F0F9FF' }}>
+                <td style={{ padding: '8px 10px', fontWeight: 500, fontStyle: 'italic', color: '#3A6EA4' }}>May proj</td>
+                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>{num(projTraffic)}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>{num(projStarts)}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>{num(projWaiting)}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>{projStartRate}%</td>
+                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>{projWaitPct}%</td>
+                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>{num(projFwd)}</td>
+              </tr>
             </tbody>
           </table>
         </div>
-        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* Partial month (through 5/19) &nbsp;|&nbsp; Proj = pace extrapolated to {MAY_DAYS_TOTAL} days ({MAY_DAYS_ELAPSED} elapsed)</div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* Through 5/19 &nbsp;|&nbsp; May proj = pace extrapolated to {MAY_DAYS_TOTAL} days ({MAY_DAYS_ELAPSED} elapsed)</div>
       </div>
     </div>
   );
