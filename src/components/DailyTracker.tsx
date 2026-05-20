@@ -93,7 +93,7 @@ export default function DailyTracker() {
       if (formHybrid.trim() !== '')   payload.hybrid   = parseInt(formHybrid);
       if (formPrime.trim() !== '')    payload.prime    = parseInt(formPrime);
       if (formVisitors.trim() !== '') payload.visitors = parseInt(formVisitors);
-      if (formIncome.trim() !== '')   payload.income   = parseFloat(formIncome);
+      // income is auto-calculated server-side as online * $5
       await upsertSubmission(payload as Partial<import('@/lib/types').DailySubmission>);
       // Clear form
       setFormOnline('');
@@ -400,13 +400,9 @@ export default function DailyTracker() {
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Income ($)</label>
-            <input
-              type="number"
-              value={formIncome}
-              onChange={(e) => setFormIncome(e.target.value)}
-              placeholder="auto"
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm w-24"
-            />
+            <div className="border border-gray-200 bg-gray-50 rounded-md px-3 py-2 text-sm w-24 text-gray-400">
+              {formOnline.trim() ? `$${parseInt(formOnline) * 5}` : 'auto'}
+            </div>
           </div>
           <button
             onClick={handleSave}

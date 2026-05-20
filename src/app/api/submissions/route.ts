@@ -43,13 +43,15 @@ export async function POST(request: NextRequest) {
         .eq('date', date)
         .maybeSingle();
 
+    const onlineCount = body.online ?? existing?.online ?? 0;
+
     const merged = {
         date,
-        online:   body.online   ?? existing?.online   ?? 0,
+        online:   onlineCount,
         hybrid:   body.hybrid   ?? existing?.hybrid   ?? 0,
         prime:    body.prime    ?? existing?.prime    ?? 0,
         visitors: body.visitors ?? existing?.visitors ?? 0,
-        income:   body.income   ?? existing?.income   ?? 0,
+        income:   onlineCount * 5,  // $5 per online submission — always auto-calculated
     };
 
     const { data, error } = await supabase
