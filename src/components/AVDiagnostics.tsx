@@ -89,41 +89,43 @@ export default function AVDiagnostics() {
   const marData = AV_DATA.find(d => d.month === 3 && d.year === 2026);
 
   // ── Chart 1: Traffic + Starts + Waiting (combo) ──────────────────
-  const labelsWithProj = [...labels, 'May proj'];
+  // Traffic bars: actual solid, projected remainder transparent (stacked on May only)
   const nullPad = AV_DATA.map(() => null as number | null);
+  const projTrafficRemainder = projTraffic - latest.traffic;
 
   const mainChartData = {
-    labels: labelsWithProj,
+    labels,
     datasets: [
       {
         type: 'bar' as const,
         label: 'Web traffic',
-        data: [...AV_DATA.map(d => d.traffic), null],
+        data: AV_DATA.map(d => d.traffic),
         backgroundColor: 'rgba(58,110,164,0.6)',
-        borderRadius: 4,
+        borderRadius: 0,
         yAxisID: 'y',
         order: 3,
+        stack: 'traffic',
       },
       {
         type: 'bar' as const,
         label: 'Traffic (projected)',
-        data: [...nullPad, projTraffic],
-        backgroundColor: 'rgba(58,110,164,0.25)',
+        data: [...nullPad.slice(0, -1), projTrafficRemainder],
+        backgroundColor: 'rgba(58,110,164,0.15)',
+        borderWidth: 1,
+        borderColor: 'rgba(58,110,164,0.4)',
         borderRadius: 4,
-        borderWidth: 1.5,
-        borderColor: 'rgba(58,110,164,0.5)',
-        borderDash: [4, 3],
         yAxisID: 'y',
         order: 3,
+        stack: 'traffic',
       },
       {
         type: 'line' as const,
         label: 'Submission starts',
-        data: [...AV_DATA.map(d => d.starts), projStarts],
+        data: AV_DATA.map(d => d.starts),
         borderColor: TP.green,
         backgroundColor: TP.green,
         borderWidth: 2.5,
-        pointRadius: AV_DATA.map(() => 5).concat([0]),
+        pointRadius: 5,
         pointBackgroundColor: TP.green,
         tension: 0.3,
         yAxisID: 'y1',
@@ -132,15 +134,15 @@ export default function AVDiagnostics() {
       {
         type: 'line' as const,
         label: 'Starts (projected)',
-        data: [...nullPad.slice(0, -1), latest.starts, projStarts],
+        data: [...nullPad.slice(0, -1), projStarts],
         borderColor: TP.green,
         backgroundColor: 'transparent',
-        borderWidth: 1.5,
-        borderDash: [6, 4],
-        pointRadius: [0, 6],
-        pointBackgroundColor: '#fff',
+        borderWidth: 0,
+        pointRadius: 7,
+        pointBackgroundColor: 'rgba(29,158,117,0.15)',
         pointBorderColor: TP.green,
         pointBorderWidth: 2,
+        pointStyle: 'circle',
         tension: 0,
         yAxisID: 'y1',
         order: 1,
@@ -148,11 +150,11 @@ export default function AVDiagnostics() {
       {
         type: 'line' as const,
         label: 'Waiting / needs info',
-        data: [...AV_DATA.map(d => d.waiting), projWaiting],
+        data: AV_DATA.map(d => d.waiting),
         borderColor: TP.red,
         backgroundColor: 'rgba(226,75,74,0.1)',
         borderWidth: 2.5,
-        pointRadius: AV_DATA.map(() => 5).concat([0]),
+        pointRadius: 5,
         pointBackgroundColor: TP.red,
         fill: true,
         tension: 0.3,
@@ -162,15 +164,15 @@ export default function AVDiagnostics() {
       {
         type: 'line' as const,
         label: 'Waiting (projected)',
-        data: [...nullPad.slice(0, -1), latest.waiting, projWaiting],
+        data: [...nullPad.slice(0, -1), projWaiting],
         borderColor: TP.red,
         backgroundColor: 'transparent',
-        borderWidth: 1.5,
-        borderDash: [6, 4],
-        pointRadius: [0, 6],
-        pointBackgroundColor: '#fff',
+        borderWidth: 0,
+        pointRadius: 7,
+        pointBackgroundColor: 'rgba(226,75,74,0.15)',
         pointBorderColor: TP.red,
         pointBorderWidth: 2,
+        pointStyle: 'circle',
         tension: 0,
         yAxisID: 'y1',
         order: 0,
@@ -260,17 +262,17 @@ export default function AVDiagnostics() {
       {
         label: 'Moved forward (projected)',
         data: [...AV_DATA.slice(0, -1).map(() => null as number | null), projFwdRemainder],
-        backgroundColor: 'rgba(29,158,117,0.25)',
-        borderWidth: 1,
-        borderColor: 'rgba(29,158,117,0.5)',
+        backgroundColor: 'rgba(29,158,117,0.12)',
+        borderWidth: 1.5,
+        borderColor: 'rgba(29,158,117,0.6)',
         borderRadius: 0,
       },
       {
         label: 'Stuck waiting (projected)',
         data: [...AV_DATA.slice(0, -1).map(() => null as number | null), projWaitRemainder],
-        backgroundColor: 'rgba(226,75,74,0.25)',
-        borderWidth: 1,
-        borderColor: 'rgba(226,75,74,0.5)',
+        backgroundColor: 'rgba(226,75,74,0.12)',
+        borderWidth: 1.5,
+        borderColor: 'rgba(226,75,74,0.6)',
         borderRadius: 4,
       },
     ],
@@ -387,6 +389,10 @@ export default function AVDiagnostics() {
                 <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Start rate</th>
                 <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Wait %</th>
                 <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Moved fwd</th>
+                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#3A6EA4', fontWeight: 600, borderLeft: '2px solid #E5E7EB' }}>Proj traffic</th>
+                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#3A6EA4', fontWeight: 600 }}>Proj starts</th>
+                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#3A6EA4', fontWeight: 600 }}>Proj waiting</th>
+                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#3A6EA4', fontWeight: 600 }}>Proj fwd</th>
               </tr>
             </thead>
             <tbody>
@@ -395,6 +401,7 @@ export default function AVDiagnostics() {
                 const wp = waitPcts[i];
                 const fwd = completionEst[i];
                 const isApril = d.month === 4 && d.year === 2026;
+                const showProj = d.partial;
                 return (
                   <tr key={d.label} style={{
                     borderBottom: '1px solid #F3F4F6',
@@ -413,23 +420,25 @@ export default function AVDiagnostics() {
                       {wp}%
                     </td>
                     <td style={{ padding: '8px 10px', textAlign: 'right' }}>{num(fwd)}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', borderLeft: '2px solid #E5E7EB', color: '#3A6EA4', fontStyle: 'italic' }}>
+                      {showProj ? num(proj(d.traffic)) : '—'}
+                    </td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>
+                      {showProj ? num(proj(d.starts)) : '—'}
+                    </td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>
+                      {showProj ? num(proj(d.waiting)) : '—'}
+                    </td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>
+                      {showProj ? num(proj(d.starts) - proj(d.waiting)) : '—'}
+                    </td>
                   </tr>
                 );
               })}
-              {/* Projected May row */}
-              <tr style={{ borderBottom: '1px solid #F3F4F6', background: '#F0F9FF' }}>
-                <td style={{ padding: '8px 10px', fontWeight: 500, fontStyle: 'italic', color: '#6B7280' }}>May proj</td>
-                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#6B7280', fontStyle: 'italic' }}>{num(projTraffic)}</td>
-                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#6B7280', fontStyle: 'italic' }}>{num(projStarts)}</td>
-                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#6B7280', fontStyle: 'italic' }}>{num(projWaiting)}</td>
-                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#6B7280', fontStyle: 'italic' }}>{projStartRate}%</td>
-                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#6B7280', fontStyle: 'italic' }}>{projWaitPct}%</td>
-                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#6B7280', fontStyle: 'italic' }}>{num(projFwd)}</td>
-              </tr>
             </tbody>
           </table>
         </div>
-        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* Partial month (through 5/20) &nbsp;|&nbsp; May proj = pace extrapolated to 31 days ({MAY_DAYS_ELAPSED} days elapsed)</div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* Partial month (through 5/20) &nbsp;|&nbsp; Proj = pace extrapolated to {MAY_DAYS_TOTAL} days ({MAY_DAYS_ELAPSED} elapsed)</div>
       </div>
     </div>
   );
