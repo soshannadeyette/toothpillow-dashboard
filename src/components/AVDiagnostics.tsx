@@ -38,7 +38,7 @@ const AV_DATA = [
   { label: 'Jan 26', month: 1,  year: 2026, traffic: 37320, starts: 1514, waiting: 108,  partial: false },
   { label: 'Feb 26', month: 2,  year: 2026, traffic: 51480, starts: 2506, waiting: 889,  partial: false },
   { label: 'Mar 26', month: 3,  year: 2026, traffic: 39218, starts: 2587, waiting: 992,  partial: false },
-  { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1692, waiting: 5788, partial: false },
+  { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1692, waiting: 578,  partial: false },
   { label: 'May 26', month: 5,  year: 2026, traffic: 18033, starts: 996,  waiting: 439,  partial: true },
 ];
 
@@ -248,12 +248,13 @@ export default function AVDiagnostics() {
 
       {/* ===== Trend callout ===== */}
       <div style={{ background: '#FFFBEB', borderRadius: 10, padding: '14px 18px', border: '1px solid #FDE68A', marginBottom: 24 }}>
-        <div style={{ fontWeight: 600, color: '#92400E', fontSize: 14, marginBottom: 4 }}>Key trend: waiting queue exploded in April</div>
+        <div style={{ fontWeight: 600, color: '#92400E', fontSize: 14, marginBottom: 4 }}>Key trend: waiting queue climbed sharply Feb–Mar, then dropped back in April</div>
         <div style={{ fontSize: 13, color: '#78350F', lineHeight: 1.6 }}>
-          From Nov 2025 through Jan 2026, the waiting/needs-info queue held steady at 97-192 (5-7% of starts).
-          Feb and Mar saw a gradual climb to 889 and 992 (35-38% of starts). Then in April the queue jumped to 5,788 —
-          342% of that month&apos;s starts and 5.8x the March level. This is not a traffic problem. Traffic dropped 23% in April
-          but the waiting queue grew 483%. Something in the assessment pipeline broke or changed in April.
+          From Nov 2025 through Jan 2026, the waiting/needs-info queue held steady at 97–192 (5–7% of starts).
+          Feb and Mar saw a sharp climb to 889 and 992 (35–38% of starts), meaning more than a third of people who started
+          assessments got stuck. April dropped to 578 (34% of starts) — the raw count fell but the rate stayed elevated.
+          Traffic declined 23% in April while the waiting rate held flat, which suggests the bottleneck is in the assessment
+          completion flow itself, not in who&apos;s arriving at the site.
         </div>
       </div>
 
