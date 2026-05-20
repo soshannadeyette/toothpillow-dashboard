@@ -42,6 +42,12 @@ const AV_DATA = [
   { label: 'May 26', month: 5,  year: 2026, traffic: 18033, starts: 996,  waiting: 439,  partial: true },
 ];
 
+// ── May projection ───────────────────────────────────────────────────
+const MAY_DAYS_ELAPSED = 20; // data through 5/20
+const MAY_DAYS_TOTAL = 31;
+const PROJ_MULT = MAY_DAYS_TOTAL / MAY_DAYS_ELAPSED;
+
+function proj(actual: number): number { return Math.round(actual * PROJ_MULT); }
 function num(v: number): string { return v.toLocaleString(); }
 function pct(v: number, t: number): string { return t > 0 ? (v / t * 100).toFixed(1) + '%' : '--'; }
 
@@ -64,8 +70,16 @@ export default function AVDiagnostics() {
   const waitPcts = AV_DATA.map(d => Math.round(d.waiting / d.starts * 1000) / 10);
   const completionEst = AV_DATA.map(d => d.starts - d.waiting);
 
-  // Trend for waiting queue
-  const waitTrend = trendArrow(latest.waiting, prev.waiting);
+  // May projections
+  const projTraffic = proj(latest.traffic);
+  const projStarts = proj(latest.starts);
+  const projWaiting = proj(latest.waiting);
+  const projFwd = projStarts - projWaiting;
+  const projStartRate = Math.round(projStarts / projTraffic * 1000) / 10;
+  const projWaitPct = Math.round(projWaiting / projStarts * 1000) / 10;
+
+  // Trend for waiting queue (use projected vs prev full month)
+  const waitTrend = trendArrow(projWaiting, prev.waiting);
   // Trend for start rate
   const latestStartRate = startRates[startRates.length - 1];
   const prevStartRate = startRates[startRates.length - 2];
@@ -75,26 +89,41 @@ export default function AVDiagnostics() {
   const marData = AV_DATA.find(d => d.month === 3 && d.year === 2026);
 
   // ── Chart 1: Traffic + Starts + Waiting (combo) ──────────────────
+  const labelsWithProj = [...labels, 'May proj'];
+  const nullPad = AV_DATA.map(() => null as number | null);
+
   const mainChartData = {
-    labels,
+    labels: labelsWithProj,
     datasets: [
       {
         type: 'bar' as const,
         label: 'Web traffic',
-        data: AV_DATA.map(d => d.traffic),
+        data: [...AV_DATA.map(d => d.traffic), null],
         backgroundColor: 'rgba(58,110,164,0.6)',
         borderRadius: 4,
         yAxisID: 'y',
         order: 3,
       },
       {
+        type: 'bar' as const,
+        label: 'Traffic (projected)',
+        data: [...nullPad, projTraffic],
+        backgroundColor: 'rgba(58,110,164,0.25)',
+        borderRadius: 4,
+        borderWidth: 1.5,
+        borderColor: 'rgba(58,110,164,0.5)',
+        borderDash: [4, 3],
+        yAxisID: 'y',
+        order: 3,
+      },
+      {
         type: 'line' as const,
         label: 'Submission starts',
-        data: AV_DATA.map(d => d.starts),
+        data: [...AV_DATA.map(d => d.starts), projStarts],
         borderColor: TP.green,
         backgroundColor: TP.green,
         borderWidth: 2.5,
-        pointRadius: 5,
+        pointRadius: AV_DATA.map(() => 5).concat([0]),
         pointBackgroundColor: TP.green,
         tension: 0.3,
         yAxisID: 'y1',
@@ -102,15 +131,47 @@ export default function AVDiagnostics() {
       },
       {
         type: 'line' as const,
+        label: 'Starts (projected)',
+        data: [...nullPad.slice(0, -1), latest.starts, projStarts],
+        borderColor: TP.green,
+        backgroundColor: 'transparent',
+        borderWidth: 1.5,
+        borderDash: [6, 4],
+        pointRadius: [0, 6],
+        pointBackgroundColor: '#fff',
+        pointBorderColor: TP.green,
+        pointBorderWidth: 2,
+        tension: 0,
+        yAxisID: 'y1',
+        order: 1,
+      },
+      {
+        type: 'line' as const,
         label: 'Waiting / needs info',
-        data: AV_DATA.map(d => d.waiting),
+        data: [...AV_DATA.map(d => d.waiting), projWaiting],
         borderColor: TP.red,
         backgroundColor: 'rgba(226,75,74,0.1)',
         borderWidth: 2.5,
-        pointRadius: 5,
+        pointRadius: AV_DATA.map(() => 5).concat([0]),
         pointBackgroundColor: TP.red,
         fill: true,
         tension: 0.3,
+        yAxisID: 'y1',
+        order: 0,
+      },
+      {
+        type: 'line' as const,
+        label: 'Waiting (projected)',
+        data: [...nullPad.slice(0, -1), latest.waiting, projWaiting],
+        borderColor: TP.red,
+        backgroundColor: 'transparent',
+        borderWidth: 1.5,
+        borderDash: [6, 4],
+        pointRadius: [0, 6],
+        pointBackgroundColor: '#fff',
+        pointBorderColor: TP.red,
+        pointBorderWidth: 2,
+        tension: 0,
         yAxisID: 'y1',
         order: 0,
       },
@@ -177,6 +238,10 @@ export default function AVDiagnostics() {
   };
 
   // ── Chart 3: Stacked bar — starts that completed vs stuck waiting ──
+  // For May, show actual + projected remainder as lighter segments
+  const projFwdRemainder = projFwd - completionEst[completionEst.length - 1];
+  const projWaitRemainder = projWaiting - latest.waiting;
+
   const stackedData = {
     labels,
     datasets: [
@@ -184,12 +249,28 @@ export default function AVDiagnostics() {
         label: 'Moved forward',
         data: completionEst,
         backgroundColor: 'rgba(29,158,117,0.7)',
-        borderRadius: 4,
+        borderRadius: 0,
       },
       {
         label: 'Stuck waiting',
         data: AV_DATA.map(d => d.waiting),
         backgroundColor: 'rgba(226,75,74,0.7)',
+        borderRadius: 0,
+      },
+      {
+        label: 'Moved forward (projected)',
+        data: [...AV_DATA.slice(0, -1).map(() => null as number | null), projFwdRemainder],
+        backgroundColor: 'rgba(29,158,117,0.25)',
+        borderWidth: 1,
+        borderColor: 'rgba(29,158,117,0.5)',
+        borderRadius: 0,
+      },
+      {
+        label: 'Stuck waiting (projected)',
+        data: [...AV_DATA.slice(0, -1).map(() => null as number | null), projWaitRemainder],
+        backgroundColor: 'rgba(226,75,74,0.25)',
+        borderWidth: 1,
+        borderColor: 'rgba(226,75,74,0.5)',
         borderRadius: 4,
       },
     ],
@@ -228,15 +309,13 @@ export default function AVDiagnostics() {
         <div style={{ background: '#F9FAFB', borderRadius: 10, padding: '14px 16px', border: '1px solid #E5E7EB' }}>
           <div style={{ fontSize: 12, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>May waiting (MTD)</div>
           <div style={{ fontSize: 26, fontWeight: 600, color: TP.navy }}>{num(latest.waiting)}</div>
-          <div style={{ fontSize: 12, color: waitTrend.color }}>{waitTrend.arrow} {waitTrend.pctStr} vs Apr</div>
+          <div style={{ fontSize: 12, color: '#6B7280' }}>proj {num(projWaiting)} | <span style={{ color: waitTrend.color }}>{waitTrend.arrow} {waitTrend.pctStr} vs Apr</span></div>
         </div>
-        {/* Start rate current */}
+        {/* May projected starts */}
         <div style={{ background: '#F9FAFB', borderRadius: 10, padding: '14px 16px', border: '1px solid #E5E7EB' }}>
-          <div style={{ fontSize: 12, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Start rate (May)</div>
-          <div style={{ fontSize: 26, fontWeight: 600, color: TP.navy }}>{latestStartRate}%</div>
-          <div style={{ fontSize: 12, color: latestStartRate >= prevStartRate ? TP.green : TP.red }}>
-            {latestStartRate >= prevStartRate ? '▲' : '▼'} vs {prevStartRate}% Apr
-          </div>
+          <div style={{ fontSize: 12, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>May starts (MTD)</div>
+          <div style={{ fontSize: 26, fontWeight: 600, color: TP.navy }}>{num(latest.starts)}</div>
+          <div style={{ fontSize: 12, color: '#6B7280' }}>proj {num(projStarts)} | {projStartRate}% start rate</div>
         </div>
         {/* Nov baseline */}
         <div style={{ background: '#F9FAFB', borderRadius: 10, padding: '14px 16px', border: '1px solid #E5E7EB' }}>
@@ -252,7 +331,7 @@ export default function AVDiagnostics() {
         <div style={{ fontSize: 13, color: '#78350F', lineHeight: 1.6 }}>
           From Nov 2025 through Jan 2026, the waiting/needs-info queue held steady at 97–192 (5–7% of starts).
           Feb and Mar saw a sharp climb to 889 and 992 (35–38% of starts), meaning more than a third of people who started
-          assessments got stuck. April dropped to 578 (34% of starts) — the raw count fell but the rate stayed elevated.
+          assessments got stuck. April dropped to 588 (35% of starts) — the raw count fell but the rate stayed elevated.
           Traffic declined 23% in April while the waiting rate held flat, which suggests the bottleneck is in the assessment
           completion flow itself, not in who&apos;s arriving at the site.
         </div>
@@ -264,8 +343,9 @@ export default function AVDiagnostics() {
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(58,110,164,0.6)' }} /> Web traffic</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, background: TP.green, borderRadius: 1 }} /> Submission starts</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, background: TP.red, borderRadius: 1 }} /> Waiting / needs info</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, borderBottom: '2px dashed #999', borderRadius: 1 }} /> Projected (May)</span>
         </div>
-        <div style={{ height: 320 }}>
+        <div style={{ height: 340 }}>
           <Bar data={mainChartData as any} options={mainChartOpts as any} />
         </div>
       </div>
@@ -286,6 +366,7 @@ export default function AVDiagnostics() {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(29,158,117,0.7)' }} /> Moved forward</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(226,75,74,0.7)' }} /> Stuck in waiting</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(150,150,150,0.2)', border: '1px dashed #999' }} /> Projected remainder</span>
         </div>
         <div style={{ height: 280 }}>
           <Bar data={stackedData} options={stackedOpts as any} />
@@ -335,10 +416,20 @@ export default function AVDiagnostics() {
                   </tr>
                 );
               })}
+              {/* Projected May row */}
+              <tr style={{ borderBottom: '1px solid #F3F4F6', background: '#F0F9FF' }}>
+                <td style={{ padding: '8px 10px', fontWeight: 500, fontStyle: 'italic', color: '#6B7280' }}>May proj</td>
+                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#6B7280', fontStyle: 'italic' }}>{num(projTraffic)}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#6B7280', fontStyle: 'italic' }}>{num(projStarts)}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#6B7280', fontStyle: 'italic' }}>{num(projWaiting)}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#6B7280', fontStyle: 'italic' }}>{projStartRate}%</td>
+                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#6B7280', fontStyle: 'italic' }}>{projWaitPct}%</td>
+                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#6B7280', fontStyle: 'italic' }}>{num(projFwd)}</td>
+              </tr>
             </tbody>
           </table>
         </div>
-        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* Partial month (through 5/19)</div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* Partial month (through 5/20) &nbsp;|&nbsp; May proj = pace extrapolated to 31 days ({MAY_DAYS_ELAPSED} days elapsed)</div>
       </div>
     </div>
   );
