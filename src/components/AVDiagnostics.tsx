@@ -38,7 +38,7 @@ const AV_DATA = [
   { label: 'Jan 26', month: 1,  year: 2026, traffic: 37320, starts: 1514, waiting: 108,  partial: false },
   { label: 'Feb 26', month: 2,  year: 2026, traffic: 51480, starts: 2506, waiting: 889,  partial: false },
   { label: 'Mar 26', month: 3,  year: 2026, traffic: 39218, starts: 2587, waiting: 992,  partial: false },
-  { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1692, waiting: 578,  partial: false },
+  { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1692, waiting: 588,  partial: false },
   { label: 'May 26', month: 5,  year: 2026, traffic: 18033, starts: 996,  waiting: 439,  partial: true },
 ];
 
