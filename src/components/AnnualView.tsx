@@ -68,21 +68,16 @@ const AMB_COMMISSIONS: Record<string, number> = {
   'May': 3624.00,
 };
 
-// 2025 website traffic (from GA4)
+// 2025 website traffic — GA4 Total Users, worldwide (confirmed May 19, 2026)
 const TRAFFIC_2025: Record<number, number> = {
   1: 57814, 2: 58901, 3: 57747, 4: 33895, 5: 31621, 6: 31681,
   7: 73193, 8: 37180, 9: 29179, 10: 28271, 11: 54674, 12: 36031,
 };
 
-// 2026 website traffic — GA4 Total Users (pulled May 19, 2026)
+// 2026 website traffic — GA4 Total Users, worldwide (pulled May 19, 2026)
 // May is partial (1-18 only); will be updated when month completes
 const TRAFFIC_2026: Record<number, number> = {
   1: 37320, 2: 51480, 3: 39218, 4: 30311, 5: 16900,
-};
-
-// 2026 USA website traffic — estimated at 86.4% of worldwide (GA4 country filter)
-const USA_TRAFFIC_2026: Record<number, number> = {
-  1: 32244, 2: 44479, 3: 33884, 4: 26189, 5: 14602,
 };
 
 // 2025 submissions (for conversion calc)
@@ -192,7 +187,7 @@ export default function AnnualView() {
       merged = merged.map(m => {
         const subs = m.total_submissions || 0;
         const vis = TRAFFIC_2026[m.month] || m.total_visitors || 0;
-        const usaVis = USA_TRAFFIC_2026[m.month] || m.usa_visitors || 0;
+        const usaVis = Math.round((TRAFFIC_2026[m.month] || 0) * 0.864) || m.usa_visitors || 0;
         return {
           ...m,
           total_visitors: vis,
