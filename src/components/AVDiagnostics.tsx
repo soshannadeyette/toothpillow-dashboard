@@ -43,7 +43,7 @@ const AV_DATA = [
 ];
 
 // ── May projection ───────────────────────────────────────────────────
-const MAY_DAYS_ELAPSED = 20; // data through 5/20
+const MAY_DAYS_ELAPSED = 19; // data through 5/19
 const MAY_DAYS_TOTAL = 31;
 const PROJ_MULT = MAY_DAYS_TOTAL / MAY_DAYS_ELAPSED;
 
@@ -247,33 +247,39 @@ export default function AVDiagnostics() {
   const stackedData = {
     labels,
     datasets: [
+      // Green block (bottom): actual + projected remainder grouped together
       {
         label: 'Moved forward',
         data: completionEst,
         backgroundColor: 'rgba(29,158,117,0.7)',
         borderRadius: 0,
+        stack: 'stack0',
       },
+      {
+        label: 'Moved forward (projected)',
+        data: [...AV_DATA.slice(0, -1).map(() => null as number | null), projFwdRemainder],
+        backgroundColor: 'rgba(29,158,117,0.15)',
+        borderWidth: 1.5,
+        borderColor: 'rgba(29,158,117,0.5)',
+        borderRadius: 0,
+        stack: 'stack0',
+      },
+      // Red block (top): actual + projected remainder grouped together
       {
         label: 'Stuck waiting',
         data: AV_DATA.map(d => d.waiting),
         backgroundColor: 'rgba(226,75,74,0.7)',
         borderRadius: 0,
-      },
-      {
-        label: 'Moved forward (projected)',
-        data: [...AV_DATA.slice(0, -1).map(() => null as number | null), projFwdRemainder],
-        backgroundColor: 'rgba(29,158,117,0.12)',
-        borderWidth: 1.5,
-        borderColor: 'rgba(29,158,117,0.6)',
-        borderRadius: 0,
+        stack: 'stack0',
       },
       {
         label: 'Stuck waiting (projected)',
         data: [...AV_DATA.slice(0, -1).map(() => null as number | null), projWaitRemainder],
-        backgroundColor: 'rgba(226,75,74,0.12)',
+        backgroundColor: 'rgba(226,75,74,0.15)',
         borderWidth: 1.5,
-        borderColor: 'rgba(226,75,74,0.6)',
+        borderColor: 'rgba(226,75,74,0.5)',
         borderRadius: 4,
+        stack: 'stack0',
       },
     ],
   };
@@ -400,25 +406,17 @@ export default function AVDiagnostics() {
                 const sr = startRates[i];
                 const wp = waitPcts[i];
                 const fwd = completionEst[i];
-                const isApril = d.month === 4 && d.year === 2026;
                 const showProj = d.partial;
                 return (
-                  <tr key={d.label} style={{
-                    borderBottom: '1px solid #F3F4F6',
-                    background: isApril ? '#FFF5F5' : 'transparent',
-                  }}>
+                  <tr key={d.label} style={{ borderBottom: '1px solid #F3F4F6' }}>
                     <td style={{ padding: '8px 10px', fontWeight: 500 }}>
                       {d.label}{d.partial ? ' *' : ''}
                     </td>
                     <td style={{ padding: '8px 10px', textAlign: 'right' }}>{num(d.traffic)}</td>
                     <td style={{ padding: '8px 10px', textAlign: 'right' }}>{num(d.starts)}</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: isApril ? '#DC2626' : 'inherit', fontWeight: isApril ? 600 : 400 }}>
-                      {num(d.waiting)}
-                    </td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>{num(d.waiting)}</td>
                     <td style={{ padding: '8px 10px', textAlign: 'right' }}>{sr}%</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: wp > 50 ? '#DC2626' : 'inherit', fontWeight: wp > 50 ? 600 : 400 }}>
-                      {wp}%
-                    </td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>{wp}%</td>
                     <td style={{ padding: '8px 10px', textAlign: 'right' }}>{num(fwd)}</td>
                     <td style={{ padding: '8px 10px', textAlign: 'right', borderLeft: '2px solid #E5E7EB', color: '#3A6EA4', fontStyle: 'italic' }}>
                       {showProj ? num(proj(d.traffic)) : '—'}
@@ -438,7 +436,7 @@ export default function AVDiagnostics() {
             </tbody>
           </table>
         </div>
-        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* Partial month (through 5/20) &nbsp;|&nbsp; Proj = pace extrapolated to {MAY_DAYS_TOTAL} days ({MAY_DAYS_ELAPSED} elapsed)</div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* Partial month (through 5/19) &nbsp;|&nbsp; Proj = pace extrapolated to {MAY_DAYS_TOTAL} days ({MAY_DAYS_ELAPSED} elapsed)</div>
       </div>
     </div>
   );
