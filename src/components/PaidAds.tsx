@@ -28,6 +28,16 @@ const TP = {
 };
 
 /* ════════════════════════════════════════════
+   TRACKING BLACKOUT — go.toothpillow link was
+   broken May 11-20, so conversion data (opened,
+   started, completed, treatment) is unreliable.
+   Spend/impressions/clicks from Google are fine.
+   ════════════════════════════════════════════ */
+const BLACKOUT_START = '2026-05-11';
+const BLACKOUT_END   = '2026-05-20';
+const isBlackout = (date: string) => date >= BLACKOUT_START && date <= BLACKOUT_END;
+
+/* ════════════════════════════════════════════
    HARDCODED DATA (source of truth from HTML)
    ════════════════════════════════════════════ */
 
@@ -127,6 +137,7 @@ export default function PaidAds() {
 
   const sorted = useMemo(() => [...entries].sort((a, b) => a.date.localeCompare(b.date)), [entries]);
 
+  // All-days totals (spend/clicks/impressions are always valid)
   const gT = useMemo(() => {
     const t = { spend: 0, impressions: 0, clicks: 0, submit: 0, started: 0, finished: 0, treatment: 0 };
     sorted.forEach((e) => {
@@ -136,20 +147,36 @@ export default function PaidAds() {
     return t;
   }, [sorted]);
 
-  const googleTotalSpend = gT.spend;
-  const googleTotalLeads = gT.started; // from Supabase daily started counts
-  const googleDays = sorted.length || 1;
-  const avgCPC = gT.clicks > 0 ? gT.spend / gT.clicks : 0;
-  const googleCPL = googleTotalLeads > 0 ? googleTotalSpend / googleTotalLeads : 0;
+  // Tracked-only totals (excludes blackout days for conversion metrics)
+  const gTracked = useMemo(() => {
+    const t = { spend: 0, clicks: 0, submit: 0, started: 0, finished: 0, treatment: 0, days: 0 };
+    sorted.forEach((e) => {
+      if (isBlackout(e.date)) return;
+      t.spend += e.spend; t.clicks += e.clicks;
+      t.submit += e.submit; t.started += e.started; t.finished += e.finished; t.treatment += e.treatment;
+      t.days += 1;
+    });
+    return t;
+  }, [sorted]);
 
-  // Submissions = completed the form (from Supabase daily finished counts)
-  const googleSubmissions = gT.finished;
-  const googleCostPerSubmission = googleSubmissions > 0 ? googleTotalSpend / googleSubmissions : 0;
-  const googleCheckouts = gT.treatment; // from Supabase daily treatment counts
-  const googleCostPerCheckout = googleCheckouts > 0 ? googleTotalSpend / googleCheckouts : 0;
+  const blackoutDays = useMemo(() => sorted.filter((e) => isBlackout(e.date)).length, [sorted]);
+
+  const googleTotalSpend = gT.spend;
+  const googleTotalLeads = gTracked.started; // tracked days only
+  const googleDays = sorted.length || 1;
+  const trackedDays = gTracked.days || 1;
+  const avgCPC = gT.clicks > 0 ? gT.spend / gT.clicks : 0;
+  // CPL uses tracked-days spend & leads so efficiency isn't distorted
+  const googleCPL = googleTotalLeads > 0 ? gTracked.spend / googleTotalLeads : 0;
+
+  // Submissions = completed the form (tracked days only)
+  const googleSubmissions = gTracked.finished;
+  const googleCostPerSubmission = googleSubmissions > 0 ? gTracked.spend / googleSubmissions : 0;
+  const googleCheckouts = gTracked.treatment; // tracked days only
+  const googleCostPerCheckout = googleCheckouts > 0 ? gTracked.spend / googleCheckouts : 0;
   const googleRevenue = GOOGLE_REVENUE;
   const googleNet = googleRevenue - googleTotalSpend;
-  const googleWaitingInfo = googleTotalLeads - googleSubmissions; // started but not finished
+  const googleWaitingInfo = googleTotalLeads - googleSubmissions; // started but not finished (tracked days)
 
   // Meta stats
   const metaCampaignMonths = META_MONTHLY.filter((m) => m.spend >= 1000);
@@ -201,15 +228,37 @@ export default function PaidAds() {
       draw('04/17', 'Switched to', 'Conversions', TP.navy);
       draw('05/01', 'Campaign Split', '50/50 New Build', TP.darkPurple);
       draw('05/13', 'Budget Increase', '$150/campaign', '#00C853');
+
+      // Draw blackout shaded region
+      const blStart = chartLabels.indexOf('05/11');
+      const blEnd = chartLabels.indexOf('05/20');
+      if (blStart >= 0 && blEnd >= 0) {
+        const x0 = xScale.getPixelForValue(blStart) - (xScale.getPixelForValue(1) - xScale.getPixelForValue(0)) / 2;
+        const x1 = xScale.getPixelForValue(blEnd) + (xScale.getPixelForValue(1) - xScale.getPixelForValue(0)) / 2;
+        ctx.save();
+        ctx.fillStyle = 'rgba(221,87,89,0.08)';
+        ctx.fillRect(x0, yScale.top, x1 - x0, yScale.bottom - yScale.top);
+        ctx.fillStyle = TP.red;
+        ctx.font = 'bold 9px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Tracking Blackout', (x0 + x1) / 2, yScale.bottom - 6);
+        ctx.restore();
+      }
     },
   }), []);
 
-  /* ──── CPL over time data ──── */
+  /* ──── CPL over time data (excludes blackout days from running totals) ──── */
   const cplChartData = useMemo(() => {
     let runSpend = 0, runLeads = 0;
     const labels: string[] = [];
-    const data: number[] = [];
+    const data: (number | null)[] = [];
     sorted.forEach((e) => {
+      if (isBlackout(e.date)) {
+        // Still show the label but null the data point
+        labels.push(e.date.substring(5).replace('-', '/'));
+        data.push(null);
+        return;
+      }
       runSpend += e.spend || 0;
       runLeads += e.started || 0;
       if (runLeads === 0) return;
@@ -224,24 +273,25 @@ export default function PaidAds() {
     e.clicks > 0 ? parseFloat(((e.spend || 0) / e.clicks).toFixed(2)) : null
   );
 
-  /* ──── Funnel bar data ──── */
+  /* ──── Funnel bar data (tracked days only for conversion metrics) ──── */
   const funnelBarData = useMemo(() => {
-    const totalClicks = sorted.reduce((s, e) => s + (e.clicks || 0), 0);
-    const totalOpened = sorted.reduce((s, e) => s + (e.submit || 0), 0);
-    const totalStarted = sorted.reduce((s, e) => s + (e.started || 0), 0);
-    const totalCompleted = sorted.reduce((s, e) => s + (e.finished || 0), 0);
-    const totalTx = sorted.reduce((s, e) => s + (e.treatment || 0), 0);
+    const tracked = sorted.filter((e) => !isBlackout(e.date));
+    const totalClicks = tracked.reduce((s, e) => s + (e.clicks || 0), 0);
+    const totalOpened = tracked.reduce((s, e) => s + (e.submit || 0), 0);
+    const totalStarted = tracked.reduce((s, e) => s + (e.started || 0), 0);
+    const totalCompleted = tracked.reduce((s, e) => s + (e.finished || 0), 0);
+    const totalTx = tracked.reduce((s, e) => s + (e.treatment || 0), 0);
     return {
-      labels: ['Clicks', 'Opened Form', 'Started Entry', 'Completed', 'Started Tx'],
+      labels: [`Clicks (${trackedDays}d)`, 'Opened Form', 'Started Entry', 'Completed', 'Started Tx'],
       values: [totalClicks, totalOpened, totalStarted, totalCompleted, totalTx],
       colors: ['#E57373', TP.darkPurple, TP.blue, '#2e7d32', '#00C853'],
       totalClicks,
     };
-  }, [sorted]);
+  }, [sorted, trackedDays]);
 
   /* ──── Google vs Meta comparison rows ──── */
   const compareRows = useMemo(() => [
-    { label: 'Time Active', meta: `${metaCampaignMonthCount} months`, google: `${googleDays} days` },
+    { label: 'Time Active', meta: `${metaCampaignMonthCount} months`, google: `${googleDays} days (${trackedDays} tracked)` },
     { label: 'Total Spend', meta: `$${Math.round(metaTotalSpend).toLocaleString()}`, google: `$${Math.round(googleTotalSpend).toLocaleString()}` },
     { label: 'Total Leads', meta: `${metaTotalLeads}`, google: `${googleTotalLeads}` },
     { label: 'Waiting on Info', meta: `${META_FUNNEL.waitingInfo} of ${META_FUNNEL.entered} (${META_FUNNEL.entered > 0 ? (META_FUNNEL.waitingInfo / META_FUNNEL.entered * 100).toFixed(0) : 0}%)`, google: `${googleWaitingInfo} of ${googleTotalLeads} (${googleTotalLeads > 0 ? (googleWaitingInfo / googleTotalLeads * 100).toFixed(0) : 0}%)` },
@@ -249,11 +299,11 @@ export default function PaidAds() {
     { label: 'Submissions (past waiting)', meta: `${metaSubmissions} of ${META_FUNNEL.entered} (${META_FUNNEL.entered > 0 ? (metaSubmissions / META_FUNNEL.entered * 100).toFixed(0) : 0}%)`, google: `${googleSubmissions} of ${googleTotalLeads} (${googleTotalLeads > 0 ? (googleSubmissions / googleTotalLeads * 100).toFixed(0) : 0}%)` },
     { label: 'Cost per Submission', meta: metaCostPerSubmission > 0 ? `$${Math.round(metaCostPerSubmission).toLocaleString()}` : '--', google: googleCostPerSubmission > 0 ? `$${Math.round(googleCostPerSubmission).toLocaleString()}` : '--', highlight: true },
     { label: 'Cost per Checkout', meta: metaCostPerCheckout > 0 ? `$${Math.round(metaCostPerCheckout).toLocaleString()}` : '--', google: googleCostPerCheckout > 0 ? `$${Math.round(googleCostPerCheckout).toLocaleString()}` : '--', highlight: true },
-    { label: 'Leads per Day', meta: metaTotalLeads > 0 ? (metaTotalLeads / (metaCampaignMonthCount * 30)).toFixed(2) : '0', google: googleTotalLeads > 0 ? (googleTotalLeads / googleDays).toFixed(2) : '0', highlight: true },
+    { label: 'Leads per Day', meta: metaTotalLeads > 0 ? (metaTotalLeads / (metaCampaignMonthCount * 30)).toFixed(2) : '0', google: googleTotalLeads > 0 ? `${(googleTotalLeads / trackedDays).toFixed(2)} (${trackedDays}d tracked)` : '0', highlight: true },
     { label: 'Sent Checkout Link', meta: `${META_FUNNEL.sentCheckout} of ${META_FUNNEL.entered} (${META_FUNNEL.entered > 0 ? (META_FUNNEL.sentCheckout / META_FUNNEL.entered * 100).toFixed(0) : 0}%)`, google: `${GOOGLE_SF_PIPELINE.sentCheckout} of ${googleTotalLeads} (${googleTotalLeads > 0 ? (GOOGLE_SF_PIPELINE.sentCheckout / googleTotalLeads * 100).toFixed(0) : 0}%)` },
     { label: 'Checked Out', meta: `${META_FUNNEL.checkedOut} -- $${(META_FUNNEL.amountReceived || 0).toLocaleString()}`, google: `${googleCheckouts} -- $${googleRevenue.toLocaleString()}`, highlight: true },
     { label: 'Denied / Closed Lost', meta: `${META_FUNNEL.denied + META_FUNNEL.closedLost} (${META_FUNNEL.entered > 0 ? ((META_FUNNEL.denied + META_FUNNEL.closedLost) / META_FUNNEL.entered * 100).toFixed(0) : 0}%)`, google: `${GOOGLE_SF_PIPELINE.denied + GOOGLE_SF_PIPELINE.closedLost} (${googleTotalLeads > 0 ? ((GOOGLE_SF_PIPELINE.denied + GOOGLE_SF_PIPELINE.closedLost) / googleTotalLeads * 100).toFixed(0) : 0}%)` },
-  ], [googleTotalSpend, googleTotalLeads, googleDays, googleCPL, googleSubmissions, googleCostPerSubmission, googleCostPerCheckout, googleCheckouts, googleRevenue, googleWaitingInfo, metaCPL, metaSubmissions, metaCostPerSubmission, metaCostPerCheckout, metaTotalSpend, metaTotalLeads, metaCampaignMonthCount]);
+  ], [googleTotalSpend, googleTotalLeads, googleDays, trackedDays, googleCPL, googleSubmissions, googleCostPerSubmission, googleCostPerCheckout, googleCheckouts, googleRevenue, googleWaitingInfo, metaCPL, metaSubmissions, metaCostPerSubmission, metaCostPerCheckout, metaTotalSpend, metaTotalLeads, metaCampaignMonthCount]);
 
   const advantage = metaCPL > 0 && googleCPL > 0 ? Math.round(metaCPL / googleCPL) : 0;
 
@@ -277,10 +327,10 @@ export default function PaidAds() {
 
         {/* Google KPI cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, marginBottom: 20 }}>
-          <KPICard color="#E57373" label="Total Spend" value={`$${gT.spend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} sub={`${sorted.length} days tracked`} />
+          <KPICard color="#E57373" label="Total Spend" value={`$${gT.spend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} sub={`${sorted.length} days (${blackoutDays} blackout)`} />
           <KPICard color={TP.yellow} label="Cost per Click" value={`$${avgCPC.toFixed(2)}`} sub={`${gT.clicks.toLocaleString()} clicks total`} />
-          <KPICard color={TP.blue} label="Cost per Lead" value={`$${Math.round(googleCPL)}`} sub={`${googleTotalLeads} leads in Salesforce`} />
-          <KPICard color={TP.darkPurple} label="Cost per Submission" value={`$${Math.round(googleCostPerSubmission)}`} sub={`${googleSubmissions} submitted (${googleTotalLeads > 0 ? (googleSubmissions / googleTotalLeads * 100).toFixed(0) : 0}% of leads)`} />
+          <KPICard color={TP.blue} label="Cost per Lead" value={`$${Math.round(googleCPL)}`} sub={`${googleTotalLeads} leads (${trackedDays}d tracked)`} />
+          <KPICard color={TP.darkPurple} label="Cost per Submission" value={`$${Math.round(googleCostPerSubmission)}`} sub={`${googleSubmissions} submitted (${trackedDays}d tracked)`} />
           <KPICard color="#00C853" label="Cost per Checkout" value={googleCheckouts > 0 ? `$${Math.round(googleCostPerCheckout).toLocaleString()}` : '--'} sub={`${googleCheckouts} checkout${googleCheckouts !== 1 ? 's' : ''} ($${googleRevenue.toLocaleString()} revenue)`} />
         </div>
 
@@ -327,10 +377,10 @@ export default function PaidAds() {
                 data={{
                   labels: trendLabels,
                   datasets: [
-                    { label: 'Opened Form', data: sorted.map((e) => e.submit || 0), borderColor: TP.darkPurple, borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 3, pointBackgroundColor: TP.darkPurple },
-                    { label: 'Started Entry', data: sorted.map((e) => e.started || 0), borderColor: TP.blue, borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 3, pointBackgroundColor: TP.blue },
-                    { label: 'Completed', data: sorted.map((e) => e.finished || 0), borderColor: '#2e7d32', borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 3, pointBackgroundColor: '#2e7d32' },
-                    { label: 'Started Tx', data: sorted.map((e) => e.treatment || 0), borderColor: '#00C853', borderWidth: 2, tension: 0.3, fill: false, pointRadius: 4, pointBackgroundColor: '#00C853', borderDash: [4, 2] },
+                    { label: 'Opened Form', data: sorted.map((e) => isBlackout(e.date) ? null : (e.submit || 0)), borderColor: TP.darkPurple, borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 3, pointBackgroundColor: TP.darkPurple, spanGaps: false },
+                    { label: 'Started Entry', data: sorted.map((e) => isBlackout(e.date) ? null : (e.started || 0)), borderColor: TP.blue, borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 3, pointBackgroundColor: TP.blue, spanGaps: false },
+                    { label: 'Completed', data: sorted.map((e) => isBlackout(e.date) ? null : (e.finished || 0)), borderColor: '#2e7d32', borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 3, pointBackgroundColor: '#2e7d32', spanGaps: false },
+                    { label: 'Started Tx', data: sorted.map((e) => isBlackout(e.date) ? null : (e.treatment || 0)), borderColor: '#00C853', borderWidth: 2, tension: 0.3, fill: false, pointRadius: 4, pointBackgroundColor: '#00C853', borderDash: [4, 2], spanGaps: false },
                   ],
                 }}
                 options={{
@@ -349,8 +399,8 @@ export default function PaidAds() {
           </div>
         </ChartCard>
 
-        {/* Chart 3: Assessment Funnel (horizontal bar) */}
-        <ChartLabel>Assessment Funnel (All Time)</ChartLabel>
+        {/* Chart 3: Assessment Funnel (horizontal bar, tracked days only) */}
+        <ChartLabel>Assessment Funnel ({trackedDays} Tracked Days)</ChartLabel>
         <ChartCard>
           <div style={{ height: 250 }}>
             <Bar
@@ -552,21 +602,37 @@ export default function PaidAds() {
             </tr>
           </thead>
           <tbody>
-            {[...sorted].reverse().map((e, idx) => (
-              <tr key={e.date} onClick={() => handleRowClick(e)} style={{ background: idx % 2 === 0 ? '#f9f9f9' : '#fff', cursor: 'pointer' }}>
-                <td style={{ padding: '6px 10px', whiteSpace: 'nowrap' }}>{e.date}</td>
-                <td style={{ padding: '6px 10px', textAlign: 'right' }}>${(e.spend || 0).toFixed(2)}</td>
-                <td style={{ padding: '6px 10px', textAlign: 'right' }}>{(e.impressions || 0).toLocaleString()}</td>
-                <td style={{ padding: '6px 10px', textAlign: 'right' }}>{e.clicks || 0}</td>
-                <td style={{ padding: '6px 10px', textAlign: 'right' }}>{e.submit || 0}</td>
-                <td style={{ padding: '6px 10px', textAlign: 'right' }}>{e.started || 0}</td>
-                <td style={{ padding: '6px 10px', textAlign: 'right' }}>{e.finished || 0}</td>
-                <td style={{ padding: '6px 10px', textAlign: 'right' }}>{e.treatment || 0}</td>
-              </tr>
-            ))}
+            {[...sorted].reverse().map((e, idx) => {
+              const bo = isBlackout(e.date);
+              return (
+                <tr key={e.date} onClick={() => handleRowClick(e)} style={{
+                  background: bo ? '#fff3f3' : (idx % 2 === 0 ? '#f9f9f9' : '#fff'),
+                  cursor: 'pointer',
+                  opacity: bo ? 0.7 : 1,
+                }}>
+                  <td style={{ padding: '6px 10px', whiteSpace: 'nowrap' }}>
+                    {e.date}{bo && <span style={{ color: TP.red, fontSize: '0.7em', marginLeft: 4 }}>*</span>}
+                  </td>
+                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>${(e.spend || 0).toFixed(2)}</td>
+                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>{(e.impressions || 0).toLocaleString()}</td>
+                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>{e.clicks || 0}</td>
+                  <td style={{ padding: '6px 10px', textAlign: 'right', color: bo ? '#ccc' : 'inherit' }}>{bo ? '--' : (e.submit || 0)}</td>
+                  <td style={{ padding: '6px 10px', textAlign: 'right', color: bo ? '#ccc' : 'inherit' }}>{bo ? '--' : (e.started || 0)}</td>
+                  <td style={{ padding: '6px 10px', textAlign: 'right', color: bo ? '#ccc' : 'inherit' }}>{bo ? '--' : (e.finished || 0)}</td>
+                  <td style={{ padding: '6px 10px', textAlign: 'right', color: bo ? '#ccc' : 'inherit' }}>{bo ? '--' : (e.treatment || 0)}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
+
+      {/* Blackout note */}
+      {blackoutDays > 0 && (
+        <div style={{ background: '#fff3f3', borderLeft: `4px solid ${TP.red}`, borderRadius: 8, padding: '12px 16px', marginBottom: 16, fontSize: 13, color: '#555', lineHeight: 1.6 }}>
+          <strong style={{ color: TP.red }}>* Tracking Blackout (May 11--20):</strong> The go.toothpillow tracking link was broken during this period. Spend, impressions, and clicks are accurate (from Google Ads), but conversion data (Opened, Started, Completed, Tx) is unreliable. These {blackoutDays} days are excluded from all conversion-based averages (CPL, Cost per Submission, Cost per Checkout, Assessment Funnel, Leads per Day).
+        </div>
+      )}
 
       {/* Timeline callout */}
       <div style={{ background: '#F8F5F0', borderLeft: `4px solid ${TP.yellow}`, borderRadius: 8, padding: '16px 20px', marginTop: 24 }}>
@@ -578,6 +644,7 @@ export default function PaidAds() {
           <strong>Apr 1:</strong> Meta paused (only $72 residual)<br />
           <strong>Apr 17:</strong> Google switched from &quot;optimize for clicks&quot; to &quot;optimize for conversions&quot;<br />
           <strong>May 1:</strong> Campaign split 50/50 new build<br />
+          <strong>May 11--20:</strong> go.toothpillow tracking link broken — conversion data missing<br />
           <strong>May 12:</strong> Budget increased to $150/campaign ($300/day total)
         </div>
       </div>
