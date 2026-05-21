@@ -40,13 +40,13 @@ const ambSubs: Record<string, number> = {
   '2023-01':9,'2023-02':20,'2023-03':10,'2023-04':16,'2023-05':14,'2023-06':219,'2023-07':81,'2023-08':15,'2023-09':22,'2023-10':17,'2023-11':22,'2023-12':20,
   '2024-01':14,'2024-02':16,'2024-03':29,'2024-04':31,'2024-05':32,'2024-06':24,'2024-07':36,'2024-08':47,'2024-09':71,'2024-10':32,'2024-11':40,'2024-12':63,
   '2025-01':60,'2025-02':69,'2025-03':64,'2025-04':59,'2025-05':47,'2025-06':45,'2025-07':28,'2025-08':47,'2025-09':39,'2025-10':40,'2025-11':39,'2025-12':29,
-  '2026-01':53,'2026-02':58,'2026-03':64,'2026-04':64,'2026-05':19,
+  '2026-01':53,'2026-02':58,'2026-03':64,'2026-04':64,'2026-05':21,
 };
 const infSubs: Record<string, number> = {
   '2023-10':6,'2023-11':294,'2023-12':1039,
   '2024-01':431,'2024-02':315,'2024-03':1593,'2024-04':569,'2024-05':654,'2024-06':1253,'2024-07':485,'2024-08':594,'2024-09':1124,'2024-10':498,'2024-11':367,'2024-12':515,
   '2025-01':521,'2025-02':605,'2025-03':521,'2025-04':511,'2025-05':428,'2025-06':330,'2025-07':906,'2025-08':440,'2025-09':290,'2025-10':273,'2025-11':485,'2025-12':273,
-  '2026-01':312,'2026-02':517,'2026-03':463,'2026-04':237,'2026-05':124,
+  '2026-01':312,'2026-02':517,'2026-03':463,'2026-04':237,'2026-05':133,
 };
 
 const newAddsAmb: Record<string, number> = {
@@ -60,9 +60,9 @@ const newAddsInf: Record<string, number> = {
   '2026-01':3,'2026-02':1,'2026-03':3,'2026-04':5,'2026-05':4,
 };
 
-const ambSubsYear: Record<number, number> = {2023:465, 2024:435, 2025:566, 2026:258};
-const infSubsYear: Record<number, number> = {2023:1339, 2024:8398, 2025:5583, 2026:1653};
-const combSubsYear: Record<number, number> = {2023:1804, 2024:8833, 2025:6149, 2026:1911};
+const ambSubsYear: Record<number, number> = {2023:465, 2024:435, 2025:566, 2026:260};
+const infSubsYear: Record<number, number> = {2023:1339, 2024:8398, 2025:5583, 2026:1662};
+const combSubsYear: Record<number, number> = {2023:1804, 2024:8833, 2025:6149, 2026:1922};
 const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:73};
 const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:16};
 const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:89};
@@ -75,9 +75,9 @@ const activeTotalByYear: Record<number, number> = {2023:30, 2024:145, 2025:209, 
 const halfCarriedBy: Record<number, number> = {2023:1, 2024:2, 2025:5, 2026:7};
 const tenPlusByYear: Record<number, number> = {2023:8, 2024:40, 2025:55, 2026:30};
 const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:346};
-const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:1460};
+const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:1576};
 
-const ANN = 12 / 4.645; // 4 full months + 20/31 of May through 5/20
+const ANN = 12 / 4.677; // 4 full months + 21/31 of May through 5/21
 
 const recruit26 = [
   {label:'Jan', amb:5, inf:3, accent:'#B6CAE3'},
@@ -288,7 +288,7 @@ export default function AmbassadorGrowth() {
   };
 
   /* ── Chart: New Adds monthly stacked (Jan 2024 – May 2026) ── */
-  const mayPaceFactor = 31 / 15; // May 2026: 15 days so far out of 31
+  const mayPaceFactor = 31 / 21; // May 2026: 21 days so far out of 31
   const lastIdx26 = MONTHS_JAN24_MAY26.length - 1;
   const mayAmbActual = newAddsAmb['2026-05'] ?? 0;
   const mayInfActual = newAddsInf['2026-05'] ?? 0;
