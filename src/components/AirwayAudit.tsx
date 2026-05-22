@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { fetchAuditPatients, upsertAuditPatient, deleteAuditPatient } from '@/lib/api';
+import { fetchAuditPatients, upsertAuditPatient, deleteAuditPatient, todayStr } from '@/lib/api';
 import type { AuditPatient } from '@/lib/types';
 import { AUDIT_STAGES } from '@/lib/types';
 
@@ -39,16 +39,17 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 function daysSince(dateStr: string): number {
-  const start = new Date(dateStr + 'T00:00:00');
-  const now = new Date();
-  return Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  const start = new Date(dateStr + 'T12:00:00');
+  const todayParts = todayStr().split('-');
+  const today = new Date(+todayParts[0], +todayParts[1] - 1, +todayParts[2], 12, 0, 0);
+  return Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 const EMPTY_FORM: Omit<AuditPatient, 'id' | 'created_at' | 'updated_at'> = {
   name: '',
   email: '',
   phone: '',
-  date_started: new Date().toISOString().slice(0, 10),
+  date_started: todayStr(),
   stage: 'Waiting for Photos',
   missing: '',
   assigned_to: '',

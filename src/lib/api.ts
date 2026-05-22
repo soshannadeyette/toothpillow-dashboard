@@ -95,18 +95,33 @@ export async function deleteAuditPatient(id: number): Promise<void> {
     if (!res.ok) throw new Error(await res.text());
 }
 
-// ---- Utility ----
+// ---- Utility (all dates in Central Time) ----
+
+/** Returns a Date object representing "now" in US Central time */
+function centralNow(): Date {
+    // Intl gives us the Central-time components regardless of server TZ
+    const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Chicago',
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hour12: false,
+    }).formatToParts(new Date());
+    const get = (t: string) => parts.find(p => p.type === t)?.value ?? '0';
+    return new Date(+get('year'), +get('month') - 1, +get('day'),
+                    +get('hour'), +get('minute'), +get('second'));
+}
 
 export function todayStr(): string {
-    return new Date().toISOString().slice(0, 10);
+    const d = centralNow();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 export function currentMonth(): number {
-    return new Date().getMonth() + 1;
+    return centralNow().getMonth() + 1;
 }
 
 export function currentYear(): number {
-    return new Date().getFullYear();
+    return centralNow().getFullYear();
 }
 
 // ---- Monthly Goals (Settings) ----

@@ -14,7 +14,7 @@ import {
   Filler,
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
-import { fetchSubmissions, upsertSubmission, currentYear, currentMonth } from '@/lib/api';
+import { fetchSubmissions, upsertSubmission, currentYear, currentMonth, todayStr } from '@/lib/api';
 import type { DailySubmission } from '@/lib/types';
 import { MONTHLY_GOALS_2026, MONTH_NAMES } from '@/lib/types';
 
@@ -47,7 +47,7 @@ export default function DailyTracker() {
   const [selectedMonth, setSelectedMonth] = useState(currentMonth());
 
   // Form state for new/edit entry
-  const [formDate, setFormDate] = useState(new Date().toISOString().slice(0, 10));
+  const [formDate, setFormDate] = useState(todayStr());
   const [formOnline, setFormOnline] = useState('');
   const [formHybrid, setFormHybrid] = useState('');
   const [formPrime, setFormPrime] = useState('');

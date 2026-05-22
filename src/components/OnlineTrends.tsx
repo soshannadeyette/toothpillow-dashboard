@@ -14,7 +14,7 @@ import {
   Filler,
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
-import { fetchAnnualSummaries, fetchSubmissions } from '@/lib/api';
+import { fetchAnnualSummaries, fetchSubmissions, currentMonth as getCentralMonth, currentYear as getCentralYear } from '@/lib/api';
 import type { MonthlySummary, DailySubmission } from '@/lib/types';
 import { MONTH_NAMES } from '@/lib/types';
 
@@ -79,8 +79,7 @@ export default function OnlineTrends() {
   useEffect(() => {
     async function load() {
       try {
-        const now = new Date();
-        const year = now.getFullYear();
+        const year = getCentralYear();
         const [annualData, dailyData] = await Promise.all([
           fetchAnnualSummaries(2026),
           fetchSubmissions(year),
@@ -98,9 +97,8 @@ export default function OnlineTrends() {
 
   /* ────── Derive 2026 monthly data ────── */
 
-  const now = new Date();
-  const currentMonth = now.getMonth() + 1;
-  const currentYear = now.getFullYear();
+  const currentMonth = getCentralMonth();
+  const currentYear = getCentralYear();
 
   const {
     online2026, hybrid2026, prime2026,

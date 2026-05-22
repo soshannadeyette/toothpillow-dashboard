@@ -14,7 +14,7 @@ import {
   Filler,
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
-import { fetchSubmissions } from '@/lib/api';
+import { fetchSubmissions, currentMonth as getCentralMonth } from '@/lib/api';
 import type { DailySubmission } from '@/lib/types';
 import { MONTHLY_GOALS_2026, MONTH_NAMES } from '@/lib/types';
 
@@ -172,7 +172,7 @@ export default function WeeklyReport() {
   const week = weeks[selectedWeekIdx] || null;
 
   // Determine report month from selected week's end date
-  const reportMonth = week ? new Date(week.endDate + 'T12:00:00').getMonth() + 1 : new Date().getMonth() + 1;
+  const reportMonth = week ? new Date(week.endDate + 'T12:00:00').getMonth() + 1 : getCentralMonth();
   const reportYear = 2026;
 
   // Month-to-date: all entries up through the selected week's end date

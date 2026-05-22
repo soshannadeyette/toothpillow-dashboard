@@ -14,7 +14,7 @@ import {
   Filler,
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
-import { fetchGoogleAds, upsertGoogleAds } from '@/lib/api';
+import { fetchGoogleAds, upsertGoogleAds, todayStr } from '@/lib/api';
 import type { GoogleAdsDaily } from '@/lib/types';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler);
@@ -74,7 +74,7 @@ export default function PaidAds() {
   const [error, setError] = useState<string | null>(null);
 
   // Form state
-  const [formDate, setFormDate] = useState(new Date().toISOString().slice(0, 10));
+  const [formDate, setFormDate] = useState(todayStr());
   const [formSpend, setFormSpend] = useState('');
   const [formImpressions, setFormImpressions] = useState('');
   const [formClicks, setFormClicks] = useState('');
