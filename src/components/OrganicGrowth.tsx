@@ -226,17 +226,33 @@ export default function OrganicGrowth() {
     };
   }, []);
 
-  // Monthly clicks chart data
+  // Monthly clicks + impressions chart data
   const monthlyChartData = useMemo(() => ({
     labels: GSC_MONTHLY.map(m => monthLabel(m.month)),
     datasets: [
       {
         label: 'Clicks',
         data: GSC_MONTHLY.map(m => m.clicks),
-        backgroundColor: GSC_MONTHLY.map(m => TP.blue),
-        borderColor: GSC_MONTHLY.map(m => TP.blue),
+        backgroundColor: TP.blue,
+        borderColor: TP.blue,
         borderWidth: 1,
         borderRadius: 4,
+        yAxisID: 'y',
+        order: 2,
+      },
+      {
+        label: 'Impressions',
+        data: GSC_MONTHLY.map(m => m.impressions),
+        type: 'line' as const,
+        borderColor: TP.darkPurple,
+        backgroundColor: `${TP.darkPurple}15`,
+        pointRadius: 3,
+        pointBackgroundColor: TP.darkPurple,
+        borderWidth: 2,
+        tension: 0.3,
+        fill: true,
+        yAxisID: 'y1',
+        order: 1,
       },
     ],
   }), []);
@@ -248,10 +264,13 @@ export default function OrganicGrowth() {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { display: false },
+      legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
       tooltip: {
         callbacks: {
-          label: (ctx: { parsed: { y: number } }) => `${ctx.parsed.y.toLocaleString()} clicks`,
+          label: (ctx: { datasetIndex: number; parsed: { y: number } }) => {
+            if (ctx.datasetIndex === 1) return `${ctx.parsed.y.toLocaleString()} impressions`;
+            return `${ctx.parsed.y.toLocaleString()} clicks`;
+          },
         },
       },
       annotation: {
@@ -279,8 +298,17 @@ export default function OrganicGrowth() {
     scales: {
       y: {
         beginAtZero: true,
+        position: 'left' as const,
+        title: { display: true, text: 'Clicks', font: { size: 11 } },
         ticks: { callback: (v: number | string) => fmtK(Number(v)) },
         grid: { color: '#f0f0f0' },
+      },
+      y1: {
+        beginAtZero: true,
+        position: 'right' as const,
+        title: { display: true, text: 'Impressions', font: { size: 11 } },
+        ticks: { callback: (v: number | string) => fmtK(Number(v)) },
+        grid: { display: false },
       },
       x: { grid: { display: false } },
     },
@@ -484,9 +512,10 @@ export default function OrganicGrowth() {
 
       {/* Monthly Clicks Chart */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12 }}>Monthly Organic Clicks</h3>
-        <div style={{ height: 300 }}>
-          <Bar data={monthlyChartData} options={monthlyChartOptions as object} />
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12 }}>Monthly Organic Clicks and Impressions</h3>
+        <div style={{ height: 320 }}>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <Bar data={monthlyChartData as any} options={monthlyChartOptions as any} />
         </div>
       </div>
 
