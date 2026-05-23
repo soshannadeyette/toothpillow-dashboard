@@ -20,7 +20,7 @@ const TP = {
 
 /* ════════════════════════════════════════════
    HARDCODED GSC DATA — Source of truth
-   Data exported from Google Search Console on May 18, 2026
+   Data exported from Google Search Console on May 23, 2026
    Property verified ~Feb 2025, 16 months of history available
    Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
    SEO program reset date: May 19, 2026
@@ -44,7 +44,7 @@ const GSC_MONTHLY = [
   { month: '2026-02', clicks: 10579, impressions: 66544, ctr: 15.9, position: 11.9 },
   { month: '2026-03', clicks: 12601, impressions: 74269, ctr: 17.0, position: 18.4 },
   { month: '2026-04', clicks: 11180, impressions: 105758, ctr: 10.6, position: 32.7 },
-  { month: '2026-05', clicks: 4792, impressions: 30428, ctr: 15.7, position: 15.5 },
+  { month: '2026-05', clicks: 6160, impressions: 36600, ctr: 16.8, position: 21.7 },
 ];
 
 const GSC_WEEKLY = [
@@ -115,6 +115,7 @@ const GSC_WEEKLY = [
   { week: '2026-04-27', clicks: 2848, impressions: 24374, ctr: 11.7, position: 25.3 },
   { week: '2026-05-04', clicks: 1951, impressions: 16762, ctr: 11.6, position: 23.0 },
   { week: '2026-05-11', clicks: 2082, impressions: 10234, ctr: 20.3, position: 11.3 },
+  { week: '2026-05-18', clicks: 1365, impressions: 6129, ctr: 22.3, position: 11.6 },
 ];
 
 const GSC_TOP_QUERIES = [
@@ -474,10 +475,10 @@ export default function OrganicGrowth() {
 
       {/* May MTD callout */}
       <div style={{ background: '#f0fdf4', borderRadius: 8, padding: '12px 16px', border: `1px solid ${TP.green}40` }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: TP.navy }}>May 2026 MTD (17 days): </span>
+        <span style={{ fontSize: 13, fontWeight: 600, color: TP.navy }}>May 2026 MTD (21 days): </span>
         <span style={{ fontSize: 13, color: TP.text }}>
           {mayPartial.clicks.toLocaleString()} clicks, {fmtK(mayPartial.impressions)} impressions, {mayPartial.ctr}% CTR, position {mayPartial.position.toFixed(1)}.
-          Daily avg: {Math.round(mayPartial.clicks / 17)} clicks/day ({Math.round(mayPartial.clicks / 17 * 31).toLocaleString()} projected for full month).
+          Daily avg: {Math.round(mayPartial.clicks / 21)} clicks/day ({Math.round(mayPartial.clicks / 21 * 31).toLocaleString()} projected for full month).
         </span>
       </div>
 
@@ -570,7 +571,7 @@ export default function OrganicGrowth() {
 
       {/* Data source note */}
       <div style={{ fontSize: 11, color: '#aaa', textAlign: 'center', padding: '8px 0' }}>
-        Data source: Google Search Console export (May 18, 2026). Property: https://www.toothpillow.com/. Baseline: Feb 8, 2025 – May 18, 2026. SEO reset: May 19, 2026.
+        Data source: Google Search Console (updated May 23, 2026). Property: https://www.toothpillow.com/. Baseline: Feb 8, 2025 – May 18, 2026. SEO reset: May 19, 2026.
       </div>
     </div>
   );
