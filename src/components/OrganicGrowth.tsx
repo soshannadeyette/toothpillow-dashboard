@@ -119,42 +119,65 @@ const GSC_WEEKLY = [
   { week: '2026-05-18', clicks: 1365, impressions: 6129, ctr: 22.3, position: 11.6 },
 ];
 
-const GSC_TOP_QUERIES = [
-  { query: 'tooth pillow', clicks: 77179, impressions: 123289, ctr: 62.6, position: 1.08 },
-  { query: 'toothpillow', clicks: 52971, impressions: 80156, ctr: 66.08, position: 1.59 },
-  { query: 'tooth pillow for kids', clicks: 8806, impressions: 14341, ctr: 61.4, position: 1.03 },
-  { query: 'toothpillow for kids', clicks: 5370, impressions: 7435, ctr: 72.23, position: 1.02 },
-  { query: 'tooth pillow device', clicks: 4604, impressions: 8398, ctr: 54.82, position: 2.65 },
-  { query: 'tooth pillow for adults', clicks: 3165, impressions: 7664, ctr: 41.3, position: 5.04 },
-  { query: 'mouth pillow', clicks: 2407, impressions: 7833, ctr: 30.73, position: 1.15 },
-  { query: 'toothpillow for adults', clicks: 1794, impressions: 4808, ctr: 37.31, position: 5.85 },
-  { query: 'the tooth pillow', clicks: 1681, impressions: 2217, ctr: 75.82, position: 1.06 },
-  { query: 'my tooth pillow', clicks: 1503, impressions: 1932, ctr: 77.8, position: 1.23 },
-  { query: 'tooth pillow appliance', clicks: 1146, impressions: 3165, ctr: 36.21, position: 8.16 },
-  { query: 'teeth pillow', clicks: 965, impressions: 2312, ctr: 41.74, position: 1.18 },
-  { query: 'tooth pillow canada', clicks: 935, impressions: 1594, ctr: 58.66, position: 1.0 },
-  { query: 'what is a tooth pillow', clicks: 812, impressions: 2658, ctr: 30.55, position: 1.26 },
-  { query: 'toothpillow reviews', clicks: 779, impressions: 7018, ctr: 11.1, position: 2.44 },
-  { query: 'toothpillow cost', clicks: 715, impressions: 2421, ctr: 29.53, position: 1.66 },
-  { query: 'tongue pillow', clicks: 688, impressions: 1651, ctr: 41.67, position: 1.32 },
-  { query: 'toothpillow canada', clicks: 669, impressions: 1298, ctr: 51.54, position: 1.07 },
-  { query: 'mouth pillow kids', clicks: 601, impressions: 1010, ctr: 59.5, position: 1.0 },
-  { query: 'tooth pillow kids', clicks: 596, impressions: 1170, ctr: 50.94, position: 1.0 },
+/* ════════════════════════════════════════════
+   KEYWORD MOVERS — Non-branded keywords showing movement
+   GSC comparison: Apr 24–May 21, 2026 vs Feb 22–Apr 23, 2026
+   Excludes all branded variations (toothpillow, tooth pillow, etc.)
+   1,236 non-branded keywords tracked
+   ════════════════════════════════════════════ */
+
+// Position climbers: non-branded keywords where position improved 5+ spots
+// These are healthcare/dental keywords parents search — exactly where SEO content will win
+const KEYWORD_CLIMBERS = [
+  { query: 'child sleep apnea solution near me', imprNow: 9, posNow: 22.0, posPrev: 65.9, change: -43.9 },
+  { query: 'airway dentist southampton', imprNow: 9, posNow: 10.1, posPrev: 51.7, change: -41.6 },
+  { query: 'airway dentists', imprNow: 6, posNow: 25.3, posPrev: 58.3, change: -33.0 },
+  { query: 'tongue tie near me', imprNow: 21, posNow: 42.1, posPrev: 65.0, change: -22.9 },
+  { query: "children's orthodontic braces", imprNow: 23, posNow: 56.8, posPrev: 79.6, change: -22.8 },
+  { query: 'mouth breathing', imprNow: 14, posNow: 48.0, posPrev: 69.4, change: -21.4 },
+  { query: 'invisalign services for kids', imprNow: 38, posNow: 65.9, posPrev: 85.9, change: -20.0 },
+  { query: 'sleep dentistry near me', imprNow: 36, posNow: 51.8, posPrev: 68.7, change: -16.9 },
+  { query: 'breathe deep dental', imprNow: 23, posNow: 39.8, posPrev: 55.9, change: -16.1 },
+  { query: "kid's dentist near me", imprNow: 115, posNow: 55.8, posPrev: 71.5, change: -15.7 },
+  { query: "children's dental braces", imprNow: 34, posNow: 59.1, posPrev: 74.6, change: -15.4 },
+  { query: 'orthodontic experts near me', imprNow: 20, posNow: 51.9, posPrev: 66.4, change: -14.5 },
+  { query: 'orthodontic consult', imprNow: 39, posNow: 61.2, posPrev: 75.4, change: -14.1 },
+  { query: 'kids dental', imprNow: 96, posNow: 53.7, posPrev: 67.4, change: -13.7 },
+  { query: 'orthodontic evaluation near me', imprNow: 91, posNow: 45.8, posPrev: 59.3, change: -13.5 },
+  { query: 'tongue tie removal near me', imprNow: 83, posNow: 38.1, posPrev: 51.5, change: -13.4 },
+  { query: 'myobrace near me', imprNow: 10, posNow: 56.5, posPrev: 69.2, change: -12.7 },
+  { query: 'sleep dentist', imprNow: 24, posNow: 56.5, posPrev: 68.4, change: -11.9 },
+  { query: 'orthodontist for children', imprNow: 34, posNow: 43.0, posPrev: 54.8, change: -11.8 },
+  { query: 'lip tie dentist near me', imprNow: 22, posNow: 52.2, posPrev: 63.8, change: -11.7 },
+  { query: 'oral appliance therapy', imprNow: 125, posNow: 64.5, posPrev: 75.8, change: -11.3 },
+  { query: 'myofunctional therapist near me', imprNow: 9, posNow: 41.9, posPrev: 62.5, change: -20.6 },
 ];
 
-const GSC_TOP_PAGES = [
-  { page: '/', clicks: 175865, impressions: 4909869, ctr: 3.58, position: 65.0 },
-  { page: '/pricing', clicks: 22015, impressions: 545463, ctr: 4.04, position: 6.06 },
-  { page: '/is-my-child-a-candidate', clicks: 10977, impressions: 463419, ctr: 2.37, position: 4.34 },
-  { page: '/adults', clicks: 7555, impressions: 349182, ctr: 2.16, position: 3.15 },
-  { page: '/faqs', clicks: 5950, impressions: 504575, ctr: 1.18, position: 3.18 },
-  { page: '/our-doctors', clicks: 5484, impressions: 487975, ctr: 1.12, position: 5.63 },
-  { page: '/teens-adult', clicks: 1620, impressions: 49706, ctr: 3.26, position: 1.98 },
-  { page: '/premium', clicks: 1305, impressions: 94830, ctr: 1.38, position: 4.91 },
-  { page: '/insurance_compliance_faqs', clicks: 760, impressions: 19064, ctr: 3.99, position: 8.8 },
-  { page: '/login', clicks: 758, impressions: 3061, ctr: 24.76, position: 9.0 },
-  { page: '/articles', clicks: 677, impressions: 140236, ctr: 0.48, position: 3.24 },
-  { page: '/symptoms', clicks: 201, impressions: 50349, ctr: 0.4, position: 3.29 },
+// New click-driving keywords: non-branded terms that started generating clicks
+const NEW_CLICK_KEYWORDS = [
+  { query: 'pillow for mouth breathers', clicksNow: 4, clicksPrev: 3, imprNow: 61, posNow: 11.5 },
+  { query: 'mouth guard for mouth breathing kids', clicksNow: 2, clicksPrev: 0, imprNow: 7, posNow: 3.6 },
+  { query: 'sleep apnea pillow for kids', clicksNow: 2, clicksPrev: 0, imprNow: 6, posNow: 9.3 },
+  { query: 'myo munchee alternative', clicksNow: 2, clicksPrev: 0, imprNow: 4, posNow: 1.0 },
+  { query: 'myobrace near me', clicksNow: 1, clicksPrev: 0, imprNow: 10, posNow: 56.5 },
+];
+
+// High-impression opportunity keywords: non-branded terms with significant impressions
+// These represent the search demand Toothpillow is visible for but not yet capturing clicks
+const OPPORTUNITY_KEYWORDS = [
+  { query: 'night guards near me', imprNow: 5319, posNow: 25.9, posPrev: 18.6 },
+  { query: 'kids airway dentist', imprNow: 158, posNow: 27.8, posPrev: 23.5 },
+  { query: 'oral appliance therapy', imprNow: 125, posNow: 64.5, posPrev: 75.8 },
+  { query: "kid's dentist near me", imprNow: 115, posNow: 55.8, posPrev: 71.5 },
+  { query: 'kids dental', imprNow: 96, posNow: 53.7, posPrev: 67.4 },
+  { query: 'orthodontic evaluation near me', imprNow: 91, posNow: 45.8, posPrev: 59.3 },
+  { query: 'tongue tie removal near me', imprNow: 83, posNow: 38.1, posPrev: 51.5 },
+  { query: 'pillow for mouth breathers', imprNow: 61, posNow: 11.5, posPrev: 11.5 },
+  { query: 'orthodontic consult', imprNow: 39, posNow: 61.2, posPrev: 75.4 },
+  { query: 'invisalign services for kids', imprNow: 38, posNow: 65.9, posPrev: 85.9 },
+  { query: 'sleep dentistry near me', imprNow: 36, posNow: 51.8, posPrev: 68.7 },
+  { query: "children's dental braces", imprNow: 34, posNow: 59.1, posPrev: 74.6 },
+  { query: 'orthodontist for children', imprNow: 34, posNow: 43.0, posPrev: 54.8 },
 ];
 
 // Online Search submissions from Referrer tab (Salesforce "Online Search" referrer type)
@@ -614,29 +637,66 @@ export default function OrganicGrowth() {
         </div>
       </div>
 
-      {/* ═══════ SECTION 8: TOP QUERIES + PAGES ═══════ */}
+      {/* ═══════ SECTION 8: KEYWORD MOVERS ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Keyword Movers — Non-Branded Position Gains</h3>
+        <p style={{ fontSize: 12, color: '#888', marginBottom: 4 }}>
+          Comparing Apr 24–May 21 vs Feb 22–Apr 23, 2026. Excludes all branded terms (toothpillow, tooth pillow, etc.). These are healthcare keywords parents search that Toothpillow is climbing on organically.
+        </p>
+        <p style={{ fontSize: 12, color: TP.blue, fontWeight: 600, marginBottom: 16 }}>
+          1,236 non-branded keywords tracked. {KEYWORD_CLIMBERS.length} keywords gained 10+ positions. Blog content targeting these terms will accelerate this movement.
+        </p>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+            <thead>
+              <tr style={{ borderBottom: `2px solid ${TP.green}` }}>
+                <th style={{ padding: '8px 10px', textAlign: 'left', color: TP.navy }}>Keyword</th>
+                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Was</th>
+                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Now</th>
+                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Moved</th>
+                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Impressions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {KEYWORD_CLIMBERS.map((k, i) => {
+                const spots = Math.abs(k.change);
+                return (
+                  <tr key={i} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : '#fff' }}>
+                    <td style={{ padding: '7px 10px', fontWeight: 500 }}>{k.query}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'right', color: '#999' }}>{k.posPrev.toFixed(1)}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 600, color: k.posNow <= 20 ? TP.green : k.posNow <= 40 ? TP.yellow : TP.text }}>{k.posNow.toFixed(1)}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 700, color: TP.green }}>▲ {spots.toFixed(1)}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'right' }}>{k.imprNow.toLocaleString()}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ═══════ SECTION 9: NEW CLICK-DRIVING + OPPORTUNITIES ═══════ */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12 }}>Top Search Queries (16 months)</h3>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>New Click-Driving Keywords</h3>
+          <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Non-branded terms that started generating clicks this period.</p>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
               <thead>
-                <tr style={{ borderBottom: `2px solid ${TP.blue}`, textAlign: 'left' }}>
-                  <th style={{ padding: '6px 8px', color: TP.navy }}>Query</th>
-                  <th style={{ padding: '6px 8px', color: TP.navy, textAlign: 'right' }}>Clicks</th>
-                  <th style={{ padding: '6px 8px', color: TP.navy, textAlign: 'right' }}>Impr</th>
-                  <th style={{ padding: '6px 8px', color: TP.navy, textAlign: 'right' }}>CTR</th>
-                  <th style={{ padding: '6px 8px', color: TP.navy, textAlign: 'right' }}>Pos</th>
+                <tr style={{ borderBottom: `2px solid ${TP.blue}` }}>
+                  <th style={{ padding: '6px 8px', textAlign: 'left', color: TP.navy }}>Keyword</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'right', color: TP.navy }}>Clicks</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'right', color: TP.navy }}>Prev</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'right', color: TP.navy }}>Pos</th>
                 </tr>
               </thead>
               <tbody>
-                {GSC_TOP_QUERIES.map((q, i) => (
+                {NEW_CLICK_KEYWORDS.map((k, i) => (
                   <tr key={i} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : '#fff' }}>
-                    <td style={{ padding: '6px 8px', fontWeight: 500, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.query}</td>
-                    <td style={{ padding: '6px 8px', textAlign: 'right', color: TP.blue, fontWeight: 600 }}>{q.clicks.toLocaleString()}</td>
-                    <td style={{ padding: '6px 8px', textAlign: 'right' }}>{fmtK(q.impressions)}</td>
-                    <td style={{ padding: '6px 8px', textAlign: 'right' }}>{q.ctr}%</td>
-                    <td style={{ padding: '6px 8px', textAlign: 'right', color: q.position <= 3 ? TP.green : q.position <= 10 ? TP.yellow : TP.red, fontWeight: 600 }}>{q.position.toFixed(1)}</td>
+                    <td style={{ padding: '6px 8px', fontWeight: 500 }}>{k.query}</td>
+                    <td style={{ padding: '6px 8px', textAlign: 'right', color: TP.green, fontWeight: 700 }}>{k.clicksNow}</td>
+                    <td style={{ padding: '6px 8px', textAlign: 'right', color: '#999' }}>{k.clicksPrev}</td>
+                    <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 600, color: k.posNow <= 10 ? TP.green : k.posNow <= 30 ? TP.yellow : TP.text }}>{k.posNow.toFixed(1)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -645,28 +705,32 @@ export default function OrganicGrowth() {
         </div>
 
         <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12 }}>Top Pages (16 months)</h3>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Impression Pipeline</h3>
+          <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Highest-impression non-branded keywords. Blog content targeting these will convert impressions to clicks.</p>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
               <thead>
-                <tr style={{ borderBottom: `2px solid ${TP.blue}`, textAlign: 'left' }}>
-                  <th style={{ padding: '6px 8px', color: TP.navy }}>Page</th>
-                  <th style={{ padding: '6px 8px', color: TP.navy, textAlign: 'right' }}>Clicks</th>
-                  <th style={{ padding: '6px 8px', color: TP.navy, textAlign: 'right' }}>Impr</th>
-                  <th style={{ padding: '6px 8px', color: TP.navy, textAlign: 'right' }}>CTR</th>
-                  <th style={{ padding: '6px 8px', color: TP.navy, textAlign: 'right' }}>Pos</th>
+                <tr style={{ borderBottom: `2px solid ${TP.darkPurple}` }}>
+                  <th style={{ padding: '6px 8px', textAlign: 'left', color: TP.navy }}>Keyword</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'right', color: TP.navy }}>Impr</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'right', color: TP.navy }}>Pos</th>
+                  <th style={{ padding: '6px 8px', textAlign: 'right', color: TP.navy }}>Trend</th>
                 </tr>
               </thead>
               <tbody>
-                {GSC_TOP_PAGES.map((p, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : '#fff' }}>
-                    <td style={{ padding: '6px 8px', fontWeight: 500, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.page}</td>
-                    <td style={{ padding: '6px 8px', textAlign: 'right', color: TP.blue, fontWeight: 600 }}>{p.clicks.toLocaleString()}</td>
-                    <td style={{ padding: '6px 8px', textAlign: 'right' }}>{fmtK(p.impressions)}</td>
-                    <td style={{ padding: '6px 8px', textAlign: 'right' }}>{p.ctr}%</td>
-                    <td style={{ padding: '6px 8px', textAlign: 'right', color: p.position <= 3 ? TP.green : p.position <= 10 ? TP.yellow : TP.red, fontWeight: 600 }}>{p.position.toFixed(1)}</td>
-                  </tr>
-                ))}
+                {OPPORTUNITY_KEYWORDS.map((k, i) => {
+                  const improving = k.posNow < k.posPrev;
+                  return (
+                    <tr key={i} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : '#fff' }}>
+                      <td style={{ padding: '6px 8px', fontWeight: 500 }}>{k.query}</td>
+                      <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 600 }}>{k.imprNow.toLocaleString()}</td>
+                      <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 600, color: k.posNow <= 20 ? TP.green : k.posNow <= 40 ? TP.yellow : TP.text }}>{k.posNow.toFixed(1)}</td>
+                      <td style={{ padding: '6px 8px', textAlign: 'right', color: improving ? TP.green : TP.red, fontWeight: 600 }}>
+                        {improving ? '▲' : '▼'} {Math.abs(k.posNow - k.posPrev).toFixed(1)}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
