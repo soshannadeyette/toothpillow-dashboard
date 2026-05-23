@@ -80,6 +80,16 @@ const TRAFFIC_2026: Record<number, number> = {
   1: 37320, 2: 51480, 3: 39218, 4: 30311, 5: 21950,
 };
 
+// Daily GA4 Total Users — May 2026 (through 5/22; 5/23 partial excluded)
+// Source: GA4 property 402506531, pulled May 23 2026
+// NOTE: daily totals won't sum to monthly unique (21,950) due to user deduplication
+const GA4_DAILY_MAY_2026: Record<number, number> = {
+  1: 1302, 2: 1037, 3: 823, 4: 1218, 5: 1157, 6: 1713, 7: 1303,
+  8: 1181, 9: 832, 10: 664, 11: 1294, 12: 1294, 13: 1478, 14: 1382,
+  15: 1088, 16: 751, 17: 1169, 18: 1284, 19: 1613, 20: 1780, 21: 1402,
+  22: 1416,
+};
+
 // 2026 website traffic — GA4 Total Users, USA only (updated May 20, 2026)
 const TRAFFIC_USA_2026: Record<number, number> = {
   1: 33544, 2: 44756, 3: 33417, 4: 25521, 5: 15656,
