@@ -74,10 +74,10 @@ const TRAFFIC_2025: Record<number, number> = {
   7: 73193, 8: 37180, 9: 29179, 10: 28271, 11: 54674, 12: 36031,
 };
 
-// 2026 website traffic — GA4 Total Users, worldwide (updated May 20, 2026)
-// May is partial (through 5/20); will be updated when month completes
+// 2026 website traffic — GA4 Total Users, worldwide (updated May 23, 2026)
+// May is partial (through 5/23); will be updated when month completes
 const TRAFFIC_2026: Record<number, number> = {
-  1: 37320, 2: 51480, 3: 39218, 4: 30311, 5: 18337,
+  1: 37320, 2: 51480, 3: 39218, 4: 30311, 5: 21950,
 };
 
 // 2026 website traffic — GA4 Total Users, USA only (updated May 20, 2026)

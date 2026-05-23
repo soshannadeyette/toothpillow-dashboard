@@ -94,13 +94,13 @@ const REFERRER_DATA: Record<string, RefMonth> = {
 
 /* ────── May 2026 Projection (Salesforce snapshot + pace) ────── */
 const MAY_2026_SF: Record<string, number> = {
-  total: 659, Parent: 34, 'Dental Office': 148, 'Airway Ambassador': 21,
-  Influencer: 133, Podcast: 65, Instagram: 31, TikTok: 3, Facebook: 8,
-  'Meta Ad': 1, 'Online Search': 157, 'Unknown Referral': 38,
-  'Unknown Professional Referral': 4, 'Google Ad': 15, MYO: 1,
+  total: 708, Parent: 35, 'Dental Office': 154, 'Airway Ambassador': 23,
+  Influencer: 145, Podcast: 69, Instagram: 33, TikTok: 3, Facebook: 9,
+  'Meta Ad': 1, 'Online Search': 174, 'Unknown Referral': 41,
+  'Unknown Professional Referral': 4, 'Google Ad': 16, MYO: 1,
   'Health Care Professional': 0,
 };
-const MAY_2026_SF_DAYS = 21;
+const MAY_2026_SF_DAYS = 23;
 const MAY_2026_DAYS_IN_MONTH = 31;
 
 function buildMay2026Projected(): { actual: RefMonth; projected: RefMonth } {
@@ -243,11 +243,11 @@ const AMB_YOY_DATA: Record<string, AmbEntry> = {
   "Tania O'Donnell":       {2023:0,    2024:0,    2025:0,    2026:3,   type:'Ambassador'},
 };
 
-const AMB_TOTALS = { 2023: 1342 + 465, 2024: 8383 + 435, 2025: 5576 + 554, 2026: 1565 + 241 };
+const AMB_TOTALS = { 2023: 1342 + 465, 2024: 8383 + 435, 2025: 5576 + 554, 2026: 1674 + 262 };
 const AMB_COUNTS = { 2023: 6 + 24, 2024: 60 + 85, 2025: 82 + 127, 2026: 64 + 97 };
-const INF_TOTALS = { 2023: 1342, 2024: 8383, 2025: 5576, 2026: 1565 };
-const AIR_TOTALS = { 2023: 465, 2024: 435, 2025: 554, 2026: 241 };
-const ANN_FACTOR = 12 / 4.27;
+const INF_TOTALS = { 2023: 1342, 2024: 8383, 2025: 5576, 2026: 1674 };
+const AIR_TOTALS = { 2023: 465, 2024: 435, 2025: 554, 2026: 262 };
+const ANN_FACTOR = 12 / 4.742;
 
 /* ────── Helpers ────── */
 
@@ -691,7 +691,7 @@ export default function ReferrerView() {
       }}>
         <div style={{ fontWeight: 700, fontSize: 16, color: TP.text, marginBottom: 4 }}>Individual Ambassador Tracking</div>
         <div style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>
-          Year-over-year submissions · Influencers + Airway Ambassadors combined · 2026 = YTD through May 8
+          Year-over-year submissions · Influencers + Airway Ambassadors combined · 2026 = YTD through May 23
         </div>
 
         {/* Diversification callout */}
