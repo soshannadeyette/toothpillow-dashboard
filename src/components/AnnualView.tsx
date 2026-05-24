@@ -65,7 +65,7 @@ const AMB_COMMISSIONS: Record<string, number> = {
   'February': 2588.20,
   'March': 1441.40,
   'April': 1552.18,
-  'May': 3624.00,
+  'May': 2789.23,
 };
 
 // 2025 website traffic — GA4 Total Users, worldwide (confirmed May 19, 2026)

@@ -21,10 +21,11 @@ const TP = {
 
 /* ════════════════════════════════════════════
    HARDCODED GSC DATA — Source of truth
-   Data exported from Google Search Console on May 23, 2026
+   Data verified from Google Search Console on May 24, 2026
    Property verified ~Feb 2025, 16 months of history available
    Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
    SEO program reset date: May 19, 2026
+   May 2026 monthly/weekly data current through May 21 (GSC ~3-day lag)
    ════════════════════════════════════════════ */
 
 const SEO_START_DATE = '2026-05-19';
@@ -118,6 +119,32 @@ const GSC_WEEKLY = [
   { week: '2026-05-11', clicks: 2082, impressions: 10234, ctr: 20.3, position: 11.3 },
   { week: '2026-05-18', clicks: 1365, impressions: 6129, ctr: 22.3, position: 11.6 },
 ];
+
+// Daily GSC data — May 2026 (through May 21; GSC has ~3-day lag)
+// Source: Google Search Console, verified May 24, 2026
+const GSC_DAILY_MAY_2026: Record<number, { clicks: number; impressions: number }> = {
+  1: { clicks: 339, impressions: 1522 },
+  2: { clicks: 218, impressions: 1003 },
+  3: { clicks: 202, impressions: 907 },
+  4: { clicks: 299, impressions: 2293 },
+  5: { clicks: 317, impressions: 3915 },
+  6: { clicks: 343, impressions: 5614 },
+  7: { clicks: 322, impressions: 1831 },
+  8: { clicks: 305, impressions: 1259 },
+  9: { clicks: 186, impressions: 877 },
+  10: { clicks: 179, impressions: 973 },
+  11: { clicks: 340, impressions: 1455 },
+  12: { clicks: 389, impressions: 1397 },
+  13: { clicks: 342, impressions: 1367 },
+  14: { clicks: 373, impressions: 3003 },
+  15: { clicks: 262, impressions: 1250 },
+  16: { clicks: 176, impressions: 900 },
+  17: { clicks: 203, impressions: 905 },
+  18: { clicks: 311, impressions: 1339 },
+  19: { clicks: 337, impressions: 1358 },
+  20: { clicks: 330, impressions: 1551 },
+  21: { clicks: 387, impressions: 1881 },
+};
 
 /* ════════════════════════════════════════════
    KEYWORD MOVERS — Non-branded keywords showing movement
@@ -423,6 +450,29 @@ export default function OrganicGrowth() {
     },
   }), []);
 
+  // Daily GSC chart (May 2026)
+  const dailyDays = Object.keys(GSC_DAILY_MAY_2026).map(Number).sort((a, b) => a - b);
+  const dailyChartData = useMemo(() => ({
+    labels: dailyDays.map(d => `May ${d}`),
+    datasets: [
+      { label: 'Clicks', data: dailyDays.map(d => GSC_DAILY_MAY_2026[d].clicks), type: 'bar' as const, backgroundColor: `${TP.blue}99`, borderRadius: 3, yAxisID: 'y', order: 2 },
+      { label: 'Impressions', data: dailyDays.map(d => GSC_DAILY_MAY_2026[d].impressions), type: 'line' as const, borderColor: TP.yellow, backgroundColor: 'transparent', pointRadius: 2, borderWidth: 2, tension: 0.3, yAxisID: 'y1', order: 1 },
+    ],
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), []);
+  const dailyChartOptions = useMemo(() => ({
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
+      annotation: { annotations: { seoLine: { type: 'line' as const, xMin: 17.5, xMax: 17.5, borderColor: TP.red, borderWidth: 2, borderDash: [6, 4], label: { display: true, content: 'SEO Launch', position: 'start' as const, font: { size: 9 }, color: TP.red } } } },
+    },
+    scales: {
+      y: { beginAtZero: true, position: 'left' as const, title: { display: true, text: 'Clicks', font: { size: 11 } }, grid: { color: '#f0f0f0' } },
+      y1: { beginAtZero: true, position: 'right' as const, title: { display: true, text: 'Impressions', font: { size: 11 } }, ticks: { callback: (v: number | string) => fmtK(Number(v)) }, grid: { display: false } },
+      x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+    },
+  }), []);
+
   // Online Search submissions chart
   const subMonths = Object.keys(ONLINE_SEARCH_SUBMISSIONS).sort();
   const onlineSearchChartData = useMemo(() => ({
@@ -632,6 +682,30 @@ export default function OrganicGrowth() {
         </div>
       </div>
 
+      {/* ═══════ SECTION 7B: DAILY GSC — MAY 2026 ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Daily Search Performance — May 2026</h3>
+        <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Day-by-day clicks and impressions from Google Search Console. Red dashed line marks SEO program launch (May 19). Data through May 21 (GSC has a ~3-day processing delay).</p>
+        <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+          <div style={{ background: '#f0f9ff', borderRadius: 8, padding: '8px 14px', border: '1px solid #bae6fd', fontSize: 12 }}>
+            <span style={{ color: '#888' }}>Avg Daily Clicks:</span>{' '}
+            <span style={{ fontWeight: 700, color: TP.navy }}>{Math.round(dailyDays.reduce((s, d) => s + GSC_DAILY_MAY_2026[d].clicks, 0) / dailyDays.length)}</span>
+          </div>
+          <div style={{ background: '#f0f9ff', borderRadius: 8, padding: '8px 14px', border: '1px solid #bae6fd', fontSize: 12 }}>
+            <span style={{ color: '#888' }}>Best Day:</span>{' '}
+            <span style={{ fontWeight: 700, color: TP.navy }}>May {dailyDays.reduce((best, d) => GSC_DAILY_MAY_2026[d].clicks > GSC_DAILY_MAY_2026[best].clicks ? d : best, dailyDays[0])} ({Math.max(...dailyDays.map(d => GSC_DAILY_MAY_2026[d].clicks))} clicks)</span>
+          </div>
+          <div style={{ background: '#f0fdf4', borderRadius: 8, padding: '8px 14px', border: `1px solid ${TP.green}50`, fontSize: 12 }}>
+            <span style={{ color: '#888' }}>Post-SEO Avg (May 19–21):</span>{' '}
+            <span style={{ fontWeight: 700, color: TP.green }}>{Math.round(([19,20,21].reduce((s, d) => s + GSC_DAILY_MAY_2026[d].clicks, 0)) / 3)} clicks/day</span>
+          </div>
+        </div>
+        <div style={{ height: 280 }}>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <Bar data={dailyChartData as any} options={dailyChartOptions as any} />
+        </div>
+      </div>
+
       {/* ═══════ SECTION 8: KEYWORD MOVERS WITH TIMELINE ═══════ */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
         <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Non-Branded Keyword Movement</h3>
@@ -797,7 +871,7 @@ export default function OrganicGrowth() {
 
       {/* Data source note */}
       <div style={{ fontSize: 11, color: '#aaa', textAlign: 'center', padding: '8px 0' }}>
-        Data source: Google Search Console + Salesforce (updated May 23, 2026). Property: https://www.toothpillow.com/. SEO program launched May 19, 2026.
+        Data source: Google Search Console + Salesforce (updated May 24, 2026). Property: https://www.toothpillow.com/. SEO program launched May 19, 2026.
       </div>
     </div>
   );
