@@ -54,7 +54,7 @@ const CONVERSION_LAG = [
   { label: 'Mar 26',    submissions: 1287, sameDay: 963, within7d: 1175, returning: 324, medianLag: 0, meanLag: 7.9  },
   { label: 'Apr 26',    submissions: 967,  sameDay: 685, within7d: 810,  returning: 282, medianLag: 0, meanLag: 17.9 },
   { label: 'May 1–22',  submissions: 578,  sameDay: 387, within7d: 513,  returning: 191, medianLag: 0, meanLag: 15.0 },
-  { label: 'May 23+',   submissions: 51,   sameDay: 36,  within7d: 49,   returning: 15,  medianLag: 0, meanLag: 2.6  },
+  { label: 'May 23+',   submissions: 29,   sameDay: 21,  within7d: 28,   returning: 8,   medianLag: 0, meanLag: 2.5  },
 ];
 
 // Traffic for conversion rate calc (matches AV_DATA where available)
@@ -72,7 +72,7 @@ const LAG_DISTRIBUTION = [
   { label: 'Mar 26',   total: 1287, buckets: [963, 97, 57, 58, 44, 30, 38] },
   { label: 'Apr 26',   total: 967,  buckets: [685, 55, 39, 31, 21, 35, 101] },
   { label: 'May 1–22', total: 578,  buckets: [387, 62, 36, 28, 16,  7, 42] },
-  { label: 'May 23+',  total: 51,   buckets: [ 36, 10,  3,  0,  0,  0,  2] },
+  { label: 'May 23+',  total: 29,   buckets: [ 21,  5,  2,  0,  0,  0,  1] },
 ];
 
 // ── Weekly cohort completion curves (source of truth) ────────────────
@@ -81,7 +81,7 @@ const COHORT_DATA = [
   { label: 'May 1–7',   n: 170, sameDay: 77.6, within1d: 89.4, within3d: 94.7, within7d: 97.1 },
   { label: 'May 8–14',  n: 162, sameDay: 71.0, within1d: 85.2, within3d: 91.4, within7d: 98.1 },
   { label: 'May 15–21', n: 161, sameDay: 74.5, within1d: 85.7, within3d: 97.5, within7d: 100.0 },
-  { label: 'May 22–28', n: 66,  sameDay: 84.8, within1d: 100.0, within3d: 100.0, within7d: 100.0 },
+  { label: 'May 22–28', n: 46,  sameDay: 89.1, within1d: 100.0, within3d: 100.0, within7d: 100.0 },
 ];
 
 // ── Daily cohorts around update (May 19–23) ──────────────────────────
@@ -89,8 +89,8 @@ const DAILY_COHORTS = [
   { day: 'May 19', n: 29, sameDay: 22, d1: 4, d2_3: 3, d4_7: 0 },
   { day: 'May 20', n: 20, sameDay: 16, d1: 1, d2_3: 3, d4_7: 0 },
   { day: 'May 21', n: 20, sameDay: 15, d1: 3, d2_3: 2, d4_7: 0 },
-  { day: 'May 22', n: 30, sameDay: 20, d1: 10, d2_3: 0, d4_7: 0 },
-  { day: 'May 23', n: 36, sameDay: 36, d1: 0, d2_3: 0, d4_7: 0 },
+  { day: 'May 22', n: 25, sameDay: 20, d1: 5, d2_3: 0, d4_7: 0 },
+  { day: 'May 23', n: 21, sameDay: 21, d1: 0, d2_3: 0, d4_7: 0 },
 ];
 
 // ── Post-update projection ──────────────────────────────────────────
@@ -331,13 +331,13 @@ export default function AVDiagnostics() {
           <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Same-day rate trend</div>
           <div style={{ fontSize: 28, fontWeight: 700, color: TP.red }}>91% → 67%</div>
           <div style={{ fontSize: 12, color: '#6B7280' }}>Jan → May pre-update</div>
-          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>Post: {Math.round(36/51*100)}% same-day</div>
+          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>Post: 72% same-day (21/29)</div>
         </div>
         <div style={{ background: '#F9FAFB', borderRadius: 10, padding: '14px 16px', border: '1px solid #E5E7EB' }}>
           <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Post-update submissions</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: TP.green }}>51</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: TP.green }}>29</div>
           <div style={{ fontSize: 12, color: '#6B7280' }}>May 23 (1 partial day)</div>
-          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>36 same-day, 15 returning</div>
+          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>21 same-day, 8 returning</div>
         </div>
       </div>
 
@@ -459,7 +459,7 @@ export default function AVDiagnostics() {
             </tbody>
           </table>
         </div>
-        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* May 23+ = {POST_UPDATE_DAYS_ELAPSED} partial day, post-update. 15 of 51 submissions were returning (created before May 23). Includes 4 manually counted submissions (no submission date in Salesforce, dev fix pending).</div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* May 23+ = {POST_UPDATE_DAYS_ELAPSED} partial day, post-update. 8 of 29 submissions were returning (created before May 23). Includes 4 manually counted submissions (no submission date in Salesforce, dev fix pending).</div>
       </div>
 
       {/* ===== NEW: Lag Distribution ===== */}
