@@ -41,7 +41,7 @@ const AV_DATA = [
   { label: 'Mar 26', month: 3,  year: 2026, traffic: 39218, starts: 2587, waiting: 992,  partial: false, period: 'full' as const },
   { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1692, waiting: 588,  partial: false, period: 'full' as const },
   { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1186, waiting: 517, partial: false, period: 'pre-update' as const },
-  { label: 'May 23+', month: 5,  year: 2026, traffic: 933,   starts: 47,   waiting: 29,  partial: true,  period: 'post-update' as const },
+  { label: 'May 23+', month: 5,  year: 2026, traffic: 933,   starts: 52,   waiting: 29,  partial: true,  period: 'post-update' as const },
 ];
 
 // ── Conversion lag data (source of truth) ─────────────────────────────
@@ -62,6 +62,36 @@ const CONV_TRAFFIC: Record<string, number> = {
   'Jan 26': 37320, 'Feb 26': 51480, 'Mar 26': 39218,
   'Apr 26': 30311, 'May 1–22': 21819, 'May 23+': 933,
 };
+
+// ── Lag distribution (source of truth) ───────────────────────────────
+// Buckets: 0=same day, 1=next day, 2-3, 4-7, 8-14, 15-30, 31+
+const LAG_BUCKETS = ['Same day', '1 day', '2–3 days', '4–7 days', '8–14 days', '15–30 days', '31+ days'] as const;
+const LAG_DISTRIBUTION = [
+  { label: 'Jan 26',   total: 1054, buckets: [959, 13, 27,  8,  8,  7, 32] },
+  { label: 'Feb 26',   total: 1208, buckets: [992, 77, 55, 42, 18,  8, 16] },
+  { label: 'Mar 26',   total: 1287, buckets: [963, 97, 57, 58, 44, 30, 38] },
+  { label: 'Apr 26',   total: 967,  buckets: [685, 55, 39, 31, 21, 35, 101] },
+  { label: 'May 1–22', total: 578,  buckets: [387, 62, 36, 28, 16,  7, 42] },
+  { label: 'May 23+',  total: 22,   buckets: [ 15,  5,  1,  0,  0,  0,  1] },
+];
+
+// ── Weekly cohort completion curves (source of truth) ────────────────
+// Created-date cohorts: what % completed by day 0, 1, 3, 7
+const COHORT_DATA = [
+  { label: 'May 1–7',   n: 170, sameDay: 77.6, within1d: 89.4, within3d: 94.7, within7d: 97.1 },
+  { label: 'May 8–14',  n: 162, sameDay: 71.0, within1d: 85.2, within3d: 91.4, within7d: 98.1 },
+  { label: 'May 15–21', n: 159, sameDay: 75.5, within1d: 86.8, within3d: 97.5, within7d: 100.0 },
+  { label: 'May 22–28', n: 40,  sameDay: 87.5, within1d: 100.0, within3d: 100.0, within7d: 100.0 },
+];
+
+// ── Daily cohorts around update (May 19–23) ──────────────────────────
+const DAILY_COHORTS = [
+  { day: 'May 19', n: 29, sameDay: 22, d1: 4, d2_3: 3, d4_7: 0 },
+  { day: 'May 20', n: 19, sameDay: 16, d1: 1, d2_3: 2, d4_7: 0 },
+  { day: 'May 21', n: 19, sameDay: 15, d1: 3, d2_3: 1, d4_7: 0 },
+  { day: 'May 22', n: 25, sameDay: 20, d1: 5, d2_3: 0, d4_7: 0 },
+  { day: 'May 23', n: 15, sameDay: 15, d1: 0, d2_3: 0, d4_7: 0 },
+];
 
 // ── Post-update projection ──────────────────────────────────────────
 const POST_UPDATE_DAYS_ELAPSED = 1; // data through 5/23 (partial day)
@@ -429,6 +459,210 @@ export default function AVDiagnostics() {
           </table>
         </div>
         <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* May 23+ = {POST_UPDATE_DAYS_ELAPSED} partial day, post-update. 6 of 27 submissions were crossover (created before May 23, submitted after update). 5 additional submissions counted manually (no submission date in Salesforce, dev fix pending).</div>
+      </div>
+
+      {/* ===== NEW: Lag Distribution ===== */}
+      <h3 style={{ fontSize: 18, fontWeight: 600, color: TP.navy, margin: '32px 0 16px' }}>How Long People Take to Complete</h3>
+      <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 16, lineHeight: 1.5 }}>
+        Breakdown of time between account creation and submission completion. Each bar shows what percentage
+        of that period&apos;s submissions fell into each lag bucket. A healthy assessment has most submissions
+        completing same-day. The shift toward longer lags (especially 31+ days) signals people getting stuck.
+      </div>
+
+      <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #E5E7EB', padding: 20, marginBottom: 20 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 12, fontSize: 11, color: '#6B7280' }}>
+          {LAG_BUCKETS.map((b, i) => {
+            const colors = ['#3A6EA4', '#7F77DD', '#1D9E75', '#EF9F27', '#D85A30', '#E24B4A', '#991B1B'];
+            return (
+              <span key={b} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span style={{ width: 10, height: 10, borderRadius: 2, background: colors[i], opacity: 0.8 }} />
+                {b}
+              </span>
+            );
+          })}
+        </div>
+        <div style={{ height: 320 }}>
+          <Bar
+            data={{
+              labels: LAG_DISTRIBUTION.map(d => d.label),
+              datasets: LAG_BUCKETS.map((bucket, i) => {
+                const colors = ['rgba(58,110,164,0.8)', 'rgba(127,119,221,0.8)', 'rgba(29,158,117,0.8)', 'rgba(239,159,39,0.8)', 'rgba(216,90,48,0.8)', 'rgba(226,75,74,0.8)', 'rgba(153,27,27,0.8)'];
+                return {
+                  label: bucket,
+                  data: LAG_DISTRIBUTION.map(d => Math.round(d.buckets[i] / d.total * 1000) / 10),
+                  backgroundColor: LAG_DISTRIBUTION.map(d => d.label === 'May 23+' ? colors[i].replace('0.8', '0.35') : colors[i]),
+                  borderRadius: i === LAG_BUCKETS.length - 1 ? 4 : 0,
+                };
+              }),
+            }}
+            options={{
+              responsive: true, maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                title: { display: true, text: 'Time to completion distribution (% of submissions)', font: { size: 14, weight: 500 as const }, color: TP.navy },
+                tooltip: { callbacks: { label: (ctx: { dataset: { label: string }; parsed: { y: number } }) => ctx.dataset.label + ': ' + ctx.parsed.y + '%' } },
+              },
+              scales: {
+                x: { stacked: true, ticks: { autoSkip: false } },
+                y: { stacked: true, max: 100, ticks: { callback: (v: number | string) => v + '%' } },
+              },
+            } as any}
+          />
+        </div>
+      </div>
+
+      {/* Lag distribution detail table */}
+      <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #E5E7EB', padding: 20, marginBottom: 20 }}>
+        <h3 style={{ fontSize: 14, fontWeight: 600, color: TP.navy, marginTop: 0, marginBottom: 12 }}>Lag distribution detail</h3>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid #E5E7EB' }}>
+                <th style={{ textAlign: 'left', padding: '6px 8px', color: '#6B7280', fontWeight: 600 }}>Period</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', color: '#6B7280', fontWeight: 600 }}>n</th>
+                {LAG_BUCKETS.map(b => (
+                  <th key={b} style={{ textAlign: 'right', padding: '6px 8px', color: '#6B7280', fontWeight: 600, fontSize: 11 }}>{b}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {LAG_DISTRIBUTION.map(d => {
+                const isPost = d.label === 'May 23+';
+                const isPre = d.label === 'May 1–22';
+                const rowBg = isPost ? '#F0FDF4' : isPre ? '#FFF5F5' : undefined;
+                return (
+                  <tr key={d.label} style={{ borderBottom: '1px solid #F3F4F6', background: rowBg }}>
+                    <td style={{ padding: '6px 8px', fontWeight: 600, color: isPost ? '#166534' : isPre ? '#991B1B' : TP.navy }}>{d.label}</td>
+                    <td style={{ padding: '6px 8px', textAlign: 'right' }}>{d.total}</td>
+                    {d.buckets.map((count, i) => {
+                      const p = Math.round(count / d.total * 1000) / 10;
+                      const isHigh31 = i === 6 && p > 5;
+                      return (
+                        <td key={i} style={{ padding: '6px 8px', textAlign: 'right', fontWeight: isHigh31 ? 600 : 400, color: isHigh31 ? TP.red : TP.text }}>
+                          {count} <span style={{ color: '#9CA3AF', fontSize: 11 }}>({p}%)</span>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>
+          Same-day completion dropped from 91% (Jan) to 67% (May pre-update). The 31+ day bucket grew from 3% to 7–10%.
+          Post-update data is 1 partial day — track weekly for trend.
+        </div>
+      </div>
+
+      {/* ===== NEW: Cohort Completion Curves ===== */}
+      <h3 style={{ fontSize: 18, fontWeight: 600, color: TP.navy, margin: '32px 0 16px' }}>Cohort Completion Speed</h3>
+      <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 16, lineHeight: 1.5 }}>
+        For people who created accounts during each week, what percentage had completed their submission
+        by day 0 (same day), day 1, day 3, and day 7. Faster curves = the assessment is easier to finish
+        in one sitting. The May 22–28 cohort (post-update) shows the fastest completion so far.
+      </div>
+
+      <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #E5E7EB', padding: 20, marginBottom: 20 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
+          {COHORT_DATA.map((c, i) => {
+            const colors = [TP.skyBlue, TP.purple, TP.amber, TP.green];
+            const isPost = c.label === 'May 22–28';
+            return (
+              <span key={c.label} style={{ display: 'flex', alignItems: 'center', gap: 5, fontWeight: isPost ? 700 : 400 }}>
+                <span style={{ width: 12, height: 3, background: colors[i], borderRadius: 1 }} />
+                {c.label} (n={c.n}){isPost ? ' — post-update' : ''}
+              </span>
+            );
+          })}
+        </div>
+        <div style={{ height: 300 }}>
+          <Line
+            data={{
+              labels: ['Same day', 'Within 1 day', 'Within 3 days', 'Within 7 days'],
+              datasets: COHORT_DATA.map((c, i) => {
+                const colors = [TP.skyBlue, TP.purple, TP.amber, TP.green];
+                const isPost = c.label === 'May 22–28';
+                return {
+                  label: c.label,
+                  data: [c.sameDay, c.within1d, c.within3d, c.within7d],
+                  borderColor: colors[i],
+                  backgroundColor: colors[i],
+                  borderWidth: isPost ? 3.5 : 2,
+                  pointRadius: isPost ? 7 : 5,
+                  pointBackgroundColor: colors[i],
+                  tension: 0.3,
+                  borderDash: isPost ? [] : [6, 3],
+                };
+              }),
+            }}
+            options={{
+              responsive: true, maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                title: { display: true, text: 'Weekly cohort completion curves (% completed by timeframe)', font: { size: 14, weight: 500 as const }, color: TP.navy },
+                tooltip: { callbacks: { label: (ctx: { dataset: { label: string }; parsed: { y: number } }) => ctx.dataset.label + ': ' + ctx.parsed.y + '%' } },
+              },
+              scales: {
+                y: { min: 60, max: 102, ticks: { callback: (v: number | string) => v + '%' } },
+              },
+            } as any}
+          />
+        </div>
+      </div>
+
+      {/* ===== NEW: Daily Cohorts Around Update ===== */}
+      <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #E5E7EB', padding: 20, marginBottom: 20 }}>
+        <h3 style={{ fontSize: 14, fontWeight: 600, color: TP.navy, marginTop: 0, marginBottom: 4 }}>Daily cohorts around update (May 19–23)</h3>
+        <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 12 }}>
+          Day-by-day view of how quickly each day&apos;s new accounts completed. May 22 = update day, May 23 = first full post-update day.
+        </div>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid #E5E7EB' }}>
+                <th style={{ textAlign: 'left', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Created</th>
+                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Started</th>
+                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Same day</th>
+                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>SD %</th>
+                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>+1 day</th>
+                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>+2–3 days</th>
+                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>+4–7 days</th>
+                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Completed</th>
+              </tr>
+            </thead>
+            <tbody>
+              {DAILY_COHORTS.map(d => {
+                const isPost = d.day === 'May 23';
+                const isUpdate = d.day === 'May 22';
+                const completed = d.sameDay + d.d1 + d.d2_3 + d.d4_7;
+                const sdPctVal = Math.round(d.sameDay / d.n * 100);
+                const rowBg = isPost ? '#F0FDF4' : isUpdate ? '#FFFBEB' : undefined;
+                const labelColor = isPost ? '#166534' : isUpdate ? '#92400E' : TP.navy;
+                return (
+                  <tr key={d.day} style={{ borderBottom: '1px solid #F3F4F6', background: rowBg }}>
+                    <td style={{ padding: '8px 10px', fontWeight: 600, color: labelColor }}>
+                      {d.day}{isUpdate ? ' (update)' : ''}{isPost ? ' (post)' : ''}
+                    </td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>{d.n}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>{d.sameDay}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 600, color: sdPctVal >= 85 ? TP.green : sdPctVal < 75 ? TP.red : TP.text }}>
+                      {sdPctVal}%
+                    </td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>{d.d1}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>{d.d2_3}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>{d.d4_7}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 600 }}>{completed}/{d.n}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>
+          May 23 shows 100% same-day completion (15/15). Small sample, but the strongest single-day rate in the window.
+          Update went live May 22. Track daily for 2 weeks to confirm trend.
+        </div>
       </div>
 
       {/* ===== AV funnel data table ===== */}
