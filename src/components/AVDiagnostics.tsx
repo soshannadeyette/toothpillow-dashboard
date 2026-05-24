@@ -32,20 +32,23 @@ const TP = {
 
 // ── Hardcoded data (source of truth) ──────────────────────────────────
 // "waiting" = "waiting, needs info" status from AV system
+// Major assessment update shipped May 22 — May split into pre/post
 const AV_DATA = [
-  { label: 'Nov 25', month: 11, year: 2025, traffic: 54674, starts: 1697, waiting: 97,   partial: false },
-  { label: 'Dec 25', month: 12, year: 2025, traffic: 36031, starts: 1435, waiting: 192,  partial: false },
-  { label: 'Jan 26', month: 1,  year: 2026, traffic: 37320, starts: 1514, waiting: 108,  partial: false },
-  { label: 'Feb 26', month: 2,  year: 2026, traffic: 51480, starts: 2506, waiting: 889,  partial: false },
-  { label: 'Mar 26', month: 3,  year: 2026, traffic: 39218, starts: 2587, waiting: 992,  partial: false },
-  { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1692, waiting: 588,  partial: false },
-  { label: 'May 26', month: 5,  year: 2026, traffic: 18033, starts: 996,  waiting: 439,  partial: true },
+  { label: 'Nov 25', month: 11, year: 2025, traffic: 54674, starts: 1697, waiting: 97,   partial: false, period: 'full' as const },
+  { label: 'Dec 25', month: 12, year: 2025, traffic: 36031, starts: 1435, waiting: 192,  partial: false, period: 'full' as const },
+  { label: 'Jan 26', month: 1,  year: 2026, traffic: 37320, starts: 1514, waiting: 108,  partial: false, period: 'full' as const },
+  { label: 'Feb 26', month: 2,  year: 2026, traffic: 51480, starts: 2506, waiting: 889,  partial: false, period: 'full' as const },
+  { label: 'Mar 26', month: 3,  year: 2026, traffic: 39218, starts: 2587, waiting: 992,  partial: false, period: 'full' as const },
+  { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1692, waiting: 588,  partial: false, period: 'full' as const },
+  { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1186, waiting: 517, partial: false, period: 'pre-update' as const },
+  { label: 'May 23+', month: 5,  year: 2026, traffic: 933,   starts: 47,   waiting: 29,  partial: true,  period: 'post-update' as const },
 ];
 
-// ── May projection ───────────────────────────────────────────────────
-const MAY_DAYS_ELAPSED = 19; // data through 5/19
-const MAY_DAYS_TOTAL = 31;
-const PROJ_MULT = MAY_DAYS_TOTAL / MAY_DAYS_ELAPSED;
+// ── Post-update projection ──────────────────────────────────────────
+// May 23 is day 1 of the new flow. Project the post-update period to remaining 9 days (May 23–31)
+const POST_UPDATE_DAYS_ELAPSED = 1; // data through 5/23 (partial day)
+const POST_UPDATE_DAYS_TOTAL = 9;   // May 23–31
+const PROJ_MULT = POST_UPDATE_DAYS_TOTAL / POST_UPDATE_DAYS_ELAPSED;
 
 function proj(actual: number): number { return Math.round(actual * PROJ_MULT); }
 function num(v: number): string { return v.toLocaleString(); }
@@ -62,36 +65,36 @@ function trendArrow(curr: number, prev: number): { arrow: string; color: string;
 
 export default function AVDiagnostics() {
   const labels = AV_DATA.map(d => d.label);
-  const latest = AV_DATA[AV_DATA.length - 1];
-  const prev = AV_DATA[AV_DATA.length - 2];
+  const postUpdate = AV_DATA.find(d => d.period === 'post-update')!;
+  const preUpdate = AV_DATA.find(d => d.period === 'pre-update')!;
+  const aprData = AV_DATA.find(d => d.month === 4 && d.year === 2026)!;
 
   // Derived metrics
   const startRates = AV_DATA.map(d => Math.round(d.starts / d.traffic * 1000) / 10);
   const waitPcts = AV_DATA.map(d => Math.round(d.waiting / d.starts * 1000) / 10);
   const completionEst = AV_DATA.map(d => d.starts - d.waiting);
 
-  // May projections
-  const projTraffic = proj(latest.traffic);
-  const projStarts = proj(latest.starts);
-  const projWaiting = proj(latest.waiting);
+  // Post-update projections (May 23–31)
+  const projTraffic = proj(postUpdate.traffic);
+  const projStarts = proj(postUpdate.starts);
+  const projWaiting = proj(postUpdate.waiting);
   const projFwd = projStarts - projWaiting;
   const projStartRate = Math.round(projStarts / projTraffic * 1000) / 10;
   const projWaitPct = Math.round(projWaiting / projStarts * 1000) / 10;
 
-  // Trend for waiting queue (use projected vs prev full month)
-  const waitTrend = trendArrow(projWaiting, prev.waiting);
-  // Trend for start rate
-  const latestStartRate = startRates[startRates.length - 1];
-  const prevStartRate = startRates[startRates.length - 2];
+  // Pre-update waiting rate for comparison
+  const preWaitPct = Math.round(preUpdate.waiting / preUpdate.starts * 1000) / 10;
+  const postWaitPct = Math.round(postUpdate.waiting / postUpdate.starts * 1000) / 10;
+  const preStartRate = Math.round(preUpdate.starts / preUpdate.traffic * 1000) / 10;
+  const postStartRate = Math.round(postUpdate.starts / postUpdate.traffic * 1000) / 10;
 
-  // Find the April spike
-  const aprData = AV_DATA.find(d => d.month === 4 && d.year === 2026);
-  const marData = AV_DATA.find(d => d.month === 3 && d.year === 2026);
+  // Use latest (post-update) and prev (pre-update) for trends
+  const latest = postUpdate;
+  const prev = preUpdate;
 
   // ── Chart 1: Traffic + Starts + Waiting (combo) ──────────────────
-  // Traffic bars: actual solid, projected remainder transparent (stacked on May only)
   const nullPad = AV_DATA.map(() => null as number | null);
-  const projTrafficRemainder = projTraffic - latest.traffic;
+  const projTrafficRemainder = Math.max(0, projTraffic - postUpdate.traffic);
 
   const mainChartData = {
     labels,
@@ -288,46 +291,45 @@ export default function AVDiagnostics() {
       {/* ===== Header ===== */}
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 24 }}>
         <h2 style={{ fontSize: 22, fontWeight: 600, color: TP.navy, margin: 0 }}>AV Diagnostics</h2>
-        <span style={{ fontSize: 13, color: '#888' }}>Assessment funnel health — Nov 2025 through May 2026</span>
+        <span style={{ fontSize: 13, color: '#888' }}>Assessment funnel health — Nov 2025 through May 2026 (split at May 22 update)</span>
       </div>
 
       {/* ===== Metric cards ===== */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 28 }}>
-        {/* April waiting spike */}
+        {/* Pre-update waiting rate */}
         <div style={{ background: '#FFF5F5', borderRadius: 10, padding: '14px 16px', border: '1px solid #FECACA' }}>
-          <div style={{ fontSize: 12, color: '#991B1B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Apr waiting queue</div>
-          <div style={{ fontSize: 26, fontWeight: 600, color: '#991B1B' }}>{num(aprData?.waiting || 0)}</div>
-          <div style={{ fontSize: 12, color: '#DC2626' }}>{pct(aprData?.waiting || 0, aprData?.starts || 1)} of starts — {Math.round((aprData?.waiting || 0) / (marData?.waiting || 1))}x March</div>
+          <div style={{ fontSize: 12, color: '#991B1B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Pre-update wait rate</div>
+          <div style={{ fontSize: 26, fontWeight: 600, color: '#991B1B' }}>{preWaitPct}%</div>
+          <div style={{ fontSize: 12, color: '#DC2626' }}>{num(preUpdate.waiting)} of {num(preUpdate.starts)} starts (May 1–22)</div>
         </div>
-        {/* Current month waiting */}
-        <div style={{ background: '#F9FAFB', borderRadius: 10, padding: '14px 16px', border: '1px solid #E5E7EB' }}>
-          <div style={{ fontSize: 12, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>May waiting (MTD)</div>
-          <div style={{ fontSize: 26, fontWeight: 600, color: TP.navy }}>{num(latest.waiting)}</div>
-          <div style={{ fontSize: 12, color: '#6B7280' }}>proj {num(projWaiting)} | <span style={{ color: waitTrend.color }}>{waitTrend.arrow} {waitTrend.pctStr} vs Apr</span></div>
+        {/* Post-update waiting rate */}
+        <div style={{ background: '#F0FDF4', borderRadius: 10, padding: '14px 16px', border: '1px solid #BBF7D0' }}>
+          <div style={{ fontSize: 12, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Post-update wait rate</div>
+          <div style={{ fontSize: 26, fontWeight: 600, color: '#166534' }}>{postWaitPct}%</div>
+          <div style={{ fontSize: 12, color: '#15803D' }}>{num(postUpdate.waiting)} of {num(postUpdate.starts)} starts (May 23+, day 1)</div>
         </div>
-        {/* May projected starts */}
+        {/* Pre-update start rate */}
         <div style={{ background: '#F9FAFB', borderRadius: 10, padding: '14px 16px', border: '1px solid #E5E7EB' }}>
-          <div style={{ fontSize: 12, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>May starts (MTD)</div>
-          <div style={{ fontSize: 26, fontWeight: 600, color: TP.navy }}>{num(latest.starts)}</div>
-          <div style={{ fontSize: 12, color: '#6B7280' }}>proj {num(projStarts)} | {projStartRate}% start rate</div>
+          <div style={{ fontSize: 12, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Pre-update start rate</div>
+          <div style={{ fontSize: 26, fontWeight: 600, color: TP.navy }}>{preStartRate}%</div>
+          <div style={{ fontSize: 12, color: '#6B7280' }}>{num(preUpdate.starts)} starts from {num(preUpdate.traffic)} traffic</div>
         </div>
-        {/* Nov baseline */}
+        {/* Post-update start rate */}
         <div style={{ background: '#F9FAFB', borderRadius: 10, padding: '14px 16px', border: '1px solid #E5E7EB' }}>
-          <div style={{ fontSize: 12, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Nov 25 baseline</div>
-          <div style={{ fontSize: 26, fontWeight: 600, color: TP.navy }}>{num(AV_DATA[0].waiting)}</div>
-          <div style={{ fontSize: 12, color: '#6B7280' }}>waiting = {pct(AV_DATA[0].waiting, AV_DATA[0].starts)} of starts</div>
+          <div style={{ fontSize: 12, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Post-update start rate</div>
+          <div style={{ fontSize: 26, fontWeight: 600, color: TP.navy }}>{postStartRate}%</div>
+          <div style={{ fontSize: 12, color: '#6B7280' }}>{num(postUpdate.starts)} starts from {num(postUpdate.traffic)} traffic (partial day)</div>
         </div>
       </div>
 
       {/* ===== Trend callout ===== */}
       <div style={{ background: '#FFFBEB', borderRadius: 10, padding: '14px 18px', border: '1px solid #FDE68A', marginBottom: 24 }}>
-        <div style={{ fontWeight: 600, color: '#92400E', fontSize: 14, marginBottom: 4 }}>Key trend: waiting queue climbed sharply Feb–Mar, then dropped back in April</div>
+        <div style={{ fontWeight: 600, color: '#92400E', fontSize: 14, marginBottom: 4 }}>Assessment update shipped May 22 — tracking before vs after</div>
         <div style={{ fontSize: 13, color: '#78350F', lineHeight: 1.6 }}>
-          From Nov 2025 through Jan 2026, the waiting/needs-info queue held steady at 97–192 (5–7% of starts).
-          Feb and Mar saw a sharp climb to 889 and 992 (35–38% of starts), meaning more than a third of people who started
-          assessments got stuck. April dropped to 588 (35% of starts) — the raw count fell but the rate stayed elevated.
-          Traffic declined 23% in April while the waiting rate held flat, which suggests the bottleneck is in the assessment
-          completion flow itself, not in who&apos;s arriving at the site.
+          From Feb through May 22, the waiting/needs-info rate stayed elevated at 35–44% of starts. A major assessment
+          update went live May 22. May 23 is the first day on the new flow. Day 1 data is noisy (some starts from earlier
+          days completed today on the new form, some today&apos;s starts haven&apos;t finished yet), so the real signal will
+          emerge over the next 1–2 weeks. This tab will track the post-update period separately so the comparison stays clean.
         </div>
       </div>
 
@@ -414,7 +416,7 @@ export default function AVDiagnostics() {
             </tbody>
           </table>
         </div>
-        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* Through 5/19 &nbsp;|&nbsp; May proj = pace extrapolated to {MAY_DAYS_TOTAL} days ({MAY_DAYS_ELAPSED} elapsed)</div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>May split at assessment update (May 22). May 1–22 = pre-update (22 days). May 23+ = post-update ({POST_UPDATE_DAYS_ELAPSED} day elapsed, proj to {POST_UPDATE_DAYS_TOTAL} days).</div>
       </div>
     </div>
   );
