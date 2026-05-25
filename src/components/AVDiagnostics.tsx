@@ -137,12 +137,9 @@ const DAILY_COHORTS = [
   { day: 'May 24', n: 17, sameDay: 14, d1: 2, d2_3: 1, d4_7: 0 },
 ];
 
-// ── Post-update projection ──────────────────────────────────────────
+// ── Post-update tracking ────────────────────────────────────────────
 const POST_UPDATE_DAYS_ELAPSED = 3; // data through 5/25
-const POST_UPDATE_DAYS_TOTAL = 9;   // May 23–31
-const PROJ_MULT = POST_UPDATE_DAYS_TOTAL / POST_UPDATE_DAYS_ELAPSED;
 
-function proj(actual: number): number { return Math.round(actual * PROJ_MULT); }
 function num(v: number): string { return v.toLocaleString(); }
 function pct(v: number, t: number): string { return t > 0 ? (v / t * 100).toFixed(1) + '%' : '--'; }
 
@@ -404,7 +401,7 @@ export default function AVDiagnostics() {
           In January, 90% of people who started an assessment finished it and only 9% got stuck in waiting.
           Starting in February, completion dropped to ~58% and has stayed there. About 40% of every month&apos;s
           accounts since February are still sitting in &quot;Waiting — Needs info&quot; with no submission date, meaning
-          they never finished. That&apos;s 3,100+ people across Feb–May. Assessment update shipped May 22 —
+          they never finished. That&apos;s over 3,000 people across Feb–May. Assessment update shipped May 22 —
           post-update data ({POST_UPDATE_DAYS_ELAPSED} days) is too early to draw conclusions since recent
           accounts haven&apos;t had time to move through the pipeline.
         </div>
@@ -471,7 +468,8 @@ export default function AVDiagnostics() {
       <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 16, lineHeight: 1.5 }}>
         How long between when someone creates an account and when they complete their submission.
         &quot;Same-day&quot; means they finished the same day they started. &quot;Returning&quot; means they came back
-        on a different day to complete it. Data from Salesforce &quot;Tracking Conversions&quot; export.
+        on a different day to complete it. Data from Salesforce &quot;Tracking Conversions&quot; export (submission
+        counts here differ slightly from the assessment table above, which uses the &quot;Waiting on Info Ratios&quot; export).
       </div>
 
       {/* Chart 4: Same-day vs Returning stacked bar */}
@@ -479,7 +477,7 @@ export default function AVDiagnostics() {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(58,110,164,0.7)' }} /> Same-day</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(239,159,39,0.7)' }} /> Returning</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(150,150,150,0.15)', border: '1.5px solid rgba(150,150,150,0.5)' }} /> May 23–25 (day 1)</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(150,150,150,0.15)', border: '1.5px solid rgba(150,150,150,0.5)' }} /> May 23–25 ({POST_UPDATE_DAYS_ELAPSED} days)</span>
         </div>
         <div style={{ height: 300 }}>
           <Bar data={lagChartData} options={lagChartOpts as any} />
@@ -631,7 +629,7 @@ export default function AVDiagnostics() {
         </div>
         <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>
           Same-day completion dropped from 91% (Jan) to 67% (May pre-update). The 31+ day bucket grew from 3% to 7–10%.
-          Post-update data is 1 partial day — track weekly for trend.
+          Post-update data is {POST_UPDATE_DAYS_ELAPSED} days — track weekly for trend.
         </div>
       </div>
 
@@ -740,8 +738,8 @@ export default function AVDiagnostics() {
           </table>
         </div>
         <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>
-          Post-update days (May 23–24) show 69–82% same-day completion (34/47 total). Stronger than the pre-update
-          trend (67%). Track through end of May to confirm sustained improvement.
+          Post-update days (May 23–24) show 69–82% same-day completion (34 of 46 same-day). Stronger than the
+          pre-update trend (67%). Track through end of May to confirm sustained improvement.
         </div>
       </div>
 
