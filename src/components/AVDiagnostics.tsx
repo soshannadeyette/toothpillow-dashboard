@@ -41,7 +41,7 @@ const AV_DATA = [
   { label: 'Mar 26', month: 3,  year: 2026, traffic: 39218, starts: 2587, waiting: 992,  partial: false, period: 'full' as const },
   { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1692, waiting: 588,  partial: false, period: 'full' as const },
   { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1186, waiting: 517, partial: false, period: 'pre-update' as const },
-  { label: 'May 23+', month: 5,  year: 2026, traffic: 933,   starts: 51,   waiting: 29,  partial: true,  period: 'post-update' as const },
+  { label: 'May 23–25', month: 5,  year: 2026, traffic: 933,   starts: 51,   waiting: 29,  partial: true,  period: 'post-update' as const },
 ];
 
 // ── Conversion lag data (source of truth) ─────────────────────────────
@@ -53,14 +53,14 @@ const CONVERSION_LAG = [
   { label: 'Feb 26',    submissions: 1208, sameDay: 992, within7d: 1166, returning: 216, medianLag: 0, meanLag: 3.2  },
   { label: 'Mar 26',    submissions: 1287, sameDay: 963, within7d: 1175, returning: 324, medianLag: 0, meanLag: 7.9  },
   { label: 'Apr 26',    submissions: 967,  sameDay: 685, within7d: 810,  returning: 282, medianLag: 0, meanLag: 17.9 },
-  { label: 'May 1–22',  submissions: 578,  sameDay: 387, within7d: 513,  returning: 191, medianLag: 0, meanLag: 15.0 },
-  { label: 'May 23+',   submissions: 29,   sameDay: 21,  within7d: 28,   returning: 8,   medianLag: 0, meanLag: 2.5  },
+  { label: 'May 1–22',  submissions: 579,  sameDay: 387, within7d: 513,  returning: 192, medianLag: 0, meanLag: 15.4 },
+  { label: 'May 23–25', submissions: 47,   sameDay: 34,  within7d: 44,   returning: 13,  medianLag: 0, meanLag: 6.1  },
 ];
 
 // Traffic for conversion rate calc (matches AV_DATA where available)
 const CONV_TRAFFIC: Record<string, number> = {
   'Jan 26': 37320, 'Feb 26': 51480, 'Mar 26': 39218,
-  'Apr 26': 30311, 'May 1–22': 21819, 'May 23+': 933,
+  'Apr 26': 30311, 'May 1–22': 21819, 'May 23–25': 933,
 };
 
 // ── Lag distribution (source of truth) ───────────────────────────────
@@ -71,8 +71,8 @@ const LAG_DISTRIBUTION = [
   { label: 'Feb 26',   total: 1208, buckets: [992, 77, 55, 42, 18,  8, 16] },
   { label: 'Mar 26',   total: 1287, buckets: [963, 97, 57, 58, 44, 30, 38] },
   { label: 'Apr 26',   total: 967,  buckets: [685, 55, 39, 31, 21, 35, 101] },
-  { label: 'May 1–22', total: 578,  buckets: [387, 62, 36, 28, 16,  7, 42] },
-  { label: 'May 23+',  total: 29,   buckets: [ 21,  5,  2,  0,  0,  0,  1] },
+  { label: 'May 1–22',  total: 579,  buckets: [387, 62, 36, 28, 16,  7, 43] },
+  { label: 'May 23–25', total: 47,   buckets: [ 34,  6,  4,  0,  0,  1,  2] },
 ];
 
 // ── Weekly cohort completion curves (source of truth) ────────────────
@@ -90,11 +90,12 @@ const DAILY_COHORTS = [
   { day: 'May 20', n: 20, sameDay: 16, d1: 1, d2_3: 3, d4_7: 0 },
   { day: 'May 21', n: 20, sameDay: 15, d1: 3, d2_3: 2, d4_7: 0 },
   { day: 'May 22', n: 25, sameDay: 20, d1: 5, d2_3: 0, d4_7: 0 },
-  { day: 'May 23', n: 21, sameDay: 21, d1: 0, d2_3: 0, d4_7: 0 },
+  { day: 'May 23', n: 29, sameDay: 20, d1: 4, d2_3: 3, d4_7: 0 },
+  { day: 'May 24', n: 17, sameDay: 14, d1: 2, d2_3: 1, d4_7: 0 },
 ];
 
 // ── Post-update projection ──────────────────────────────────────────
-const POST_UPDATE_DAYS_ELAPSED = 1; // data through 5/23 (partial day)
+const POST_UPDATE_DAYS_ELAPSED = 3; // data through 5/25
 const POST_UPDATE_DAYS_TOTAL = 9;   // May 23–31
 const PROJ_MULT = POST_UPDATE_DAYS_TOTAL / POST_UPDATE_DAYS_ELAPSED;
 
@@ -224,7 +225,7 @@ export default function AVDiagnostics() {
   };
 
   // ── Chart 3: Stacked — forward vs stuck ─────────────────────────────
-  // Show ACTUAL data for May 23+ (not projected — projection was misleading on 1 day)
+  // Show ACTUAL data for May 23–25 (not projected — projection was misleading on 1 day)
   const fwdData = AV_DATA.map((_, i) => completionEst[i]);
   const waitData = AV_DATA.map(d => d.waiting);
   const greenBgs = AV_DATA.map(d => d.partial ? 'rgba(29,158,117,0.25)' : 'rgba(29,158,117,0.7)');
@@ -257,14 +258,14 @@ export default function AVDiagnostics() {
     datasets: [
       {
         label: 'Same-day %', data: sameDayPcts,
-        backgroundColor: lagLabels.map(l => l === 'May 23+' ? 'rgba(58,110,164,0.3)' : 'rgba(58,110,164,0.7)'),
-        borderColor: lagLabels.map(l => l === 'May 23+' ? 'rgba(58,110,164,0.5)' : 'rgba(58,110,164,0)'),
+        backgroundColor: lagLabels.map(l => l === 'May 23–25' ? 'rgba(58,110,164,0.3)' : 'rgba(58,110,164,0.7)'),
+        borderColor: lagLabels.map(l => l === 'May 23–25' ? 'rgba(58,110,164,0.5)' : 'rgba(58,110,164,0)'),
         borderWidth: 1.5, borderRadius: 0,
       },
       {
         label: 'Returning %', data: returningPcts,
-        backgroundColor: lagLabels.map(l => l === 'May 23+' ? 'rgba(239,159,39,0.3)' : 'rgba(239,159,39,0.7)'),
-        borderColor: lagLabels.map(l => l === 'May 23+' ? 'rgba(239,159,39,0.5)' : 'rgba(239,159,39,0)'),
+        backgroundColor: lagLabels.map(l => l === 'May 23–25' ? 'rgba(239,159,39,0.3)' : 'rgba(239,159,39,0.7)'),
+        borderColor: lagLabels.map(l => l === 'May 23–25' ? 'rgba(239,159,39,0.5)' : 'rgba(239,159,39,0)'),
         borderWidth: 1.5, borderRadius: 4,
       },
     ],
@@ -325,19 +326,19 @@ export default function AVDiagnostics() {
           <div style={{ fontSize: 11, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Post-update wait rate</div>
           <div style={{ fontSize: 28, fontWeight: 700, color: '#166534' }}>{postWaitPctVal}%</div>
           <div style={{ fontSize: 12, color: '#15803D' }}>{num(postUpdate.waiting)} of {num(postUpdate.starts)} starts</div>
-          <div style={{ fontSize: 11, color: '#166534', marginTop: 2 }}>May 23+ ({POST_UPDATE_DAYS_ELAPSED} day, partial)</div>
+          <div style={{ fontSize: 11, color: '#166534', marginTop: 2 }}>May 23–25 ({POST_UPDATE_DAYS_ELAPSED} days)</div>
         </div>
         <div style={{ background: '#F9FAFB', borderRadius: 10, padding: '14px 16px', border: '1px solid #E5E7EB' }}>
           <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Same-day rate trend</div>
           <div style={{ fontSize: 28, fontWeight: 700, color: TP.red }}>91% → 67%</div>
           <div style={{ fontSize: 12, color: '#6B7280' }}>Jan → May pre-update</div>
-          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>Post: 72% same-day (21/29)</div>
+          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>Post: 72% same-day (34/47)</div>
         </div>
         <div style={{ background: '#F9FAFB', borderRadius: 10, padding: '14px 16px', border: '1px solid #E5E7EB' }}>
           <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Post-update submissions</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: TP.green }}>29</div>
-          <div style={{ fontSize: 12, color: '#6B7280' }}>May 23 (1 partial day)</div>
-          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>21 same-day, 8 returning</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: TP.green }}>47</div>
+          <div style={{ fontSize: 12, color: '#6B7280' }}>May 23–25 (3 days post-update)</div>
+          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>34 same-day, 13 returning</div>
         </div>
       </div>
 
@@ -348,8 +349,8 @@ export default function AVDiagnostics() {
           From Feb through May 22, the waiting/needs-info rate stayed at 35–44% of starts, meaning more than a third of
           people who began assessments got stuck and didn&apos;t finish. At the same time, same-day completion dropped from
           91% in January to 67% by May, and returning submissions (people who came back on a later day to finish) grew from
-          9% to 33%. The update went live May 22. Day 1 data is mixed (some earlier starts completed today, some new starts
-          haven&apos;t finished yet), so the real signal will emerge over 1–2 weeks.
+          9% to 33%. The update went live May 22. Through 3 days post-update (May 23–25), same-day rate recovered to 72%
+          (34/47) and mean lag dropped from 15.4 days (pre) to 6.1 days (post). Early signal is positive but sample is still small.
         </div>
       </div>
 
@@ -400,7 +401,7 @@ export default function AVDiagnostics() {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(58,110,164,0.7)' }} /> Same-day</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(239,159,39,0.7)' }} /> Returning</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(150,150,150,0.15)', border: '1.5px solid rgba(150,150,150,0.5)' }} /> May 23+ (day 1)</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(150,150,150,0.15)', border: '1.5px solid rgba(150,150,150,0.5)' }} /> May 23–25 (day 1)</span>
         </div>
         <div style={{ height: 300 }}>
           <Bar data={lagChartData} options={lagChartOpts as any} />
@@ -438,7 +439,7 @@ export default function AVDiagnostics() {
                 const cr = t ? (d.submissions / t * 100).toFixed(1) : '--';
                 const sdPct = (d.sameDay / d.submissions * 100).toFixed(1);
                 const retPct = (d.returning / d.submissions * 100).toFixed(1);
-                const isPost = d.label === 'May 23+';
+                const isPost = d.label === 'May 23–25';
                 const rowBg = isPost ? '#F0FDF4' : d.label === 'May 1–22' ? '#FFF5F5' : undefined;
                 return (
                   <tr key={d.label} style={{ borderBottom: '1px solid #F3F4F6', background: rowBg }}>
@@ -459,7 +460,7 @@ export default function AVDiagnostics() {
             </tbody>
           </table>
         </div>
-        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* May 23+ = {POST_UPDATE_DAYS_ELAPSED} partial day, post-update. 8 of 29 submissions were returning (created before May 23). Includes 4 manually counted submissions (no submission date in Salesforce, dev fix pending).</div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* May 23–25 = {POST_UPDATE_DAYS_ELAPSED} days post-update. 13 of 47 submissions were returning (created before May 23).</div>
       </div>
 
       {/* ===== NEW: Lag Distribution ===== */}
@@ -491,7 +492,7 @@ export default function AVDiagnostics() {
                 return {
                   label: bucket,
                   data: LAG_DISTRIBUTION.map(d => Math.round(d.buckets[i] / d.total * 1000) / 10),
-                  backgroundColor: LAG_DISTRIBUTION.map(d => d.label === 'May 23+' ? colors[i].replace('0.8', '0.35') : colors[i]),
+                  backgroundColor: LAG_DISTRIBUTION.map(d => d.label === 'May 23–25' ? colors[i].replace('0.8', '0.35') : colors[i]),
                   borderRadius: i === LAG_BUCKETS.length - 1 ? 4 : 0,
                 };
               }),
@@ -528,7 +529,7 @@ export default function AVDiagnostics() {
             </thead>
             <tbody>
               {LAG_DISTRIBUTION.map(d => {
-                const isPost = d.label === 'May 23+';
+                const isPost = d.label === 'May 23–25';
                 const isPre = d.label === 'May 1–22';
                 const rowBg = isPost ? '#F0FDF4' : isPre ? '#FFF5F5' : undefined;
                 return (
@@ -634,7 +635,7 @@ export default function AVDiagnostics() {
             </thead>
             <tbody>
               {DAILY_COHORTS.map(d => {
-                const isPost = d.day === 'May 23';
+                const isPost = d.day === 'May 23' || d.day === 'May 24';
                 const isUpdate = d.day === 'May 22';
                 const completed = d.sameDay + d.d1 + d.d2_3 + d.d4_7;
                 const sdPctVal = Math.round(d.sameDay / d.n * 100);
@@ -661,8 +662,8 @@ export default function AVDiagnostics() {
           </table>
         </div>
         <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>
-          May 23 shows 100% same-day completion (15/15). Small sample, but the strongest single-day rate in the window.
-          Update went live May 22. Track daily for 2 weeks to confirm trend.
+          Post-update days (May 23–24) show 69–82% same-day completion (34/47 total). Stronger than the pre-update
+          trend (67%). Track through end of May to confirm sustained improvement.
         </div>
       </div>
 
@@ -705,7 +706,7 @@ export default function AVDiagnostics() {
                 );
               })}
               <tr style={{ borderBottom: '1px solid #F3F4F6', background: '#F0F9FF' }}>
-                <td style={{ padding: '8px 10px', fontWeight: 500, fontStyle: 'italic', color: '#3A6EA4' }}>May 23+ proj</td>
+                <td style={{ padding: '8px 10px', fontWeight: 500, fontStyle: 'italic', color: '#3A6EA4' }}>May 23–25 proj</td>
                 <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>{num(projTraffic)}</td>
                 <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>{num(projStarts)}</td>
                 <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>{num(projWaiting)}</td>
@@ -717,7 +718,7 @@ export default function AVDiagnostics() {
           </table>
         </div>
         <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>
-          May split at assessment update (May 22). Pre-update = 22 days. Post-update = {POST_UPDATE_DAYS_ELAPSED} day elapsed, projected to {POST_UPDATE_DAYS_TOTAL} days.
+          May split at assessment update (May 22). Pre-update = 22 days. Post-update = {POST_UPDATE_DAYS_ELAPSED} days elapsed, projected to {POST_UPDATE_DAYS_TOTAL} days.
           Wait % above 30% highlighted red.
         </div>
       </div>
