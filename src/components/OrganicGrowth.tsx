@@ -21,11 +21,11 @@ const TP = {
 
 /* ════════════════════════════════════════════
    HARDCODED GSC DATA — Source of truth
-   Data verified from Google Search Console on May 24, 2026
+   Data verified from Google Search Console on May 25, 2026
    Property verified ~Feb 2025, 16 months of history available
    Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
    SEO program reset date: May 19, 2026
-   May 2026 monthly/weekly data current through May 21 (GSC ~3-day lag)
+   May 2026 monthly/weekly data current through May 23 (GSC ~3-day lag)
    ════════════════════════════════════════════ */
 
 const SEO_START_DATE = '2026-05-19';
@@ -46,7 +46,7 @@ const GSC_MONTHLY = [
   { month: '2026-02', clicks: 10579, impressions: 66544, ctr: 15.9, position: 11.9 },
   { month: '2026-03', clicks: 12601, impressions: 74269, ctr: 17.0, position: 18.4 },
   { month: '2026-04', clicks: 11180, impressions: 105758, ctr: 10.6, position: 32.7 },
-  { month: '2026-05', clicks: 6160, impressions: 36600, ctr: 16.8, position: 21.7 },
+  { month: '2026-05', clicks: 7111, impressions: 39759, ctr: 17.9, position: 20.6 },
 ];
 
 const GSC_WEEKLY = [
@@ -117,11 +117,11 @@ const GSC_WEEKLY = [
   { week: '2026-04-27', clicks: 2848, impressions: 24374, ctr: 11.7, position: 25.3 },
   { week: '2026-05-04', clicks: 1951, impressions: 16762, ctr: 11.6, position: 23.0 },
   { week: '2026-05-11', clicks: 2082, impressions: 10234, ctr: 20.3, position: 11.3 },
-  { week: '2026-05-18', clicks: 1365, impressions: 6129, ctr: 22.3, position: 11.6 },
+  { week: '2026-05-18', clicks: 2316, impressions: 9288, ctr: 24.9, position: 10.2 },
 ];
 
-// Daily GSC data — May 2026 (through May 21; GSC has ~3-day lag)
-// Source: Google Search Console, verified May 24, 2026
+// Daily GSC data — May 2026 (through May 23; GSC has ~3-day lag)
+// Source: Google Search Console, verified May 25, 2026
 const GSC_DAILY_MAY_2026: Record<number, { clicks: number; impressions: number }> = {
   1: { clicks: 339, impressions: 1522 },
   2: { clicks: 218, impressions: 1003 },
@@ -144,6 +144,8 @@ const GSC_DAILY_MAY_2026: Record<number, { clicks: number; impressions: number }
   19: { clicks: 337, impressions: 1358 },
   20: { clicks: 330, impressions: 1551 },
   21: { clicks: 387, impressions: 1881 },
+  22: { clicks: 487, impressions: 1600 },
+  23: { clicks: 464, impressions: 1559 },
 };
 
 /* ════════════════════════════════════════════
@@ -322,7 +324,7 @@ export default function OrganicGrowth() {
   const currentQ = quarters[quarters.length - 1]; // Q2 2026 (partial)
 
   const mayPartial = GSC_MONTHLY[GSC_MONTHLY.length - 1];
-  const mayDays = 21;
+  const mayDays = 23;
 
   // Monthly CTR trend chart
   const ctrChartData = useMemo(() => ({
@@ -539,7 +541,7 @@ export default function OrganicGrowth() {
           <div style={{ fontSize: 32, opacity: 0.4 }}>→</div>
           {/* Now */}
           <div>
-            <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 8, fontWeight: 600 }}>MAY 2026 (21 DAYS)</div>
+            <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 8, fontWeight: 600 }}>MAY 2026 (23 DAYS)</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               <div><div style={{ fontSize: 10, opacity: 0.5 }}>Avg Position</div><div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>21.7</div><div style={{ fontSize: 10, opacity: 0.5 }}>Page 2–3</div></div>
               <div><div style={{ fontSize: 10, opacity: 0.5 }}>CTR</div><div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>16.8%</div></div>
@@ -685,7 +687,7 @@ export default function OrganicGrowth() {
       {/* ═══════ SECTION 7B: DAILY GSC — MAY 2026 ═══════ */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
         <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Daily Search Performance — May 2026</h3>
-        <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Day-by-day clicks and impressions from Google Search Console. Red dashed line marks SEO program launch (May 19). Data through May 21 (GSC has a ~3-day processing delay).</p>
+        <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Day-by-day clicks and impressions from Google Search Console. Red dashed line marks SEO program launch (May 19). Data through May 23 (GSC has a ~3-day processing delay).</p>
         <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
           <div style={{ background: '#f0f9ff', borderRadius: 8, padding: '8px 14px', border: '1px solid #bae6fd', fontSize: 12 }}>
             <span style={{ color: '#888' }}>Avg Daily Clicks:</span>{' '}
@@ -696,8 +698,8 @@ export default function OrganicGrowth() {
             <span style={{ fontWeight: 700, color: TP.navy }}>May {dailyDays.reduce((best, d) => GSC_DAILY_MAY_2026[d].clicks > GSC_DAILY_MAY_2026[best].clicks ? d : best, dailyDays[0])} ({Math.max(...dailyDays.map(d => GSC_DAILY_MAY_2026[d].clicks))} clicks)</span>
           </div>
           <div style={{ background: '#f0fdf4', borderRadius: 8, padding: '8px 14px', border: `1px solid ${TP.green}50`, fontSize: 12 }}>
-            <span style={{ color: '#888' }}>Post-SEO Avg (May 19–21):</span>{' '}
-            <span style={{ fontWeight: 700, color: TP.green }}>{Math.round(([19,20,21].reduce((s, d) => s + GSC_DAILY_MAY_2026[d].clicks, 0)) / 3)} clicks/day</span>
+            <span style={{ color: '#888' }}>Post-SEO Avg (May 19–23):</span>{' '}
+            <span style={{ fontWeight: 700, color: TP.green }}>{Math.round(([19,20,21,22,23].reduce((s, d) => s + GSC_DAILY_MAY_2026[d].clicks, 0)) / 5)} clicks/day</span>
           </div>
         </div>
         <div style={{ height: 280 }}>
