@@ -41,8 +41,8 @@ const AV_DATA = [
   { label: 'Feb 26', month: 2,  year: 2026, traffic: 51480, starts: 2193, waiting: 888, submitted: 1293, partial: false, period: 'full' as const },
   { label: 'Mar 26', month: 3,  year: 2026, traffic: 39218, starts: 2263, waiting: 967, submitted: 1285, partial: false, period: 'full' as const },
   { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1431, waiting: 569, submitted: 854,  partial: false, period: 'full' as const },
-  { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1038, waiting: 514, submitted: 520, partial: false, period: 'pre-update' as const },
-  { label: 'May 23–25', month: 5,  year: 2026, traffic: 933,   starts: 114,  waiting: 80,  submitted: 34,  partial: true,  period: 'post-update' as const },
+  { label: 'May 1–22', month: 5, year: 2026, traffic: 21897, starts: 1038, waiting: 514, submitted: 520, partial: false, period: 'pre-update' as const },
+  { label: 'May 23–25', month: 5,  year: 2026, traffic: 1808,  starts: 114,  waiting: 80,  submitted: 34,  partial: true,  period: 'post-update' as const },
 ];
 
 // ── Full pipeline funnel by month (source of truth) ──────────────────
@@ -103,7 +103,7 @@ const CONVERSION_LAG = [
 // Traffic for conversion rate calc (matches AV_DATA where available)
 const CONV_TRAFFIC: Record<string, number> = {
   'Jan 26': 37320, 'Feb 26': 51480, 'Mar 26': 39218,
-  'Apr 26': 30311, 'May 1–22': 21819, 'May 23–25': 933,
+  'Apr 26': 30311, 'May 1–22': 21897, 'May 23–25': 1808,
 };
 
 // ── Lag distribution (source of truth) ───────────────────────────────
