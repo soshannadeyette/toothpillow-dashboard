@@ -31,17 +31,60 @@ const TP = {
 };
 
 // ── Hardcoded data (source of truth) ──────────────────────────────────
-// "waiting" = "waiting, needs info" status from AV system
+// Source: Salesforce "Waiting on Info Ratios" export, pulled May 25 2026
+// "starts" = Salesforce Person Account creations (assessment starts)
+// "waiting" = current WAITING stage (needs info / needs photos) — never finished
+// "submitted" = have a Submission Date — completed their assessment
 // Major assessment update shipped May 22 — May split into pre/post
 const AV_DATA = [
-  { label: 'Nov 25', month: 11, year: 2025, traffic: 54674, starts: 1697, waiting: 97,   partial: false, period: 'full' as const },
-  { label: 'Dec 25', month: 12, year: 2025, traffic: 36031, starts: 1435, waiting: 192,  partial: false, period: 'full' as const },
-  { label: 'Jan 26', month: 1,  year: 2026, traffic: 37320, starts: 1514, waiting: 108,  partial: false, period: 'full' as const },
-  { label: 'Feb 26', month: 2,  year: 2026, traffic: 51480, starts: 2506, waiting: 889,  partial: false, period: 'full' as const },
-  { label: 'Mar 26', month: 3,  year: 2026, traffic: 39218, starts: 2587, waiting: 992,  partial: false, period: 'full' as const },
-  { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1692, waiting: 588,  partial: false, period: 'full' as const },
-  { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1186, waiting: 517, partial: false, period: 'pre-update' as const },
-  { label: 'May 23–25', month: 5,  year: 2026, traffic: 933,   starts: 51,   waiting: 29,  partial: true,  period: 'post-update' as const },
+  { label: 'Jan 26', month: 1,  year: 2026, traffic: 37320, starts: 1146, waiting: 108, submitted: 1035, partial: false, period: 'full' as const },
+  { label: 'Feb 26', month: 2,  year: 2026, traffic: 51480, starts: 2193, waiting: 888, submitted: 1293, partial: false, period: 'full' as const },
+  { label: 'Mar 26', month: 3,  year: 2026, traffic: 39218, starts: 2263, waiting: 967, submitted: 1285, partial: false, period: 'full' as const },
+  { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1431, waiting: 569, submitted: 854,  partial: false, period: 'full' as const },
+  { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1038, waiting: 514, submitted: 520, partial: false, period: 'pre-update' as const },
+  { label: 'May 23–25', month: 5,  year: 2026, traffic: 933,   starts: 114,  waiting: 80,  submitted: 34,  partial: true,  period: 'post-update' as const },
+];
+
+// ── Full pipeline funnel by month (source of truth) ──────────────────
+// From same Salesforce export — current stage of all 2026 accounts
+// Stages grouped: Waiting (stuck), In Review (Sent to Dr Ben through TxP Approved),
+// Checkout (Sent Checkout Link), Checked Out (CHECKED OUT + Consult Complete + Myo Only),
+// Closed (Referred Out, Denied, Closed Lost, etc.), On Hold
+const FUNNEL_DATA = [
+  { label: 'Jan 26', waiting: 108, inReview:  0, checkout:  92, checkedOut: 311, closed: 617, onHold: 18 },
+  { label: 'Feb 26', waiting: 888, inReview:  6, checkout: 480, checkedOut: 320, closed: 472, onHold: 27 },
+  { label: 'Mar 26', waiting: 967, inReview: 13, checkout: 530, checkedOut: 359, closed: 366, onHold: 28 },
+  { label: 'Apr 26', waiting: 569, inReview: 36, checkout: 434, checkedOut: 164, closed: 212, onHold: 16 },
+  { label: 'May 26', waiting: 594, inReview: 226, checkout: 260, checkedOut: 33,  closed: 32,  onHold: 7 },
+];
+
+// ── May daily data (source of truth) ─────────────────────────────────
+// Daily breakdown: account creations, waiting, and submitted for May 2026
+const MAY_DAILY = [
+  { day: 1, starts: 42, waiting: 17, submitted: 24 },
+  { day: 2, starts: 38, waiting: 21, submitted: 17 },
+  { day: 3, starts: 40, waiting: 20, submitted: 19 },
+  { day: 4, starts: 57, waiting: 25, submitted: 32 },
+  { day: 5, starts: 37, waiting: 16, submitted: 21 },
+  { day: 6, starts: 67, waiting: 32, submitted: 35 },
+  { day: 7, starts: 46, waiting: 24, submitted: 22 },
+  { day: 8, starts: 40, waiting: 18, submitted: 22 },
+  { day: 9, starts: 34, waiting: 17, submitted: 17 },
+  { day: 10, starts: 31, waiting: 16, submitted: 15 },
+  { day: 11, starts: 55, waiting: 23, submitted: 32 },
+  { day: 12, starts: 42, waiting: 16, submitted: 26 },
+  { day: 13, starts: 54, waiting: 27, submitted: 26 },
+  { day: 14, starts: 49, waiting: 25, submitted: 24 },
+  { day: 15, starts: 41, waiting: 18, submitted: 23 },
+  { day: 16, starts: 33, waiting: 14, submitted: 19 },
+  { day: 17, starts: 59, waiting: 37, submitted: 22 },
+  { day: 18, starts: 48, waiting: 19, submitted: 28 },
+  { day: 19, starts: 62, waiting: 33, submitted: 29 },
+  { day: 20, starts: 46, waiting: 26, submitted: 20 },
+  { day: 21, starts: 41, waiting: 22, submitted: 19 },
+  { day: 22, starts: 76, waiting: 48, submitted: 28 },
+  { day: 23, starts: 68, waiting: 48, submitted: 20 },
+  { day: 24, starts: 41, waiting: 27, submitted: 14 },
 ];
 
 // ── Conversion lag data (source of truth) ─────────────────────────────
@@ -109,23 +152,19 @@ export default function AVDiagnostics() {
   const preUpdate = AV_DATA.find(d => d.period === 'pre-update')!;
 
   // Derived metrics
-  const startRates = AV_DATA.map(d => Math.round(d.starts / d.traffic * 1000) / 10);
   const waitPcts = AV_DATA.map(d => Math.round(d.waiting / d.starts * 1000) / 10);
-  const completionEst = AV_DATA.map(d => d.starts - d.waiting);
-
-  // Post-update projections
-  const projTraffic = proj(postUpdate.traffic);
-  const projStarts = proj(postUpdate.starts);
-  const projWaiting = proj(postUpdate.waiting);
-  const projFwd = projStarts - projWaiting;
-  const projStartRate = Math.round(projStarts / projTraffic * 1000) / 10;
-  const projWaitPct = Math.round(projWaiting / projStarts * 1000) / 10;
+  const completionRates = AV_DATA.map(d => Math.round(d.submitted / d.starts * 1000) / 10);
 
   // Pre vs post rates
   const preWaitPct = Math.round(preUpdate.waiting / preUpdate.starts * 1000) / 10;
   const postWaitPctVal = Math.round(postUpdate.waiting / postUpdate.starts * 1000) / 10;
-  const preStartRate = Math.round(preUpdate.starts / preUpdate.traffic * 1000) / 10;
-  const postStartRate = Math.round(postUpdate.starts / postUpdate.traffic * 1000) / 10;
+  const preCompRate = Math.round(preUpdate.submitted / preUpdate.starts * 1000) / 10;
+  const postCompRate = Math.round(postUpdate.submitted / postUpdate.starts * 1000) / 10;
+
+  // Jan baseline
+  const janData = AV_DATA.find(d => d.label === 'Jan 26')!;
+  const janCompRate = Math.round(janData.submitted / janData.starts * 1000) / 10;
+  const janWaitPct = Math.round(janData.waiting / janData.starts * 1000) / 10;
 
   // Conversion lag derived
   const lagLabels = CONVERSION_LAG.map(d => d.label);
@@ -136,77 +175,19 @@ export default function AVDiagnostics() {
     return t ? Math.round(d.submissions / t * 1000) / 10 : 0;
   });
 
-  // ── Chart 1: Traffic + Starts + Waiting ─────────────────────────────
-  const nullPad = AV_DATA.map(() => null as number | null);
-  const projTrafficRemainder = Math.max(0, projTraffic - postUpdate.traffic);
-
-  const mainChartData = {
-    labels,
-    datasets: [
-      {
-        type: 'bar' as const, label: 'Web traffic', data: AV_DATA.map(d => d.traffic),
-        backgroundColor: AV_DATA.map(d => d.period === 'post-update' ? 'rgba(58,110,164,0.3)' : 'rgba(58,110,164,0.6)'),
-        borderRadius: 0, yAxisID: 'y', order: 3, stack: 'traffic',
-      },
-      {
-        type: 'bar' as const, label: 'Traffic (projected)',
-        data: [...nullPad.slice(0, -1), projTrafficRemainder],
-        backgroundColor: 'rgba(58,110,164,0.1)', borderWidth: 1, borderColor: 'rgba(58,110,164,0.3)',
-        borderRadius: 4, yAxisID: 'y', order: 3, stack: 'traffic',
-      },
-      {
-        type: 'line' as const, label: 'Submission starts', data: AV_DATA.map(d => d.starts),
-        borderColor: TP.green, backgroundColor: TP.green, borderWidth: 2.5,
-        pointRadius: 5, pointBackgroundColor: TP.green, tension: 0.3, yAxisID: 'y1', order: 1,
-      },
-      {
-        type: 'line' as const, label: 'Starts (projected)',
-        data: [...nullPad.slice(0, -1), projStarts],
-        borderColor: TP.green, backgroundColor: 'transparent', borderWidth: 0,
-        pointRadius: 7, pointBackgroundColor: 'rgba(29,158,117,0.15)',
-        pointBorderColor: TP.green, pointBorderWidth: 2, pointStyle: 'circle', tension: 0, yAxisID: 'y1', order: 1,
-      },
-      {
-        type: 'line' as const, label: 'Waiting / needs info', data: AV_DATA.map(d => d.waiting),
-        borderColor: TP.red, backgroundColor: 'rgba(226,75,74,0.1)', borderWidth: 2.5,
-        pointRadius: 5, pointBackgroundColor: TP.red, fill: true, tension: 0.3, yAxisID: 'y1', order: 0,
-      },
-      {
-        type: 'line' as const, label: 'Waiting (projected)',
-        data: [...nullPad.slice(0, -1), projWaiting],
-        borderColor: TP.red, backgroundColor: 'transparent', borderWidth: 0,
-        pointRadius: 7, pointBackgroundColor: 'rgba(226,75,74,0.15)',
-        pointBorderColor: TP.red, pointBorderWidth: 2, pointStyle: 'circle', tension: 0, yAxisID: 'y1', order: 0,
-      },
-    ],
-  };
-  const mainChartOpts = {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      title: { display: true, text: 'Web traffic vs submission starts vs waiting queue', font: { size: 14, weight: 500 as const }, color: TP.navy },
-      tooltip: { callbacks: { label: (ctx: { dataset: { label: string }; parsed: { y: number } }) => ctx.dataset.label + ': ' + ctx.parsed.y.toLocaleString() } },
-    },
-    scales: {
-      x: { ticks: { autoSkip: false } },
-      y: { position: 'left' as const, title: { display: true, text: 'Web traffic' }, ticks: { callback: (v: number | string) => Math.round(Number(v) / 1000) + 'K' } },
-      y1: { position: 'right' as const, title: { display: true, text: 'Starts / waiting' }, grid: { drawOnChartArea: false }, ticks: { callback: (v: number | string) => Number(v).toLocaleString() } },
-    },
-  };
-
-  // ── Chart 2: Rate trends ────────────────────────────────────────────
+  // ── Chart 1: Completion rate + waiting rate (lines) ──────────────────
   const rateChartData = {
     labels,
     datasets: [
       {
-        label: 'Start rate (traffic → starts)', data: startRates,
-        borderColor: TP.purple, backgroundColor: TP.purple, borderWidth: 2.5,
-        pointRadius: 5, pointBackgroundColor: TP.purple, tension: 0.3, yAxisID: 'y',
+        label: 'Completion rate', data: completionRates,
+        borderColor: TP.green, backgroundColor: 'rgba(29,158,117,0.08)', borderWidth: 2.5,
+        pointRadius: 6, pointBackgroundColor: TP.green, fill: true, tension: 0.3,
       },
       {
-        label: 'Waiting as % of starts', data: waitPcts,
+        label: 'Waiting rate', data: waitPcts,
         borderColor: TP.red, backgroundColor: 'rgba(226,75,74,0.08)', borderWidth: 2.5,
-        pointRadius: 5, pointBackgroundColor: TP.red, borderDash: [6, 3], fill: true, tension: 0.3, yAxisID: 'y1',
+        pointRadius: 6, pointBackgroundColor: TP.red, borderDash: [6, 3], fill: true, tension: 0.3,
       },
     ],
   };
@@ -214,41 +195,113 @@ export default function AVDiagnostics() {
     responsive: true, maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
-      title: { display: true, text: 'Conversion rate vs waiting queue buildup', font: { size: 14, weight: 500 as const }, color: TP.navy },
+      title: { display: true, text: 'Assessment completion rate vs waiting rate', font: { size: 14, weight: 500 as const }, color: TP.navy },
       tooltip: { callbacks: { label: (ctx: { dataset: { label: string }; parsed: { y: number } }) => ctx.dataset.label + ': ' + ctx.parsed.y + '%' } },
     },
     scales: {
       x: { ticks: { autoSkip: false } },
-      y: { position: 'left' as const, title: { display: true, text: 'Start rate %' }, ticks: { callback: (v: number | string) => v + '%' } },
-      y1: { position: 'right' as const, title: { display: true, text: 'Waiting % of starts' }, grid: { drawOnChartArea: false }, ticks: { callback: (v: number | string) => v + '%' } },
+      y: { min: 0, max: 100, ticks: { callback: (v: number | string) => v + '%' } },
     },
   };
 
-  // ── Chart 3: Stacked — forward vs stuck ─────────────────────────────
-  // Show ACTUAL data for May 23–25 (not projected — projection was misleading on 1 day)
-  const fwdData = AV_DATA.map((_, i) => completionEst[i]);
-  const waitData = AV_DATA.map(d => d.waiting);
-  const greenBgs = AV_DATA.map(d => d.partial ? 'rgba(29,158,117,0.25)' : 'rgba(29,158,117,0.7)');
-  const redBgs = AV_DATA.map(d => d.partial ? 'rgba(226,75,74,0.25)' : 'rgba(226,75,74,0.7)');
-  const greenBorders = AV_DATA.map(d => d.partial ? 'rgba(29,158,117,0.6)' : 'rgba(29,158,117,0)');
-  const redBorders = AV_DATA.map(d => d.partial ? 'rgba(226,75,74,0.6)' : 'rgba(226,75,74,0)');
+  // ── Chart 2: Stacked — submitted vs waiting vs other ───────────────
+  const otherData = AV_DATA.map(d => d.starts - d.submitted - d.waiting);
 
   const stackedData = {
     labels, datasets: [
-      { label: 'Moved forward', data: fwdData, backgroundColor: greenBgs, borderColor: greenBorders, borderWidth: 1.5, borderRadius: 0 },
-      { label: 'Stuck waiting', data: waitData, backgroundColor: redBgs, borderColor: redBorders, borderWidth: 1.5, borderRadius: 4 },
+      {
+        label: 'Submitted', data: AV_DATA.map(d => d.submitted),
+        backgroundColor: AV_DATA.map(d => d.partial ? 'rgba(29,158,117,0.25)' : 'rgba(29,158,117,0.7)'),
+        borderColor: AV_DATA.map(d => d.partial ? 'rgba(29,158,117,0.6)' : 'rgba(29,158,117,0)'),
+        borderWidth: 1.5, borderRadius: 0,
+      },
+      {
+        label: 'Waiting (stuck)', data: AV_DATA.map(d => d.waiting),
+        backgroundColor: AV_DATA.map(d => d.partial ? 'rgba(226,75,74,0.25)' : 'rgba(226,75,74,0.7)'),
+        borderColor: AV_DATA.map(d => d.partial ? 'rgba(226,75,74,0.6)' : 'rgba(226,75,74,0)'),
+        borderWidth: 1.5, borderRadius: 0,
+      },
+      {
+        label: 'In pipeline / closed', data: otherData,
+        backgroundColor: AV_DATA.map(d => d.partial ? 'rgba(127,119,221,0.2)' : 'rgba(127,119,221,0.5)'),
+        borderColor: AV_DATA.map(d => d.partial ? 'rgba(127,119,221,0.5)' : 'rgba(127,119,221,0)'),
+        borderWidth: 1.5, borderRadius: 4,
+      },
     ],
   };
   const stackedOpts = {
     responsive: true, maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
-      title: { display: true, text: 'Submission starts: moved forward vs stuck in waiting', font: { size: 14, weight: 500 as const }, color: TP.navy },
+      title: { display: true, text: 'Account outcomes: submitted vs waiting vs in pipeline', font: { size: 14, weight: 500 as const }, color: TP.navy },
       tooltip: { callbacks: { label: (ctx: { dataset: { label: string }; parsed: { y: number } }) => ctx.dataset.label + ': ' + ctx.parsed.y.toLocaleString() } },
     },
     scales: {
       x: { stacked: true, ticks: { autoSkip: false } },
       y: { stacked: true, ticks: { callback: (v: number | string) => Number(v).toLocaleString() } },
+    },
+  };
+
+  // ── Chart 2B: Pipeline funnel (stacked bar) ────────────────────────
+  const funnelLabels = FUNNEL_DATA.map(d => d.label);
+  const funnelChartData = {
+    labels: funnelLabels,
+    datasets: [
+      { label: 'Checked Out', data: FUNNEL_DATA.map(d => d.checkedOut), backgroundColor: 'rgba(29,158,117,0.8)', borderRadius: 0 },
+      { label: 'Checkout Link Sent', data: FUNNEL_DATA.map(d => d.checkout), backgroundColor: 'rgba(58,110,164,0.7)', borderRadius: 0 },
+      { label: 'In Review', data: FUNNEL_DATA.map(d => d.inReview), backgroundColor: 'rgba(127,119,221,0.7)', borderRadius: 0 },
+      { label: 'Waiting (stuck)', data: FUNNEL_DATA.map(d => d.waiting), backgroundColor: 'rgba(226,75,74,0.7)', borderRadius: 0 },
+      { label: 'Closed / Denied', data: FUNNEL_DATA.map(d => d.closed), backgroundColor: 'rgba(156,163,175,0.5)', borderRadius: 0 },
+      { label: 'On Hold', data: FUNNEL_DATA.map(d => d.onHold), backgroundColor: 'rgba(239,159,39,0.5)', borderRadius: 4 },
+    ],
+  };
+  const funnelChartOpts = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      title: { display: true, text: 'Where all 2026 accounts are now (current stage)', font: { size: 14, weight: 500 as const }, color: TP.navy },
+      tooltip: { callbacks: { label: (ctx: { dataset: { label: string }; parsed: { y: number } }) => ctx.dataset.label + ': ' + ctx.parsed.y.toLocaleString() } },
+    },
+    scales: {
+      x: { stacked: true, ticks: { autoSkip: false } },
+      y: { stacked: true, ticks: { callback: (v: number | string) => Number(v).toLocaleString() } },
+    },
+  };
+
+  // ── Chart 2C: May daily starts/waiting/submitted ───────────────────
+  const mayLabels = MAY_DAILY.map(d => d.day.toString());
+  const mayDailyChartData = {
+    labels: mayLabels,
+    datasets: [
+      {
+        type: 'bar' as const, label: 'Submitted', data: MAY_DAILY.map(d => d.submitted),
+        backgroundColor: MAY_DAILY.map(d => d.day >= 23 ? 'rgba(29,158,117,0.35)' : 'rgba(29,158,117,0.7)'),
+        borderColor: MAY_DAILY.map(d => d.day >= 23 ? 'rgba(29,158,117,0.6)' : 'rgba(29,158,117,0)'),
+        borderWidth: 1, borderRadius: 0, stack: 'main', order: 2,
+      },
+      {
+        type: 'bar' as const, label: 'Waiting', data: MAY_DAILY.map(d => d.waiting),
+        backgroundColor: MAY_DAILY.map(d => d.day >= 23 ? 'rgba(226,75,74,0.35)' : 'rgba(226,75,74,0.7)'),
+        borderColor: MAY_DAILY.map(d => d.day >= 23 ? 'rgba(226,75,74,0.6)' : 'rgba(226,75,74,0)'),
+        borderWidth: 1, borderRadius: 0, stack: 'main', order: 2,
+      },
+      {
+        type: 'line' as const, label: 'Starts', data: MAY_DAILY.map(d => d.starts),
+        borderColor: TP.navy, backgroundColor: TP.navy, borderWidth: 2,
+        pointRadius: 3, pointBackgroundColor: TP.navy, tension: 0.3, order: 1,
+      },
+    ],
+  };
+  const mayDailyOpts = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      title: { display: true, text: 'May daily: starts vs submitted vs waiting (lighter = post-update)', font: { size: 14, weight: 500 as const }, color: TP.navy },
+      tooltip: { callbacks: { label: (ctx: { dataset: { label: string }; parsed: { y: number } }) => ctx.dataset.label + ': ' + ctx.parsed.y } },
+    },
+    scales: {
+      x: { stacked: true, title: { display: true, text: 'Day of May' } },
+      y: { stacked: false, ticks: { callback: (v: number | string) => Number(v).toLocaleString() } },
     },
   };
 
@@ -311,80 +364,103 @@ export default function AVDiagnostics() {
       {/* ===== Header ===== */}
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap', marginBottom: 24 }}>
         <h2 style={{ fontSize: 22, fontWeight: 600, color: TP.navy, margin: 0 }}>AV Diagnostics</h2>
-        <span style={{ fontSize: 13, color: '#888' }}>Assessment funnel health — Nov 2025 through May 2026 (split at May 22 update)</span>
+        <span style={{ fontSize: 13, color: '#888' }}>Assessment funnel health — Jan–May 2026 (Salesforce data, split at May 22 update)</span>
       </div>
 
-      {/* ===== Pre vs Post Comparison Cards ===== */}
+      {/* ===== Stat Cards ===== */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 28 }}>
-        <div style={{ background: '#FFF5F5', borderRadius: 10, padding: '14px 16px', border: '1px solid #FECACA' }}>
-          <div style={{ fontSize: 11, color: '#991B1B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Pre-update wait rate</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: '#991B1B' }}>{preWaitPct}%</div>
-          <div style={{ fontSize: 12, color: '#DC2626' }}>{num(preUpdate.waiting)} of {num(preUpdate.starts)} starts</div>
-          <div style={{ fontSize: 11, color: '#B91C1C', marginTop: 2 }}>May 1–22 (22 days)</div>
-        </div>
         <div style={{ background: '#F0FDF4', borderRadius: 10, padding: '14px 16px', border: '1px solid #BBF7D0' }}>
-          <div style={{ fontSize: 11, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Post-update wait rate</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: '#166534' }}>{postWaitPctVal}%</div>
-          <div style={{ fontSize: 12, color: '#15803D' }}>{num(postUpdate.waiting)} of {num(postUpdate.starts)} starts</div>
-          <div style={{ fontSize: 11, color: '#166534', marginTop: 2 }}>May 23–25 ({POST_UPDATE_DAYS_ELAPSED} days)</div>
+          <div style={{ fontSize: 11, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Jan completion rate</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: '#166534' }}>{janCompRate}%</div>
+          <div style={{ fontSize: 12, color: '#15803D' }}>{num(janData.submitted)} of {num(janData.starts)} submitted</div>
+          <div style={{ fontSize: 11, color: '#166534', marginTop: 2 }}>Only {janWaitPct}% stuck in waiting</div>
+        </div>
+        <div style={{ background: '#FFF5F5', borderRadius: 10, padding: '14px 16px', border: '1px solid #FECACA' }}>
+          <div style={{ fontSize: 11, color: '#991B1B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Feb–Apr completion rate</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: '#991B1B' }}>58%</div>
+          <div style={{ fontSize: 12, color: '#DC2626' }}>3,432 of 5,887 submitted</div>
+          <div style={{ fontSize: 11, color: '#B91C1C', marginTop: 2 }}>~40% stuck in waiting (2,424)</div>
         </div>
         <div style={{ background: '#F9FAFB', borderRadius: 10, padding: '14px 16px', border: '1px solid #E5E7EB' }}>
-          <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Same-day rate trend</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: TP.red }}>91% → 67%</div>
-          <div style={{ fontSize: 12, color: '#6B7280' }}>Jan → May pre-update</div>
-          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>Post: 72% same-day (34/47)</div>
+          <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>May pre-update</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: TP.text }}>{preCompRate}%</div>
+          <div style={{ fontSize: 12, color: '#6B7280' }}>{num(preUpdate.submitted)} of {num(preUpdate.starts)} submitted</div>
+          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>{preWaitPct}% waiting (May 1–22)</div>
         </div>
-        <div style={{ background: '#F9FAFB', borderRadius: 10, padding: '14px 16px', border: '1px solid #E5E7EB' }}>
-          <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Post-update submissions</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: TP.green }}>47</div>
-          <div style={{ fontSize: 12, color: '#6B7280' }}>May 23–25 (3 days post-update)</div>
-          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>34 same-day, 13 returning</div>
+        <div style={{ background: '#FFFBEB', borderRadius: 10, padding: '14px 16px', border: '1px solid #FDE68A' }}>
+          <div style={{ fontSize: 11, color: '#92400E', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>May post-update</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: '#92400E' }}>{postCompRate}%</div>
+          <div style={{ fontSize: 12, color: '#92400E' }}>{num(postUpdate.submitted)} of {num(postUpdate.starts)} submitted</div>
+          <div style={{ fontSize: 11, color: '#B45309', marginTop: 2 }}>{postWaitPctVal}% waiting (3 days, too early to judge)</div>
         </div>
       </div>
 
       {/* ===== Trend callout ===== */}
       <div style={{ background: '#FFFBEB', borderRadius: 10, padding: '14px 18px', border: '1px solid #FDE68A', marginBottom: 24 }}>
-        <div style={{ fontWeight: 600, color: '#92400E', fontSize: 14, marginBottom: 4 }}>Assessment update shipped May 22 — tracking before vs after</div>
+        <div style={{ fontWeight: 600, color: '#92400E', fontSize: 14, marginBottom: 4 }}>January was healthy. February broke. It hasn&apos;t recovered.</div>
         <div style={{ fontSize: 13, color: '#78350F', lineHeight: 1.6 }}>
-          From Feb through May 22, the waiting/needs-info rate stayed at 35–44% of starts, meaning more than a third of
-          people who began assessments got stuck and didn&apos;t finish. At the same time, same-day completion dropped from
-          91% in January to 67% by May, and returning submissions (people who came back on a later day to finish) grew from
-          9% to 33%. The update went live May 22. Through 3 days post-update (May 23–25), same-day rate recovered to 72%
-          (34/47) and mean lag dropped from 15.4 days (pre) to 6.1 days (post). Early signal is positive but sample is still small.
+          In January, 90% of people who started an assessment finished it and only 9% got stuck in waiting.
+          Starting in February, completion dropped to ~58% and has stayed there. About 40% of every month&apos;s
+          accounts since February are still sitting in &quot;Waiting — Needs info&quot; with no submission date, meaning
+          they never finished. That&apos;s 3,100+ people across Feb–May. Assessment update shipped May 22 —
+          post-update data ({POST_UPDATE_DAYS_ELAPSED} days) is too early to draw conclusions since recent
+          accounts haven&apos;t had time to move through the pipeline.
         </div>
       </div>
 
-      {/* ===== Chart 1: Main combo ===== */}
+      {/* ===== Chart 1: Completion rate vs waiting rate ===== */}
       <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #E5E7EB', padding: 20, marginBottom: 20 }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(58,110,164,0.6)' }} /> Web traffic</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, background: TP.green, borderRadius: 1 }} /> Submission starts</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, background: TP.red, borderRadius: 1 }} /> Waiting / needs info</span>
-        </div>
-        <div style={{ height: 340 }}>
-          <Bar data={mainChartData as any} options={mainChartOpts as any} />
-        </div>
-      </div>
-
-      {/* ===== Chart 2: Rate trends ===== */}
-      <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #E5E7EB', padding: 20, marginBottom: 20 }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, background: TP.purple, borderRadius: 1 }} /> Start rate (traffic → starts)</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, background: TP.red, borderRadius: 1, borderTop: '1px dashed ' + TP.red }} /> Waiting as % of starts</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, background: TP.green, borderRadius: 1 }} /> Completion rate (submitted / starts)</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, background: TP.red, borderRadius: 1, borderTop: '1px dashed ' + TP.red }} /> Waiting rate (stuck / starts)</span>
         </div>
         <div style={{ height: 280 }}>
           <Line data={rateChartData} options={rateChartOpts as any} />
         </div>
       </div>
 
-      {/* ===== Chart 3: Stacked — forward vs stuck ===== */}
+      {/* ===== Chart 2: Stacked — submitted vs waiting vs other ===== */}
       <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #E5E7EB', padding: 20, marginBottom: 20 }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(29,158,117,0.7)' }} /> Moved forward</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(226,75,74,0.7)' }} /> Stuck in waiting</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(29,158,117,0.7)' }} /> Submitted</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(226,75,74,0.7)' }} /> Waiting (stuck)</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(127,119,221,0.5)' }} /> In pipeline / closed</span>
         </div>
         <div style={{ height: 280 }}>
           <Bar data={stackedData} options={stackedOpts as any} />
+        </div>
+      </div>
+
+      {/* ===== Chart 2B: Full pipeline funnel ===== */}
+      <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #E5E7EB', padding: 20, marginBottom: 20 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(29,158,117,0.8)' }} /> Checked Out</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(58,110,164,0.7)' }} /> Checkout Link</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(127,119,221,0.7)' }} /> In Review</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(226,75,74,0.7)' }} /> Waiting</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(156,163,175,0.5)' }} /> Closed</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(239,159,39,0.5)' }} /> On Hold</span>
+        </div>
+        <div style={{ height: 300 }}>
+          <Bar data={funnelChartData} options={funnelChartOpts as any} />
+        </div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>
+          Jan cohort is mature (130+ days) — most accounts resolved to Checked Out or Closed. Feb–Apr cohorts
+          still have large Waiting blocks that likely won&apos;t convert without re-engagement. May is too early for
+          Checked Out/Closed — accounts are still in Checkout or In Review.
+        </div>
+      </div>
+
+      {/* ===== Chart 2C: May daily ===== */}
+      <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #E5E7EB', padding: 20, marginBottom: 20 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(29,158,117,0.7)' }} /> Submitted</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(226,75,74,0.7)' }} /> Waiting</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, background: TP.navy, borderRadius: 1 }} /> Total starts</span>
+          <span style={{ fontSize: 11, color: '#9CA3AF' }}>(lighter bars = post-update May 23+)</span>
+        </div>
+        <div style={{ height: 280 }}>
+          <Bar data={mayDailyChartData as any} options={mayDailyOpts as any} />
         </div>
       </div>
 
@@ -667,59 +743,52 @@ export default function AVDiagnostics() {
         </div>
       </div>
 
-      {/* ===== AV funnel data table ===== */}
+      {/* ===== Assessment data table ===== */}
       <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #E5E7EB', padding: 20 }}>
-        <h3 style={{ fontSize: 14, fontWeight: 600, color: TP.navy, marginTop: 0, marginBottom: 12 }}>Assessment funnel data</h3>
+        <h3 style={{ fontSize: 14, fontWeight: 600, color: TP.navy, marginTop: 0, marginBottom: 12 }}>Assessment data (Salesforce)</h3>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '2px solid #E5E7EB' }}>
                 <th style={{ textAlign: 'left', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Period</th>
-                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Traffic</th>
                 <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Starts</th>
+                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Submitted</th>
+                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Comp %</th>
                 <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Waiting</th>
-                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Start rate</th>
                 <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Wait %</th>
-                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Moved fwd</th>
+                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Other</th>
               </tr>
             </thead>
             <tbody>
               {AV_DATA.map((d, i) => {
-                const sr = startRates[i];
                 const wp = waitPcts[i];
-                const fwd = completionEst[i];
+                const cr = completionRates[i];
+                const other = d.starts - d.submitted - d.waiting;
                 const isPost = d.period === 'post-update';
                 const isPre = d.period === 'pre-update';
-                const rowBg = isPost ? '#F0FDF4' : isPre ? '#FFF5F5' : undefined;
+                const rowBg = isPost ? '#FFFBEB' : isPre ? '#FFF5F5' : undefined;
                 return (
                   <tr key={d.label} style={{ borderBottom: '1px solid #F3F4F6', background: rowBg }}>
-                    <td style={{ padding: '8px 10px', fontWeight: 600, color: isPost ? '#166534' : isPre ? '#991B1B' : TP.navy }}>
+                    <td style={{ padding: '8px 10px', fontWeight: 600, color: isPost ? '#92400E' : isPre ? '#991B1B' : TP.navy }}>
                       {d.label}{d.partial ? ' *' : ''}
                     </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>{num(d.traffic)}</td>
                     <td style={{ padding: '8px 10px', textAlign: 'right' }}>{num(d.starts)}</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>{num(d.waiting)}</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>{sr}%</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 600, color: TP.green }}>{num(d.submitted)}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 600, color: cr >= 80 ? TP.green : cr < 60 ? TP.red : TP.text }}>{cr}%</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: TP.red }}>{num(d.waiting)}</td>
                     <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 600, color: wp > 30 ? TP.red : TP.text }}>{wp}%</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>{num(fwd)}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#6B7280' }}>{num(other)}</td>
                   </tr>
                 );
               })}
-              <tr style={{ borderBottom: '1px solid #F3F4F6', background: '#F0F9FF' }}>
-                <td style={{ padding: '8px 10px', fontWeight: 500, fontStyle: 'italic', color: '#3A6EA4' }}>May 23–25 proj</td>
-                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>{num(projTraffic)}</td>
-                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>{num(projStarts)}</td>
-                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>{num(projWaiting)}</td>
-                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>{projStartRate}%</td>
-                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>{projWaitPct}%</td>
-                <td style={{ padding: '8px 10px', textAlign: 'right', color: '#3A6EA4', fontStyle: 'italic' }}>{num(projFwd)}</td>
-              </tr>
             </tbody>
           </table>
         </div>
         <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>
-          May split at assessment update (May 22). Pre-update = 22 days. Post-update = {POST_UPDATE_DAYS_ELAPSED} days elapsed, projected to {POST_UPDATE_DAYS_TOTAL} days.
-          Wait % above 30% highlighted red.
+          Source: Salesforce &quot;Waiting on Info Ratios&quot; export, May 25 2026. &quot;Starts&quot; = Person Account creations.
+          &quot;Submitted&quot; = have a Submission Date. &quot;Waiting&quot; = current stage is WAITING (never finished).
+          &quot;Other&quot; = in pipeline, closed, denied, or on hold.
+          * May 23–25 is {POST_UPDATE_DAYS_ELAPSED} days post-update — recent accounts haven&apos;t had time to mature.
         </div>
       </div>
     </div>
