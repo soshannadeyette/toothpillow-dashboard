@@ -289,6 +289,7 @@ export default function AVDiagnostics() {
         type: 'line' as const, label: 'Starts', data: MAY_DAILY.map(d => d.starts),
         borderColor: TP.navy, backgroundColor: TP.navy, borderWidth: 2,
         pointRadius: 3, pointBackgroundColor: TP.navy, tension: 0.3, order: 1,
+        yAxisID: 'y1',
       },
     ],
   };
@@ -301,7 +302,8 @@ export default function AVDiagnostics() {
     },
     scales: {
       x: { stacked: true, title: { display: true, text: 'Day of May' } },
-      y: { stacked: false, ticks: { callback: (v: number | string) => Number(v).toLocaleString() } },
+      y: { stacked: true, ticks: { callback: (v: number | string) => Number(v).toLocaleString() } },
+      y1: { display: false, stacked: false, min: 0, max: 90 },
     },
   };
 
