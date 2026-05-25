@@ -120,33 +120,48 @@ const GSC_WEEKLY = [
   { week: '2026-05-18', clicks: 2316, impressions: 9288, ctr: 24.9, position: 10.2 },
 ];
 
-// Daily GSC data — May 2026 (through May 23; GSC has ~3-day lag)
-// Source: Google Search Console, verified May 25, 2026
-const GSC_DAILY_MAY_2026: Record<number, { clicks: number; impressions: number }> = {
-  1: { clicks: 339, impressions: 1522 },
-  2: { clicks: 218, impressions: 1003 },
-  3: { clicks: 202, impressions: 907 },
-  4: { clicks: 299, impressions: 2293 },
-  5: { clicks: 317, impressions: 3915 },
-  6: { clicks: 343, impressions: 5614 },
-  7: { clicks: 322, impressions: 1831 },
-  8: { clicks: 305, impressions: 1259 },
-  9: { clicks: 186, impressions: 877 },
-  10: { clicks: 179, impressions: 973 },
-  11: { clicks: 340, impressions: 1455 },
-  12: { clicks: 389, impressions: 1397 },
-  13: { clicks: 342, impressions: 1367 },
-  14: { clicks: 373, impressions: 3003 },
-  15: { clicks: 262, impressions: 1250 },
-  16: { clicks: 176, impressions: 900 },
-  17: { clicks: 203, impressions: 905 },
-  18: { clicks: 311, impressions: 1339 },
-  19: { clicks: 337, impressions: 1358 },
-  20: { clicks: 330, impressions: 1551 },
-  21: { clicks: 387, impressions: 1881 },
-  22: { clicks: 487, impressions: 1600 },
-  23: { clicks: 464, impressions: 1559 },
+// Full-year daily GSC data — Jan 1 to May 23, 2026 (143 days)
+// Source: Google Search Console DAYS view, extracted May 25, 2026
+// Format: [day, clicks, impressions]
+const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
+  Jan: [
+    [1,254,1532],[2,276,2115],[3,245,1477],[4,258,1646],[5,382,2299],[6,472,2277],[7,459,2482],
+    [8,439,8333],[9,391,13023],[10,242,11158],[11,246,9091],[12,400,10680],[13,451,12374],[14,466,2493],
+    [15,624,9788],[16,389,12479],[17,249,10079],[18,286,10651],[19,391,11432],[20,532,12448],[21,550,13664],
+    [22,361,7174],[23,302,2087],[24,213,1718],[25,235,1760],[26,328,3489],[27,394,10677],[28,788,13860],
+    [29,513,8228],[30,406,1936],[31,268,1310],
+  ],
+  Feb: [
+    [1,248,1399],[2,400,1633],[3,387,5794],[4,414,9045],[5,543,8944],[6,393,3057],[7,269,1252],
+    [8,209,1223],[9,375,1811],[10,381,1679],[11,357,1478],[12,347,1632],[13,264,1692],[14,218,1248],
+    [15,187,1151],[16,403,1711],[17,524,1906],[18,499,2113],[19,422,1907],[20,351,1938],[21,234,1190],
+    [22,228,1381],[23,551,2136],[24,571,2030],[25,555,2089],[26,547,2050],[27,404,1881],[28,298,1174],
+  ],
+  Mar: [
+    [1,222,945],[2,412,1665],[3,488,1829],[4,451,1668],[5,364,1371],[6,349,1483],[7,238,998],
+    [8,185,1114],[9,528,1704],[10,579,1827],[11,460,1439],[12,467,1486],[13,431,1571],[14,285,1009],
+    [15,313,1135],[16,508,1481],[17,491,1702],[18,479,3412],[19,405,5134],[20,366,4292],[21,244,2395],
+    [22,208,3703],[23,383,1335],[24,403,1396],[25,494,3372],[26,505,5154],[27,676,4298],[28,340,3524],
+    [29,301,3957],[30,545,3506],[31,481,4364],
+  ],
+  Apr: [
+    [1,453,5600],[2,346,3610],[3,252,3468],[4,180,2681],[5,174,1719],[6,304,4381],[7,360,1388],
+    [8,376,3655],[9,427,2065],[10,305,3816],[11,828,5014],[12,407,5590],[13,294,2728],[14,383,1415],
+    [15,377,1416],[16,342,1265],[17,545,5042],[18,300,4172],[19,296,4980],[20,427,5550],[21,382,2953],
+    [22,341,1284],[23,332,1129],[24,311,3957],[25,158,2174],[26,191,3764],[27,340,3772],[28,721,6704],
+    [29,619,7218],[30,409,3248],
+  ],
+  May: [
+    [1,339,1522],[2,218,1003],[3,202,907],[4,299,2293],[5,317,3915],[6,343,5614],[7,322,1831],
+    [8,305,1259],[9,186,877],[10,179,973],[11,337,1412],[12,389,1397],[13,342,1367],[14,373,3003],
+    [15,262,1250],[16,176,900],[17,203,905],[18,311,1339],[19,337,1358],[20,330,1551],[21,387,1881],
+    [22,487,1600],[23,464,1559],
+  ],
 };
+
+// Derive May-only record for backward compat
+const GSC_DAILY_MAY_2026: Record<number, { clicks: number; impressions: number }> = {};
+for (const [d, c, i] of GSC_DAILY_2026.May) { GSC_DAILY_MAY_2026[d] = { clicks: c, impressions: i }; }
 
 /* ════════════════════════════════════════════
    KEYWORD MOVERS — Non-branded keywords showing movement
@@ -475,6 +490,121 @@ export default function OrganicGrowth() {
     },
   }), []);
 
+  // Full-year daily chart (Jan 1 – May 23, 2026)
+  const fullYearDaily = useMemo(() => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May'] as const;
+    const labels: string[] = [];
+    const clicks: number[] = [];
+    const impressions: number[] = [];
+    const monthBoundaries: number[] = [];
+    let idx = 0;
+    for (const mo of months) {
+      const days = GSC_DAILY_2026[mo];
+      if (idx > 0) monthBoundaries.push(idx - 0.5);
+      for (const [d, c, imp] of days) {
+        labels.push(`${mo} ${d}`);
+        clicks.push(c);
+        impressions.push(imp);
+        idx++;
+      }
+    }
+    // Compute monthly averages for overlay
+    const monthlyAvgs: { start: number; end: number; avg: number; label: string }[] = [];
+    let offset = 0;
+    for (const mo of months) {
+      const days = GSC_DAILY_2026[mo];
+      const totalClicks = days.reduce((s, [, c]) => s + c, 0);
+      const avg = Math.round(totalClicks / days.length);
+      monthlyAvgs.push({ start: offset, end: offset + days.length - 1, avg, label: mo });
+      offset += days.length;
+    }
+    // 7-day moving average
+    const ma7: (number | null)[] = clicks.map((_, i) => {
+      if (i < 6) return null;
+      const sum = clicks.slice(i - 6, i + 1).reduce((a, b) => a + b, 0);
+      return Math.round(sum / 7);
+    });
+    return { labels, clicks, impressions, monthBoundaries, monthlyAvgs, ma7 };
+  }, []);
+
+  const fullYearChartData = useMemo(() => ({
+    labels: fullYearDaily.labels,
+    datasets: [
+      {
+        label: 'Daily Clicks',
+        data: fullYearDaily.clicks,
+        type: 'bar' as const,
+        backgroundColor: `${TP.blue}60`,
+        borderColor: TP.blue,
+        borderWidth: 0,
+        borderRadius: 1,
+        yAxisID: 'y',
+        order: 3,
+      },
+      {
+        label: '7-Day Moving Avg',
+        data: fullYearDaily.ma7,
+        type: 'line' as const,
+        borderColor: TP.red,
+        backgroundColor: 'transparent',
+        pointRadius: 0,
+        borderWidth: 2.5,
+        tension: 0.3,
+        yAxisID: 'y',
+        order: 1,
+        spanGaps: true,
+      },
+    ],
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), []);
+
+  const fullYearAnnotations: Record<string, object> = {};
+  fullYearDaily.monthBoundaries.forEach((x, i) => {
+    fullYearAnnotations[`mo${i}`] = {
+      type: 'line', xMin: x, xMax: x,
+      borderColor: '#ddd', borderWidth: 1, borderDash: [4, 4],
+    };
+  });
+  // SEO launch line (May 19 = index within the full dataset)
+  const seoIdx = fullYearDaily.labels.indexOf('May 19');
+  if (seoIdx >= 0) {
+    fullYearAnnotations['seoLine'] = {
+      type: 'line', xMin: seoIdx - 0.5, xMax: seoIdx - 0.5,
+      borderColor: TP.red, borderWidth: 2, borderDash: [6, 4],
+      label: { display: true, content: 'SEO Launch', position: 'start', font: { size: 9 }, color: TP.red },
+    };
+  }
+  // Month labels
+  fullYearDaily.monthlyAvgs.forEach((m, i) => {
+    fullYearAnnotations[`moLabel${i}`] = {
+      type: 'label',
+      xValue: Math.floor((m.start + m.end) / 2),
+      yValue: Math.max(...fullYearDaily.clicks) * 0.95,
+      content: [m.label],
+      font: { size: 11, weight: 'bold' as const },
+      color: '#bbb',
+    };
+  });
+
+  const fullYearChartOptions = useMemo(() => ({
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
+      tooltip: {
+        callbacks: {
+          label: (ctx: { datasetIndex: number; parsed: { y: number } }) =>
+            ctx.datasetIndex === 0 ? `${ctx.parsed.y} clicks` : `${ctx.parsed.y} avg`,
+        },
+      },
+      annotation: { annotations: fullYearAnnotations },
+    },
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: 'Clicks', font: { size: 11 } }, grid: { color: '#f0f0f0' } },
+      x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 15, font: { size: 9 } } },
+    },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), []);
+
   // Online Search submissions chart
   const subMonths = Object.keys(ONLINE_SEARCH_SUBMISSIONS).sort();
   const onlineSearchChartData = useMemo(() => ({
@@ -684,7 +814,29 @@ export default function OrganicGrowth() {
         </div>
       </div>
 
-      {/* ═══════ SECTION 7B: DAILY GSC — MAY 2026 ═══════ */}
+      {/* ═══════ SECTION 7B: FULL-YEAR DAILY CLICKS ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Daily Search Clicks — 2026 Year to Date</h3>
+        <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Every day from Jan 1 to May 23. Red line is the 7-day moving average. Dashed vertical lines separate months.</p>
+        <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+          {fullYearDaily.monthlyAvgs.map(m => (
+            <div key={m.label} style={{ background: '#f0f9ff', borderRadius: 8, padding: '6px 12px', border: '1px solid #bae6fd', fontSize: 12, minWidth: 90 }}>
+              <div style={{ color: '#888', fontSize: 10 }}>{m.label} avg</div>
+              <div style={{ fontWeight: 700, color: TP.navy }}>{m.avg}/day</div>
+            </div>
+          ))}
+          <div style={{ background: '#f0fdf4', borderRadius: 8, padding: '6px 12px', border: `1px solid ${TP.green}50`, fontSize: 12, minWidth: 90 }}>
+            <div style={{ color: '#888', fontSize: 10 }}>YTD Total</div>
+            <div style={{ fontWeight: 700, color: TP.green }}>{fmtK(fullYearDaily.clicks.reduce((a, b) => a + b, 0))}</div>
+          </div>
+        </div>
+        <div style={{ height: 320 }}>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <Bar data={fullYearChartData as any} options={fullYearChartOptions as any} />
+        </div>
+      </div>
+
+      {/* ═══════ SECTION 7C: DAILY GSC — MAY 2026 ═══════ */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
         <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Daily Search Performance — May 2026</h3>
         <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Day-by-day clicks and impressions from Google Search Console. Red dashed line marks SEO program launch (May 19). Data through May 23 (GSC has a ~3-day processing delay).</p>
