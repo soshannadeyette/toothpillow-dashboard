@@ -294,25 +294,6 @@ export default function AVDiagnostics() {
       },
     ],
   };
-  // Plugin to render completion % below each bar
-  const mayDailyCompletionPlugin = {
-    id: 'completionLabels',
-    afterDraw(chart: { ctx: CanvasRenderingContext2D; scales: Record<string, { getPixelForValue: (v: number) => number; bottom: number }>; }) {
-      const { ctx } = chart;
-      const xScale = chart.scales['x'];
-      const yBottom = xScale.bottom;
-      ctx.save();
-      ctx.textAlign = 'center';
-      ctx.font = '10px Arial';
-      MAY_DAILY.forEach((d, i) => {
-        const rate = Math.round(d.submitted / d.starts * 100);
-        const x = xScale.getPixelForValue(i);
-        ctx.fillStyle = rate >= 50 ? '#059669' : '#DC2626';
-        ctx.fillText(rate + '%', x, yBottom + 28);
-      });
-      ctx.restore();
-    },
-  };
   const mayDailyOpts = {
     responsive: true, maintainAspectRatio: false,
     plugins: {
@@ -320,9 +301,8 @@ export default function AVDiagnostics() {
       title: { display: true, text: 'May daily: starts vs submitted vs waiting (lighter = post-update)', font: { size: 14, weight: 500 as const }, color: TP.navy },
       tooltip: { callbacks: { label: (ctx: { dataset: { label: string }; parsed: { y: number } }) => ctx.dataset.label + ': ' + ctx.parsed.y } },
     },
-    layout: { padding: { bottom: 20 } },
     scales: {
-      x: { stacked: true, title: { display: true, text: 'Day of May', padding: { top: 16 } } },
+      x: { stacked: true, title: { display: true, text: 'Day of May' } },
       y: { stacked: true, ticks: { callback: (v: number | string) => Number(v).toLocaleString() } },
       y1: { display: false, stacked: false, min: 0, max: 90 },
     },
@@ -483,8 +463,20 @@ export default function AVDiagnostics() {
           <span style={{ fontSize: 11, color: '#9CA3AF' }}>(lighter bars = post-update May 23+)</span>
         </div>
         <div style={{ height: 280 }}>
-          <Bar data={mayDailyChartData as any} options={mayDailyOpts as any} plugins={[mayDailyCompletionPlugin as any]} />
+          <Bar data={mayDailyChartData as any} options={mayDailyOpts as any} />
         </div>
+        {/* Completion rate row below chart */}
+        <div style={{ display: 'flex', marginTop: 4, paddingLeft: 38, paddingRight: 8 }}>
+          {MAY_DAILY.map((d, i) => {
+            const rate = Math.round(d.submitted / d.starts * 100);
+            return (
+              <div key={i} style={{ flex: 1, textAlign: 'center', fontSize: 9, fontWeight: 700, fontFamily: 'monospace', color: rate >= 50 ? '#059669' : '#DC2626' }}>
+                {rate}%
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ textAlign: 'center', fontSize: 10, color: '#9CA3AF', marginTop: 2 }}>completion rate (submitted ÷ starts)</div>
       </div>
 
       {/* ===== NEW SECTION: Conversion Lag ===== */}
