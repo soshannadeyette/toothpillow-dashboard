@@ -83,8 +83,10 @@ const MAY_DAILY = [
   { day: 20, starts: 46, waiting: 26, submitted: 20 },
   { day: 21, starts: 41, waiting: 22, submitted: 19 },
   { day: 22, starts: 76, waiting: 48, submitted: 28 },
-  { day: 23, starts: 68, waiting: 48, submitted: 20 },
-  { day: 24, starts: 41, waiting: 27, submitted: 14 },
+  { day: 23, starts: 68, waiting: 47, submitted: 21 },
+  { day: 24, starts: 41, waiting: 25, submitted: 16 },
+  { day: 25, starts: 38, waiting: 19, submitted: 19 },
+  { day: 26, starts: 24, waiting: 11, submitted: 12 },
 ];
 
 // ── Conversion lag data (source of truth) ─────────────────────────────
