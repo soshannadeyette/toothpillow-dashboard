@@ -511,6 +511,129 @@ export default function DailyTracker() {
         </div>
       )}
 
+      {/* Website Traffic & Conversion */}
+      {entries.length > 0 && entries.some(e => e.visitors > 0) && (() => {
+        const daysWithTraffic = entries.filter(e => e.visitors > 0);
+        const avgVisitors = daysWithTraffic.length > 0
+          ? Math.round(daysWithTraffic.reduce((s, e) => s + e.visitors, 0) / daysWithTraffic.length)
+          : 0;
+        const projectedVisitors = avgVisitors * daysInMonth;
+        const dailyConvRates = entries.map(e => {
+          if (e.visitors <= 0) return 0;
+          const total = e.total ?? e.online + e.hybrid + e.prime;
+          return parseFloat(((total / e.visitors) * 100).toFixed(2));
+        });
+        const avgConvRate = daysWithTraffic.length > 0
+          ? (daysWithTraffic.reduce((s, e) => {
+              const total = e.total ?? e.online + e.hybrid + e.prime;
+              return s + (e.visitors > 0 ? (total / e.visitors) * 100 : 0);
+            }, 0) / daysWithTraffic.length).toFixed(2)
+          : '0';
+        const bestDay = daysWithTraffic.reduce((best, e) =>
+          e.visitors > (best?.visitors ?? 0) ? e : best, daysWithTraffic[0]);
+        const bestDayLabel = bestDay ? new Date(bestDay.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+
+        return (
+          <>
+            {/* Traffic stat cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.darkPurple}` }}>
+                <div className="text-xl font-bold" style={{ color: TP.darkPurple }}>{totalVisitors.toLocaleString()}</div>
+                <div className="text-sm text-gray-500">Total Visitors</div>
+                <div className="text-xs text-gray-400 mt-1">{daysWithTraffic.length} of {daysTracked} days tracked</div>
+              </div>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.darkPurple}` }}>
+                <div className="text-xl font-bold" style={{ color: TP.darkPurple }}>{avgVisitors.toLocaleString()}</div>
+                <div className="text-sm text-gray-500">Avg Daily Visitors</div>
+                <div className="text-xs text-gray-400 mt-1">Projected: {projectedVisitors.toLocaleString()}/mo</div>
+              </div>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.green}` }}>
+                <div className="text-xl font-bold" style={{ color: TP.green }}>{avgConvRate}%</div>
+                <div className="text-sm text-gray-500">Avg Conversion Rate</div>
+                <div className="text-xs text-gray-400 mt-1">Submissions / Visitors</div>
+              </div>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.bubblegum}` }}>
+                <div className="text-xl font-bold" style={{ color: TP.navy }}>{bestDay ? bestDay.visitors.toLocaleString() : '--'}</div>
+                <div className="text-sm text-gray-500">Best Day</div>
+                <div className="text-xs text-gray-400 mt-1">{bestDayLabel}</div>
+              </div>
+            </div>
+
+            {/* Traffic + Conversion chart */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+              <h3 className="text-sm font-bold text-gray-700 mb-3">Daily Website Traffic & Conversion Rate</h3>
+              <div style={{ height: 340 }}>
+                <Bar
+                  data={{
+                    labels: breakdownLabels,
+                    datasets: [
+                      {
+                        label: 'Visitors',
+                        data: entries.map(e => e.visitors),
+                        backgroundColor: `${TP.darkPurple}55`,
+                        borderColor: TP.darkPurple,
+                        borderWidth: 1,
+                        borderRadius: 3,
+                        yAxisID: 'y',
+                        order: 2,
+                      },
+                      {
+                        label: 'Submissions',
+                        data: entries.map(e => e.total ?? e.online + e.hybrid + e.prime),
+                        backgroundColor: `${TP.blue}55`,
+                        borderColor: TP.blue,
+                        borderWidth: 1,
+                        borderRadius: 3,
+                        yAxisID: 'y',
+                        order: 3,
+                      },
+                      {
+                        label: 'Conversion %',
+                        data: dailyConvRates,
+                        type: 'line',
+                        borderColor: TP.green,
+                        backgroundColor: 'transparent',
+                        pointRadius: 3,
+                        pointBackgroundColor: TP.green,
+                        borderWidth: 2.5,
+                        tension: 0.3,
+                        yAxisID: 'y1',
+                        order: 1,
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      } as any,
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
+                      tooltip: {
+                        callbacks: {
+                          label: (ctx: { datasetIndex: number; parsed: { y: number }; dataset: { label?: string } }) => {
+                            if (ctx.datasetIndex === 2) return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}%`;
+                            return `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`;
+                          },
+                        },
+                      },
+                    },
+                    scales: {
+                      y: { beginAtZero: true, position: 'left' as const, title: { display: true, text: 'Count', font: { size: 11 } }, grid: { color: '#f0f0f0' } },
+                      y1: { beginAtZero: true, position: 'right' as const, title: { display: true, text: 'Conv %', font: { size: 11 } }, ticks: { callback: (v: number | string) => `${v}%` }, grid: { display: false } },
+                      x: { grid: { display: false } },
+                    },
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  } as any}
+                />
+              </div>
+              <div className="text-xs text-gray-400 mt-2">
+                Visitors from GA4. Conversion rate = total submissions / visitors. Days without visitor data are excluded from averages.
+              </div>
+            </div>
+          </>
+        );
+      })()}
+
       {/* Sub-totals by type + Conversion */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.blue}` }}>
@@ -566,19 +689,20 @@ export default function DailyTracker() {
               <th className="px-3 py-2 font-medium text-right">Prime</th>
               <th className="px-3 py-2 font-medium text-right">Total</th>
               <th className="px-3 py-2 font-medium text-right">Visitors</th>
+              <th className="px-3 py-2 font-medium text-right">Conv %</th>
               <th className="px-3 py-2 font-medium text-right">Income</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7} className="px-3 py-8 text-center text-gray-400">
+                <td colSpan={8} className="px-3 py-8 text-center text-gray-400">
                   Loading...
                 </td>
               </tr>
             ) : entries.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-3 py-8 text-center text-gray-400">
+                <td colSpan={8} className="px-3 py-8 text-center text-gray-400">
                   No entries yet
                 </td>
               </tr>
@@ -601,6 +725,9 @@ export default function DailyTracker() {
                     <td className="px-3 py-2 border-t border-gray-100 text-right" style={{ color: TP.red }}>{e.prime}</td>
                     <td className="px-3 py-2 border-t border-gray-100 text-right font-medium">{total}</td>
                     <td className="px-3 py-2 border-t border-gray-100 text-right">{e.visitors.toLocaleString()}</td>
+                    <td className="px-3 py-2 border-t border-gray-100 text-right" style={{ color: e.visitors > 0 ? TP.green : '#ccc' }}>
+                      {e.visitors > 0 ? `${((total / e.visitors) * 100).toFixed(1)}%` : '--'}
+                    </td>
                     <td className="px-3 py-2 border-t border-gray-100 text-right">${e.income}</td>
                   </tr>
                 );
@@ -614,6 +741,7 @@ export default function DailyTracker() {
                 <td className="px-3 py-2 border-t border-gray-200 text-right" style={{ color: TP.red }}>{totalPrime}</td>
                 <td className="px-3 py-2 border-t border-gray-200 text-right">{totalSubmissions}</td>
                 <td className="px-3 py-2 border-t border-gray-200 text-right">{totalVisitors.toLocaleString()}</td>
+                <td className="px-3 py-2 border-t border-gray-200 text-right" style={{ color: TP.green }}>{convRate}%</td>
                 <td className="px-3 py-2 border-t border-gray-200 text-right">${totalIncome}</td>
               </tr>
             )}
