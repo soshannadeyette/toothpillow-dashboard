@@ -98,8 +98,8 @@ const CONVERSION_LAG = [
   { label: 'Feb 26',    submissions: 1208, sameDay: 992, within7d: 1166, returning: 216, medianLag: 0, meanLag: 3.2  },
   { label: 'Mar 26',    submissions: 1287, sameDay: 963, within7d: 1175, returning: 324, medianLag: 0, meanLag: 7.9  },
   { label: 'Apr 26',    submissions: 967,  sameDay: 685, within7d: 810,  returning: 282, medianLag: 0, meanLag: 17.9 },
-  { label: 'May 1–22',  submissions: 579,  sameDay: 387, within7d: 513,  returning: 192, medianLag: 0, meanLag: 15.4 },
-  { label: 'May 23–31', submissions: 47,   sameDay: 34,  within7d: 44,   returning: 13,  medianLag: 0, meanLag: 6.1  },
+  { label: 'May 1–22',  submissions: 527,  sameDay: 390, within7d: 516,  returning: 137, medianLag: 0, meanLag: 0.3  },
+  { label: 'May 23–31', submissions: 68,   sameDay: 63,  within7d: 68,   returning: 5,   medianLag: 0, meanLag: 0.1  },
 ];
 
 // Traffic for conversion rate calc (matches AV_DATA where available)
@@ -116,31 +116,33 @@ const LAG_DISTRIBUTION = [
   { label: 'Feb 26',   total: 1208, buckets: [992, 77, 55, 42, 18,  8, 16] },
   { label: 'Mar 26',   total: 1287, buckets: [963, 97, 57, 58, 44, 30, 38] },
   { label: 'Apr 26',   total: 967,  buckets: [685, 55, 39, 31, 21, 35, 101] },
-  { label: 'May 1–22',  total: 579,  buckets: [387, 62, 36, 28, 16,  7, 43] },
-  { label: 'May 23–31', total: 47,   buckets: [ 34,  6,  4,  0,  0,  1,  2] },
+  { label: 'May 1–22',  total: 527,  buckets: [390, 64, 42, 20,  9,  2,  0] },
+  { label: 'May 23–31', total: 68,   buckets: [ 63,  3,  2,  0,  0,  0,  0] },
 ];
 
 // ── Weekly cohort completion curves (source of truth) ────────────────
 // Created-date cohorts: what % completed by day 0, 1, 3, 7
 const COHORT_DATA = [
-  { label: 'May 1–7',   n: 170, sameDay: 77.6, within1d: 89.4, within3d: 94.7, within7d: 97.1 },
-  { label: 'May 8–14',  n: 162, sameDay: 71.0, within1d: 85.2, within3d: 91.4, within7d: 98.1 },
-  { label: 'May 15–21', n: 161, sameDay: 74.5, within1d: 85.7, within3d: 97.5, within7d: 100.0 },
-  { label: 'May 22–28', n: 46,  sameDay: 89.1, within1d: 100.0, within3d: 100.0, within7d: 100.0 },
+  { label: 'May 1–7',   n: 172, sameDay: 77.9, within1d: 89.5, within3d: 94.8, within7d: 97.1 },
+  { label: 'May 8–14',  n: 165, sameDay: 70.3, within1d: 84.2, within3d: 90.3, within7d: 97.0 },
+  { label: 'May 15–21', n: 162, sameDay: 74.1, within1d: 85.2, within3d: 96.3, within7d: 99.4 },
+  { label: 'May 22–28', n: 96,  sameDay: 86.5, within1d: 95.8, within3d: 100.0, within7d: 100.0 },
 ];
 
-// ── Daily cohorts around update (May 19–23) ──────────────────────────
+// ── Daily cohorts around update (May 19–26) ──────────────────────────
 const DAILY_COHORTS = [
   { day: 'May 19', n: 29, sameDay: 22, d1: 4, d2_3: 3, d4_7: 0 },
   { day: 'May 20', n: 20, sameDay: 16, d1: 1, d2_3: 3, d4_7: 0 },
-  { day: 'May 21', n: 20, sameDay: 15, d1: 3, d2_3: 2, d4_7: 0 },
-  { day: 'May 22', n: 25, sameDay: 20, d1: 5, d2_3: 0, d4_7: 0 },
-  { day: 'May 23', n: 29, sameDay: 20, d1: 4, d2_3: 3, d4_7: 0 },
-  { day: 'May 24', n: 17, sameDay: 14, d1: 2, d2_3: 1, d4_7: 0 },
+  { day: 'May 21', n: 19, sameDay: 15, d1: 3, d2_3: 1, d4_7: 0 },
+  { day: 'May 22', n: 28, sameDay: 20, d1: 6, d2_3: 2, d4_7: 0 },
+  { day: 'May 23', n: 21, sameDay: 20, d1: 0, d2_3: 1, d4_7: 0 },
+  { day: 'May 24', n: 16, sameDay: 14, d1: 1, d2_3: 1, d4_7: 0 },
+  { day: 'May 25', n: 19, sameDay: 17, d1: 2, d2_3: 0, d4_7: 0 },
+  { day: 'May 26', n: 12, sameDay: 12, d1: 0, d2_3: 0, d4_7: 0 },
 ];
 
 // ── Post-update tracking ────────────────────────────────────────────
-const POST_UPDATE_DAYS_ELAPSED = 3; // data through 5/25
+const POST_UPDATE_DAYS_ELAPSED = 4; // data through 5/26
 
 function num(v: number): string { return v.toLocaleString(); }
 function pct(v: number, t: number): string { return t > 0 ? (v / t * 100).toFixed(1) + '%' : '--'; }
@@ -538,7 +540,7 @@ export default function AVDiagnostics() {
             </tbody>
           </table>
         </div>
-        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* May 23–31 = {POST_UPDATE_DAYS_ELAPSED} days post-update. 13 of 47 submissions were returning (created before May 23).</div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* May 23–31 = {POST_UPDATE_DAYS_ELAPSED} days post-update. 5 of 68 submissions were returning (created before May 23).</div>
       </div>
 
       {/* ===== NEW: Lag Distribution ===== */}
@@ -693,7 +695,7 @@ export default function AVDiagnostics() {
 
       {/* ===== NEW: Daily Cohorts Around Update ===== */}
       <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #E5E7EB', padding: 20, marginBottom: 20 }}>
-        <h3 style={{ fontSize: 14, fontWeight: 600, color: TP.navy, marginTop: 0, marginBottom: 4 }}>Daily cohorts around update (May 19–23)</h3>
+        <h3 style={{ fontSize: 14, fontWeight: 600, color: TP.navy, marginTop: 0, marginBottom: 4 }}>Daily cohorts around update (May 19–26)</h3>
         <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 12 }}>
           Day-by-day view of how quickly each day&apos;s new accounts completed. May 22 = update day, May 23 = first full post-update day.
         </div>
@@ -740,7 +742,7 @@ export default function AVDiagnostics() {
           </table>
         </div>
         <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>
-          Post-update days (May 23–24) show 69–82% same-day completion (34 of 46 same-day). Stronger than the
+          Post-update days (May 23–26) show 82–100% same-day completion (63 of 68 same-day). Stronger than the
           pre-update trend (67%). Track through end of May to confirm sustained improvement.
         </div>
       </div>
