@@ -42,7 +42,7 @@ const AV_DATA = [
   { label: 'Mar 26', month: 3,  year: 2026, traffic: 39218, starts: 2263, waiting: 967, submitted: 1285, partial: false, period: 'full' as const },
   { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1431, waiting: 569, submitted: 854,  partial: false, period: 'full' as const },
   { label: 'May 1–22', month: 5, year: 2026, traffic: 21897, starts: 1038, waiting: 509, submitted: 527, partial: false, period: 'pre-update' as const },
-  { label: 'May 23–26', month: 5,  year: 2026, traffic: 1808,  starts: 171,  waiting: 102,  submitted: 68,  partial: true,  period: 'post-update' as const },
+  { label: 'May 23–31', month: 5,  year: 2026, traffic: 1808,  starts: 171,  waiting: 102,  submitted: 68,  partial: true,  period: 'post-update' as const },
 ];
 
 // ── Full pipeline funnel by month (source of truth) ──────────────────
@@ -97,13 +97,13 @@ const CONVERSION_LAG = [
   { label: 'Mar 26',    submissions: 1287, sameDay: 963, within7d: 1175, returning: 324, medianLag: 0, meanLag: 7.9  },
   { label: 'Apr 26',    submissions: 967,  sameDay: 685, within7d: 810,  returning: 282, medianLag: 0, meanLag: 17.9 },
   { label: 'May 1–22',  submissions: 579,  sameDay: 387, within7d: 513,  returning: 192, medianLag: 0, meanLag: 15.4 },
-  { label: 'May 23–25', submissions: 47,   sameDay: 34,  within7d: 44,   returning: 13,  medianLag: 0, meanLag: 6.1  },
+  { label: 'May 23–31', submissions: 47,   sameDay: 34,  within7d: 44,   returning: 13,  medianLag: 0, meanLag: 6.1  },
 ];
 
 // Traffic for conversion rate calc (matches AV_DATA where available)
 const CONV_TRAFFIC: Record<string, number> = {
   'Jan 26': 37320, 'Feb 26': 51480, 'Mar 26': 39218,
-  'Apr 26': 30311, 'May 1–22': 21897, 'May 23–25': 1808,
+  'Apr 26': 30311, 'May 1–22': 21897, 'May 23–31': 1808,
 };
 
 // ── Lag distribution (source of truth) ───────────────────────────────
@@ -115,7 +115,7 @@ const LAG_DISTRIBUTION = [
   { label: 'Mar 26',   total: 1287, buckets: [963, 97, 57, 58, 44, 30, 38] },
   { label: 'Apr 26',   total: 967,  buckets: [685, 55, 39, 31, 21, 35, 101] },
   { label: 'May 1–22',  total: 579,  buckets: [387, 62, 36, 28, 16,  7, 43] },
-  { label: 'May 23–25', total: 47,   buckets: [ 34,  6,  4,  0,  0,  1,  2] },
+  { label: 'May 23–31', total: 47,   buckets: [ 34,  6,  4,  0,  0,  1,  2] },
 ];
 
 // ── Weekly cohort completion curves (source of truth) ────────────────
@@ -310,14 +310,14 @@ export default function AVDiagnostics() {
     datasets: [
       {
         label: 'Same-day %', data: sameDayPcts,
-        backgroundColor: lagLabels.map(l => l === 'May 23–25' ? 'rgba(58,110,164,0.3)' : 'rgba(58,110,164,0.7)'),
-        borderColor: lagLabels.map(l => l === 'May 23–25' ? 'rgba(58,110,164,0.5)' : 'rgba(58,110,164,0)'),
+        backgroundColor: lagLabels.map(l => l === 'May 23–31' ? 'rgba(58,110,164,0.3)' : 'rgba(58,110,164,0.7)'),
+        borderColor: lagLabels.map(l => l === 'May 23–31' ? 'rgba(58,110,164,0.5)' : 'rgba(58,110,164,0)'),
         borderWidth: 1.5, borderRadius: 0,
       },
       {
         label: 'Returning %', data: returningPcts,
-        backgroundColor: lagLabels.map(l => l === 'May 23–25' ? 'rgba(239,159,39,0.3)' : 'rgba(239,159,39,0.7)'),
-        borderColor: lagLabels.map(l => l === 'May 23–25' ? 'rgba(239,159,39,0.5)' : 'rgba(239,159,39,0)'),
+        backgroundColor: lagLabels.map(l => l === 'May 23–31' ? 'rgba(239,159,39,0.3)' : 'rgba(239,159,39,0.7)'),
+        borderColor: lagLabels.map(l => l === 'May 23–31' ? 'rgba(239,159,39,0.5)' : 'rgba(239,159,39,0)'),
         borderWidth: 1.5, borderRadius: 4,
       },
     ],
@@ -477,7 +477,7 @@ export default function AVDiagnostics() {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(58,110,164,0.7)' }} /> Same-day</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(239,159,39,0.7)' }} /> Returning</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(150,150,150,0.15)', border: '1.5px solid rgba(150,150,150,0.5)' }} /> May 23–25 ({POST_UPDATE_DAYS_ELAPSED} days)</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(150,150,150,0.15)', border: '1.5px solid rgba(150,150,150,0.5)' }} /> May 23–31 ({POST_UPDATE_DAYS_ELAPSED} days)</span>
         </div>
         <div style={{ height: 300 }}>
           <Bar data={lagChartData} options={lagChartOpts as any} />
@@ -515,7 +515,7 @@ export default function AVDiagnostics() {
                 const cr = t ? (d.submissions / t * 100).toFixed(1) : '--';
                 const sdPct = (d.sameDay / d.submissions * 100).toFixed(1);
                 const retPct = (d.returning / d.submissions * 100).toFixed(1);
-                const isPost = d.label === 'May 23–25';
+                const isPost = d.label === 'May 23–31';
                 const rowBg = isPost ? '#F0FDF4' : d.label === 'May 1–22' ? '#FFF5F5' : undefined;
                 return (
                   <tr key={d.label} style={{ borderBottom: '1px solid #F3F4F6', background: rowBg }}>
@@ -536,7 +536,7 @@ export default function AVDiagnostics() {
             </tbody>
           </table>
         </div>
-        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* May 23–25 = {POST_UPDATE_DAYS_ELAPSED} days post-update. 13 of 47 submissions were returning (created before May 23).</div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* May 23–31 = {POST_UPDATE_DAYS_ELAPSED} days post-update. 13 of 47 submissions were returning (created before May 23).</div>
       </div>
 
       {/* ===== NEW: Lag Distribution ===== */}
@@ -568,7 +568,7 @@ export default function AVDiagnostics() {
                 return {
                   label: bucket,
                   data: LAG_DISTRIBUTION.map(d => Math.round(d.buckets[i] / d.total * 1000) / 10),
-                  backgroundColor: LAG_DISTRIBUTION.map(d => d.label === 'May 23–25' ? colors[i].replace('0.8', '0.35') : colors[i]),
+                  backgroundColor: LAG_DISTRIBUTION.map(d => d.label === 'May 23–31' ? colors[i].replace('0.8', '0.35') : colors[i]),
                   borderRadius: i === LAG_BUCKETS.length - 1 ? 4 : 0,
                 };
               }),
@@ -605,7 +605,7 @@ export default function AVDiagnostics() {
             </thead>
             <tbody>
               {LAG_DISTRIBUTION.map(d => {
-                const isPost = d.label === 'May 23–25';
+                const isPost = d.label === 'May 23–31';
                 const isPre = d.label === 'May 1–22';
                 const rowBg = isPost ? '#F0FDF4' : isPre ? '#FFF5F5' : undefined;
                 return (
@@ -788,7 +788,7 @@ export default function AVDiagnostics() {
           Source: Salesforce &quot;Waiting on Info Ratios&quot; export, May 26 2026. &quot;Starts&quot; = Person Account creations.
           &quot;Submitted&quot; = have a Submission Date. &quot;Waiting&quot; = current stage is WAITING (never finished).
           &quot;Other&quot; = in pipeline, closed, denied, or on hold.
-          * May 23–25 is {POST_UPDATE_DAYS_ELAPSED} days post-update — recent accounts haven&apos;t had time to mature.
+          * May 23–31 is {POST_UPDATE_DAYS_ELAPSED} days post-update — recent accounts haven&apos;t had time to mature.
         </div>
       </div>
     </div>
