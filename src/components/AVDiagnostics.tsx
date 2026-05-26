@@ -31,7 +31,7 @@ const TP = {
 };
 
 // ── Hardcoded data (source of truth) ──────────────────────────────────
-// Source: Salesforce "Waiting on Info Ratios" export, pulled May 25 2026
+// Source: Salesforce "Waiting on Info Ratios" export, pulled May 26 2026
 // "starts" = Salesforce Person Account creations (assessment starts)
 // "waiting" = current WAITING stage (needs info / needs photos) — never finished
 // "submitted" = have a Submission Date — completed their assessment
@@ -41,8 +41,8 @@ const AV_DATA = [
   { label: 'Feb 26', month: 2,  year: 2026, traffic: 51480, starts: 2193, waiting: 888, submitted: 1293, partial: false, period: 'full' as const },
   { label: 'Mar 26', month: 3,  year: 2026, traffic: 39218, starts: 2263, waiting: 967, submitted: 1285, partial: false, period: 'full' as const },
   { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1431, waiting: 569, submitted: 854,  partial: false, period: 'full' as const },
-  { label: 'May 1–22', month: 5, year: 2026, traffic: 21897, starts: 1038, waiting: 514, submitted: 520, partial: false, period: 'pre-update' as const },
-  { label: 'May 23–25', month: 5,  year: 2026, traffic: 1808,  starts: 114,  waiting: 80,  submitted: 34,  partial: true,  period: 'post-update' as const },
+  { label: 'May 1–22', month: 5, year: 2026, traffic: 21897, starts: 1038, waiting: 509, submitted: 527, partial: false, period: 'pre-update' as const },
+  { label: 'May 23–26', month: 5,  year: 2026, traffic: 1808,  starts: 171,  waiting: 102,  submitted: 68,  partial: true,  period: 'post-update' as const },
 ];
 
 // ── Full pipeline funnel by month (source of truth) ──────────────────
@@ -55,7 +55,7 @@ const FUNNEL_DATA = [
   { label: 'Feb 26', waiting: 888, inReview:  6, checkout: 480, checkedOut: 320, closed: 472, onHold: 27 },
   { label: 'Mar 26', waiting: 967, inReview: 13, checkout: 530, checkedOut: 359, closed: 366, onHold: 28 },
   { label: 'Apr 26', waiting: 569, inReview: 36, checkout: 434, checkedOut: 164, closed: 212, onHold: 16 },
-  { label: 'May 26', waiting: 594, inReview: 226, checkout: 260, checkedOut: 33,  closed: 32,  onHold: 7 },
+  { label: 'May 26', waiting: 611, inReview: 224, checkout: 288, checkedOut: 37,  closed: 42,  onHold: 7 },
 ];
 
 // ── May daily data (source of truth) ─────────────────────────────────
@@ -785,7 +785,7 @@ export default function AVDiagnostics() {
           </table>
         </div>
         <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>
-          Source: Salesforce &quot;Waiting on Info Ratios&quot; export, May 25 2026. &quot;Starts&quot; = Person Account creations.
+          Source: Salesforce &quot;Waiting on Info Ratios&quot; export, May 26 2026. &quot;Starts&quot; = Person Account creations.
           &quot;Submitted&quot; = have a Submission Date. &quot;Waiting&quot; = current stage is WAITING (never finished).
           &quot;Other&quot; = in pipeline, closed, denied, or on hold.
           * May 23–25 is {POST_UPDATE_DAYS_ELAPSED} days post-update — recent accounts haven&apos;t had time to mature.

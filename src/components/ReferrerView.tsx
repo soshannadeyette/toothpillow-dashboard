@@ -94,13 +94,13 @@ const REFERRER_DATA: Record<string, RefMonth> = {
 
 /* ────── May 2026 Projection (Salesforce snapshot + pace) ────── */
 const MAY_2026_SF: Record<string, number> = {
-  total: 708, Parent: 35, 'Dental Office': 154, 'Airway Ambassador': 23,
-  Influencer: 145, Podcast: 69, Instagram: 33, TikTok: 3, Facebook: 9,
-  'Meta Ad': 1, 'Online Search': 174, 'Unknown Referral': 41,
-  'Unknown Professional Referral': 4, 'Google Ad': 16, MYO: 1,
+  total: 823, Parent: 43, 'Dental Office': 176, 'Airway Ambassador': 25,
+  Influencer: 178, Podcast: 74, Instagram: 39, TikTok: 4, Facebook: 9,
+  'Meta Ad': 1, 'Online Search': 205, 'Unknown Referral': 44,
+  'Unknown Professional Referral': 5, 'Google Ad': 19, MYO: 1,
   'Health Care Professional': 0,
 };
-const MAY_2026_SF_DAYS = 23;
+const MAY_2026_SF_DAYS = 26;
 const MAY_2026_DAYS_IN_MONTH = 31;
 
 function buildMay2026Projected(): { actual: RefMonth; projected: RefMonth } {
