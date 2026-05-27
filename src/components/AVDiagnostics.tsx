@@ -143,6 +143,18 @@ const DAILY_COHORTS = [
   { day: 'May 26', n: 28, sameDay: 28, d1: 0, d2_3: 0, d4_7: 0 },
 ];
 
+// ── Cohort aging comparison (source of truth) ───────────────────────
+// Tracks each weekly cohort's completion + waiting rate at fixed time windows
+// so pre-update and post-update cohorts can be compared at the same age.
+// "mature7d" / "mature14d" = every person in the cohort has had at least 7/14 days.
+// When mature=false, the rate will still change as more people age into the window.
+const COHORT_AGING = [
+  { label: 'May 1–7',   starts: 327, sub7d: 167, sub14d: 171, waiting: 155, daysElapsed: 19, mature7d: true,  mature14d: true,  postUpdate: false },
+  { label: 'May 8–14',  starts: 305, sub7d: 160, sub14d: 164, waiting: 140, daysElapsed: 12, mature7d: true,  mature14d: false, postUpdate: false },
+  { label: 'May 15–21', starts: 330, sub7d: 162, sub14d: 165, waiting: 164, daysElapsed: 5,  mature7d: false, mature14d: false, postUpdate: false },
+  { label: 'May 22–28', starts: 266, sub7d: 113, sub14d: 113, waiting: 150, daysElapsed: 0,  mature7d: false, mature14d: false, postUpdate: true  },
+];
+
 // ── Post-update tracking ────────────────────────────────────────────
 const POST_UPDATE_DAYS_ELAPSED = 4; // data through 5/26
 
@@ -807,6 +819,98 @@ export default function AVDiagnostics() {
           &quot;Submitted&quot; = have a Submission Date. &quot;Waiting&quot; = current stage is WAITING (never finished).
           &quot;Other&quot; = in pipeline, closed, denied, or on hold.
           * May 23–31 is {POST_UPDATE_DAYS_ELAPSED} days post-update — recent accounts haven&apos;t had time to mature.
+        </div>
+      </div>
+
+      {/* ── Cohort Aging Comparison ── */}
+      <div style={{ background: 'white', borderRadius: 12, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.08)', marginTop: 24 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>
+          Cohort aging comparison — did the photo upload change work?
+        </h3>
+        <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px', lineHeight: 1.5 }}>
+          Each row tracks everyone who started in that week. &quot;Completed within 7d&quot; and &quot;within 14d&quot; show
+          what percentage finished their assessment within that window. &quot;Still waiting&quot; shows how many are
+          currently stuck. A row is <strong>mature</strong> when every person in it has had at least that many days
+          since they started — until then the number will still change.
+        </p>
+
+        {/* Comparison bars */}
+        <div style={{ display: 'grid', gap: 12, marginBottom: 20 }}>
+          {COHORT_AGING.map((c) => {
+            const comp7d = c.starts > 0 ? c.sub7d / c.starts * 100 : 0;
+            const comp14d = c.starts > 0 ? c.sub14d / c.starts * 100 : 0;
+            const waitRate = c.starts > 0 ? c.waiting / c.starts * 100 : 0;
+            const borderColor = c.postUpdate ? TP.green : TP.blue;
+            const bgColor = c.postUpdate ? '#F0FDF4' : '#F8FAFC';
+            return (
+              <div key={c.label} style={{ background: bgColor, border: `1.5px solid ${borderColor}`, borderRadius: 8, padding: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <div>
+                    <span style={{ fontWeight: 700, color: TP.navy, fontSize: 14 }}>{c.label}</span>
+                    {c.postUpdate && <span style={{ marginLeft: 8, fontSize: 11, background: TP.green, color: 'white', padding: '2px 8px', borderRadius: 10, fontWeight: 600 }}>POST-UPDATE</span>}
+                  </div>
+                  <span style={{ fontSize: 12, color: '#6B7280' }}>{c.starts} started · {c.daysElapsed} days old</span>
+                </div>
+
+                {/* 7-day completion bar */}
+                <div style={{ marginBottom: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 3 }}>
+                    <span style={{ color: TP.text }}>Completed within 7 days</span>
+                    <span style={{ fontWeight: 700, color: c.mature7d ? TP.navy : '#9CA3AF' }}>
+                      {comp7d.toFixed(1)}%
+                      <span style={{ fontWeight: 400, fontSize: 11, marginLeft: 4 }}>({c.sub7d} of {c.starts})</span>
+                      {!c.mature7d && <span style={{ marginLeft: 6, fontSize: 10, color: TP.amber, fontWeight: 600 }}>NOT YET MATURE</span>}
+                    </span>
+                  </div>
+                  <div style={{ height: 14, background: '#E5E7EB', borderRadius: 7, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${Math.min(comp7d, 100)}%`, background: c.mature7d ? TP.blue : '#CBD5E1', borderRadius: 7, transition: 'width 0.3s' }} />
+                  </div>
+                </div>
+
+                {/* 14-day completion bar */}
+                <div style={{ marginBottom: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 3 }}>
+                    <span style={{ color: TP.text }}>Completed within 14 days</span>
+                    <span style={{ fontWeight: 700, color: c.mature14d ? TP.navy : '#9CA3AF' }}>
+                      {comp14d.toFixed(1)}%
+                      <span style={{ fontWeight: 400, fontSize: 11, marginLeft: 4 }}>({c.sub14d} of {c.starts})</span>
+                      {!c.mature14d && <span style={{ marginLeft: 6, fontSize: 10, color: TP.amber, fontWeight: 600 }}>NOT YET MATURE</span>}
+                    </span>
+                  </div>
+                  <div style={{ height: 14, background: '#E5E7EB', borderRadius: 7, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${Math.min(comp14d, 100)}%`, background: c.mature14d ? TP.green : '#CBD5E1', borderRadius: 7, transition: 'width 0.3s' }} />
+                  </div>
+                </div>
+
+                {/* Waiting rate bar */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 3 }}>
+                    <span style={{ color: TP.text }}>Still waiting (stuck)</span>
+                    <span style={{ fontWeight: 700, color: waitRate > 45 ? TP.red : TP.text }}>
+                      {waitRate.toFixed(1)}%
+                      <span style={{ fontWeight: 400, fontSize: 11, marginLeft: 4 }}>({c.waiting} of {c.starts})</span>
+                    </span>
+                  </div>
+                  <div style={{ height: 14, background: '#E5E7EB', borderRadius: 7, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${Math.min(waitRate, 100)}%`, background: waitRate > 45 ? TP.red : TP.amber, borderRadius: 7, transition: 'width 0.3s' }} />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Maturity timeline */}
+        <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8, padding: 14, fontSize: 12, color: '#92400E', lineHeight: 1.6 }}>
+          <strong>When can you compare?</strong> The May 22–28 cohort&apos;s 7-day completion rate will be final on <strong>June 4</strong> (when the last person in the cohort has had 7 days).
+          The 14-day rate will be final on <strong>June 11</strong>. Until then, the post-update bars will keep growing.
+          Compare the final post-update bars against May 1–7 (the only cohort where both 7d and 14d are already mature).
+          If the post-update completion rate is higher and the waiting rate is lower at the same age, the simplified photo upload worked.
+        </div>
+
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 10 }}>
+          Source: Salesforce export May 26 2026 19:33 PST. &quot;Mature&quot; = every person in the cohort has had at least that many days since creation.
+          Waiting rate is a snapshot — it will decrease over time as some waiting accounts eventually complete or are closed.
         </div>
       </div>
     </div>
