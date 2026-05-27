@@ -206,10 +206,11 @@ export default function WeeklyReport() {
   const projectedPct = goal > 0 ? ((mtdProjected / goal) * 100).toFixed(1) : '0';
   const progressPct = goal > 0 ? Math.min((mtdTotal / goal) * 100, 100) : 0;
   const pacePct = goal > 0 ? Math.min((shouldBeAt / goal) * 100, 100) : 0;
-  const mtdConvRate = mtdVisitors > 0 ? ((mtdTotal / mtdVisitors) * 100).toFixed(1) : '0';
+  const mtdConvRate = mtdVisitors > 0 ? ((mtdOnline / mtdVisitors) * 100).toFixed(1) : '0';
 
-  // Week conversion rate
-  const weekConvRate = week && week.visitors > 0 ? ((week.total / week.visitors) * 100).toFixed(1) : '0';
+  // Week conversion rate (online only — hybrid/prime come through separate channels)
+  const weekOnline = week ? week.entries.reduce((s: number, e: DailySubmission) => s + e.online, 0) : 0;
+  const weekConvRate = week && week.visitors > 0 ? ((weekOnline / week.visitors) * 100).toFixed(1) : '0';
 
   // ---- Submission Trend (all entries for the month, daily totals + 7-day rolling avg) ----
   const monthEntries = useMemo(() => {
@@ -328,8 +329,7 @@ export default function WeeklyReport() {
           {
             label: 'Conversion %',
             data: week.entries.map((e) => {
-              const total = e.total ?? e.online + e.hybrid + e.prime;
-              return e.visitors > 0 ? Math.round((total / e.visitors) * 1000) / 10 : 0;
+              return e.visitors > 0 ? Math.round((e.online / e.visitors) * 1000) / 10 : 0;
             }),
             borderColor: '#8b5cf6',
             backgroundColor: 'rgba(139, 92, 246, 0.1)',
@@ -618,7 +618,7 @@ export default function WeeklyReport() {
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">MTD Conversion</div>
                 <div className="text-3xl font-bold text-purple-600">{mtdConvRate}%</div>
-                <div className="text-sm text-gray-500 mt-1">{mtdTotal.toLocaleString()} of {mtdVisitors.toLocaleString()} visitors</div>
+                <div className="text-sm text-gray-500 mt-1">{mtdOnline.toLocaleString()} online of {mtdVisitors.toLocaleString()} visitors</div>
               </div>
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Unique Visitors (MTD)</div>
@@ -628,7 +628,7 @@ export default function WeeklyReport() {
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">This Week{"'"}s Conversion</div>
                 <div className="text-3xl font-bold text-purple-600">{weekConvRate}%</div>
-                <div className="text-sm text-gray-500 mt-1">{week.total} of {week.visitors.toLocaleString()} visitors</div>
+                <div className="text-sm text-gray-500 mt-1">{weekOnline} online of {week.visitors.toLocaleString()} visitors</div>
               </div>
             </div>
 

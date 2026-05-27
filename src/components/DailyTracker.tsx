@@ -128,7 +128,7 @@ export default function DailyTracker() {
   const totalIncome = entries.reduce((s, e) => s + e.income, 0);
   const daysTracked = entries.length;
   const dailyAvg = daysTracked > 0 ? (totalSubmissions / daysTracked).toFixed(1) : '0';
-  const convRate = totalVisitors > 0 ? ((totalSubmissions / totalVisitors) * 100).toFixed(1) : '0';
+  const convRate = totalVisitors > 0 ? ((totalOnline / totalVisitors) * 100).toFixed(1) : '0';
 
   // Days remaining in month
   const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
@@ -520,13 +520,11 @@ export default function DailyTracker() {
         const projectedVisitors = avgVisitors * daysInMonth;
         const dailyConvRates = entries.map(e => {
           if (e.visitors <= 0) return 0;
-          const total = e.total ?? e.online + e.hybrid + e.prime;
-          return parseFloat(((total / e.visitors) * 100).toFixed(2));
+          return parseFloat(((e.online / e.visitors) * 100).toFixed(2));
         });
         const avgConvRate = daysWithTraffic.length > 0
           ? (daysWithTraffic.reduce((s, e) => {
-              const total = e.total ?? e.online + e.hybrid + e.prime;
-              return s + (e.visitors > 0 ? (total / e.visitors) * 100 : 0);
+              return s + (e.visitors > 0 ? (e.online / e.visitors) * 100 : 0);
             }, 0) / daysWithTraffic.length).toFixed(2)
           : '0';
         const bestDay = daysWithTraffic.reduce((best, e) =>
@@ -550,7 +548,7 @@ export default function DailyTracker() {
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.green}` }}>
                 <div className="text-xl font-bold" style={{ color: TP.green }}>{avgConvRate}%</div>
                 <div className="text-sm text-gray-500">Avg Conversion Rate</div>
-                <div className="text-xs text-gray-400 mt-1">Submissions / Visitors</div>
+                <div className="text-xs text-gray-400 mt-1">Online Submissions / Visitors</div>
               </div>
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.bubblegum}` }}>
                 <div className="text-xl font-bold" style={{ color: TP.navy }}>{bestDay ? bestDay.visitors.toLocaleString() : '--'}</div>
@@ -578,8 +576,8 @@ export default function DailyTracker() {
                         order: 2,
                       },
                       {
-                        label: 'Submissions',
-                        data: entries.map(e => e.total ?? e.online + e.hybrid + e.prime),
+                        label: 'Online Submissions',
+                        data: entries.map(e => e.online),
                         backgroundColor: `${TP.blue}55`,
                         borderColor: TP.blue,
                         borderWidth: 1,
@@ -627,7 +625,7 @@ export default function DailyTracker() {
                 />
               </div>
               <div className="text-xs text-gray-400 mt-2">
-                Visitors from GA4. Conversion rate = total submissions / visitors. Days without visitor data are excluded from averages.
+                Visitors from GA4. Conversion rate = online submissions / visitors. Hybrid and prime come through separate channels and are excluded. Days without visitor data are excluded from averages.
               </div>
             </div>
           </>
@@ -650,7 +648,7 @@ export default function DailyTracker() {
         </div>
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.blue}` }}>
           <div className="text-xl font-bold" style={{ color: TP.navy }}>{convRate}%</div>
-          <div className="text-sm text-gray-500">Conversion ({totalVisitors.toLocaleString()} visitors)</div>
+          <div className="text-sm text-gray-500">Online Conv % ({totalVisitors.toLocaleString()} visitors)</div>
         </div>
       </div>
 
@@ -726,7 +724,7 @@ export default function DailyTracker() {
                     <td className="px-3 py-2 border-t border-gray-100 text-right font-medium">{total}</td>
                     <td className="px-3 py-2 border-t border-gray-100 text-right">{e.visitors.toLocaleString()}</td>
                     <td className="px-3 py-2 border-t border-gray-100 text-right" style={{ color: e.visitors > 0 ? TP.green : '#ccc' }}>
-                      {e.visitors > 0 ? `${((total / e.visitors) * 100).toFixed(1)}%` : '--'}
+                      {e.visitors > 0 ? `${((e.online / e.visitors) * 100).toFixed(1)}%` : '--'}
                     </td>
                     <td className="px-3 py-2 border-t border-gray-100 text-right">${e.income}</td>
                   </tr>
