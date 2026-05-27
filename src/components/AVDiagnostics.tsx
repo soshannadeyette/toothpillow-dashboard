@@ -144,15 +144,14 @@ const DAILY_COHORTS = [
 ];
 
 // ── Cohort aging comparison (source of truth) ───────────────────────
-// Tracks each weekly cohort's completion + waiting rate at fixed time windows
-// so pre-update and post-update cohorts can be compared at the same age.
-// "mature7d" / "mature14d" = every person in the cohort has had at least 7/14 days.
-// When mature=false, the rate will still change as more people age into the window.
+// Tracks each weekly cohort broken into non-overlapping groups:
+//   completed (within 7d + days 8-14 + 15+) | waiting | other
+// These add up to starts. "mature" = every person has had that many days.
 const COHORT_AGING = [
-  { label: 'May 1–7',   starts: 327, sub7d: 167, sub14d: 171, waiting: 155, daysElapsed: 19, mature7d: true,  mature14d: true,  postUpdate: false },
-  { label: 'May 8–14',  starts: 305, sub7d: 160, sub14d: 164, waiting: 140, daysElapsed: 12, mature7d: true,  mature14d: false, postUpdate: false },
-  { label: 'May 15–21', starts: 330, sub7d: 162, sub14d: 165, waiting: 164, daysElapsed: 5,  mature7d: false, mature14d: false, postUpdate: false },
-  { label: 'May 22–28', starts: 266, sub7d: 113, sub14d: 113, waiting: 150, daysElapsed: 0,  mature7d: false, mature14d: false, postUpdate: true  },
+  { label: 'May 1–7',   starts: 327, within7d: 167, d8to14: 4, d15plus: 1, waiting: 155, daysElapsed: 19, mature7d: true,  mature14d: true,  postUpdate: false },
+  { label: 'May 8–14',  starts: 305, within7d: 160, d8to14: 4, d15plus: 1, waiting: 140, daysElapsed: 12, mature7d: true,  mature14d: false, postUpdate: false },
+  { label: 'May 15–21', starts: 330, within7d: 162, d8to14: 3, d15plus: 0, waiting: 164, daysElapsed: 5,  mature7d: false, mature14d: false, postUpdate: false },
+  { label: 'May 22–28', starts: 266, within7d: 113, d8to14: 0, d15plus: 0, waiting: 150, daysElapsed: 0,  mature7d: false, mature14d: false, postUpdate: true  },
 ];
 
 // ── Post-update tracking ────────────────────────────────────────────
@@ -828,89 +827,84 @@ export default function AVDiagnostics() {
           Cohort aging comparison — did the photo upload change work?
         </h3>
         <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px', lineHeight: 1.5 }}>
-          Each row tracks everyone who started in that week. &quot;Completed within 7d&quot; and &quot;within 14d&quot; show
-          what percentage finished their assessment within that window. &quot;Still waiting&quot; shows how many are
-          currently stuck. A row is <strong>mature</strong> when every person in it has had at least that many days
-          since they started — until then the number will still change.
+          Each row tracks everyone who started in that week. The stacked bar shows where they ended up:
+          completed (green), still waiting (red), or other (gray). These add up to 100%.
+          Within &quot;completed,&quot; the shade shows speed — dark green finished within 7 days, lighter shades took longer.
+          A cohort is <strong>mature</strong> when every person in it has had enough time to reach that window.
         </p>
 
-        {/* Comparison bars */}
-        <div style={{ display: 'grid', gap: 12, marginBottom: 20 }}>
+        {/* Stacked bar rows */}
+        <div style={{ display: 'grid', gap: 16, marginBottom: 20 }}>
           {COHORT_AGING.map((c) => {
-            const comp7d = c.starts > 0 ? c.sub7d / c.starts * 100 : 0;
-            const comp14d = c.starts > 0 ? c.sub14d / c.starts * 100 : 0;
-            const waitRate = c.starts > 0 ? c.waiting / c.starts * 100 : 0;
+            const completed = c.within7d + c.d8to14 + c.d15plus;
+            const other = c.starts - completed - c.waiting;
+            const pct7 = c.starts > 0 ? c.within7d / c.starts * 100 : 0;
+            const pct814 = c.starts > 0 ? c.d8to14 / c.starts * 100 : 0;
+            const pct15 = c.starts > 0 ? c.d15plus / c.starts * 100 : 0;
+            const pctWait = c.starts > 0 ? c.waiting / c.starts * 100 : 0;
+            const pctOther = c.starts > 0 ? other / c.starts * 100 : 0;
+            const compPct = c.starts > 0 ? completed / c.starts * 100 : 0;
             const borderColor = c.postUpdate ? TP.green : TP.blue;
             const bgColor = c.postUpdate ? '#F0FDF4' : '#F8FAFC';
             return (
               <div key={c.label} style={{ background: bgColor, border: `1.5px solid ${borderColor}`, borderRadius: 8, padding: 16 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontWeight: 700, color: TP.navy, fontSize: 14 }}>{c.label}</span>
-                    {c.postUpdate && <span style={{ marginLeft: 8, fontSize: 11, background: TP.green, color: 'white', padding: '2px 8px', borderRadius: 10, fontWeight: 600 }}>POST-UPDATE</span>}
+                    {c.postUpdate && <span style={{ fontSize: 11, background: TP.green, color: 'white', padding: '2px 8px', borderRadius: 10, fontWeight: 600 }}>POST-UPDATE</span>}
+                    {!c.mature7d && <span style={{ fontSize: 10, color: TP.amber, fontWeight: 600 }}>STILL AGING</span>}
                   </div>
                   <span style={{ fontSize: 12, color: '#6B7280' }}>{c.starts} started · {c.daysElapsed} days old</span>
                 </div>
 
-                {/* 7-day completion bar */}
-                <div style={{ marginBottom: 8 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 3 }}>
-                    <span style={{ color: TP.text }}>Completed within 7 days</span>
-                    <span style={{ fontWeight: 700, color: c.mature7d ? TP.navy : '#9CA3AF' }}>
-                      {comp7d.toFixed(1)}%
-                      <span style={{ fontWeight: 400, fontSize: 11, marginLeft: 4 }}>({c.sub7d} of {c.starts})</span>
-                      {!c.mature7d && <span style={{ marginLeft: 6, fontSize: 10, color: TP.amber, fontWeight: 600 }}>NOT YET MATURE</span>}
-                    </span>
-                  </div>
-                  <div style={{ height: 14, background: '#E5E7EB', borderRadius: 7, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${Math.min(comp7d, 100)}%`, background: c.mature7d ? TP.blue : '#CBD5E1', borderRadius: 7, transition: 'width 0.3s' }} />
-                  </div>
+                {/* Stacked bar */}
+                <div style={{ display: 'flex', height: 28, borderRadius: 6, overflow: 'hidden', marginBottom: 8 }}>
+                  {pct7 > 0 && <div style={{ width: `${pct7}%`, background: '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 11, fontWeight: 700, minWidth: pct7 > 8 ? 0 : 'auto' }}>{pct7 > 8 ? `${Math.round(pct7)}%` : ''}</div>}
+                  {pct814 > 0 && <div style={{ width: `${pct814}%`, background: '#34D399', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 11, fontWeight: 700 }} />}
+                  {pct15 > 0 && <div style={{ width: `${pct15}%`, background: '#A7F3D0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#065F46', fontSize: 11, fontWeight: 700 }} />}
+                  {pctWait > 0 && <div style={{ width: `${pctWait}%`, background: '#E24B4A', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 11, fontWeight: 700, minWidth: pctWait > 8 ? 0 : 'auto' }}>{pctWait > 8 ? `${Math.round(pctWait)}%` : ''}</div>}
+                  {pctOther > 0 && <div style={{ width: `${Math.max(pctOther, 1)}%`, background: '#D1D5DB' }} />}
                 </div>
 
-                {/* 14-day completion bar */}
-                <div style={{ marginBottom: 8 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 3 }}>
-                    <span style={{ color: TP.text }}>Completed within 14 days</span>
-                    <span style={{ fontWeight: 700, color: c.mature14d ? TP.navy : '#9CA3AF' }}>
-                      {comp14d.toFixed(1)}%
-                      <span style={{ fontWeight: 400, fontSize: 11, marginLeft: 4 }}>({c.sub14d} of {c.starts})</span>
-                      {!c.mature14d && <span style={{ marginLeft: 6, fontSize: 10, color: TP.amber, fontWeight: 600 }}>NOT YET MATURE</span>}
-                    </span>
-                  </div>
-                  <div style={{ height: 14, background: '#E5E7EB', borderRadius: 7, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${Math.min(comp14d, 100)}%`, background: c.mature14d ? TP.green : '#CBD5E1', borderRadius: 7, transition: 'width 0.3s' }} />
-                  </div>
-                </div>
-
-                {/* Waiting rate bar */}
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 3 }}>
-                    <span style={{ color: TP.text }}>Still waiting (stuck)</span>
-                    <span style={{ fontWeight: 700, color: waitRate > 45 ? TP.red : TP.text }}>
-                      {waitRate.toFixed(1)}%
-                      <span style={{ fontWeight: 400, fontSize: 11, marginLeft: 4 }}>({c.waiting} of {c.starts})</span>
-                    </span>
-                  </div>
-                  <div style={{ height: 14, background: '#E5E7EB', borderRadius: 7, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${Math.min(waitRate, 100)}%`, background: waitRate > 45 ? TP.red : TP.amber, borderRadius: 7, transition: 'width 0.3s' }} />
-                  </div>
+                {/* Breakdown numbers */}
+                <div style={{ display: 'flex', gap: 16, fontSize: 12, flexWrap: 'wrap' }}>
+                  <span style={{ color: '#065F46' }}>
+                    <strong style={{ color: '#1D9E75' }}>Completed: {completed}</strong> ({compPct.toFixed(1)}%)
+                    {completed > 0 && <span style={{ color: '#6B7280', marginLeft: 4 }}>
+                      — {c.within7d} within 7d{c.d8to14 > 0 ? `, ${c.d8to14} days 8–14` : ''}{c.d15plus > 0 ? `, ${c.d15plus} after 14d` : ''}
+                    </span>}
+                  </span>
+                  <span style={{ color: TP.red }}>
+                    <strong>Waiting: {c.waiting}</strong> ({pctWait.toFixed(1)}%)
+                  </span>
+                  {other > 0 && <span style={{ color: '#6B7280' }}>
+                    <strong>Other: {other}</strong> ({pctOther.toFixed(1)}%)
+                  </span>}
                 </div>
               </div>
             );
           })}
         </div>
 
+        {/* Legend */}
+        <div style={{ display: 'flex', gap: 16, fontSize: 11, color: '#6B7280', marginBottom: 16, flexWrap: 'wrap' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 12, height: 12, borderRadius: 2, background: '#1D9E75' }} /> Completed within 7 days</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 12, height: 12, borderRadius: 2, background: '#34D399' }} /> Completed days 8–14</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 12, height: 12, borderRadius: 2, background: '#E24B4A' }} /> Still waiting</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 12, height: 12, borderRadius: 2, background: '#D1D5DB' }} /> Other (closed, denied, etc.)</span>
+        </div>
+
         {/* Maturity timeline */}
         <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8, padding: 14, fontSize: 12, color: '#92400E', lineHeight: 1.6 }}>
-          <strong>When can you compare?</strong> The May 22–28 cohort&apos;s 7-day completion rate will be final on <strong>June 4</strong> (when the last person in the cohort has had 7 days).
-          The 14-day rate will be final on <strong>June 11</strong>. Until then, the post-update bars will keep growing.
-          Compare the final post-update bars against May 1–7 (the only cohort where both 7d and 14d are already mature).
-          If the post-update completion rate is higher and the waiting rate is lower at the same age, the simplified photo upload worked.
+          <strong>When can you compare?</strong> The May 22–28 cohort will be comparable on <strong>June 4</strong> (7-day window mature) and <strong>June 11</strong> (14-day window mature).
+          Right now the post-update green bar is still growing — some of the red &quot;waiting&quot; people may still complete.
+          The key question: will the post-update cohort&apos;s green bar end up larger than May 1–7&apos;s 52.6%?
+          If yes and the red bar is smaller, the simplified photo upload is converting more people.
         </div>
 
         <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 10 }}>
-          Source: Salesforce export May 26 2026 19:33 PST. &quot;Mature&quot; = every person in the cohort has had at least that many days since creation.
-          Waiting rate is a snapshot — it will decrease over time as some waiting accounts eventually complete or are closed.
+          Source: Salesforce export May 26 2026 19:33 PST. Waiting rate is a point-in-time snapshot — it will
+          decrease as some accounts eventually complete or are closed out.
         </div>
       </div>
     </div>
