@@ -41,8 +41,8 @@ const AV_DATA = [
   { label: 'Feb 26', month: 2,  year: 2026, traffic: 51480, starts: 2193, waiting: 888, submitted: 1293, partial: false, period: 'full' as const },
   { label: 'Mar 26', month: 3,  year: 2026, traffic: 39218, starts: 2263, waiting: 967, submitted: 1285, partial: false, period: 'full' as const },
   { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1431, waiting: 569, submitted: 854,  partial: false, period: 'full' as const },
-  { label: 'May 1–22', month: 5, year: 2026, traffic: 21897, starts: 1038, waiting: 507, submitted: 530, partial: false, period: 'pre-update' as const },
-  { label: 'May 23–31', month: 5,  year: 2026, traffic: 1808,  starts: 189,  waiting: 103,  submitted: 83,  partial: true,  period: 'post-update' as const },
+  { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1038, waiting: 507, submitted: 530, partial: false, period: 'pre-update' as const },
+  { label: 'May 23–31', month: 5,  year: 2026, traffic: 2941,  starts: 189,  waiting: 103,  submitted: 83,  partial: true,  period: 'post-update' as const },
 ];
 
 // ── Full pipeline funnel by month (source of truth) ──────────────────
@@ -105,7 +105,7 @@ const CONVERSION_LAG = [
 // Traffic for conversion rate calc (matches AV_DATA where available)
 const CONV_TRAFFIC: Record<string, number> = {
   'Jan 26': 37320, 'Feb 26': 51480, 'Mar 26': 39218,
-  'Apr 26': 30311, 'May 1–22': 21897, 'May 23–31': 1808,
+  'Apr 26': 30311, 'May 1–22': 21819, 'May 23–31': 2941,
 };
 
 // ── Lag distribution (source of truth) ───────────────────────────────
@@ -615,7 +615,7 @@ export default function AVDiagnostics() {
             <thead>
               <tr style={{ borderBottom: '2px solid #E5E7EB' }}>
                 <th style={{ textAlign: 'left', padding: '6px 8px', color: '#6B7280', fontWeight: 600 }}>Period</th>
-                <th style={{ textAlign: 'right', padding: '6px 8px', color: '#6B7280', fontWeight: 600 }}>n</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', color: '#6B7280', fontWeight: 600 }}>Submitted</th>
                 {LAG_BUCKETS.map(b => (
                   <th key={b} style={{ textAlign: 'right', padding: '6px 8px', color: '#6B7280', fontWeight: 600, fontSize: 11 }}>{b}</th>
                 ))}
@@ -667,7 +667,7 @@ export default function AVDiagnostics() {
             return (
               <span key={c.label} style={{ display: 'flex', alignItems: 'center', gap: 5, fontWeight: isPost ? 700 : 400 }}>
                 <span style={{ width: 12, height: 3, background: colors[i], borderRadius: 1 }} />
-                {c.label} (n={c.n}){isPost ? ' — post-update' : ''}
+                {c.label} ({c.n} submitted){isPost ? ' — post-update' : ''}
               </span>
             );
           })}
