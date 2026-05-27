@@ -68,14 +68,14 @@ const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:16};
 const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:92};
 
 // Active ambassadors with ≥1 submission per year (from Salesforce)
-const activeInfByYear: Record<number, number> = {2023:6, 2024:60, 2025:82, 2026:64};
-const activeAmbByYear: Record<number, number> = {2023:24, 2024:85, 2025:127, 2026:97};
-const activeTotalByYear: Record<number, number> = {2023:30, 2024:145, 2025:209, 2026:161};
+const activeInfByYear: Record<number, number> = {2023:6, 2024:60, 2025:82, 2026:66};
+const activeAmbByYear: Record<number, number> = {2023:24, 2024:85, 2025:127, 2026:104};
+const activeTotalByYear: Record<number, number> = {2023:30, 2024:145, 2025:209, 2026:170};
 
 const halfCarriedBy: Record<number, number> = {2023:1, 2024:2, 2025:5, 2026:7};
 const tenPlusByYear: Record<number, number> = {2023:8, 2024:40, 2025:55, 2026:30};
-const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:346};
-const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:1590};
+const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:575};
+const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:1406};
 
 const ANN = 12 / 4.871; // 4 full months + 27/31 of May through 5/27
 
