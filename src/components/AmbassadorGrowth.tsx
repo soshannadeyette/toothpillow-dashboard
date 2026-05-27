@@ -149,9 +149,11 @@ const moversData: Record<string, {y25:number; y26:number; type:string}> = {
 
 // Launch Bonus Tracker — updated from Salesforce export 2026-05-27
 // bonusSubs = submissions counted ONLY from window start date forward
+// Sorted by bonusSubs descending. Katelyn Alsop has a separate Jan 19 window.
 const launchBonusData = [
   {name:'Shannon Tripp',onboard:'06/27/2025',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:50,tier:1,earned:250},
   {name:'Lauren Johnson NNM',onboard:'05/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:41,tier:1,earned:250},
+  {name:'Katelyn Alsop (James)',onboard:'01/19/2026',is2026:true,winStart:'01/19/2026',winEnd:'01/19/2027',bonusSubs:40,tier:1,earned:250},
   {name:'Soshanna Salsman',onboard:'04/30/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:40,tier:1,earned:250},
   {name:'Kendra Needham',onboard:'11/01/2023',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:28,tier:1,earned:250},
   {name:'Emily Boazman',onboard:'04/02/2026',is2026:true,winStart:'04/02/2026',winEnd:'04/02/2027',bonusSubs:27,tier:1,earned:250},
@@ -165,7 +167,6 @@ const launchBonusData = [
   {name:'Taylor Kulik',onboard:'02/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:11,tier:0,earned:0},
   {name:'Eden Lee loverlees',onboard:'12/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:10,tier:0,earned:0},
   {name:'Melody Brandon',onboard:'04/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:10,tier:0,earned:0},
-  {name:'Katelyn Alsop (James)',onboard:'01/19/2026',is2026:true,winStart:'01/19/2026',winEnd:'01/19/2027',bonusSubs:40,tier:1,earned:250},
   {name:'Melina Moses',onboard:'01/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:9,tier:0,earned:0},
   {name:'Thuy Improta *ministry*',onboard:'07/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:9,tier:0,earned:0},
   {name:'Eryn Carroll NMM',onboard:'07/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:8,tier:0,earned:0},
