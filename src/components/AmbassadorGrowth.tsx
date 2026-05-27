@@ -161,7 +161,7 @@ const launchBonusData = [
   {name:'Carly Brown',onboard:'04/21/2026',is2026:true,winStart:'04/21/2026',winEnd:'04/21/2027',bonusSubs:21,tier:0,earned:0},
   {name:'Jasyra Santiago-Hines',onboard:'02/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:20,tier:0,earned:0},
   {name:'Ginny Yurich',onboard:'06/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:19,tier:0,earned:0},
-  {name:'Hayley Lombard',onboard:'04/14/2026',is2026:true,winStart:'04/14/2026',winEnd:'04/14/2027',bonusSubs:13,tier:0,earned:0},
+  {name:'Hayley Lombard',onboard:'05/19/2026',is2026:true,winStart:'05/19/2026',winEnd:'05/19/2027',bonusSubs:13,tier:0,earned:0},
   {name:'Amy Erickson',onboard:'01/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:13,tier:0,earned:0},
   {name:'Amy Bernhard',onboard:'08/25/2025',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:12,tier:0,earned:0},
   {name:'Taylor Kulik',onboard:'02/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:11,tier:0,earned:0},
@@ -174,7 +174,7 @@ const launchBonusData = [
   {name:'Ellen Fisher',onboard:'01/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:7,tier:0,earned:0},
   {name:'Hilary Fritsch',onboard:'01/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:7,tier:0,earned:0},
   {name:'Karalynne Call *Just Ingredients*',onboard:'08/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:6,tier:0,earned:0},
-  {name:'Hillary Ha',onboard:'04/07/2026',is2026:true,winStart:'04/07/2026',winEnd:'04/07/2027',bonusSubs:5,tier:0,earned:0},
+  {name:'Hillary Ha',onboard:'08/05/2025',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:5,tier:0,earned:0},
 ];
 
 /* ════════════════════════════════════════════════════════════════════════════
