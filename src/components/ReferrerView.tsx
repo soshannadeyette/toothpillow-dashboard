@@ -89,15 +89,15 @@ const REFERRER_DATA: Record<string, RefMonth> = {
   "2026-01": {total:1410, Parent:76, "Dental Office":367, "Airway Ambassador":53, Influencer:312, Podcast:151, Instagram:87, TikTok:2, Facebook:16, "Meta Ad":12, "Online Search":233, "Unknown Referral":74, "Unknown Professional Referral":23, Other:4},
   "2026-02": {total:1503, Parent:66, "Dental Office":312, "Airway Ambassador":58, Influencer:517, Podcast:92, Instagram:70, TikTok:3, Facebook:25, "Meta Ad":5, "Online Search":282, "Unknown Referral":46, "Unknown Professional Referral":27, Other:0},
   "2026-03": {total:1604, Parent:75, "Dental Office":321, "Airway Ambassador":64, Influencer:463, Podcast:163, Instagram:74, TikTok:1, Facebook:11, "Meta Ad":2, "Online Search":339, "Unknown Referral":58, "Unknown Professional Referral":21, Other:12},
-  "2026-04": {total:1229, Parent:76, "Dental Office":260, "Airway Ambassador":64, Influencer:237, Podcast:125, Instagram:39, TikTok:1, Facebook:10, "Meta Ad":0, "Online Search":297, "Unknown Referral":70, "Unknown Professional Referral":26, Other:24},
+  "2026-04": {total:1228, Parent:75, "Dental Office":259, "Airway Ambassador":64, Influencer:238, Podcast:125, Instagram:39, TikTok:1, Facebook:10, "Meta Ad":0, "Online Search":298, "Unknown Referral":70, "Unknown Professional Referral":25, Other:23},
 };
 
-/* ────── May 2026 Projection (Salesforce snapshot + pace) ────── */
+/* ────── May 2026 Projection (Salesforce snapshot through 5/28 + pace) ────── */
 const MAY_2026_SF: Record<string, number> = {
-  total: 909, Parent: 45, 'Dental Office': 196, 'Airway Ambassador': 29,
-  Influencer: 205, Podcast: 76, Instagram: 47, TikTok: 4, Facebook: 11,
-  'Meta Ad': 1, 'Online Search': 218, 'Unknown Referral': 45,
-  'Unknown Professional Referral': 5, 'Google Ad': 22, MYO: 3,
+  total: 956, Parent: 46, 'Dental Office': 206, 'Airway Ambassador': 32,
+  Influencer: 224, Podcast: 79, Instagram: 49, TikTok: 4, Facebook: 12,
+  'Meta Ad': 1, 'Online Search': 222, 'Unknown Referral': 46,
+  'Unknown Professional Referral': 6, 'Google Ad': 24, MYO: 3,
   'Health Care Professional': 2,
 };
 const MAY_2026_SF_DAYS = 28;
@@ -183,71 +183,73 @@ const PER_SOURCE_DEFS = [
 interface AmbEntry { 2023: number; 2024: number; 2025: number; 2026: number; type: string; _pace2026?: number }
 
 const AMB_YOY_DATA: Record<string, AmbEntry> = {
-  'Lauren Johnson NNM':    {2023:4,    2024:2968, 2025:831,  2026:144, type:'Influencer'},
-  'Kendra Needham':        {2023:1286, 2024:1856, 2025:386,  2026:133, type:'Influencer'},
-  'Ginny Yurich':          {2023:0,    2024:1111, 2025:291,  2026:73,  type:'Influencer'},
-  'Soshanna Salsman':      {2023:0,    2024:299,  2025:914,  2026:155, type:'Influencer'},
-  'Shannon Tripp':         {2023:0,    2024:0,    2025:866,  2026:247, type:'Influencer'},
-  'Thuy Improta':          {2023:0,    2024:205,  2025:245,  2026:22,  type:'Influencer'},
-  'Jeff Cruz':             {2023:0,    2024:263,  2025:84,   2026:104, type:'Influencer'},
+  'Lauren Johnson NNM':    {2023:4,    2024:2968, 2025:831,  2026:157, type:'Influencer'},
+  'Kendra Needham':        {2023:1286, 2024:1856, 2025:386,  2026:141, type:'Influencer'},
+  'Ginny Yurich':          {2023:0,    2024:1111, 2025:291,  2026:79,  type:'Influencer'},
+  'Soshanna Salsman':      {2023:0,    2024:299,  2025:914,  2026:169, type:'Influencer'},
+  'Shannon Tripp':         {2023:0,    2024:0,    2025:866,  2026:257, type:'Influencer'},
+  'Thuy Improta':          {2023:0,    2024:205,  2025:245,  2026:24,  type:'Influencer'},
+  'Jeff Cruz':             {2023:0,    2024:263,  2025:84,   2026:112, type:'Influencer'},
   'Erin Wilkins':          {2023:0,    2024:287,  2025:111,  2026:12,  type:'Influencer'},
-  'Eden Lee':              {2023:0,    2024:25,   2025:185,  2026:38,  type:'Influencer'},
-  'Melody Brandon':        {2023:0,    2024:138,  2025:123,  2026:71,  type:'Influencer'},
-  'Eryn Carroll NMM':      {2023:1,    2024:144,  2025:104,  2026:12,  type:'Influencer'},
-  'Taylor Kulik':          {2023:0,    2024:156,  2025:103,  2026:42,  type:'Influencer'},
-  'Amy Bernhard':          {2023:0,    2024:0,    2025:112,  2026:91,  type:'Influencer'},
-  'Amy Erickson':          {2023:42,   2024:141,  2025:51,   2026:25,  type:'Influencer'},
+  'Eden Lee':              {2023:0,    2024:25,   2025:185,  2026:41,  type:'Influencer'},
+  'Melody Brandon':        {2023:0,    2024:138,  2025:123,  2026:76,  type:'Influencer'},
+  'Eryn Carroll NMM':      {2023:1,    2024:144,  2025:104,  2026:17,  type:'Influencer'},
+  'Taylor Kulik':          {2023:0,    2024:156,  2025:103,  2026:48,  type:'Influencer'},
+  'Amy Bernhard':          {2023:0,    2024:0,    2025:112,  2026:95,  type:'Influencer'},
+  'Amy Erickson':          {2023:42,   2024:141,  2025:51,   2026:34,  type:'Influencer'},
   'Emily Morrow':          {2023:0,    2024:108,  2025:31,   2026:5,   type:'Influencer'},
-  'Jasyra Santiago-Hines': {2023:0,    2024:101,  2025:57,   2026:63,  type:'Influencer'},
+  'Jasyra Santiago-Hines': {2023:0,    2024:101,  2025:57,   2026:73,  type:'Influencer'},
   'Devon Kuntzman':        {2023:0,    2024:28,   2025:90,   2026:13,  type:'Influencer'},
-  'Dr. Ameet Trivedi':     {2023:0,    2024:0,    2025:105,  2026:5,   type:'Influencer'},
+  'Dr. Ameet Trivedi':     {2023:0,    2024:0,    2025:105,  2026:7,   type:'Influencer'},
   'Ashley Turner':         {2023:0,    2024:87,   2025:39,   2026:21,  type:'Influencer'},
-  'Ellen Fisher':          {2023:0,    2024:1,    2025:53,   2026:54,  type:'Influencer'},
+  'Ellen Fisher':          {2023:0,    2024:1,    2025:53,   2026:57,  type:'Influencer'},
   'Wendy Ostapuk':         {2023:0,    2024:0,    2025:104,  2026:3,   type:'Influencer'},
-  'Lauren Stadler':        {2023:0,    2024:0,    2025:93,   2026:24,  type:'Influencer'},
-  'Karalynne Call':        {2023:0,    2024:65,   2025:25,   2026:10,  type:'Influencer'},
+  'Lauren Stadler':        {2023:0,    2024:0,    2025:93,   2026:25,  type:'Influencer'},
+  'Karalynne Call':        {2023:0,    2024:65,   2025:25,   2026:11,  type:'Influencer'},
   'Jennie Hoglund':        {2023:0,    2024:53,   2025:29,   2026:24,  type:'Influencer'},
-  'Taylor Moran':          {2023:0,    2024:22,   2025:62,   2026:18,  type:'Influencer'},
+  'Taylor Moran':          {2023:0,    2024:22,   2025:62,   2026:19,  type:'Influencer'},
   'Katelyn Alsop':         {2023:0,    2024:0,    2025:0,    2026:40,  type:'Influencer'},
-  'Carly Brown':           {2023:0,    2024:0,    2025:0,    2026:13,  type:'Influencer'},
-  'Taylor Weimar':         {2023:0,    2024:0,    2025:0,    2026:13,  type:'Influencer'},
-  'Emily Boazman':         {2023:0,    2024:0,    2025:0,    2026:12,  type:'Influencer'},
-  'Craig Clayton':         {2023:0,    2024:0,    2025:0,    2026:6,   type:'Influencer'},
-  'Sara Lininger':         {2023:0,    2024:0,    2025:0,    2026:6,   type:'Influencer'},
-  'Taylor Dukes':          {2023:0,    2024:0,    2025:0,    2026:5,   type:'Influencer'},
-  'Mary Catherine Oechslin': {2023:0,  2024:0,    2025:0,    2026:5,   type:'Influencer'},
+  'Carly Brown':           {2023:0,    2024:0,    2025:0,    2026:20,  type:'Influencer'},
+  'Taylor Weimar':         {2023:0,    2024:0,    2025:0,    2026:14,  type:'Influencer'},
+  'Emily Boazman':         {2023:0,    2024:0,    2025:0,    2026:35,  type:'Influencer'},
+  'Hayley Lombard':        {2023:0,    2024:0,    2025:0,    2026:15,  type:'Influencer'},
+  'Craig Clayton':         {2023:0,    2024:0,    2025:0,    2026:7,   type:'Influencer'},
+  'Sara Lininger':         {2023:0,    2024:0,    2025:0,    2026:7,   type:'Influencer'},
+  'Taylor Dukes':          {2023:0,    2024:0,    2025:0,    2026:6,   type:'Influencer'},
+  'Mary Catherine Oechslin': {2023:0,  2024:0,    2025:0,    2026:6,   type:'Influencer'},
   'Brianna Reiser':        {2023:334,  2024:25,   2025:22,   2026:9,   type:'Ambassador'},
   'Erin Rice':             {2023:5,    2024:32,   2025:22,   2026:3,   type:'Ambassador'},
   'Tiffany Hubbard':       {2023:24,   2024:16,   2025:11,   2026:6,   type:'Ambassador'},
   'Lauren Peter':          {2023:0,    2024:12,   2025:37,   2026:5,   type:'Ambassador'},
   'Elise Hylden':          {2023:0,    2024:25,   2025:20,   2026:8,   type:'Ambassador'},
-  'Melina Moses':          {2023:1,    2024:5,    2025:28,   2026:12,  type:'Ambassador'},
-  'Courtland Nall':        {2023:0,    2024:22,   2025:10,   2026:5,   type:'Ambassador'},
+  'Melina Moses':          {2023:1,    2024:5,    2025:28,   2026:15,  type:'Ambassador'},
+  'Courtland Nall':        {2023:0,    2024:22,   2025:10,   2026:8,   type:'Ambassador'},
   'Jessica Klick':         {2023:0,    2024:23,   2025:9,    2026:1,   type:'Ambassador'},
-  'Karyna Cast Korotkykh': {2023:0,    2024:1,    2025:24,   2026:5,   type:'Ambassador'},
-  'Cy Tidwell':            {2023:0,    2024:11,   2025:12,   2026:3,   type:'Ambassador'},
+  'Karyna Cast Korotkykh': {2023:0,    2024:1,    2025:24,   2026:6,   type:'Ambassador'},
+  'Cy Tidwell':            {2023:0,    2024:11,   2025:12,   2026:4,   type:'Ambassador'},
   'Michelle Keijner':      {2023:0,    2024:2,    2025:13,   2026:14,  type:'Ambassador'},
   'Jennee Guerrero':       {2023:0,    2024:1,    2025:18,   2026:3,   type:'Ambassador'},
   'Anna Brayton':          {2023:0,    2024:0,    2025:19,   2026:3,   type:'Ambassador'},
   'Heather Reed':          {2023:0,    2024:16,   2025:4,    2026:1,   type:'Ambassador'},
-  'Laura Bruner':          {2023:0,    2024:0,    2025:17,   2026:0,   type:'Ambassador'},
+  'Laura Bruner':          {2023:0,    2024:0,    2025:17,   2026:2,   type:'Ambassador'},
   'Michelle Melerine':     {2023:0,    2024:0,    2025:13,   2026:2,   type:'Ambassador'},
   'Laura Manns':           {2023:0,    2024:0,    2025:0,    2026:10,  type:'Ambassador'},
   'Hillary Ha':            {2023:0,    2024:0,    2025:0,    2026:9,   type:'Ambassador'},
-  'Rachel Jayroe':         {2023:0,    2024:0,    2025:0,    2026:6,   type:'Ambassador'},
+  'Hilary Fritsch':        {2023:0,    2024:0,    2025:0,    2026:8,   type:'Ambassador'},
+  'Rachel Jayroe':         {2023:0,    2024:0,    2025:0,    2026:7,   type:'Ambassador'},
   'Ashley Vogt':           {2023:0,    2024:0,    2025:0,    2026:5,   type:'Ambassador'},
-  'Jordan Schoen':         {2023:0,    2024:0,    2025:0,    2026:4,   type:'Ambassador'},
+  'Jordan Schoen':         {2023:0,    2024:0,    2025:0,    2026:5,   type:'Ambassador'},
   'Julia Lee':             {2023:0,    2024:0,    2025:0,    2026:4,   type:'Ambassador'},
   'Tracy Gillet':          {2023:0,    2024:0,    2025:0,    2026:4,   type:'Ambassador'},
   'Brittany Lockie':       {2023:0,    2024:0,    2025:0,    2026:4,   type:'Ambassador'},
-  "Tania O'Donnell":       {2023:0,    2024:0,    2025:0,    2026:3,   type:'Ambassador'},
+  "Tania O'Donnell":       {2023:0,    2024:0,    2025:0,    2026:4,   type:'Ambassador'},
 };
 
-const AMB_TOTALS = { 2023: 1342 + 465, 2024: 8383 + 435, 2025: 5576 + 554, 2026: 1674 + 262 };
-const AMB_COUNTS = { 2023: 6 + 24, 2024: 60 + 85, 2025: 82 + 127, 2026: 64 + 97 };
-const INF_TOTALS = { 2023: 1342, 2024: 8383, 2025: 5576, 2026: 1674 };
-const AIR_TOTALS = { 2023: 465, 2024: 435, 2025: 554, 2026: 262 };
-const ANN_FACTOR = 12 / 4.742;
+const AMB_TOTALS = { 2023: 1342 + 465, 2024: 8383 + 435, 2025: 5576 + 554, 2026: 1753 + 271 };
+const AMB_COUNTS = { 2023: 6 + 24, 2024: 60 + 85, 2025: 82 + 127, 2026: 66 + 107 };
+const INF_TOTALS = { 2023: 1342, 2024: 8383, 2025: 5576, 2026: 1753 };
+const AIR_TOTALS = { 2023: 465, 2024: 435, 2025: 554, 2026: 271 };
+const ANN_FACTOR = 12 / 4.903;
 
 /* ────── Helpers ────── */
 
@@ -713,7 +715,7 @@ export default function ReferrerView() {
             let yoyLine = '';
             let yoyColor = '';
             if (y === 2026) {
-              const annualized = Math.round(AMB_TOTALS[2026] * (12 / 3.5));
+              const annualized = Math.round(AMB_TOTALS[2026] * ANN_FACTOR);
               yoyLine = `~${annualized.toLocaleString()} annualized pace`;
               yoyColor = '#888';
             } else if (y > 2023) {
