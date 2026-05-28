@@ -99,8 +99,8 @@ const CONVERSION_LAG = [
   { label: 'Feb 26',    submissions: 1208, sameDay: 992, within7d: 1166, returning: 216, medianLag: 0, meanLag: 3.2  },
   { label: 'Mar 26',    submissions: 1287, sameDay: 963, within7d: 1175, returning: 324, medianLag: 0, meanLag: 7.9  },
   { label: 'Apr 26',    submissions: 967,  sameDay: 685, within7d: 810,  returning: 282, medianLag: 0, meanLag: 17.9 },
-  { label: 'May 1–22',  submissions: 532,  sameDay: 393, within7d: 518,  returning: 139, medianLag: 0, meanLag: 0.8  },
-  { label: 'May 23–31', submissions: 115,  sameDay: 108, within7d: 115,  returning: 7,   medianLag: 0, meanLag: 0.1  },
+  { label: 'May 1–22',  submissions: 532,  sameDay: 390, within7d: 518,  returning: 142, medianLag: 0, meanLag: 0.8  },
+  { label: 'May 23–31', submissions: 115,  sameDay: 107, within7d: 115,  returning: 8,   medianLag: 0, meanLag: 0.1  },
 ];
 
 // Traffic for conversion rate calc (matches AV_DATA where available)
@@ -117,32 +117,34 @@ const LAG_DISTRIBUTION = [
   { label: 'Feb 26',   total: 1208, buckets: [992, 77, 55, 42, 18,  8, 16] },
   { label: 'Mar 26',   total: 1287, buckets: [963, 97, 57, 58, 44, 30, 38] },
   { label: 'Apr 26',   total: 967,  buckets: [685, 55, 39, 31, 21, 35, 101] },
-  { label: 'May 1–22',  total: 532,  buckets: [393, 64, 39, 22, 11,  3,  0] },
-  { label: 'May 23–31', total: 115,  buckets: [108,  5,  2,  0,  0,  0,  0] },
+  { label: 'May 1–22',  total: 532,  buckets: [390, 64, 42, 22, 11,  3,  0] },
+  { label: 'May 23–31', total: 115,  buckets: [107,  5,  3,  0,  0,  0,  0] },
 ];
 
 // ── Weekly cohort completion curves (source of truth) ────────────────
 // Created-date cohorts: what % completed by day 0, 1, 3, 7
 const COHORT_DATA = [
   { label: 'May 1–7',   n: 173, sameDay: 77.5, within1d: 89.0, within3d: 94.2, within7d: 96.5 },
-  { label: 'May 8–14',  n: 165, sameDay: 70.3, within1d: 84.2, within3d: 90.3, within7d: 97.0 },
+  { label: 'May 8–14',  n: 165, sameDay: 70.3, within1d: 82.4, within3d: 90.3, within7d: 97.0 },
   { label: 'May 15–21', n: 166, sameDay: 72.3, within1d: 83.1, within3d: 94.0, within7d: 98.2 },
-  { label: 'May 22–28', n: 143, sameDay: 88.8, within1d: 97.2, within3d: 100.0, within7d: 100.0 },
+  { label: 'May 22–28', n: 143, sameDay: 88.8, within1d: 96.5, within3d: 100.0, within7d: 100.0 },
 ];
 
-// ── Daily cohorts around update (May 17–26) ──────────────────────────
+// ── Daily cohorts around update (May 17–27) ─────────────────────────
+// n = total starts (account creations) that day. sameDay/d1/d2_3/d4_7 = how many submitted within that window.
+// Unaccounted (n − sum of buckets) = still waiting.
 const DAILY_COHORTS = [
-  { day: 'May 17', n: 23, sameDay: 12, d1: 6, d2_3: 4, d4_7: 0 },
-  { day: 'May 18', n: 30, sameDay: 23, d1: 2, d2_3: 2, d4_7: 2 },
-  { day: 'May 19', n: 29, sameDay: 22, d1: 4, d2_3: 3, d4_7: 0 },
-  { day: 'May 20', n: 21, sameDay: 16, d1: 1, d2_3: 3, d4_7: 1 },
-  { day: 'May 21', n: 20, sameDay: 15, d1: 3, d2_3: 1, d4_7: 1 },
-  { day: 'May 22', n: 28, sameDay: 20, d1: 6, d2_3: 2, d4_7: 0 },
-  { day: 'May 23', n: 21, sameDay: 20, d1: 0, d2_3: 1, d4_7: 0 },
-  { day: 'May 24', n: 16, sameDay: 14, d1: 1, d2_3: 1, d4_7: 0 },
-  { day: 'May 25', n: 20, sameDay: 17, d1: 3, d2_3: 0, d4_7: 0 },
-  { day: 'May 26', n: 32, sameDay: 31, d1: 1, d2_3: 0, d4_7: 0 },
-  { day: 'May 27', n: 52, sameDay: 25, d1: 0, d2_3: 0, d4_7: 0 },
+  { day: 'May 17', n: 59, sameDay: 12, d1: 6, d2_3: 4, d4_7: 0 },
+  { day: 'May 18', n: 48, sameDay: 23, d1: 2, d2_3: 2, d4_7: 2 },
+  { day: 'May 19', n: 62, sameDay: 22, d1: 4, d2_3: 3, d4_7: 0 },
+  { day: 'May 20', n: 46, sameDay: 16, d1: 1, d2_3: 3, d4_7: 1 },
+  { day: 'May 21', n: 41, sameDay: 15, d1: 3, d2_3: 1, d4_7: 1 },
+  { day: 'May 22', n: 76, sameDay: 20, d1: 6, d2_3: 2, d4_7: 0 },
+  { day: 'May 23', n: 68, sameDay: 20, d1: 0, d2_3: 1, d4_7: 0 },
+  { day: 'May 24', n: 41, sameDay: 14, d1: 1, d2_3: 1, d4_7: 0 },
+  { day: 'May 25', n: 38, sameDay: 17, d1: 3, d2_3: 0, d4_7: 0 },
+  { day: 'May 26', n: 48, sameDay: 31, d1: 1, d2_3: 0, d4_7: 0 },
+  { day: 'May 27', n: 52, sameDay: 25, d1: 0, d2_3: 1, d4_7: 0 },
 ];
 
 // ── Cohort aging comparison (source of truth) ───────────────────────
@@ -738,30 +740,34 @@ export default function AVDiagnostics() {
                 <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>+2–3 days</th>
                 <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>+4–7 days</th>
                 <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Completed</th>
+                <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Waiting</th>
               </tr>
             </thead>
             <tbody>
               {DAILY_COHORTS.map(d => {
-                const isPost = d.day === 'May 23' || d.day === 'May 24';
+                const isPost = parseInt(d.day.replace('May ', '')) >= 23;
                 const isUpdate = d.day === 'May 22';
                 const completed = d.sameDay + d.d1 + d.d2_3 + d.d4_7;
+                const waiting = d.n - completed;
+                const compPctVal = Math.round(completed / d.n * 100);
                 const sdPctVal = Math.round(d.sameDay / d.n * 100);
                 const rowBg = isPost ? '#F0FDF4' : isUpdate ? '#FFFBEB' : undefined;
                 const labelColor = isPost ? '#166534' : isUpdate ? '#92400E' : TP.navy;
                 return (
                   <tr key={d.day} style={{ borderBottom: '1px solid #F3F4F6', background: rowBg }}>
                     <td style={{ padding: '8px 10px', fontWeight: 600, color: labelColor }}>
-                      {d.day}{isUpdate ? ' (update)' : ''}{isPost ? ' (post)' : ''}
+                      {d.day}{isUpdate ? ' (update)' : ''}{isPost && !isUpdate ? ' (post)' : ''}
                     </td>
                     <td style={{ padding: '8px 10px', textAlign: 'right' }}>{d.n}</td>
                     <td style={{ padding: '8px 10px', textAlign: 'right' }}>{d.sameDay}</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 600, color: sdPctVal >= 85 ? TP.green : sdPctVal < 75 ? TP.red : TP.text }}>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 600, color: sdPctVal >= 50 ? TP.green : sdPctVal < 30 ? TP.red : TP.text }}>
                       {sdPctVal}%
                     </td>
                     <td style={{ padding: '8px 10px', textAlign: 'right' }}>{d.d1}</td>
                     <td style={{ padding: '8px 10px', textAlign: 'right' }}>{d.d2_3}</td>
                     <td style={{ padding: '8px 10px', textAlign: 'right' }}>{d.d4_7}</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 600 }}>{completed}/{d.n}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 600 }}>{completed} ({compPctVal}%)</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: TP.red }}>{waiting}</td>
                   </tr>
                 );
               })}
@@ -769,8 +775,8 @@ export default function AVDiagnostics() {
           </table>
         </div>
         <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>
-          Post-update days (May 23–26) show 82–100% same-day completion (63 of 68 same-day). Stronger than the
-          pre-update trend (67%). Track through end of May to confirm sustained improvement.
+          n = total account creations that day. SD% = same-day submissions ÷ starts. Waiting = started but never submitted.
+          Pre-update days carry more waiting because those cohorts are older and anyone who hasn&apos;t submitted by now likely won&apos;t.
         </div>
       </div>
 
