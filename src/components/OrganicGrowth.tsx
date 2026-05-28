@@ -21,11 +21,11 @@ const TP = {
 
 /* ════════════════════════════════════════════
    HARDCODED GSC DATA — Source of truth
-   Data verified from Google Search Console on May 25, 2026
+   Data verified from Google Search Console on May 28, 2026
    Property verified ~Feb 2025, 16 months of history available
    Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
    SEO program reset date: May 19, 2026
-   May 2026 monthly/weekly data current through May 23 (GSC ~3-day lag)
+   May 2026 monthly/weekly data current through May 26 (GSC ~2-day lag)
    ════════════════════════════════════════════ */
 
 const SEO_START_DATE = '2026-05-19';
@@ -46,7 +46,7 @@ const GSC_MONTHLY = [
   { month: '2026-02', clicks: 10579, impressions: 66544, ctr: 15.9, position: 11.9 },
   { month: '2026-03', clicks: 12601, impressions: 74269, ctr: 17.0, position: 18.4 },
   { month: '2026-04', clicks: 11180, impressions: 105758, ctr: 10.6, position: 32.7 },
-  { month: '2026-05', clicks: 7111, impressions: 39759, ctr: 17.9, position: 20.6 },
+  { month: '2026-05', clicks: 7927, impressions: 43839, ctr: 18.1, position: 19.5 },
 ];
 
 const GSC_WEEKLY = [
@@ -117,11 +117,12 @@ const GSC_WEEKLY = [
   { week: '2026-04-27', clicks: 2848, impressions: 24374, ctr: 11.7, position: 25.3 },
   { week: '2026-05-04', clicks: 1951, impressions: 16762, ctr: 11.6, position: 23.0 },
   { week: '2026-05-11', clicks: 2082, impressions: 10234, ctr: 20.3, position: 11.3 },
-  { week: '2026-05-18', clicks: 2316, impressions: 9288, ctr: 24.9, position: 10.2 },
+  { week: '2026-05-18', clicks: 2564, impressions: 10691, ctr: 24.0, position: 10.4 },
+  { week: '2026-05-25', clicks: 568, impressions: 2677, ctr: 21.2, position: 8.1 },
 ];
 
-// Full-year daily GSC data — Jan 1 to May 23, 2026 (143 days)
-// Source: Google Search Console DAYS view, extracted May 25, 2026
+// Full-year daily GSC data — Jan 1 to May 26, 2026 (146 days)
+// Source: Google Search Console DAYS view, updated May 28, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -155,7 +156,7 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
     [1,339,1522],[2,218,1003],[3,202,907],[4,299,2293],[5,317,3915],[6,343,5614],[7,322,1831],
     [8,305,1259],[9,186,877],[10,179,973],[11,337,1412],[12,389,1397],[13,342,1367],[14,373,3003],
     [15,262,1250],[16,176,900],[17,203,905],[18,311,1339],[19,337,1358],[20,330,1551],[21,387,1881],
-    [22,487,1600],[23,464,1559],
+    [22,487,1600],[23,464,1559],[24,248,1403],[25,230,1124],[26,338,1553],
   ],
 };
 
@@ -839,7 +840,7 @@ export default function OrganicGrowth() {
       {/* ═══════ SECTION 7C: DAILY GSC — MAY 2026 ═══════ */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
         <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Daily Search Performance — May 2026</h3>
-        <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Day-by-day clicks and impressions from Google Search Console. Red dashed line marks SEO program launch (May 19). Data through May 23 (GSC has a ~3-day processing delay).</p>
+        <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Day-by-day clicks and impressions from Google Search Console. Red dashed line marks SEO program launch (May 19). Data through May 26 (GSC has a ~2-day processing delay).</p>
         <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
           <div style={{ background: '#f0f9ff', borderRadius: 8, padding: '8px 14px', border: '1px solid #bae6fd', fontSize: 12 }}>
             <span style={{ color: '#888' }}>Avg Daily Clicks:</span>{' '}
@@ -850,8 +851,8 @@ export default function OrganicGrowth() {
             <span style={{ fontWeight: 700, color: TP.navy }}>May {dailyDays.reduce((best, d) => GSC_DAILY_MAY_2026[d].clicks > GSC_DAILY_MAY_2026[best].clicks ? d : best, dailyDays[0])} ({Math.max(...dailyDays.map(d => GSC_DAILY_MAY_2026[d].clicks))} clicks)</span>
           </div>
           <div style={{ background: '#f0fdf4', borderRadius: 8, padding: '8px 14px', border: `1px solid ${TP.green}50`, fontSize: 12 }}>
-            <span style={{ color: '#888' }}>Post-SEO Avg (May 19–23):</span>{' '}
-            <span style={{ fontWeight: 700, color: TP.green }}>{Math.round(([19,20,21,22,23].reduce((s, d) => s + GSC_DAILY_MAY_2026[d].clicks, 0)) / 5)} clicks/day</span>
+            <span style={{ color: '#888' }}>Post-SEO Avg (May 19–26):</span>{' '}
+            <span style={{ fontWeight: 700, color: TP.green }}>{Math.round(([19,20,21,22,23,24,25,26].reduce((s, d) => s + GSC_DAILY_MAY_2026[d].clicks, 0)) / 8)} clicks/day</span>
           </div>
         </div>
         <div style={{ height: 280 }}>
