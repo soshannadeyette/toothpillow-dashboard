@@ -31,7 +31,7 @@ const TP = {
 };
 
 // ── Hardcoded data (source of truth) ──────────────────────────────────
-// Source: Salesforce "Waiting on Info Ratios" export, pulled May 27 2026 17:04 PST
+// Source: Salesforce "Waiting on Info Ratios" export, pulled May 28 2026 07:39 PST
 // "starts" = Salesforce Person Account creations (assessment starts)
 // "waiting" = current WAITING stage (needs info / needs photos) — never finished
 // "submitted" = have a Submission Date — completed their assessment
@@ -41,8 +41,8 @@ const AV_DATA = [
   { label: 'Feb 26', month: 2,  year: 2026, traffic: 51480, starts: 2193, waiting: 888, submitted: 1293, partial: false, period: 'full' as const },
   { label: 'Mar 26', month: 3,  year: 2026, traffic: 39218, starts: 2263, waiting: 967, submitted: 1285, partial: false, period: 'full' as const },
   { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1431, waiting: 569, submitted: 854,  partial: false, period: 'full' as const },
-  { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1038, waiting: 506, submitted: 532, partial: false, period: 'pre-update' as const },
-  { label: 'May 23–31', month: 5,  year: 2026, traffic: 2941,  starts: 247,  waiting: 132,  submitted: 115,  partial: true,  period: 'post-update' as const },
+  { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1038, waiting: 505, submitted: 533, partial: false, period: 'pre-update' as const },
+  { label: 'May 23–31', month: 5,  year: 2026, traffic: 2941,  starts: 291,  waiting: 163,  submitted: 128,  partial: true,  period: 'post-update' as const },
 ];
 
 // ── Full pipeline funnel by month (source of truth) ──────────────────
@@ -55,7 +55,7 @@ const FUNNEL_DATA = [
   { label: 'Feb 26', waiting: 888, inReview:  6, checkout: 480, checkedOut: 320, closed: 472, onHold: 27 },
   { label: 'Mar 26', waiting: 967, inReview: 13, checkout: 530, checkedOut: 359, closed: 366, onHold: 28 },
   { label: 'Apr 26', waiting: 569, inReview: 36, checkout: 434, checkedOut: 164, closed: 212, onHold: 16 },
-  { label: 'May 26', waiting: 634, inReview: 227, checkout: 302, checkedOut: 64,  closed: 50,  onHold: 8 },
+  { label: 'May 26', waiting: 661, inReview: 237, checkout: 304, checkedOut: 68,  closed: 50,  onHold: 9 },
 ];
 
 // ── May daily data (source of truth) ─────────────────────────────────
@@ -77,7 +77,7 @@ const MAY_DAILY = [
   { day: 14, starts: 49, waiting: 25, submitted: 24 },
   { day: 15, starts: 41, waiting: 18, submitted: 23 },
   { day: 16, starts: 33, waiting: 13, submitted: 20 },
-  { day: 17, starts: 59, waiting: 36, submitted: 23 },
+  { day: 17, starts: 59, waiting: 35, submitted: 24 },
   { day: 18, starts: 48, waiting: 18, submitted: 30 },
   { day: 19, starts: 62, waiting: 33, submitted: 29 },
   { day: 20, starts: 46, waiting: 26, submitted: 20 },
@@ -86,8 +86,9 @@ const MAY_DAILY = [
   { day: 23, starts: 68, waiting: 47, submitted: 21 },
   { day: 24, starts: 41, waiting: 25, submitted: 16 },
   { day: 25, starts: 38, waiting: 18, submitted: 20 },
-  { day: 26, starts: 48, waiting: 16, submitted: 32 },
-  { day: 27, starts: 52, waiting: 26, submitted: 26 },
+  { day: 26, starts: 47, waiting: 15, submitted: 32 },
+  { day: 27, starts: 82, waiting: 49, submitted: 33 },
+  { day: 28, starts: 15, waiting: 9, submitted: 6 },
 ];
 
 // ── Conversion lag data (source of truth) ─────────────────────────────
@@ -99,8 +100,8 @@ const CONVERSION_LAG = [
   { label: 'Feb 26',    submissions: 1208, sameDay: 992, within7d: 1166, returning: 216, medianLag: 0, meanLag: 3.2  },
   { label: 'Mar 26',    submissions: 1287, sameDay: 963, within7d: 1175, returning: 324, medianLag: 0, meanLag: 7.9  },
   { label: 'Apr 26',    submissions: 967,  sameDay: 685, within7d: 810,  returning: 282, medianLag: 0, meanLag: 17.9 },
-  { label: 'May 1–22',  submissions: 532,  sameDay: 390, within7d: 518,  returning: 142, medianLag: 0, meanLag: 0.8  },
-  { label: 'May 23–31', submissions: 115,  sameDay: 107, within7d: 115,  returning: 8,   medianLag: 0, meanLag: 0.1  },
+  { label: 'May 1–22',  submissions: 533,  sameDay: 390, within7d: 518,  returning: 143, medianLag: 0, meanLag: 0.8  },
+  { label: 'May 23–31', submissions: 128,  sameDay: 120, within7d: 128,  returning: 8,   medianLag: 0, meanLag: 0.1  },
 ];
 
 // Traffic for conversion rate calc (matches AV_DATA where available)
@@ -117,24 +118,24 @@ const LAG_DISTRIBUTION = [
   { label: 'Feb 26',   total: 1208, buckets: [992, 77, 55, 42, 18,  8, 16] },
   { label: 'Mar 26',   total: 1287, buckets: [963, 97, 57, 58, 44, 30, 38] },
   { label: 'Apr 26',   total: 967,  buckets: [685, 55, 39, 31, 21, 35, 101] },
-  { label: 'May 1–22',  total: 532,  buckets: [390, 64, 42, 22, 11,  3,  0] },
-  { label: 'May 23–31', total: 115,  buckets: [107,  5,  3,  0,  0,  0,  0] },
+  { label: 'May 1–22',  total: 533,  buckets: [390, 64, 42, 22, 12,  3,  0] },
+  { label: 'May 23–31', total: 128,  buckets: [120,  5,  3,  0,  0,  0,  0] },
 ];
 
 // ── Weekly cohort completion curves (source of truth) ────────────────
 // Created-date cohorts: what % completed by day 0, 1, 3, 7
 const COHORT_DATA = [
   { label: 'May 1–7',   n: 173, sameDay: 77.5, within1d: 89.0, within3d: 94.2, within7d: 96.5 },
-  { label: 'May 8–14',  n: 165, sameDay: 70.3, within1d: 82.4, within3d: 90.3, within7d: 97.0 },
-  { label: 'May 15–21', n: 166, sameDay: 72.3, within1d: 83.1, within3d: 94.0, within7d: 98.2 },
-  { label: 'May 22–28', n: 143, sameDay: 88.8, within1d: 96.5, within3d: 100.0, within7d: 100.0 },
+  { label: 'May 8–14',  n: 165, sameDay: 70.3, within1d: 82.4, within3d: 88.5, within7d: 95.2 },
+  { label: 'May 15–21', n: 167, sameDay: 71.9, within1d: 82.6, within3d: 93.4, within7d: 97.6 },
+  { label: 'May 22–28', n: 156, sameDay: 89.7, within1d: 96.8, within3d: 99.4, within7d: 99.4 },
 ];
 
 // ── Daily cohorts around update (May 17–27) ─────────────────────────
 // n = total starts (account creations) that day. sameDay/d1/d2_3/d4_7 = how many submitted within that window.
 // Unaccounted (n − sum of buckets) = still waiting.
 const DAILY_COHORTS = [
-  { day: 'May 17', n: 59, sameDay: 12, d1: 6, d2_3: 4, d4_7: 0 },
+  { day: 'May 17', n: 59, sameDay: 12, d1: 6, d2_3: 4, d4_7: 2 },
   { day: 'May 18', n: 48, sameDay: 23, d1: 2, d2_3: 2, d4_7: 2 },
   { day: 'May 19', n: 62, sameDay: 22, d1: 4, d2_3: 3, d4_7: 0 },
   { day: 'May 20', n: 46, sameDay: 16, d1: 1, d2_3: 3, d4_7: 1 },
@@ -143,8 +144,9 @@ const DAILY_COHORTS = [
   { day: 'May 23', n: 68, sameDay: 20, d1: 0, d2_3: 1, d4_7: 0 },
   { day: 'May 24', n: 41, sameDay: 14, d1: 1, d2_3: 1, d4_7: 0 },
   { day: 'May 25', n: 38, sameDay: 17, d1: 3, d2_3: 0, d4_7: 0 },
-  { day: 'May 26', n: 48, sameDay: 31, d1: 1, d2_3: 0, d4_7: 0 },
-  { day: 'May 27', n: 52, sameDay: 25, d1: 0, d2_3: 1, d4_7: 0 },
+  { day: 'May 26', n: 47, sameDay: 31, d1: 1, d2_3: 0, d4_7: 0 },
+  { day: 'May 27', n: 82, sameDay: 32, d1: 0, d2_3: 0, d4_7: 0 },
+  { day: 'May 28', n: 15, sameDay: 6, d1: 0, d2_3: 0, d4_7: 0 },
 ];
 
 // ── Cohort aging comparison (source of truth) ───────────────────────
@@ -152,14 +154,14 @@ const DAILY_COHORTS = [
 //   completed (within 7d + days 8-14 + 15+) | waiting | other
 // These add up to starts. "mature" = every person has had that many days.
 const COHORT_AGING = [
-  { label: 'May 1–7',   starts: 327, within7d: 167, d8to14: 4, d15plus: 2, waiting: 154, daysElapsed: 20, mature7d: true,  mature14d: true,  postUpdate: false },
-  { label: 'May 8–14',  starts: 305, within7d: 160, d8to14: 4, d15plus: 1, waiting: 140, daysElapsed: 13, mature7d: true,  mature14d: false, postUpdate: false },
-  { label: 'May 15–21', starts: 330, within7d: 163, d8to14: 3, d15plus: 0, waiting: 164, daysElapsed: 6,  mature7d: false, mature14d: false, postUpdate: false },
-  { label: 'May 22–28', starts: 323, within7d: 143, d8to14: 0, d15plus: 0, waiting: 180, daysElapsed: 0,  mature7d: false, mature14d: false, postUpdate: true  },
+  { label: 'May 1–7',   starts: 327, within7d: 167, d8to14: 4, d15plus: 2, waiting: 154, daysElapsed: 21, mature7d: true,  mature14d: true,  postUpdate: false },
+  { label: 'May 8–14',  starts: 305, within7d: 157, d8to14: 5, d15plus: 3, waiting: 140, daysElapsed: 14, mature7d: true,  mature14d: true,  postUpdate: false },
+  { label: 'May 15–21', starts: 330, within7d: 163, d8to14: 4, d15plus: 0, waiting: 163, daysElapsed: 7,  mature7d: true,  mature14d: false, postUpdate: false },
+  { label: 'May 22–28', starts: 367, within7d: 156, d8to14: 0, d15plus: 0, waiting: 211, daysElapsed: 0,  mature7d: false, mature14d: false, postUpdate: true  },
 ];
 
 // ── Post-update tracking ────────────────────────────────────────────
-const POST_UPDATE_DAYS_ELAPSED = 5; // data through 5/27
+const POST_UPDATE_DAYS_ELAPSED = 6; // data through 5/28
 
 function num(v: number): string { return v.toLocaleString(); }
 function pct(v: number, t: number): string { return t > 0 ? (v / t * 100).toFixed(1) + '%' : '--'; }
@@ -569,7 +571,7 @@ export default function AVDiagnostics() {
             </tbody>
           </table>
         </div>
-        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* May 23–31 = {POST_UPDATE_DAYS_ELAPSED} days post-update. 6 of 85 submissions were returning (created before May 23).</div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* May 23–31 = {POST_UPDATE_DAYS_ELAPSED} days post-update. 8 of 128 submissions were returning (created before May 23).</div>
       </div>
 
       {/* ===== NEW: Lag Distribution ===== */}
@@ -809,7 +811,7 @@ export default function AVDiagnostics() {
                 <div style={{ fontSize: 12, color: '#6B7280' }}>{preTotalSub} of {preTotalStarts} completed</div>
               </div>
               <div style={{ flex: 1, minWidth: 140, background: '#F0FDF4', borderRadius: 8, padding: '12px 16px' }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: '#166534', textTransform: 'uppercase', letterSpacing: 0.5 }}>Post-update (May 23–27)</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#166534', textTransform: 'uppercase', letterSpacing: 0.5 }}>Post-update (May 23–28)</div>
                 <div style={{ fontSize: 28, fontWeight: 700, color: '#166534' }}>{postOverall}%</div>
                 <div style={{ fontSize: 12, color: '#6B7280' }}>{postTotalSub} of {postTotalStarts} completed</div>
               </div>
@@ -838,7 +840,7 @@ export default function AVDiagnostics() {
                     const comp = Math.round(d.submitted / d.starts * 100);
                     const isPost = d.day >= 23;
                     const isUpdate = d.day === 22;
-                    const daysOld = 27 - d.day;
+                    const daysOld = 28 - d.day;
                     const rowBg = isPost ? '#F0FDF4' : isUpdate ? '#FFFBEB' : undefined;
                     const labelColor = isPost ? '#166534' : isUpdate ? '#92400E' : TP.navy;
                     return (
@@ -924,7 +926,7 @@ export default function AVDiagnostics() {
           </table>
         </div>
         <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>
-          Source: Salesforce &quot;Waiting on Info Ratios&quot; export, May 26 2026. &quot;Starts&quot; = Person Account creations.
+          Source: Salesforce &quot;Waiting on Info Ratios&quot; export, May 28 2026. &quot;Starts&quot; = Person Account creations.
           &quot;Submitted&quot; = have a Submission Date. &quot;Waiting&quot; = current stage is WAITING (never finished).
           &quot;Other&quot; = in pipeline, closed, denied, or on hold.
           * May 23–31 is {POST_UPDATE_DAYS_ELAPSED} days post-update — recent accounts haven&apos;t had time to mature.
@@ -1013,7 +1015,7 @@ export default function AVDiagnostics() {
         </div>
 
         <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 10 }}>
-          Source: Salesforce export May 26 2026 19:33 PST. Waiting rate is a point-in-time snapshot — it will
+          Source: Salesforce export May 28 2026 07:39 PST. Waiting rate is a point-in-time snapshot — it will
           decrease as some accounts eventually complete or are closed out.
         </div>
       </div>

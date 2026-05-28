@@ -94,13 +94,13 @@ const REFERRER_DATA: Record<string, RefMonth> = {
 
 /* ────── May 2026 Projection (Salesforce snapshot + pace) ────── */
 const MAY_2026_SF: Record<string, number> = {
-  total: 897, Parent: 45, 'Dental Office': 194, 'Airway Ambassador': 28,
-  Influencer: 200, Podcast: 76, Instagram: 45, TikTok: 4, Facebook: 11,
+  total: 909, Parent: 45, 'Dental Office': 196, 'Airway Ambassador': 29,
+  Influencer: 205, Podcast: 76, Instagram: 47, TikTok: 4, Facebook: 11,
   'Meta Ad': 1, 'Online Search': 218, 'Unknown Referral': 45,
-  'Unknown Professional Referral': 5, 'Google Ad': 20, MYO: 3,
+  'Unknown Professional Referral': 5, 'Google Ad': 22, MYO: 3,
   'Health Care Professional': 2,
 };
-const MAY_2026_SF_DAYS = 27;
+const MAY_2026_SF_DAYS = 28;
 const MAY_2026_DAYS_IN_MONTH = 31;
 
 function buildMay2026Projected(): { actual: RefMonth; projected: RefMonth } {
@@ -691,7 +691,7 @@ export default function ReferrerView() {
       }}>
         <div style={{ fontWeight: 700, fontSize: 16, color: TP.text, marginBottom: 4 }}>Individual Ambassador Tracking</div>
         <div style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>
-          Year-over-year submissions · Influencers + Airway Ambassadors combined · 2026 = YTD through May 23
+          Year-over-year submissions · Influencers + Airway Ambassadors combined · 2026 = YTD through May 28
         </div>
 
         {/* Diversification callout */}
