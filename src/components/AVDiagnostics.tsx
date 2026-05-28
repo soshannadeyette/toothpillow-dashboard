@@ -780,6 +780,108 @@ export default function AVDiagnostics() {
         </div>
       </div>
 
+      {/* ===== Post-Update Impact ===== */}
+      {(() => {
+        const preDays = MAY_DAILY.filter(d => d.day >= 15 && d.day <= 21);
+        const postDays = MAY_DAILY.filter(d => d.day >= 23);
+        const preAvgComp = Math.round(preDays.reduce((s, d) => s + d.submitted / d.starts * 100, 0) / preDays.length);
+        const postAvgComp = Math.round(postDays.reduce((s, d) => s + d.submitted / d.starts * 100, 0) / postDays.length);
+        const preTotalStarts = preDays.reduce((s, d) => s + d.starts, 0);
+        const preTotalSub = preDays.reduce((s, d) => s + d.submitted, 0);
+        const postTotalStarts = postDays.reduce((s, d) => s + d.starts, 0);
+        const postTotalSub = postDays.reduce((s, d) => s + d.submitted, 0);
+        const preOverall = Math.round(preTotalSub / preTotalStarts * 100);
+        const postOverall = Math.round(postTotalSub / postTotalStarts * 100);
+        const diff = postOverall - preOverall;
+        return (
+          <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #E5E7EB', padding: 20, marginBottom: 20 }}>
+            <h3 style={{ fontSize: 14, fontWeight: 600, color: TP.navy, marginTop: 0, marginBottom: 4 }}>Post-update impact: completion rate</h3>
+            <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 16 }}>
+              Completion = submitted ÷ starts for each day. Compares the week before the update (May 15–21) to post-update days (May 23+).
+              Post-update cohorts are newer, so some &quot;waiting&quot; people may still complete.
+            </div>
+
+            {/* KPI cards */}
+            <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: 140, background: '#FFF5F5', borderRadius: 8, padding: '12px 16px' }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#991B1B', textTransform: 'uppercase', letterSpacing: 0.5 }}>Pre-update (May 15–21)</div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: '#991B1B' }}>{preOverall}%</div>
+                <div style={{ fontSize: 12, color: '#6B7280' }}>{preTotalSub} of {preTotalStarts} completed</div>
+              </div>
+              <div style={{ flex: 1, minWidth: 140, background: '#F0FDF4', borderRadius: 8, padding: '12px 16px' }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#166534', textTransform: 'uppercase', letterSpacing: 0.5 }}>Post-update (May 23–27)</div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: '#166534' }}>{postOverall}%</div>
+                <div style={{ fontSize: 12, color: '#6B7280' }}>{postTotalSub} of {postTotalStarts} completed</div>
+              </div>
+              <div style={{ flex: 1, minWidth: 140, background: diff > 0 ? '#F0FDF4' : diff < 0 ? '#FFF5F5' : '#F9FAFB', borderRadius: 8, padding: '12px 16px' }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: 0.5 }}>Change</div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: diff > 0 ? TP.green : diff < 0 ? TP.red : TP.text }}>{diff > 0 ? '+' : ''}{diff}pp</div>
+                <div style={{ fontSize: 12, color: '#6B7280' }}>percentage points</div>
+              </div>
+            </div>
+
+            {/* Daily completion rate table */}
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid #E5E7EB' }}>
+                    <th style={{ textAlign: 'left', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Day</th>
+                    <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Starts</th>
+                    <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Submitted</th>
+                    <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Comp %</th>
+                    <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Waiting</th>
+                    <th style={{ textAlign: 'right', padding: '8px 10px', color: '#6B7280', fontWeight: 600 }}>Days old</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {MAY_DAILY.filter(d => d.day >= 15).map(d => {
+                    const comp = Math.round(d.submitted / d.starts * 100);
+                    const isPost = d.day >= 23;
+                    const isUpdate = d.day === 22;
+                    const daysOld = 27 - d.day;
+                    const rowBg = isPost ? '#F0FDF4' : isUpdate ? '#FFFBEB' : undefined;
+                    const labelColor = isPost ? '#166534' : isUpdate ? '#92400E' : TP.navy;
+                    return (
+                      <tr key={d.day} style={{ borderBottom: '1px solid #F3F4F6', background: rowBg }}>
+                        <td style={{ padding: '8px 10px', fontWeight: 600, color: labelColor }}>
+                          May {d.day}{isUpdate ? ' (update)' : ''}{isPost ? ' (post)' : ''}
+                        </td>
+                        <td style={{ padding: '8px 10px', textAlign: 'right' }}>{d.starts}</td>
+                        <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 600, color: TP.green }}>{d.submitted}</td>
+                        <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 600, color: comp >= 60 ? TP.green : comp < 40 ? TP.red : TP.text }}>{comp}%</td>
+                        <td style={{ padding: '8px 10px', textAlign: 'right', color: TP.red }}>{d.waiting}</td>
+                        <td style={{ padding: '8px 10px', textAlign: 'right', color: '#6B7280' }}>{daysOld}d</td>
+                      </tr>
+                    );
+                  })}
+                  {/* Pre-update subtotal */}
+                  <tr style={{ borderTop: '2px solid #E5E7EB', fontWeight: 700 }}>
+                    <td style={{ padding: '8px 10px', color: '#991B1B' }}>Pre avg (May 15–21)</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>{preTotalStarts}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: TP.green }}>{preTotalSub}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: TP.red }}>{preOverall}%</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: TP.red }}>{preTotalStarts - preTotalSub}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#6B7280' }}>6–12d</td>
+                  </tr>
+                  <tr style={{ fontWeight: 700 }}>
+                    <td style={{ padding: '8px 10px', color: '#166534' }}>Post avg (May 23–27)</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>{postTotalStarts}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: TP.green }}>{postTotalSub}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: postOverall >= preOverall ? TP.green : TP.red }}>{postOverall}%</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: TP.red }}>{postTotalStarts - postTotalSub}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#6B7280' }}>0–4d</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>
+              &quot;Days old&quot; = how many days since that cohort was created. Newer cohorts have lower completion rates because people haven&apos;t
+              had time to come back. Pre-update cohorts (6–12 days old) are near-final. Post-update cohorts (0–4 days old) will climb.
+            </div>
+          </div>
+        );
+      })()}
+
       {/* ===== Assessment data table ===== */}
       <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #E5E7EB', padding: 20 }}>
         <h3 style={{ fontSize: 14, fontWeight: 600, color: TP.navy, marginTop: 0, marginBottom: 12 }}>Assessment data (Salesforce)</h3>
