@@ -491,7 +491,7 @@ export default function OrganicGrowth() {
     },
   }), []);
 
-  // Full-year daily chart (Jan 1 – May 23, 2026)
+  // Full-year daily chart (Jan 1 – May 26, 2026)
   const fullYearDaily = useMemo(() => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May'] as const;
     const labels: string[] = [];
@@ -672,7 +672,7 @@ export default function OrganicGrowth() {
           <div style={{ fontSize: 32, opacity: 0.4 }}>→</div>
           {/* Now */}
           <div>
-            <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 8, fontWeight: 600 }}>MAY 2026 (23 DAYS)</div>
+            <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 8, fontWeight: 600 }}>MAY 2026 (26 DAYS)</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               <div><div style={{ fontSize: 10, opacity: 0.5 }}>Avg Position</div><div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>21.7</div><div style={{ fontSize: 10, opacity: 0.5 }}>Page 2–3</div></div>
               <div><div style={{ fontSize: 10, opacity: 0.5 }}>CTR</div><div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>16.8%</div></div>
@@ -818,7 +818,7 @@ export default function OrganicGrowth() {
       {/* ═══════ SECTION 7B: FULL-YEAR DAILY CLICKS ═══════ */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
         <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Daily Search Clicks — 2026 Year to Date</h3>
-        <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Every day from Jan 1 to May 23. Red line is the 7-day moving average. Dashed vertical lines separate months.</p>
+        <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Every day from Jan 1 to May 26. Red line is the 7-day moving average. Dashed vertical lines separate months.</p>
         <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
           {fullYearDaily.monthlyAvgs.map(m => (
             <div key={m.label} style={{ background: '#f0f9ff', borderRadius: 8, padding: '6px 12px', border: '1px solid #bae6fd', fontSize: 12, minWidth: 90 }}>
