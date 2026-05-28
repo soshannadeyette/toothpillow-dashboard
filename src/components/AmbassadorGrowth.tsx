@@ -151,7 +151,7 @@ const moversData: Record<string, {y25:number; y26:number; type:string}> = {
 // bonusSubs = submissions counted ONLY from window start date forward
 // Sorted by bonusSubs descending. Katelyn Alsop has a separate Jan 19 window.
 const launchBonusData = [
-  {name:'Shannon Tripp',onboard:'06/27/2025',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:50,tier:1,earned:250},
+  {name:'Shannon Tripp',onboard:'06/27/2025',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:50,tier:2,earned:1250},
   {name:'Lauren Johnson NNM',onboard:'05/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:42,tier:1,earned:250},
   {name:'Katelyn Alsop (James)',onboard:'01/19/2026',is2026:true,winStart:'01/19/2026',winEnd:'01/19/2027',bonusSubs:40,tier:1,earned:250},
   {name:'Soshanna Salsman',onboard:'04/30/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:43,tier:1,earned:250},
@@ -248,6 +248,7 @@ export default function AmbassadorGrowth() {
 
   /* ── Launch bonus summary ── */
   const tier1Count = launchBonusData.filter(d => d.tier >= 1).length;
+  const tier2Count = launchBonusData.filter(d => d.tier >= 2).length;
   const approachingTier1 = launchBonusData.filter(d => d.tier === 0 && d.bonusSubs >= 15).length;
   const totalEarned = launchBonusData.reduce((s, d) => s + d.earned, 0);
   const lbMaxLiability = 72 * 1250; // 72 tracked ambassadors * $1,250 max each
