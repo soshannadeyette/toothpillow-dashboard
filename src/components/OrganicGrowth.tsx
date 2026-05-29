@@ -233,54 +233,14 @@ const ONLINE_SEARCH_SUBMISSIONS: Record<string, number> = {
 };
 
 /* ════════════════════════════════════════════
-   QUARTERLY AGGREGATION
-   ════════════════════════════════════════════ */
-
-interface QuarterData {
-  label: string;
-  clicks: number;
-  impressions: number;
-  ctr: number;
-  position: number;
-  months: number;
-  onlineSearchSubs: number;
-}
-
-function computeQuarters(): QuarterData[] {
-  const qMap: Record<string, { clicks: number; impressions: number; positions: number[]; ctrs: number[]; months: number; subs: number }> = {};
-  const qOrder = ['Q1 2025', 'Q2 2025', 'Q3 2025', 'Q4 2025', 'Q1 2026', 'Q2 2026'];
-
-  for (const m of GSC_MONTHLY) {
-    const [y, mo] = m.month.split('-').map(Number);
-    const qNum = Math.ceil(mo / 3);
-    const label = `Q${qNum} ${y}`;
-    if (!qMap[label]) qMap[label] = { clicks: 0, impressions: 0, positions: [], ctrs: [], months: 0, subs: 0 };
-    qMap[label].clicks += m.clicks;
-    qMap[label].impressions += m.impressions;
-    qMap[label].positions.push(m.position);
-    qMap[label].ctrs.push(m.ctr);
-    qMap[label].months += 1;
-    const subKey = m.month;
-    if (ONLINE_SEARCH_SUBMISSIONS[subKey]) qMap[label].subs += ONLINE_SEARCH_SUBMISSIONS[subKey];
-  }
-
-  return qOrder.filter(q => qMap[q]).map(q => {
-    const d = qMap[q];
-    return {
-      label: q,
-      clicks: d.clicks,
-      impressions: d.impressions,
-      ctr: parseFloat((d.ctrs.reduce((a, b) => a + b, 0) / d.ctrs.length).toFixed(1)),
-      position: parseFloat((d.positions.reduce((a, b) => a + b, 0) / d.positions.length).toFixed(1)),
-      months: d.months,
-      onlineSearchSubs: d.subs,
-    };
-  });
-}
-
-/* ════════════════════════════════════════════
    HELPERS
    ════════════════════════════════════════════ */
+
+// Suppress unused-variable warnings for data kept for future use
+void SEO_START_DATE;
+void GSC_WEEKLY;
+void GSC_DAILY_2026;
+void GSC_DAILY_MAY_2026;
 
 function fmtK(n: number): string {
   if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
@@ -294,39 +254,10 @@ function monthLabel(m: string): string {
   return `${names[parseInt(mo)]} '${y.slice(2)}`;
 }
 
-function weekLabel(w: string): string {
-  const d = new Date(w + 'T00:00:00');
-  const names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return `${names[d.getMonth()]} ${d.getDate()}`;
-}
-
 function delta(current: number, previous: number): string {
   const pct = ((current - previous) / previous * 100);
   const sign = pct >= 0 ? '+' : '';
   return `${sign}${pct.toFixed(0)}%`;
-}
-
-function TrendCard({ label, current, previous, unit, reverse, sub }: {
-  label: string; current: number; previous: number; unit?: string; reverse?: boolean; sub?: string;
-}) {
-  const improved = reverse ? current < previous : current > previous;
-  const changeVal = reverse
-    ? ((previous - current) / previous * 100).toFixed(0)
-    : ((current - previous) / previous * 100).toFixed(0);
-  const arrow = improved ? '▲' : '▼';
-  const color = improved ? TP.green : TP.red;
-  const displayVal = unit === '%' ? `${current}%` : unit === 'pos' ? current.toFixed(1) : fmtK(current);
-
-  return (
-    <div style={{ background: '#fff', borderRadius: 10, padding: '16px 18px', border: '1px solid #e5e7eb', flex: '1 1 0', minWidth: 155 }}>
-      <div style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>{label}</div>
-      <div style={{ fontSize: 26, fontWeight: 700, color: TP.navy }}>{displayVal}</div>
-      <div style={{ fontSize: 12, color, fontWeight: 600, marginTop: 4 }}>
-        {arrow} {Math.abs(Number(changeVal))}% {improved ? 'improvement' : 'decline'}
-      </div>
-      {sub && <div style={{ fontSize: 11, color: '#aaa', marginTop: 2 }}>{sub}</div>}
-    </div>
-  );
 }
 
 /* ════════════════════════════════════════════
@@ -334,70 +265,119 @@ function TrendCard({ label, current, previous, unit, reverse, sub }: {
    ════════════════════════════════════════════ */
 
 export default function OrganicGrowth() {
-  const quarters = useMemo(() => computeQuarters(), []);
-  const firstQ = quarters[0];
-  const latestFullQ = quarters[quarters.length - 2]; // Q1 2026
-  const currentQ = quarters[quarters.length - 1]; // Q2 2026 (partial)
+  const mayData = GSC_MONTHLY[GSC_MONTHLY.length - 1];
+  const mayDaysReported = 26;
+  const mayClickPace = Math.round(mayData.clicks / mayDaysReported * 31);
 
-  const mayPartial = GSC_MONTHLY[GSC_MONTHLY.length - 1];
-  const mayDays = 23;
+  const may2025 = GSC_MONTHLY.find(m => m.month === '2025-05')!;
+  const feb2025 = GSC_MONTHLY.find(m => m.month === '2025-02')!;
 
-  // Monthly CTR trend chart
-  const ctrChartData = useMemo(() => ({
-    labels: GSC_MONTHLY.map(m => monthLabel(m.month)),
-    datasets: [{
-      label: 'Monthly CTR',
-      data: GSC_MONTHLY.map(m => m.ctr),
-      borderColor: TP.green,
-      backgroundColor: `${TP.green}20`,
-      pointRadius: 5,
-      pointBackgroundColor: GSC_MONTHLY.map(m => TP.green),
-      borderWidth: 2.5,
-      tension: 0.3,
-      fill: true,
-    }],
-  }), []);
+  // Submission totals by year
+  const sub2023Total = Object.entries(ONLINE_SEARCH_SUBMISSIONS).filter(([k]) => k.startsWith('2023')).reduce((s, [, v]) => s + v, 0);
+  const sub2024Total = Object.entries(ONLINE_SEARCH_SUBMISSIONS).filter(([k]) => k.startsWith('2024')).reduce((s, [, v]) => s + v, 0);
+  const sub2025Total = Object.entries(ONLINE_SEARCH_SUBMISSIONS).filter(([k]) => k.startsWith('2025')).reduce((s, [, v]) => s + v, 0);
+  const sub2026YTD = Object.entries(ONLINE_SEARCH_SUBMISSIONS).filter(([k]) => k.startsWith('2026')).reduce((s, [, v]) => s + v, 0);
+  const sub2026Pace = Math.round(sub2026YTD / 5 * 12);
 
-  // SEO marker index
-  const seoMarkerIndex = GSC_MONTHLY.findIndex(m => m.month === '2026-05') - 0.5;
+  const may2026Subs = ONLINE_SEARCH_SUBMISSIONS['2026-05']; // 174 through 23 days
+  const may2025Subs = ONLINE_SEARCH_SUBMISSIONS['2025-05']; // 88
 
-  const ctrChartOptions = useMemo(() => ({
+  // ── Section 2: Monthly Organic Clicks bar chart with 3-month MA ──
+  const monthlyClicksData = useMemo(() => {
+    const clickValues = GSC_MONTHLY.map(m => m.clicks);
+    const ma3: (number | null)[] = clickValues.map((_, i) => {
+      if (i < 2) return null;
+      return Math.round((clickValues[i] + clickValues[i - 1] + clickValues[i - 2]) / 3);
+    });
+
+    return {
+      labels: GSC_MONTHLY.map(m => monthLabel(m.month)),
+      datasets: [
+        {
+          label: 'Organic Clicks',
+          data: clickValues,
+          backgroundColor: TP.blue,
+          borderRadius: 4,
+          borderSkipped: false as const,
+          order: 2,
+        },
+        {
+          label: '3-Month Moving Avg',
+          data: ma3,
+          type: 'line' as const,
+          borderColor: TP.red,
+          backgroundColor: 'transparent',
+          pointRadius: 0,
+          borderWidth: 2.5,
+          tension: 0.35,
+          spanGaps: true,
+          order: 1,
+        },
+      ],
+    };
+  }, []);
+
+  const monthlyClicksOptions = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { display: false },
-      tooltip: { callbacks: { label: (ctx: { parsed: { y: number } }) => `CTR: ${ctx.parsed.y}%` } },
-      annotation: {
-        annotations: {
-          seoLine: { type: 'line' as const, xMin: seoMarkerIndex, xMax: seoMarkerIndex, borderColor: TP.red, borderWidth: 2, borderDash: [6, 4] },
-          startLabel: {
-            type: 'label' as const, xValue: 0, yValue: GSC_MONTHLY[0].ctr,
-            content: [`${GSC_MONTHLY[0].ctr}%`], font: { size: 11, weight: 'bold' as const }, color: TP.navy,
-            position: { x: 'start' as const, y: 'start' as const },
-          },
-          endLabel: {
-            type: 'label' as const, xValue: GSC_MONTHLY.length - 1, yValue: mayPartial.ctr,
-            content: [`${mayPartial.ctr}%`], font: { size: 11, weight: 'bold' as const }, color: TP.navy,
-            position: { x: 'end' as const, y: 'start' as const },
-          },
+      legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
+      tooltip: {
+        callbacks: {
+          label: (ctx: { datasetIndex: number; parsed: { y: number } }) =>
+            ctx.datasetIndex === 0 ? `${ctx.parsed.y.toLocaleString()} clicks` : `${ctx.parsed.y.toLocaleString()} avg`,
         },
       },
     },
     scales: {
-      y: { beginAtZero: true, ticks: { callback: (v: number | string) => `${v}%` }, grid: { color: '#f0f0f0' } },
+      y: { beginAtZero: true, ticks: { callback: (v: number | string) => fmtK(Number(v)) }, grid: { color: '#f0f0f0' } },
       x: { grid: { display: false } },
     },
-  }), [seoMarkerIndex, mayPartial.ctr]);
+  }), []);
 
-  // Position trend (inverted)
+  // ── Section 3: Online Search Submissions ──
+  const subMonths = Object.keys(ONLINE_SEARCH_SUBMISSIONS).sort();
+  const yearColorMap: Record<string, string> = {
+    '2023': `${TP.blue}40`,
+    '2024': `${TP.blue}70`,
+    '2025': `${TP.blue}A0`,
+    '2026': TP.blue,
+  };
+
+  const submissionsChartData = useMemo(() => ({
+    labels: subMonths.map(m => monthLabel(m)),
+    datasets: [{
+      label: 'Search Submissions',
+      data: subMonths.map(m => ONLINE_SEARCH_SUBMISSIONS[m]),
+      backgroundColor: subMonths.map(m => yearColorMap[m.slice(0, 4)] || TP.blue),
+      borderRadius: 3,
+      borderSkipped: false as const,
+    }],
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), []);
+
+  const submissionsChartOptions = useMemo(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (ctx: { parsed: { y: number } }) => `${ctx.parsed.y} submissions` } },
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+      x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } },
+    },
+  }), []);
+
+  // ── Section 4: Search Position Trend (reversed Y) ──
   const positionChartData = useMemo(() => ({
     labels: GSC_MONTHLY.map(m => monthLabel(m.month)),
     datasets: [{
       label: 'Avg Position',
       data: GSC_MONTHLY.map(m => m.position),
       borderColor: TP.darkPurple,
-      backgroundColor: `${TP.darkPurple}20`,
-      pointRadius: 5,
+      backgroundColor: `${TP.darkPurple}18`,
+      pointRadius: 4,
       pointBackgroundColor: TP.darkPurple,
       borderWidth: 2.5,
       tension: 0.3,
@@ -413,481 +393,177 @@ export default function OrganicGrowth() {
       tooltip: { callbacks: { label: (ctx: { parsed: { y: number } }) => `Position: ${ctx.parsed.y.toFixed(1)}` } },
       annotation: {
         annotations: {
-          seoLine: { type: 'line' as const, xMin: seoMarkerIndex, xMax: seoMarkerIndex, borderColor: TP.red, borderWidth: 2, borderDash: [6, 4] },
+          page1Line: {
+            type: 'line' as const,
+            yMin: 10,
+            yMax: 10,
+            borderColor: `${TP.green}80`,
+            borderWidth: 1.5,
+            borderDash: [6, 4],
+            label: {
+              display: true,
+              content: 'Page 1',
+              position: 'start' as const,
+              backgroundColor: 'transparent',
+              color: TP.green,
+              font: { size: 10, weight: 'bold' as const },
+              padding: 2,
+            },
+          },
+          page2Line: {
+            type: 'line' as const,
+            yMin: 20,
+            yMax: 20,
+            borderColor: `${TP.yellow}80`,
+            borderWidth: 1.5,
+            borderDash: [6, 4],
+            label: {
+              display: true,
+              content: 'Page 2',
+              position: 'start' as const,
+              backgroundColor: 'transparent',
+              color: TP.yellow,
+              font: { size: 10, weight: 'bold' as const },
+              padding: 2,
+            },
+          },
         },
       },
     },
     scales: {
-      y: { reverse: true, title: { display: true, text: 'Position (lower = better)', font: { size: 11 } }, grid: { color: '#f0f0f0' } },
-      x: { grid: { display: false } },
-    },
-  }), [seoMarkerIndex]);
-
-  // Monthly clicks + impressions
-  const monthlyChartData = useMemo(() => ({
-    labels: GSC_MONTHLY.map(m => monthLabel(m.month)),
-    datasets: [
-      { label: 'Clicks', data: GSC_MONTHLY.map(m => m.clicks), backgroundColor: TP.blue, borderColor: TP.blue, borderWidth: 1, borderRadius: 4, yAxisID: 'y', order: 2 },
-      { label: 'Impressions', data: GSC_MONTHLY.map(m => m.impressions), type: 'line' as const, borderColor: TP.darkPurple, backgroundColor: `${TP.darkPurple}15`, pointRadius: 3, pointBackgroundColor: TP.darkPurple, borderWidth: 2, tension: 0.3, fill: true, yAxisID: 'y1', order: 1 },
-    ],
-  }), []);
-
-  const monthlyChartOptions = useMemo(() => ({
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
-      tooltip: { callbacks: { label: (ctx: { datasetIndex: number; parsed: { y: number } }) => ctx.datasetIndex === 1 ? `${ctx.parsed.y.toLocaleString()} impressions` : `${ctx.parsed.y.toLocaleString()} clicks` } },
-      annotation: { annotations: { seoLine: { type: 'line' as const, xMin: seoMarkerIndex, xMax: seoMarkerIndex, borderColor: TP.red, borderWidth: 2, borderDash: [6, 4], label: { display: true, content: 'SEO Reset', position: 'start' as const, backgroundColor: TP.red, color: '#fff', font: { size: 10, weight: 'bold' as const }, padding: 4 } } } },
-    },
-    scales: {
-      y: { beginAtZero: true, position: 'left' as const, title: { display: true, text: 'Clicks', font: { size: 11 } }, ticks: { callback: (v: number | string) => fmtK(Number(v)) }, grid: { color: '#f0f0f0' } },
-      y1: { beginAtZero: true, position: 'right' as const, title: { display: true, text: 'Impressions', font: { size: 11 } }, ticks: { callback: (v: number | string) => fmtK(Number(v)) }, grid: { display: false } },
-      x: { grid: { display: false } },
-    },
-  }), [seoMarkerIndex]);
-
-  // Weekly clicks + CTR
-  const weeklyChartData = useMemo(() => ({
-    labels: GSC_WEEKLY.map(w => weekLabel(w.week)),
-    datasets: [
-      { label: 'Weekly Clicks', data: GSC_WEEKLY.map(w => w.clicks), type: 'bar' as const, backgroundColor: `${TP.blue}99`, borderRadius: 3, yAxisID: 'y', order: 2 },
-      { label: 'CTR %', data: GSC_WEEKLY.map(w => w.ctr), type: 'line' as const, borderColor: TP.yellow, backgroundColor: 'transparent', pointRadius: 0, borderWidth: 2, tension: 0.3, yAxisID: 'y1', order: 1 },
-    ],
-  }), []);
-
-  const weeklyChartOptions = useMemo(() => ({
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
-      annotation: { annotations: { seoLine: { type: 'line' as const, xMin: GSC_WEEKLY.length - 1.5, xMax: GSC_WEEKLY.length - 1.5, borderColor: TP.red, borderWidth: 2, borderDash: [6, 4] } } },
-    },
-    scales: {
-      y: { beginAtZero: true, position: 'left' as const, title: { display: true, text: 'Clicks', font: { size: 11 } }, ticks: { callback: (v: number | string) => fmtK(Number(v)) }, grid: { color: '#f0f0f0' } },
-      y1: { beginAtZero: true, position: 'right' as const, title: { display: true, text: 'CTR %', font: { size: 11 } }, ticks: { callback: (v: number | string) => `${v}%` }, grid: { display: false } },
-      x: { grid: { display: false }, ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 20, font: { size: 9 } } },
-    },
-  }), []);
-
-  // Daily GSC chart (May 2026)
-  const dailyDays = Object.keys(GSC_DAILY_MAY_2026).map(Number).sort((a, b) => a - b);
-  const dailyChartData = useMemo(() => ({
-    labels: dailyDays.map(d => `May ${d}`),
-    datasets: [
-      { label: 'Clicks', data: dailyDays.map(d => GSC_DAILY_MAY_2026[d].clicks), type: 'bar' as const, backgroundColor: `${TP.blue}99`, borderRadius: 3, yAxisID: 'y', order: 2 },
-      { label: 'Impressions', data: dailyDays.map(d => GSC_DAILY_MAY_2026[d].impressions), type: 'line' as const, borderColor: TP.yellow, backgroundColor: 'transparent', pointRadius: 2, borderWidth: 2, tension: 0.3, yAxisID: 'y1', order: 1 },
-    ],
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), []);
-  const dailyChartOptions = useMemo(() => ({
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
-      annotation: { annotations: { seoLine: { type: 'line' as const, xMin: 17.5, xMax: 17.5, borderColor: TP.red, borderWidth: 2, borderDash: [6, 4], label: { display: true, content: 'SEO Launch', position: 'start' as const, font: { size: 9 }, color: TP.red } } } },
-    },
-    scales: {
-      y: { beginAtZero: true, position: 'left' as const, title: { display: true, text: 'Clicks', font: { size: 11 } }, grid: { color: '#f0f0f0' } },
-      y1: { beginAtZero: true, position: 'right' as const, title: { display: true, text: 'Impressions', font: { size: 11 } }, ticks: { callback: (v: number | string) => fmtK(Number(v)) }, grid: { display: false } },
-      x: { grid: { display: false }, ticks: { font: { size: 9 } } },
-    },
-  }), []);
-
-  // Full-year daily chart (Jan 1 – May 26, 2026)
-  const fullYearDaily = useMemo(() => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May'] as const;
-    const labels: string[] = [];
-    const clicks: number[] = [];
-    const impressions: number[] = [];
-    const monthBoundaries: number[] = [];
-    let idx = 0;
-    for (const mo of months) {
-      const days = GSC_DAILY_2026[mo];
-      if (idx > 0) monthBoundaries.push(idx - 0.5);
-      for (const [d, c, imp] of days) {
-        labels.push(`${mo} ${d}`);
-        clicks.push(c);
-        impressions.push(imp);
-        idx++;
-      }
-    }
-    // Compute monthly averages for overlay
-    const monthlyAvgs: { start: number; end: number; avg: number; label: string }[] = [];
-    let offset = 0;
-    for (const mo of months) {
-      const days = GSC_DAILY_2026[mo];
-      const totalClicks = days.reduce((s, [, c]) => s + c, 0);
-      const avg = Math.round(totalClicks / days.length);
-      monthlyAvgs.push({ start: offset, end: offset + days.length - 1, avg, label: mo });
-      offset += days.length;
-    }
-    // 7-day moving average
-    const ma7: (number | null)[] = clicks.map((_, i) => {
-      if (i < 6) return null;
-      const sum = clicks.slice(i - 6, i + 1).reduce((a, b) => a + b, 0);
-      return Math.round(sum / 7);
-    });
-    return { labels, clicks, impressions, monthBoundaries, monthlyAvgs, ma7 };
-  }, []);
-
-  const fullYearChartData = useMemo(() => ({
-    labels: fullYearDaily.labels,
-    datasets: [
-      {
-        label: 'Daily Clicks',
-        data: fullYearDaily.clicks,
-        type: 'bar' as const,
-        backgroundColor: `${TP.blue}60`,
-        borderColor: TP.blue,
-        borderWidth: 0,
-        borderRadius: 1,
-        yAxisID: 'y',
-        order: 3,
-      },
-      {
-        label: '7-Day Moving Avg',
-        data: fullYearDaily.ma7,
-        type: 'line' as const,
-        borderColor: TP.red,
-        backgroundColor: 'transparent',
-        pointRadius: 0,
-        borderWidth: 2.5,
-        tension: 0.3,
-        yAxisID: 'y',
-        order: 1,
-        spanGaps: true,
-      },
-    ],
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), []);
-
-  const fullYearAnnotations: Record<string, object> = {};
-  fullYearDaily.monthBoundaries.forEach((x, i) => {
-    fullYearAnnotations[`mo${i}`] = {
-      type: 'line', xMin: x, xMax: x,
-      borderColor: '#ddd', borderWidth: 1, borderDash: [4, 4],
-    };
-  });
-  // SEO launch line (May 19 = index within the full dataset)
-  const seoIdx = fullYearDaily.labels.indexOf('May 19');
-  if (seoIdx >= 0) {
-    fullYearAnnotations['seoLine'] = {
-      type: 'line', xMin: seoIdx - 0.5, xMax: seoIdx - 0.5,
-      borderColor: TP.red, borderWidth: 2, borderDash: [6, 4],
-      label: { display: true, content: 'SEO Launch', position: 'start', font: { size: 9 }, color: TP.red },
-    };
-  }
-  // Month labels
-  fullYearDaily.monthlyAvgs.forEach((m, i) => {
-    fullYearAnnotations[`moLabel${i}`] = {
-      type: 'label',
-      xValue: Math.floor((m.start + m.end) / 2),
-      yValue: Math.max(...fullYearDaily.clicks) * 0.95,
-      content: [m.label],
-      font: { size: 11, weight: 'bold' as const },
-      color: '#bbb',
-    };
-  });
-
-  const fullYearChartOptions = useMemo(() => ({
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
-      tooltip: {
-        callbacks: {
-          label: (ctx: { datasetIndex: number; parsed: { y: number } }) =>
-            ctx.datasetIndex === 0 ? `${ctx.parsed.y} clicks` : `${ctx.parsed.y} avg`,
+      y: {
+        reverse: true,
+        min: 0,
+        max: 80,
+        grid: { color: '#f0f0f0' },
+        ticks: {
+          callback: (v: number | string) => {
+            const n = Number(v);
+            if (n === 10) return 'Pg 1';
+            if (n === 20) return 'Pg 2';
+            if (n === 30) return 'Pg 3';
+            if (n === 50) return 'Pg 5';
+            if (n === 70) return 'Pg 7';
+            return '';
+          },
         },
       },
-      annotation: { annotations: fullYearAnnotations },
-    },
-    scales: {
-      y: { beginAtZero: true, title: { display: true, text: 'Clicks', font: { size: 11 } }, grid: { color: '#f0f0f0' } },
-      x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 15, font: { size: 9 } } },
-    },
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), []);
-
-  // Online Search submissions chart
-  const subMonths = Object.keys(ONLINE_SEARCH_SUBMISSIONS).sort();
-  const onlineSearchChartData = useMemo(() => ({
-    labels: subMonths.map(m => monthLabel(m)),
-    datasets: [{
-      label: 'Online Search Submissions',
-      data: subMonths.map(m => ONLINE_SEARCH_SUBMISSIONS[m]),
-      backgroundColor: subMonths.map(m => m >= '2026' ? TP.blue : `${TP.blue}66`),
-      borderColor: TP.blue,
-      borderWidth: 1,
-      borderRadius: 4,
-    }],
-  }), [subMonths]);
-
-  const onlineSearchChartOptions = useMemo(() => ({
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: { callbacks: { label: (ctx: { parsed: { y: number } }) => `${ctx.parsed.y} submissions from organic search` } },
-    },
-    scales: {
-      y: { beginAtZero: true, title: { display: true, text: 'Submissions', font: { size: 11 } }, grid: { color: '#f0f0f0' } },
-      x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } },
+      x: { grid: { display: false } },
     },
   }), []);
-
-  // Compute YoY submission comparison
-  const sub2024Total = Object.entries(ONLINE_SEARCH_SUBMISSIONS).filter(([k]) => k.startsWith('2024')).reduce((s, [, v]) => s + v, 0);
-  const sub2025Total = Object.entries(ONLINE_SEARCH_SUBMISSIONS).filter(([k]) => k.startsWith('2025')).reduce((s, [, v]) => s + v, 0);
-  const sub2026YTD = Object.entries(ONLINE_SEARCH_SUBMISSIONS).filter(([k]) => k.startsWith('2026')).reduce((s, [, v]) => s + v, 0);
-  const sub2025SamePeriod = Object.entries(ONLINE_SEARCH_SUBMISSIONS).filter(([k]) => k >= '2025-01' && k <= '2025-05').reduce((s, [, v]) => s + v, 0);
-  const may2026Projected = Math.round(174 / 23 * 31);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* Header */}
       <div>
         <h2 style={{ fontSize: 22, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Organic Search Growth</h2>
-        <p style={{ fontSize: 13, color: '#888' }}>
-          Google Search Console data from Feb 2025 to present. Formal SEO program launched May 19, 2026.
+        <p style={{ fontSize: 13, color: '#888', margin: 0 }}>
+          Google Search Console + Salesforce, Feb 2025 to present
         </p>
       </div>
 
-      {/* ═══════ SECTION 1: THEN vs NOW ═══════ */}
-      <div style={{
-        background: `linear-gradient(135deg, ${TP.navy} 0%, ${TP.blue} 100%)`,
-        borderRadius: 12, padding: '20px 24px', color: '#fff',
-      }}>
-        <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>
-          Search Performance: Then vs. Now
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 16, alignItems: 'center' }}>
-          {/* Then */}
-          <div>
-            <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 8, fontWeight: 600 }}>FEB–MAR 2025 (First Data)</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              <div><div style={{ fontSize: 10, opacity: 0.5 }}>Avg Position</div><div style={{ fontSize: 22, fontWeight: 700 }}>72.4</div><div style={{ fontSize: 10, opacity: 0.5 }}>Page 7–8</div></div>
-              <div><div style={{ fontSize: 10, opacity: 0.5 }}>CTR</div><div style={{ fontSize: 22, fontWeight: 700 }}>2.8%</div></div>
-              <div><div style={{ fontSize: 10, opacity: 0.5 }}>Clicks/mo</div><div style={{ fontSize: 22, fontWeight: 700 }}>18.6K</div></div>
-              <div><div style={{ fontSize: 10, opacity: 0.5 }}>Search Subs/mo</div><div style={{ fontSize: 22, fontWeight: 700 }}>{Math.round((ONLINE_SEARCH_SUBMISSIONS['2025-02'] + ONLINE_SEARCH_SUBMISSIONS['2025-03']) / 2)}</div></div>
-            </div>
-          </div>
-          {/* Arrow */}
-          <div style={{ fontSize: 32, opacity: 0.4 }}>→</div>
-          {/* Now */}
-          <div>
-            <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 8, fontWeight: 600 }}>MAY 2026 (26 DAYS)</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              <div><div style={{ fontSize: 10, opacity: 0.5 }}>Avg Position</div><div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>21.7</div><div style={{ fontSize: 10, opacity: 0.5 }}>Page 2–3</div></div>
-              <div><div style={{ fontSize: 10, opacity: 0.5 }}>CTR</div><div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>16.8%</div></div>
-              <div><div style={{ fontSize: 10, opacity: 0.5 }}>Clicks/mo (pace)</div><div style={{ fontSize: 22, fontWeight: 700 }}>{fmtK(Math.round(mayPartial.clicks / mayDays * 31))}</div></div>
-              <div><div style={{ fontSize: 10, opacity: 0.5 }}>Search Subs/mo (pace)</div><div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>{may2026Projected}</div></div>
-            </div>
+      {/* ═══════ SECTION 1: HEADLINE STAT CARDS ═══════ */}
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        {/* Organic Clicks */}
+        <div style={{ background: '#fff', borderRadius: 10, padding: '16px 20px', border: '1px solid #e5e7eb', flex: '1 1 0', minWidth: 160 }}>
+          <div style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>Organic Clicks</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{fmtK(mayClickPace)}</div>
+          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>May pace (26 days reported)</div>
+          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: mayClickPace < may2025.clicks ? TP.red : TP.green }}>
+            {mayClickPace >= may2025.clicks ? '▲' : '▼'} {delta(mayClickPace, may2025.clicks)} vs May 2025 ({fmtK(may2025.clicks)})
           </div>
         </div>
-        {/* Delta summary */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.15)', marginTop: 16, paddingTop: 12, display: 'flex', gap: 32, flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 16, fontWeight: 700, color: TP.green }}>▲ 70%</span>
-            <span style={{ fontSize: 12, opacity: 0.7 }}>position improvement (72.4 → 21.7)</span>
+
+        {/* Search Submissions */}
+        <div style={{ background: '#fff', borderRadius: 10, padding: '16px 20px', border: '1px solid #e5e7eb', flex: '1 1 0', minWidth: 160 }}>
+          <div style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>Search Submissions</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{may2026Subs}</div>
+          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>May through 23 days, pace ~{Math.round(174 / 23 * 31)}/mo</div>
+          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: TP.green }}>
+            ▲ {delta(may2026Subs, may2025Subs)} vs May 2025 ({may2025Subs})
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 16, fontWeight: 700, color: TP.green }}>▲ 500%</span>
-            <span style={{ fontSize: 12, opacity: 0.7 }}>CTR improvement (2.8% → 16.8%)</span>
+        </div>
+
+        {/* Avg Position */}
+        <div style={{ background: '#fff', borderRadius: 10, padding: '16px 20px', border: '1px solid #e5e7eb', flex: '1 1 0', minWidth: 160 }}>
+          <div style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>Avg Position</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{mayData.position}</div>
+          <div style={{ fontSize: 11, color: TP.green, fontWeight: 600, marginTop: 2 }}>Page 2</div>
+          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: TP.green }}>
+            ▲ from {feb2025.position} (Page 7) in Feb 2025
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 16, fontWeight: 700, color: TP.green }}>▲ {Math.round((may2026Projected - 128) / 128 * 100)}%</span>
-            <span style={{ fontSize: 12, opacity: 0.7 }}>more search submissions/mo</span>
+        </div>
+
+        {/* CTR */}
+        <div style={{ background: '#fff', borderRadius: 10, padding: '16px 20px', border: '1px solid #e5e7eb', flex: '1 1 0', minWidth: 160 }}>
+          <div style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>Click-Through Rate</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{mayData.ctr}%</div>
+          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>May 2026</div>
+          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: TP.green }}>
+            ▲ from {feb2025.ctr}% in Feb 2025
           </div>
         </div>
       </div>
 
-      {/* ═══════ SECTION 2: QUARTERLY TREND TABLE ═══════ */}
+      {/* ═══════ SECTION 2: MONTHLY ORGANIC CLICKS ═══════ */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12 }}>Quarterly Trend</h3>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-            <thead>
-              <tr style={{ borderBottom: `2px solid ${TP.blue}` }}>
-                <th style={{ padding: '8px 10px', textAlign: 'left', color: TP.navy }}>Quarter</th>
-                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Clicks</th>
-                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Impressions</th>
-                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Avg CTR</th>
-                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Avg Position</th>
-                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Search Subs</th>
-              </tr>
-            </thead>
-            <tbody>
-              {quarters.map((q, i) => {
-                const prev = i > 0 ? quarters[i - 1] : null;
-                const isPartial = q.label === 'Q2 2026';
-                return (
-                  <tr key={q.label} style={{ borderBottom: '1px solid #f0f0f0', background: isPartial ? '#f8f9ff' : i % 2 === 0 ? '#fafafa' : '#fff' }}>
-                    <td style={{ padding: '8px 10px', fontWeight: 600 }}>
-                      {q.label}{isPartial ? ` (${q.months}mo MTD)` : ''}
-                    </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>
-                      {fmtK(q.clicks)}
-                      {prev && <span style={{ fontSize: 10, color: q.clicks > prev.clicks ? TP.green : TP.red, marginLeft: 6 }}>{delta(q.clicks, prev.clicks)}</span>}
-                    </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>{fmtK(q.impressions)}</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 600, color: q.ctr >= 10 ? TP.green : q.ctr >= 5 ? TP.yellow : TP.text }}>
-                      {q.ctr}%
-                      {prev && <span style={{ fontSize: 10, color: q.ctr > prev.ctr ? TP.green : TP.red, marginLeft: 6 }}>{delta(q.ctr, prev.ctr)}</span>}
-                    </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 600, color: q.position <= 20 ? TP.green : q.position <= 40 ? TP.yellow : TP.red }}>
-                      {q.position}
-                      {prev && <span style={{ fontSize: 10, color: q.position < prev.position ? TP.green : TP.red, marginLeft: 6 }}>{q.position < prev.position ? '▲' : '▼'}{Math.abs(Math.round((prev.position - q.position) / prev.position * 100))}%</span>}
-                    </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 600 }}>
-                      {q.onlineSearchSubs}
-                      {prev && prev.onlineSearchSubs > 0 && <span style={{ fontSize: 10, color: q.onlineSearchSubs > prev.onlineSearchSubs ? TP.green : TP.red, marginLeft: 6 }}>{delta(q.onlineSearchSubs, prev.onlineSearchSubs)}</span>}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12, marginTop: 0 }}>Monthly Organic Clicks from Google</h3>
+        <div style={{ height: 300 }}>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <Bar data={monthlyClicksData as any} options={monthlyClicksOptions as object} />
         </div>
       </div>
 
-      {/* ═══════ SECTION 3: CTR TREND ═══════ */}
+      {/* ═══════ SECTION 3: ONLINE SEARCH SUBMISSIONS ═══════ */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Click-Through Rate Trend</h3>
-        <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Higher CTR means searchers are finding our results more relevant and clicking through more often.</p>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12, marginTop: 0 }}>Organic Search Submissions</h3>
+        <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+          <div style={{ background: '#fff', borderRadius: 8, padding: '10px 14px', border: '1px solid #e5e7eb', flex: '1 1 0', minWidth: 120 }}>
+            <div style={{ fontSize: 11, color: '#888' }}>2023</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy }}>{sub2023Total}</div>
+          </div>
+          <div style={{ background: '#fff', borderRadius: 8, padding: '10px 14px', border: '1px solid #e5e7eb', flex: '1 1 0', minWidth: 120 }}>
+            <div style={{ fontSize: 11, color: '#888' }}>2024</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy }}>{sub2024Total}</div>
+            <div style={{ fontSize: 11, color: TP.green, fontWeight: 600 }}>{delta(sub2024Total, sub2023Total)} YoY</div>
+          </div>
+          <div style={{ background: '#fff', borderRadius: 8, padding: '10px 14px', border: '1px solid #e5e7eb', flex: '1 1 0', minWidth: 120 }}>
+            <div style={{ fontSize: 11, color: '#888' }}>2025</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy }}>{sub2025Total}</div>
+            <div style={{ fontSize: 11, color: TP.green, fontWeight: 600 }}>{delta(sub2025Total, sub2024Total)} YoY</div>
+          </div>
+          <div style={{ background: '#fff', borderRadius: 8, padding: '10px 14px', border: `1px solid ${TP.green}60`, flex: '1 1 0', minWidth: 120 }}>
+            <div style={{ fontSize: 11, color: '#888' }}>2026 YTD</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy }}>{sub2026YTD}</div>
+            <div style={{ fontSize: 11, color: TP.green, fontWeight: 600 }}>Pace: ~{fmtK(sub2026Pace)}/yr</div>
+          </div>
+        </div>
         <div style={{ height: 280 }}>
-          <Line data={ctrChartData} options={ctrChartOptions as object} />
+          <Bar data={submissionsChartData} options={submissionsChartOptions as object} />
         </div>
       </div>
 
-      {/* ═══════ SECTION 4: POSITION TREND ═══════ */}
+      {/* ═══════ SECTION 4: SEARCH POSITION TREND ═══════ */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Average Search Position</h3>
-        <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Position 1–10 = page 1 of Google. We moved from page 7+ to page 2.</p>
-        <div style={{ height: 280 }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12, marginTop: 0 }}>Average Search Position</h3>
+        <div style={{ height: 300 }}>
           <Line data={positionChartData} options={positionChartOptions as object} />
         </div>
       </div>
 
-      {/* ═══════ SECTION 5: ONLINE SEARCH SUBMISSIONS ═══════ */}
+      {/* ═══════ SECTION 5: KEYWORD MOVEMENT ═══════ */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Online Search → Assessment Submissions</h3>
-        <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Actual submissions where the family found us through organic search (Salesforce "Online Search" referrer).</p>
-        <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-          <div style={{ background: '#f0f9ff', borderRadius: 8, padding: '10px 14px', border: '1px solid #bae6fd', flex: '1 1 0', minWidth: 130 }}>
-            <div style={{ fontSize: 11, color: '#666' }}>2024 Full Year</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy }}>{sub2024Total}</div>
-            <div style={{ fontSize: 11, color: '#999' }}>{Math.round(sub2024Total / 12)}/mo avg</div>
-          </div>
-          <div style={{ background: '#f0f9ff', borderRadius: 8, padding: '10px 14px', border: '1px solid #bae6fd', flex: '1 1 0', minWidth: 130 }}>
-            <div style={{ fontSize: 11, color: '#666' }}>2025 Full Year</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy }}>{sub2025Total}</div>
-            <div style={{ fontSize: 11, color: TP.green, fontWeight: 600 }}>▲ {Math.round((sub2025Total - sub2024Total) / sub2024Total * 100)}% vs 2024</div>
-          </div>
-          <div style={{ background: '#f0fdf4', borderRadius: 8, padding: '10px 14px', border: `1px solid ${TP.green}60`, flex: '1 1 0', minWidth: 130 }}>
-            <div style={{ fontSize: 11, color: '#666' }}>2026 YTD (Jan–May)</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy }}>{sub2026YTD}</div>
-            <div style={{ fontSize: 11, color: TP.green, fontWeight: 600 }}>▲ {Math.round((sub2026YTD - sub2025SamePeriod) / sub2025SamePeriod * 100)}% vs same period 2025</div>
-          </div>
-          <div style={{ background: '#f0fdf4', borderRadius: 8, padding: '10px 14px', border: `1px solid ${TP.green}60`, flex: '1 1 0', minWidth: 130 }}>
-            <div style={{ fontSize: 11, color: '#666' }}>May 2026 Pace</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: TP.green }}>{may2026Projected}/mo</div>
-            <div style={{ fontSize: 11, color: '#999' }}>174 through day 23</div>
-          </div>
-        </div>
-        <div style={{ height: 260 }}>
-          <Bar data={onlineSearchChartData} options={onlineSearchChartOptions as object} />
-        </div>
-      </div>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12, marginTop: 0 }}>Non-Branded Keywords Moving Toward Page 1</h3>
 
-      {/* ═══════ SECTION 6: MONTHLY CLICKS + IMPRESSIONS ═══════ */}
-      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Monthly Organic Clicks and Impressions</h3>
-        <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Impressions dropped as position improved — fewer irrelevant searches, more relevant ones. Clicks per impression (CTR) increased 5x.</p>
-        <div style={{ height: 320 }}>
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          <Bar data={monthlyChartData as any} options={monthlyChartOptions as any} />
-        </div>
-      </div>
-
-      {/* ═══════ SECTION 7: WEEKLY DETAIL ═══════ */}
-      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12 }}>Weekly Clicks and CTR</h3>
-        <div style={{ height: 320 }}>
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          <Bar data={weeklyChartData as any} options={weeklyChartOptions as any} />
-        </div>
-      </div>
-
-      {/* ═══════ SECTION 7B: FULL-YEAR DAILY CLICKS ═══════ */}
-      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Daily Search Clicks — 2026 Year to Date</h3>
-        <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Every day from Jan 1 to May 26. Red line is the 7-day moving average. Dashed vertical lines separate months.</p>
-        <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
-          {fullYearDaily.monthlyAvgs.map(m => (
-            <div key={m.label} style={{ background: '#f0f9ff', borderRadius: 8, padding: '6px 12px', border: '1px solid #bae6fd', fontSize: 12, minWidth: 90 }}>
-              <div style={{ color: '#888', fontSize: 10 }}>{m.label} avg</div>
-              <div style={{ fontWeight: 700, color: TP.navy }}>{m.avg}/day</div>
-            </div>
-          ))}
-          <div style={{ background: '#f0fdf4', borderRadius: 8, padding: '6px 12px', border: `1px solid ${TP.green}50`, fontSize: 12, minWidth: 90 }}>
-            <div style={{ color: '#888', fontSize: 10 }}>YTD Total</div>
-            <div style={{ fontWeight: 700, color: TP.green }}>{fmtK(fullYearDaily.clicks.reduce((a, b) => a + b, 0))}</div>
-          </div>
-        </div>
-        <div style={{ height: 320 }}>
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          <Bar data={fullYearChartData as any} options={fullYearChartOptions as any} />
-        </div>
-      </div>
-
-      {/* ═══════ SECTION 7C: DAILY GSC — MAY 2026 ═══════ */}
-      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Daily Search Performance — May 2026</h3>
-        <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Day-by-day clicks and impressions from Google Search Console. Red dashed line marks SEO program launch (May 19). Data through May 26 (GSC has a ~2-day processing delay).</p>
-        <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
-          <div style={{ background: '#f0f9ff', borderRadius: 8, padding: '8px 14px', border: '1px solid #bae6fd', fontSize: 12 }}>
-            <span style={{ color: '#888' }}>Avg Daily Clicks:</span>{' '}
-            <span style={{ fontWeight: 700, color: TP.navy }}>{Math.round(dailyDays.reduce((s, d) => s + GSC_DAILY_MAY_2026[d].clicks, 0) / dailyDays.length)}</span>
-          </div>
-          <div style={{ background: '#f0f9ff', borderRadius: 8, padding: '8px 14px', border: '1px solid #bae6fd', fontSize: 12 }}>
-            <span style={{ color: '#888' }}>Best Day:</span>{' '}
-            <span style={{ fontWeight: 700, color: TP.navy }}>May {dailyDays.reduce((best, d) => GSC_DAILY_MAY_2026[d].clicks > GSC_DAILY_MAY_2026[best].clicks ? d : best, dailyDays[0])} ({Math.max(...dailyDays.map(d => GSC_DAILY_MAY_2026[d].clicks))} clicks)</span>
-          </div>
-          <div style={{ background: '#f0fdf4', borderRadius: 8, padding: '8px 14px', border: `1px solid ${TP.green}50`, fontSize: 12 }}>
-            <span style={{ color: '#888' }}>Post-SEO Avg (May 19–26):</span>{' '}
-            <span style={{ fontWeight: 700, color: TP.green }}>{Math.round(([19,20,21,22,23,24,25,26].reduce((s, d) => s + GSC_DAILY_MAY_2026[d].clicks, 0)) / 8)} clicks/day</span>
-          </div>
-        </div>
-        <div style={{ height: 280 }}>
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          <Bar data={dailyChartData as any} options={dailyChartOptions as any} />
-        </div>
-      </div>
-
-      {/* ═══════ SECTION 8: KEYWORD MOVERS WITH TIMELINE ═══════ */}
-      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Non-Branded Keyword Movement</h3>
-        <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>
-          Before 2026, nearly 100% of Toothpillow&apos;s search clicks came from branded terms (people already searching for &quot;toothpillow&quot;). These non-branded healthcare keywords sat at positions 60–90 for months, invisible to searchers. The table below shows when each keyword started climbing toward page 1.
-        </p>
-        <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
-          <div style={{ background: '#f0fdf4', borderRadius: 8, padding: '8px 14px', border: `1px solid ${TP.green}50`, fontSize: 12 }}>
-            <span style={{ fontWeight: 700, color: TP.green }}>1,236</span> <span style={{ color: '#666' }}>non-branded keywords tracked</span>
-          </div>
-          <div style={{ background: '#f0fdf4', borderRadius: 8, padding: '8px 14px', border: `1px solid ${TP.green}50`, fontSize: 12 }}>
-            <span style={{ fontWeight: 700, color: TP.green }}>{KEYWORD_CLIMBERS.length}</span> <span style={{ color: '#666' }}>keywords climbing 10+ positions</span>
-          </div>
-          <div style={{ background: '#f0f9ff', borderRadius: 8, padding: '8px 14px', border: '1px solid #bae6fd', fontSize: 12 }}>
-            <span style={{ fontWeight: 700, color: TP.blue }}>{CLICK_DRIVING_KEYWORDS.length}</span> <span style={{ color: '#666' }}>keywords driving clicks</span>
-          </div>
-        </div>
-        <div style={{ overflowX: 'auto' }}>
+        {/* Climbers table */}
+        <div style={{ overflowX: 'auto', marginBottom: 24 }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
             <thead>
               <tr style={{ borderBottom: `2px solid ${TP.green}` }}>
                 <th style={{ padding: '8px 10px', textAlign: 'left', color: TP.navy }}>Keyword</th>
-                <th style={{ padding: '8px 10px', textAlign: 'left', color: TP.navy }}>Started Climbing</th>
-                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Was</th>
-                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Now</th>
+                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Position</th>
                 <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Moved</th>
-                <th style={{ padding: '8px 10px', textAlign: 'center', color: TP.navy, minWidth: 130 }}>Position Over Time</th>
+                <th style={{ padding: '8px 10px', textAlign: 'center', color: TP.navy, minWidth: 130 }}>Trend</th>
               </tr>
             </thead>
             <tbody>
@@ -897,18 +573,12 @@ export default function OrganicGrowth() {
                 return (
                   <tr key={i} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : '#fff' }}>
                     <td style={{ padding: '7px 10px', fontWeight: 500 }}>{k.query}</td>
-                    <td style={{ padding: '7px 10px' }}>
-                      <span style={{
-                        display: 'inline-block', padding: '2px 8px', borderRadius: 10, fontSize: 11, fontWeight: 600,
-                        background: k.startedClimbing.includes('2025') ? `${TP.green}20` : '#fff3cd',
-                        color: k.startedClimbing.includes('2025') ? TP.green : '#856404',
-                      }}>
-                        {k.startedClimbing}
-                      </span>
+                    <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 600, color: k.posNow <= 20 ? TP.green : k.posNow <= 40 ? TP.yellow : TP.text }}>
+                      {k.posNow.toFixed(1)}
                     </td>
-                    <td style={{ padding: '7px 10px', textAlign: 'right', color: '#999' }}>{k.posPrev.toFixed(1)}</td>
-                    <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 600, color: k.posNow <= 20 ? TP.green : k.posNow <= 40 ? TP.yellow : TP.text }}>{k.posNow.toFixed(1)}</td>
-                    <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 700, color: TP.green }}>▲ {spots.toFixed(1)}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 700, color: TP.green }}>
+                      ▲ {spots.toFixed(0)}
+                    </td>
                     <td style={{ padding: '4px 10px', textAlign: 'center' }}>
                       {ph ? (
                         <svg width={130} height={28} viewBox="0 0 130 28">
@@ -918,13 +588,11 @@ export default function OrganicGrowth() {
                             const minP = Math.min(...vals);
                             const range = maxP - minP || 1;
                             const points: string[] = [];
-                            let idx = 0;
                             ph.forEach((v, mi) => {
                               if (v !== null) {
                                 const x = (mi / 15) * 126 + 2;
                                 const y = ((v - minP) / range) * 20 + 2;
                                 points.push(`${x},${y}`);
-                                idx++;
                               }
                             });
                             return (
@@ -939,7 +607,7 @@ export default function OrganicGrowth() {
                           })()}
                         </svg>
                       ) : (
-                        <span style={{ fontSize: 10, color: '#ccc' }}>—</span>
+                        <span style={{ fontSize: 10, color: '#ccc' }}>--</span>
                       )}
                     </td>
                   </tr>
@@ -947,78 +615,29 @@ export default function OrganicGrowth() {
               })}
             </tbody>
           </table>
-          <div style={{ fontSize: 10, color: '#bbb', marginTop: 6 }}>Position sparklines show monthly average from Feb 2025 to May 2026. Lower position = better (closer to page 1). Green dot = current month.</div>
         </div>
-      </div>
 
-      {/* ═══════ SECTION 9: CLICK-DRIVING KEYWORDS ═══════ */}
-      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Non-Branded Keywords Driving Clicks</h3>
-        <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>
-          These crossed the threshold from impressions-only to actual clicks. Each one represents a parent who found Toothpillow through a healthcare search, not a brand search.
-        </p>
+        {/* Click-driving keywords table */}
+        <div style={{ fontSize: 13, fontWeight: 600, color: TP.navy, marginBottom: 8 }}>Already Driving Clicks</div>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
             <thead>
               <tr style={{ borderBottom: `2px solid ${TP.blue}` }}>
                 <th style={{ padding: '8px 10px', textAlign: 'left', color: TP.navy }}>Keyword</th>
-                <th style={{ padding: '8px 10px', textAlign: 'left', color: TP.navy }}>Status</th>
+                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Position</th>
                 <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Clicks</th>
-                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Pos</th>
-                <th style={{ padding: '8px 10px', textAlign: 'center', color: TP.navy, minWidth: 130 }}>Position Over Time</th>
               </tr>
             </thead>
             <tbody>
-              {CLICK_DRIVING_KEYWORDS.map((k, i) => {
-                const ph = k.posHistory;
-                return (
-                  <tr key={i} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : '#fff' }}>
-                    <td style={{ padding: '7px 10px', fontWeight: 500 }}>{k.query}</td>
-                    <td style={{ padding: '7px 10px' }}>
-                      <span style={{
-                        display: 'inline-block', padding: '2px 8px', borderRadius: 10, fontSize: 11, fontWeight: 600,
-                        background: k.status.includes('Page 1') ? `${TP.green}20` : '#e8f4fd',
-                        color: k.status.includes('Page 1') ? TP.green : TP.blue,
-                      }}>
-                        {k.status}
-                      </span>
-                    </td>
-                    <td style={{ padding: '7px 10px', textAlign: 'right', color: TP.green, fontWeight: 700 }}>{k.clicksNow}</td>
-                    <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 600, color: k.posNow <= 10 ? TP.green : k.posNow <= 30 ? TP.yellow : TP.text }}>{k.posNow.toFixed(1)}</td>
-                    <td style={{ padding: '4px 10px', textAlign: 'center' }}>
-                      {ph ? (
-                        <svg width={130} height={28} viewBox="0 0 130 28">
-                          {(() => {
-                            const vals = ph.filter((v): v is number => v !== null);
-                            const maxP = Math.max(...vals, 20);
-                            const minP = Math.min(...vals, 1);
-                            const range = maxP - minP || 1;
-                            const points: string[] = [];
-                            ph.forEach((v, mi) => {
-                              if (v !== null) {
-                                const x = (mi / 15) * 126 + 2;
-                                const y = ((v - minP) / range) * 20 + 2;
-                                points.push(`${x},${y}`);
-                              }
-                            });
-                            return (
-                              <>
-                                <polyline points={points.join(' ')} fill="none" stroke={TP.blue} strokeWidth={1.5} />
-                                {points.map((p, pi) => {
-                                  const [cx, cy] = p.split(',').map(Number);
-                                  return <circle key={pi} cx={cx} cy={cy} r={pi === points.length - 1 ? 3 : 1.5} fill={pi === points.length - 1 ? TP.blue : `${TP.blue}80`} />;
-                                })}
-                              </>
-                            );
-                          })()}
-                        </svg>
-                      ) : (
-                        <span style={{ fontSize: 10, color: '#ccc' }}>—</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
+              {CLICK_DRIVING_KEYWORDS.map((k, i) => (
+                <tr key={i} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : '#fff' }}>
+                  <td style={{ padding: '7px 10px', fontWeight: 500 }}>{k.query}</td>
+                  <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 600, color: k.posNow <= 10 ? TP.green : k.posNow <= 30 ? TP.yellow : TP.text }}>
+                    {k.posNow.toFixed(1)}
+                  </td>
+                  <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 700, color: TP.blue }}>{k.clicksNow}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -1026,7 +645,7 @@ export default function OrganicGrowth() {
 
       {/* Data source note */}
       <div style={{ fontSize: 11, color: '#aaa', textAlign: 'center', padding: '8px 0' }}>
-        Data source: Google Search Console + Salesforce (updated May 24, 2026). Property: https://www.toothpillow.com/. SEO program launched May 19, 2026.
+        Google Search Console + Salesforce. Updated May 28, 2026.
       </div>
     </div>
   );
