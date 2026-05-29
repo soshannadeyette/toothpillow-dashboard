@@ -154,15 +154,37 @@ const apr2026Daily = [
     {date:'2026-04-30',online:36,hybrid:9,prime:0,visitors:1130,income:181},
 ];
 
+// Source: Salesforce exports pulled May 29, 2026 12:34 PST
 const may2026Seed = [
-    {date:'2026-05-01',online:21,hybrid:5,prime:0,visitors:878,income:105},
-    {date:'2026-05-02',online:14,hybrid:4,prime:0,visitors:581,income:70},
-    {date:'2026-05-03',online:18,hybrid:4,prime:0,visitors:721,income:90},
-    {date:'2026-05-04',online:31,hybrid:8,prime:1,visitors:1279,income:155},
-    {date:'2026-05-05',online:34,hybrid:9,prime:1,visitors:1376,income:170},
-    {date:'2026-05-06',online:28,hybrid:7,prime:1,visitors:1132,income:140},
-    {date:'2026-05-07',online:26,hybrid:7,prime:0,visitors:1078,income:130},
-    {date:'2026-05-08',online:23,hybrid:6,prime:0,visitors:955,income:115},
+    {date:'2026-05-01',online:31,hybrid:3,prime:3,visitors:1302,income:155},
+    {date:'2026-05-02',online:17,hybrid:0,prime:0,visitors:1037,income:85},
+    {date:'2026-05-03',online:21,hybrid:0,prime:0,visitors:823,income:105},
+    {date:'2026-05-04',online:36,hybrid:13,prime:1,visitors:1218,income:180},
+    {date:'2026-05-05',online:26,hybrid:11,prime:0,visitors:1157,income:130},
+    {date:'2026-05-06',online:34,hybrid:10,prime:1,visitors:1713,income:170},
+    {date:'2026-05-07',online:27,hybrid:8,prime:2,visitors:1303,income:135},
+    {date:'2026-05-08',online:23,hybrid:2,prime:3,visitors:1181,income:115},
+    {date:'2026-05-09',online:16,hybrid:0,prime:0,visitors:832,income:80},
+    {date:'2026-05-10',online:15,hybrid:0,prime:0,visitors:664,income:75},
+    {date:'2026-05-11',online:37,hybrid:3,prime:0,visitors:1294,income:185},
+    {date:'2026-05-12',online:28,hybrid:11,prime:0,visitors:1294,income:140},
+    {date:'2026-05-13',online:33,hybrid:13,prime:0,visitors:1478,income:165},
+    {date:'2026-05-14',online:28,hybrid:18,prime:0,visitors:1382,income:140},
+    {date:'2026-05-15',online:22,hybrid:3,prime:0,visitors:1082,income:110},
+    {date:'2026-05-16',online:18,hybrid:0,prime:0,visitors:823,income:90},
+    {date:'2026-05-17',online:15,hybrid:0,prime:0,visitors:610,income:75},
+    {date:'2026-05-18',online:41,hybrid:9,prime:0,visitors:1129,income:205},
+    {date:'2026-05-19',online:34,hybrid:6,prime:0,visitors:1155,income:170},
+    {date:'2026-05-20',online:29,hybrid:14,prime:0,visitors:1359,income:145},
+    {date:'2026-05-21',online:20,hybrid:8,prime:0,visitors:1077,income:100},
+    {date:'2026-05-22',online:32,hybrid:5,prime:0,visitors:1186,income:160},
+    {date:'2026-05-23',online:29,hybrid:0,prime:0,visitors:1133,income:145},
+    {date:'2026-05-24',online:17,hybrid:0,prime:0,visitors:752,income:85},
+    {date:'2026-05-25',online:23,hybrid:1,prime:0,visitors:989,income:115},
+    {date:'2026-05-26',online:40,hybrid:22,prime:0,visitors:1378,income:200},
+    {date:'2026-05-27',online:40,hybrid:15,prime:1,visitors:1478,income:200},
+    {date:'2026-05-28',online:70,hybrid:11,prime:1,visitors:1415,income:350},
+    {date:'2026-05-29',online:33,hybrid:3,prime:1,visitors:1014,income:165},
 ];
 
 const allDailySubmissions = [
@@ -222,6 +244,14 @@ const monthlySummaries = [
         total_income: 4845, total_visitors: 30311, usa_visitors: 25521,
         conversion_rate: 3.2, usa_conversion_rate: 3.8,
         days_tracked: 30, daily_avg: 41.0,
+    },
+    {
+        year: 2026, month: 5, month_name: 'May',
+        goal: 1992, total_submissions: 1037,
+        online_submissions: 835, hybrid_submissions: 189, prime_submissions: 13,
+        total_income: 4175, total_visitors: 30261, usa_visitors: 0,
+        conversion_rate: 2.8, usa_conversion_rate: 0,
+        days_tracked: 29, daily_avg: 35.8,
     },
 ];
 
