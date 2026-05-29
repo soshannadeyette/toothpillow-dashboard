@@ -11,7 +11,7 @@ export function middleware(req: NextRequest) {
 
   if (basicAuth) {
     const authValue = basicAuth.split(' ')[1] ?? '';
-    const [user, password] = Buffer.from(authValue, 'base64').toString().split(':');
+    const [user, password] = atob(authValue).split(':');
 
     if (user === expectedUser && password === expectedPassword) {
       return NextResponse.next();
