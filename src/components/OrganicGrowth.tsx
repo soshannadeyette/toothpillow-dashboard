@@ -297,11 +297,12 @@ export default function OrganicGrowth() {
   const totalTopClicks = brandedClicks + nonBrandedClicks;
 
   // Annotation configs reused across all charts
+  // Position lines proportionally within the month (Dec 22 = 71% through, May 19 = 61% through)
   const websiteAnnotation = websiteMonthIndex >= 0 ? {
     websiteLine: {
       type: 'line' as const,
-      xMin: websiteMonthIndex - 0.5,
-      xMax: websiteMonthIndex - 0.5,
+      xMin: websiteMonthIndex + 0.21,
+      xMax: websiteMonthIndex + 0.21,
       borderColor: `${TP.blue}B0`,
       borderWidth: 2.5,
       borderDash: [6, 3],
@@ -321,8 +322,8 @@ export default function OrganicGrowth() {
   const seoAnnotation = seoMonthIndex >= 0 ? {
     seoLine: {
       type: 'line' as const,
-      xMin: seoMonthIndex - 0.5,
-      xMax: seoMonthIndex - 0.5,
+      xMin: seoMonthIndex + 0.11,
+      xMax: seoMonthIndex + 0.11,
       borderColor: `${TP.green}B0`,
       borderWidth: 2.5,
       borderDash: [6, 3],
