@@ -565,13 +565,18 @@ export default function DailyTracker() {
                       {
                         label: 'Online Submissions',
                         data: entries.map(e => e.online),
-                        backgroundColor: `${TP.blue}55`,
+                        type: 'line',
                         borderColor: TP.blue,
-                        borderWidth: 1,
-                        borderRadius: 3,
-                        yAxisID: 'y',
-                        order: 3,
-                      },
+                        backgroundColor: `${TP.blue}18`,
+                        pointRadius: 3,
+                        pointBackgroundColor: TP.blue,
+                        borderWidth: 2.5,
+                        tension: 0.3,
+                        fill: true,
+                        yAxisID: 'y2',
+                        order: 1,
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      } as any,
                       {
                         label: 'Conversion %',
                         data: dailyConvRates,
@@ -603,8 +608,9 @@ export default function DailyTracker() {
                       },
                     },
                     scales: {
-                      y: { beginAtZero: true, position: 'left' as const, title: { display: true, text: 'Count', font: { size: 11 } }, grid: { color: '#f0f0f0' } },
-                      y1: { beginAtZero: true, position: 'right' as const, title: { display: true, text: 'Conv %', font: { size: 11 } }, ticks: { callback: (v: number | string) => `${v}%` }, grid: { display: false } },
+                      y: { beginAtZero: true, position: 'left' as const, title: { display: true, text: 'Visitors', font: { size: 11 } }, grid: { color: '#f0f0f0' } },
+                      y2: { beginAtZero: true, position: 'right' as const, title: { display: true, text: 'Submissions', font: { size: 11, weight: 'bold' as const }, color: TP.blue }, ticks: { color: TP.blue, font: { size: 10 } }, grid: { display: false } },
+                      y1: { beginAtZero: true, position: 'right' as const, title: { display: true, text: 'Conv %', font: { size: 11 }, color: TP.green }, ticks: { callback: (v: number | string) => `${v}%`, color: TP.green, font: { size: 10 } }, grid: { display: false } },
                       x: { grid: { display: false } },
                     },
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
