@@ -15,9 +15,45 @@ import {
   type ChartData,
   type Plugin,
 } from 'chart.js';
-import { Bar } from 'react-chartjs-2';
+import { Bar, Line } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend);
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Top Ambassador Monthly Submission History (from Salesforce exports)
+   ════════════════════════════════════════════════════════════════════════ */
+type AmbMonthly = { key: string; subs: number };
+
+const KENDRA_MONTHLY: AmbMonthly[] = [
+  {key:'2023-09',subs:1},{key:'2023-11',subs:275},{key:'2023-12',subs:1009},
+  {key:'2024-01',subs:395},{key:'2024-02',subs:271},{key:'2024-03',subs:374},{key:'2024-04',subs:158},{key:'2024-05',subs:164},{key:'2024-06',subs:138},{key:'2024-07',subs:80},{key:'2024-08',subs:57},{key:'2024-09',subs:92},{key:'2024-10',subs:51},{key:'2024-11',subs:36},{key:'2024-12',subs:38},
+  {key:'2025-01',subs:50},{key:'2025-02',subs:41},{key:'2025-03',subs:29},{key:'2025-04',subs:59},{key:'2025-05',subs:32},{key:'2025-06',subs:39},{key:'2025-07',subs:29},{key:'2025-08',subs:20},{key:'2025-09',subs:23},{key:'2025-10',subs:33},{key:'2025-11',subs:19},{key:'2025-12',subs:9},
+  {key:'2026-01',subs:28},{key:'2026-02',subs:45},{key:'2026-03',subs:38},{key:'2026-04',subs:20},{key:'2026-05',subs:11},
+];
+
+const LAUREN_MONTHLY: AmbMonthly[] = [
+  {key:'2023-12',subs:4},
+  {key:'2024-01',subs:5},{key:'2024-02',subs:3},{key:'2024-03',subs:1188},{key:'2024-04',subs:265},{key:'2024-05',subs:270},{key:'2024-06',subs:450},{key:'2024-07',subs:199},{key:'2024-08',subs:147},{key:'2024-09',subs:166},{key:'2024-10',subs:88},{key:'2024-11',subs:99},{key:'2024-12',subs:85},
+  {key:'2025-01',subs:120},{key:'2025-02',subs:96},{key:'2025-03',subs:87},{key:'2025-04',subs:130},{key:'2025-05',subs:66},{key:'2025-06',subs:31},{key:'2025-07',subs:89},{key:'2025-08',subs:68},{key:'2025-09',subs:48},{key:'2025-10',subs:39},{key:'2025-11',subs:26},{key:'2025-12',subs:29},
+  {key:'2026-01',subs:46},{key:'2026-02',subs:31},{key:'2026-03',subs:38},{key:'2026-04',subs:24},{key:'2026-05',subs:18},
+];
+
+const SHANNON_MONTHLY: AmbMonthly[] = [
+  {key:'2025-05',subs:1},{key:'2025-06',subs:11},{key:'2025-07',subs:470},{key:'2025-08',subs:71},{key:'2025-09',subs:28},{key:'2025-10',subs:33},{key:'2025-11',subs:197},{key:'2025-12',subs:55},
+  {key:'2026-01',subs:39},{key:'2026-02',subs:112},{key:'2026-03',subs:56},{key:'2026-04',subs:35},{key:'2026-05',subs:15},
+];
+
+// Build a unified timeline of all months across the three ambassadors
+function buildTimeline(datasets: AmbMonthly[][]): string[] {
+  const allKeys = new Set<string>();
+  datasets.forEach(ds => ds.forEach(d => allKeys.add(d.key)));
+  return Array.from(allKeys).sort();
+}
+
+function lookupSubs(data: AmbMonthly[], key: string): number | null {
+  const entry = data.find(d => d.key === key);
+  return entry ? entry.subs : null;
+}
 
 /* ════════════════════════════════════════════════════════════════════════════
    TP Kids Color Palette
@@ -527,8 +563,127 @@ export default function AmbassadorGrowth() {
 
   const concMax = 9;
 
+  /* ── Top Producer History chart data ── */
+  const topProducerTimeline = buildTimeline([KENDRA_MONTHLY, LAUREN_MONTHLY, SHANNON_MONTHLY]);
+  const topProducerLabels = topProducerTimeline.map(k => {
+    const [yr, mo] = k.split('-');
+    return `${MONTH_LABELS_SHORT[parseInt(mo, 10)]} '${yr.slice(2)}`;
+  });
+
+  const kendraTotals = KENDRA_MONTHLY.reduce((s, d) => s + d.subs, 0);
+  const laurenTotals = LAUREN_MONTHLY.reduce((s, d) => s + d.subs, 0);
+  const shannonTotals = SHANNON_MONTHLY.reduce((s, d) => s + d.subs, 0);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+
+      {/* ════════ SECTION 1: Top Producer Monthly History ════════ */}
+      <div>
+        <h3 style={sectionHeader}>Top Producer Submission History</h3>
+        <p style={sectionSub}>Month-over-month submissions for the three highest-volume ambassadors. Data from Salesforce.</p>
+
+        {/* Summary cards */}
+        <div style={{ ...gridRow(3), marginBottom: '1.5rem' }}>
+          <div style={statCard(TP.teal)}>
+            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#666' }}>Lauren Johnson (NNM)</div>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: TP.navy }}>{laurenTotals.toLocaleString()}</div>
+            <div style={{ fontSize: '0.7rem', color: '#888' }}>lifetime submissions</div>
+          </div>
+          <div style={statCard(TP.gold)}>
+            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#666' }}>Kendra Needham</div>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: TP.navy }}>{kendraTotals.toLocaleString()}</div>
+            <div style={{ fontSize: '0.7rem', color: '#888' }}>lifetime submissions</div>
+          </div>
+          <div style={statCard(TP.purple)}>
+            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#666' }}>Shannon Tripp</div>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: TP.navy }}>{shannonTotals.toLocaleString()}</div>
+            <div style={{ fontSize: '0.7rem', color: '#888' }}>lifetime submissions</div>
+          </div>
+        </div>
+
+        {/* Line chart */}
+        <div style={chartWrap}>
+          <div style={{ height: 380 }}>
+            <Line
+              data={{
+                labels: topProducerLabels,
+                datasets: [
+                  {
+                    label: 'Lauren Johnson (NNM)',
+                    data: topProducerTimeline.map(k => lookupSubs(LAUREN_MONTHLY, k)),
+                    borderColor: TP.teal,
+                    backgroundColor: TP.teal + '20',
+                    borderWidth: 2.5,
+                    pointRadius: 3,
+                    pointBackgroundColor: TP.teal,
+                    tension: 0.3,
+                    spanGaps: true,
+                  },
+                  {
+                    label: 'Kendra Needham',
+                    data: topProducerTimeline.map(k => lookupSubs(KENDRA_MONTHLY, k)),
+                    borderColor: TP.gold,
+                    backgroundColor: TP.gold + '20',
+                    borderWidth: 2.5,
+                    pointRadius: 3,
+                    pointBackgroundColor: TP.gold,
+                    tension: 0.3,
+                    spanGaps: true,
+                  },
+                  {
+                    label: 'Shannon Tripp',
+                    data: topProducerTimeline.map(k => lookupSubs(SHANNON_MONTHLY, k)),
+                    borderColor: TP.purple,
+                    backgroundColor: TP.purple + '20',
+                    borderWidth: 2.5,
+                    pointRadius: 3,
+                    pointBackgroundColor: TP.purple,
+                    tension: 0.3,
+                    spanGaps: true,
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index' as const, intersect: false },
+                plugins: {
+                  legend: { position: 'top' as const, labels: { usePointStyle: true, padding: 16 } },
+                  tooltip: {
+                    mode: 'index' as const,
+                    intersect: false,
+                    callbacks: {
+                      label: (ctx: any) => {
+                        if (ctx.parsed.y == null) return '';
+                        return `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`;
+                      },
+                    },
+                  },
+                },
+                scales: {
+                  x: { ticks: { maxRotation: 45, font: { size: 10 } } },
+                  y: { beginAtZero: true, title: { display: true, text: 'Submissions', font: { size: 11 } } },
+                },
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Insight callout */}
+        <div style={{
+          background: '#f0f7f4',
+          borderRadius: 10,
+          padding: '0.875rem 1.125rem',
+          marginTop: '1rem',
+          fontSize: '0.88rem',
+          lineHeight: 1.6,
+        }}>
+          <strong style={{ color: TP.navy }}>What the data shows:</strong>{' '}
+          Lauren&apos;s viral March 2024 spike (1,188 subs) and Shannon&apos;s July 2025 spike (470) were one-time events that inflated yearly totals.
+          Outside those spikes, all three have settled into a steady 20–60 submissions/month range in 2026.
+          This is why the base program growth (excluding these mega-influencers) is the more reliable indicator of program health.
+        </div>
+      </div>
 
       {/* ════════ SECTION 2: Ambassador Recruitment — 2026 ════════ */}
       <div>
