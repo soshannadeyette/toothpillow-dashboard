@@ -123,11 +123,9 @@ export default function DailyTracker() {
   const totalVisitors = entries.reduce((s, e) => s + e.visitors, 0);
   const daysTracked = entries.length;
   const dailyAvg = daysTracked > 0 ? (totalSubmissions / daysTracked).toFixed(1) : '0';
-  // Monthly conversion rate using GA4 unique users (not daily session sums)
+  // GA4 monthly unique users for conversion rate (not daily session sums)
   const monthlyUniqueUsers = TRAFFIC_2026[selectedMonth] || 0;
   const monthlyUSAUsers = TRAFFIC_USA_2026[selectedMonth] || 0;
-  const convRate = monthlyUniqueUsers > 0 ? ((totalOnline / monthlyUniqueUsers) * 100).toFixed(2) : null;
-  const usaConvRate = monthlyUSAUsers > 0 ? ((totalOnline / monthlyUSAUsers) * 100).toFixed(2) : null;
 
   // Days remaining in month
   const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
@@ -502,44 +500,45 @@ export default function DailyTracker() {
         </div>
       )}
 
-      {/* Website Traffic & Conversion */}
+      {/* ═══ Website Traffic Section ═══ */}
       {entries.length > 0 && entries.some(e => e.visitors > 0) && (() => {
-        const daysWithTraffic = entries.filter(e => e.visitors > 0);
-        const avgVisitors = daysWithTraffic.length > 0
-          ? Math.round(daysWithTraffic.reduce((s, e) => s + e.visitors, 0) / daysWithTraffic.length)
+        const trafficDays = entries.filter(e => e.visitors > 0);
+        const avgDailyVis = trafficDays.length > 0
+          ? Math.round(trafficDays.reduce((sum, e) => sum + e.visitors, 0) / trafficDays.length)
           : 0;
-        const projectedVisitors = avgVisitors * daysInMonth;
-        const bestDay = daysWithTraffic.reduce((best, e) =>
-          e.visitors > (best?.visitors ?? 0) ? e : best, daysWithTraffic[0]);
-        const bestDayLabel = bestDay ? new Date(bestDay.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+        const projVis = avgDailyVis * daysInMonth;
+        const peakDay = trafficDays.reduce((best, e) => e.visitors > (best?.visitors ?? 0) ? e : best, trafficDays[0]);
+        const peakLabel = peakDay ? new Date(peakDay.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+        const ga4Users = monthlyUniqueUsers;
+        const ga4USA = monthlyUSAUsers;
+        const allConv = ga4Users > 0 ? ((totalOnline / ga4Users) * 100).toFixed(2) : null;
+        const usaConv = ga4USA > 0 ? ((totalOnline / ga4USA) * 100).toFixed(2) : null;
 
         return (
           <>
-            {/* Traffic stat cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.darkPurple}` }}>
-                <div className="text-xl font-bold" style={{ color: TP.darkPurple }}>{totalVisitors.toLocaleString()}</div>
-                <div className="text-sm text-gray-500">Total Visitors</div>
-                <div className="text-xs text-gray-400 mt-1">{daysWithTraffic.length} of {daysTracked} days tracked</div>
+                <div className="text-xl font-bold" style={{ color: TP.darkPurple }}>{ga4Users > 0 ? ga4Users.toLocaleString() : totalVisitors.toLocaleString()}</div>
+                <div className="text-sm text-gray-500">{ga4Users > 0 ? 'Unique Users (GA4)' : 'Total Sessions'}</div>
+                <div className="text-xs text-gray-400 mt-1">{trafficDays.length} of {daysTracked} days tracked</div>
               </div>
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.darkPurple}` }}>
-                <div className="text-xl font-bold" style={{ color: TP.darkPurple }}>{avgVisitors.toLocaleString()}</div>
+                <div className="text-xl font-bold" style={{ color: TP.darkPurple }}>{avgDailyVis.toLocaleString()}</div>
                 <div className="text-sm text-gray-500">Avg Daily Visitors</div>
-                <div className="text-xs text-gray-400 mt-1">Projected: {projectedVisitors.toLocaleString()}/mo</div>
+                <div className="text-xs text-gray-400 mt-1">Projected: {projVis.toLocaleString()}/mo</div>
               </div>
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.green}` }}>
-                <div className="text-xl font-bold" style={{ color: TP.green }}>{convRate ? `${convRate}%` : '--'}</div>
-                <div className="text-sm text-gray-500">Monthly Conversion Rate</div>
-                <div className="text-xs text-gray-400 mt-1">{monthlyUniqueUsers > 0 ? `${totalOnline.toLocaleString()} subs / ${monthlyUniqueUsers.toLocaleString()} unique users` : 'No GA4 data for this month'}</div>
+                <div className="text-xl font-bold" style={{ color: TP.green }}>{allConv ? `${allConv}%` : '--'}</div>
+                <div className="text-sm text-gray-500">Monthly Conversion</div>
+                <div className="text-xs text-gray-400 mt-1">{ga4Users > 0 ? `${totalOnline.toLocaleString()} online / ${ga4Users.toLocaleString()} users` : 'No GA4 data yet'}</div>
               </div>
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.bubblegum}` }}>
-                <div className="text-xl font-bold" style={{ color: TP.navy }}>{bestDay ? bestDay.visitors.toLocaleString() : '--'}</div>
-                <div className="text-sm text-gray-500">Best Day</div>
-                <div className="text-xs text-gray-400 mt-1">{bestDayLabel}</div>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.green}` }}>
+                <div className="text-xl font-bold" style={{ color: TP.green }}>{usaConv ? `${usaConv}%` : '--'}</div>
+                <div className="text-sm text-gray-500">USA Conversion</div>
+                <div className="text-xs text-gray-400 mt-1">{ga4USA > 0 ? `${totalOnline.toLocaleString()} online / ${ga4USA.toLocaleString()} USA users` : 'No USA data yet'}</div>
               </div>
             </div>
 
-            {/* Traffic + Conversion chart */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
               <h3 className="text-sm font-bold text-gray-700 mb-3">Daily Website Traffic & Submissions</h3>
               <div style={{ height: 340 }}>
@@ -560,7 +559,7 @@ export default function DailyTracker() {
                       {
                         label: 'Online Submissions',
                         data: entries.map(e => e.online),
-                        type: 'line',
+                        type: 'line' as const,
                         borderColor: TP.blue,
                         backgroundColor: `${TP.blue}18`,
                         pointRadius: 3,
@@ -578,18 +577,11 @@ export default function DailyTracker() {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                      legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
-                      tooltip: {
-                        callbacks: {
-                          label: (ctx: { datasetIndex: number; parsed: { y: number }; dataset: { label?: string } }) => {
-                            return `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`;
-                          },
-                        },
-                      },
+                      legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
                     },
                     scales: {
                       y: { beginAtZero: true, position: 'left' as const, title: { display: true, text: 'Visitors', font: { size: 11 } }, grid: { color: '#f0f0f0' } },
-                      y2: { beginAtZero: true, position: 'right' as const, title: { display: true, text: 'Submissions', font: { size: 11, weight: 'bold' as const }, color: TP.blue }, ticks: { color: TP.blue, font: { size: 10 } }, grid: { display: false } },
+                      y2: { beginAtZero: true, position: 'right' as const, title: { display: true, text: 'Submissions', font: { size: 11 }, color: TP.blue }, ticks: { color: TP.blue }, grid: { display: false } },
                       x: { grid: { display: false } },
                     },
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -597,14 +589,14 @@ export default function DailyTracker() {
                 />
               </div>
               <div className="text-xs text-gray-400 mt-2">
-                Visitors from GA4. Hybrid and prime come through separate channels and are excluded. Days without visitor data are excluded from averages.
+                Visitors from GA4 daily sessions. Monthly conversion uses GA4 unique users (deduplicated) from the Annual tab.
               </div>
             </div>
           </>
         );
       })()}
 
-      {/* Sub-totals by type */}
+      {/* ═══ Submission Totals by Type ═══ */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.blue}` }}>
           <div className="text-xl font-bold" style={{ color: TP.blue }}>{totalOnline.toLocaleString()}</div>
@@ -618,10 +610,10 @@ export default function DailyTracker() {
           <div className="text-xl font-bold" style={{ color: TP.red }}>{totalPrime.toLocaleString()}</div>
           <div className="text-sm text-gray-500">Prime</div>
         </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.green}` }}>
-          <div className="text-xl font-bold" style={{ color: TP.green }}>{usaConvRate ? `${usaConvRate}%` : convRate ? `${convRate}%` : '--'}</div>
-          <div className="text-sm text-gray-500">{usaConvRate ? 'USA Conv Rate' : 'Conv Rate'}</div>
-          <div className="text-xs text-gray-400 mt-1">{monthlyUSAUsers > 0 ? `${monthlyUSAUsers.toLocaleString()} USA users` : monthlyUniqueUsers > 0 ? `${monthlyUniqueUsers.toLocaleString()} unique users` : 'No GA4 data'}</div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.bubblegum}` }}>
+          <div className="text-xl font-bold" style={{ color: TP.navy }}>{(() => { const pd = entries.filter(e => e.visitors > 0).reduce((b, e) => e.visitors > (b?.visitors ?? 0) ? e : b, entries[0]); return pd ? pd.visitors.toLocaleString() : '--'; })()}</div>
+          <div className="text-sm text-gray-500">Peak Traffic Day</div>
+          <div className="text-xs text-gray-400 mt-1">{(() => { const pd = entries.filter(e => e.visitors > 0).reduce((b, e) => e.visitors > (b?.visitors ?? 0) ? e : b, entries[0]); return pd ? new Date(pd.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''; })()}</div>
         </div>
       </div>
 
