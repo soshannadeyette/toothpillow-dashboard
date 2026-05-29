@@ -432,19 +432,19 @@ export default function AmbassadorGrowth() {
         const { x, width } = bar as unknown as { x: number; width: number };
         const color = di === 0 ? TP.teal : TP.blue;
         ctx.save();
-        ctx.fillStyle = color + '15';
-        ctx.strokeStyle = color + '40';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([5, 3]);
+        ctx.fillStyle = color + '25';
+        ctx.strokeStyle = color + '70';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 3]);
         ctx.beginPath();
         ctx.rect(x - width / 2, top, width, bottom - top);
         ctx.fill();
         ctx.stroke();
         ctx.setLineDash([]);
-        ctx.fillStyle = color + '90';
-        ctx.font = '600 10px system-ui, sans-serif';
+        ctx.fillStyle = TP.navy;
+        ctx.font = '700 11px system-ui, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`${label} pace: ~${paceVal.toLocaleString()}`, x, top - 5);
+        ctx.fillText(`${label} pace: ~${paceVal.toLocaleString()}`, x, top - 6);
         ctx.restore();
       });
     },
@@ -492,19 +492,19 @@ export default function AmbassadorGrowth() {
       const top = yScale.getPixelForValue(projTotal);
       const { x, width } = bar as unknown as { x: number; width: number };
       ctx.save();
-      ctx.fillStyle = TP.navy + '10';
-      ctx.strokeStyle = TP.navy + '35';
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([5, 3]);
+      ctx.fillStyle = TP.navy + '20';
+      ctx.strokeStyle = TP.navy + '60';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 3]);
       ctx.beginPath();
       ctx.rect(x - width / 2, top, width, bottom - top);
       ctx.fill();
       ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle = TP.navy + '80';
-      ctx.font = '600 10px system-ui, sans-serif';
+      ctx.fillStyle = TP.navy;
+      ctx.font = '700 11px system-ui, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(`Full-year pace: ~${projTotal.toLocaleString()}`, x, top - 5);
+      ctx.fillText(`Full-year pace: ~${projTotal.toLocaleString()}`, x, top - 6);
       ctx.restore();
     },
   }), [basePace]);
@@ -951,10 +951,10 @@ export default function AmbassadorGrowth() {
                   const { x, width } = bar2026 as unknown as { x: number; width: number };
                   const ctx = chart.ctx;
                   ctx.save();
-                  ctx.fillStyle = TP.navy + '10';
-                  ctx.strokeStyle = TP.navy + '35';
-                  ctx.lineWidth = 1.5;
-                  ctx.setLineDash([5, 3]);
+                  ctx.fillStyle = TP.navy + '20';
+                  ctx.strokeStyle = TP.navy + '60';
+                  ctx.lineWidth = 2;
+                  ctx.setLineDash([6, 3]);
                   const r = 4;
                   const left = x - width / 2;
                   ctx.beginPath();
@@ -970,10 +970,10 @@ export default function AmbassadorGrowth() {
                   ctx.stroke();
                   // Label
                   ctx.setLineDash([]);
-                  ctx.fillStyle = TP.navy + '80';
-                  ctx.font = '600 11px system-ui, sans-serif';
+                  ctx.fillStyle = TP.navy;
+                  ctx.font = '700 12px system-ui, sans-serif';
                   ctx.textAlign = 'center';
-                  ctx.fillText(`Full-year pace: ~${projTotal.toLocaleString()}`, x, projTop - 6);
+                  ctx.fillText(`Full-year pace: ~${projTotal.toLocaleString()}`, x, projTop - 7);
                   ctx.restore();
                 },
               } satisfies Plugin<'bar'>]}
