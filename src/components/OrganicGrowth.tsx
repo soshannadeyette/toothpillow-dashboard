@@ -383,28 +383,6 @@ export default function OrganicGrowth() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [seoMonthIndex]);
 
-  // ── Chart: CTR Trend ──
-  const ctrData = useMemo(() => ({
-    labels: GSC_MONTHLY.map(m => monthLabel(m.month)),
-    datasets: [{
-      label: 'CTR',
-      data: GSC_MONTHLY.map(m => m.ctr),
-      borderColor: TP.green, backgroundColor: `${TP.green}18`,
-      pointRadius: 4, pointBackgroundColor: TP.green, borderWidth: 2.5, tension: 0.3, fill: true,
-    }],
-  }), []);
-
-  const ctrOpts = useMemo(() => ({
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: { callbacks: { label: (ctx: { parsed: { y: number } }) => `CTR: ${ctx.parsed.y.toFixed(1)}%` } },
-      annotation: { annotations: { ...websiteAnnotation, ...seoAnnotation } },
-    },
-    scales: { y: { beginAtZero: true, ticks: { callback: (v: number | string) => `${Number(v)}%` }, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } },
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [seoMonthIndex]);
-
   // ── Chart: Search Position Trend (reversed Y) ──
   const positionData = useMemo(() => ({
     labels: GSC_MONTHLY.map(m => monthLabel(m.month)),
@@ -553,14 +531,8 @@ export default function OrganicGrowth() {
             {mayData.position < may2025.position ? '▲' : '▼'} from {may2025.position} (Pg {Math.ceil(may2025.position / 10)}) in May &apos;25
           </div>
         </div>
-        <div style={cardStyle}>
-          <div style={labelStyle}>Click-Through Rate</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{mayData.ctr}%</div>
-          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>May 2026</div>
-          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: mayData.ctr > may2025.ctr ? TP.green : TP.red }}>
-            {mayData.ctr > may2025.ctr ? '▲' : '▼'} from {may2025.ctr}% in May &apos;25
-          </div>
-        </div>
+
+
       </div>
 
       {/* ═══════ SECTION 2: MONTHLY ORGANIC CLICKS ═══════ */}
@@ -572,24 +544,11 @@ export default function OrganicGrowth() {
         </div>
       </div>
 
-      {/* ═══════ SECTION 3: IMPRESSIONS + CTR (side by side) ═══════ */}
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-        <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb', flex: '1 1 400px', minWidth: 0 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12, marginTop: 0 }}>Monthly Impressions</h3>
-          <div style={{ height: 250 }}>
-            <Bar data={impressionsData} options={impressionsOpts as object} />
-          </div>
-        </div>
-        <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb', flex: '1 1 400px', minWidth: 0 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12, marginTop: 0 }}>Click-Through Rate Trend</h3>
-          <div style={{ height: 250 }}>
-            <Line data={ctrData} options={ctrOpts as object} />
-          </div>
-          <div style={{ marginTop: 8, padding: '6px 10px', background: '#f8f9fa', borderRadius: 6, fontSize: 11, color: '#666', lineHeight: 1.5 }}>
-            CTR rose after the new site launch because impressions dropped, not because clicks increased. Clicks stayed around 10–12K/month while
-            impressions fell from 213K to 66K. Fewer junk impressions at positions 50–70 means a higher click-through percentage on the remaining
-            branded queries where Toothpillow still ranks on name alone.
-          </div>
+      {/* ═══════ SECTION 3: MONTHLY IMPRESSIONS ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12, marginTop: 0 }}>Monthly Impressions</h3>
+        <div style={{ height: 300 }}>
+          <Bar data={impressionsData} options={impressionsOpts as object} />
         </div>
       </div>
 
