@@ -172,6 +172,8 @@ export default function AVDiagnostics() {
     return { label: d.label, within3d, sameDayPct, within1dPct, isPost: d.label === 'May 23–29' };
   });
   const fairComp = fairCompAll.filter(d => d.label === 'May 1–22' || d.label === 'May 23–29');
+  const fairPre = fairComp.find(d => d.label === 'May 1–22')!;
+  const fairPost = fairComp.find(d => d.label === 'May 23–29')!;
 
   // ── Styles ────────────────────────────────────────────────────────
   const card = (bg: string, border: string): React.CSSProperties => ({
@@ -257,12 +259,12 @@ export default function AVDiagnostics() {
         {/* Same-day completion */}
         <div style={card('#F0FDF4', '#BBF7D0')}>
           <div style={{ ...cardLabel, color: '#166534' }}>Same-day completion</div>
-          <div style={{ ...cardNum, color: '#166534' }}>{postCohort.sameDay}%</div>
+          <div style={{ ...cardNum, color: '#166534' }}>{fairPost.sameDayPct}%</div>
           <div style={{ ...cardSub, color: '#15803D' }}>
-            {arrow(true)} from {preCohort.sameDay}% pre-update
+            {arrow(true)} from {fairPre.sameDayPct}% (May 1–22)
           </div>
           <div style={{ fontSize: 11, color: '#166534', marginTop: 2 }}>
-            +{(postCohort.sameDay - preCohort.sameDay).toFixed(0)}pp vs pre-update (same 7-day window)
+            +{(fairPost.sameDayPct - fairPre.sameDayPct).toFixed(0)}pp improvement (same 3-day window)
           </div>
         </div>
 
@@ -361,26 +363,18 @@ export default function AVDiagnostics() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
         {/* Pre-update */}
         <div style={{ background: '#FFF5F5', borderRadius: 12, padding: 20, border: '1.5px solid #FECACA' }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#991B1B', textTransform: 'uppercase', marginBottom: 4 }}>Before update (May 15–21)</div>
-          <div style={{ fontSize: 11, color: '#9B1C1C', marginBottom: 10 }}>Speed among {preCohort.n7d} patients who completed within 7 days</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#991B1B', textTransform: 'uppercase', marginBottom: 4 }}>Before update (May 1–22)</div>
+          <div style={{ fontSize: 11, color: '#9B1C1C', marginBottom: 10 }}>{fairPre.within3d} patients completed within 3 days</div>
           <div style={{ display: 'grid', gap: 10 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span style={{ color: '#6B7280' }}>Same-day completion</span>
-              <span style={{ fontWeight: 700, color: '#991B1B' }}>{preCohort.sameDay}%</span>
+              <span style={{ fontWeight: 700, color: '#991B1B' }}>{fairPre.sameDayPct}%</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span style={{ color: '#6B7280' }}>Within 1 day</span>
-              <span style={{ fontWeight: 700, color: '#991B1B' }}>{preCohort.within1d}%</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-              <span style={{ color: '#6B7280' }}>Within 3 days</span>
-              <span style={{ fontWeight: 700, color: '#991B1B' }}>{preCohort.within3d}%</span>
+              <span style={{ fontWeight: 700, color: '#991B1B' }}>{fairPre.within1dPct}%</span>
             </div>
             <div style={{ borderTop: '1px solid #FECACA', paddingTop: 8, display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-              <span style={{ color: '#6B7280' }}>Avg starts/day</span>
-              <span style={{ fontWeight: 700, color: '#991B1B' }}>{preAvgStarts}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span style={{ color: '#6B7280' }}>Mean lag</span>
               <span style={{ fontWeight: 700, color: '#991B1B' }}>1.0 day</span>
             </div>
@@ -390,25 +384,17 @@ export default function AVDiagnostics() {
         {/* Post-update */}
         <div style={{ background: '#F0FDF4', borderRadius: 12, padding: 20, border: '1.5px solid #BBF7D0' }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: '#166534', textTransform: 'uppercase', marginBottom: 4 }}>After update (May 23–29)</div>
-          <div style={{ fontSize: 11, color: '#15803D', marginBottom: 10 }}>Speed among {postCohort.n7d} patients who completed within 7 days</div>
+          <div style={{ fontSize: 11, color: '#15803D', marginBottom: 10 }}>{fairPost.within3d} patients completed within 3 days</div>
           <div style={{ display: 'grid', gap: 10 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span style={{ color: '#6B7280' }}>Same-day completion</span>
-              <span style={{ fontWeight: 700, color: '#166534' }}>{postCohort.sameDay}% <span style={{ fontSize: 11, color: '#15803D' }}>+{(postCohort.sameDay - preCohort.sameDay).toFixed(0)}pp</span></span>
+              <span style={{ fontWeight: 700, color: '#166534' }}>{fairPost.sameDayPct}% <span style={{ fontSize: 11, color: '#15803D' }}>+{(fairPost.sameDayPct - fairPre.sameDayPct).toFixed(0)}pp</span></span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span style={{ color: '#6B7280' }}>Within 1 day</span>
-              <span style={{ fontWeight: 700, color: '#166534' }}>{postCohort.within1d}% <span style={{ fontSize: 11, color: '#15803D' }}>+{(postCohort.within1d - preCohort.within1d).toFixed(0)}pp</span></span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-              <span style={{ color: '#6B7280' }}>Within 3 days</span>
-              <span style={{ fontWeight: 700, color: '#166534' }}>{postCohort.within3d}% <span style={{ fontSize: 11, color: '#15803D' }}>+{(postCohort.within3d - preCohort.within3d).toFixed(0)}pp</span></span>
+              <span style={{ fontWeight: 700, color: '#166534' }}>{fairPost.within1dPct}% <span style={{ fontSize: 11, color: '#15803D' }}>+{(fairPost.within1dPct - fairPre.within1dPct).toFixed(0)}pp</span></span>
             </div>
             <div style={{ borderTop: '1px solid #BBF7D0', paddingTop: 8, display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-              <span style={{ color: '#6B7280' }}>Avg starts/day</span>
-              <span style={{ fontWeight: 700, color: '#166534' }}>{postAvgStarts} <span style={{ fontSize: 11, color: '#15803D' }}>{postAvgStarts > preAvgStarts ? '+' : ''}{postAvgStarts - preAvgStarts}</span></span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span style={{ color: '#6B7280' }}>Mean lag</span>
               <span style={{ fontWeight: 700, color: '#166534' }}>0.2 days</span>
             </div>
