@@ -165,12 +165,13 @@ export default function AVDiagnostics() {
   // ── Fair comparison: same-day rate using 3-day window across all months ────
   // For each period, denominator = people who completed within 3 days (same day + 1 day + 2-3 day buckets)
   // This makes every period comparable regardless of how old the cohort is
-  const fairComp = LAG_DISTRIBUTION.map(d => {
+  const fairCompAll = LAG_DISTRIBUTION.map(d => {
     const within3d = d.buckets[0] + d.buckets[1] + d.buckets[2];
     const sameDayPct = within3d > 0 ? Math.round(d.buckets[0] / within3d * 1000) / 10 : 0;
     const within1dPct = within3d > 0 ? Math.round((d.buckets[0] + d.buckets[1]) / within3d * 1000) / 10 : 0;
     return { label: d.label, within3d, sameDayPct, within1dPct, isPost: d.label === 'May 23–29' };
   });
+  const fairComp = fairCompAll.filter(d => d.label === 'May 1–22' || d.label === 'May 23–29');
 
   // ── Styles ────────────────────────────────────────────────────────
   const card = (bg: string, border: string): React.CSSProperties => ({
