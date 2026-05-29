@@ -97,7 +97,6 @@ function goalPctColor(val: number): string {
 export default function AnnualView() {
   const [data2026, setData2026] = useState<MonthlySummary[]>([]);
   const [data2025, setData2025] = useState<MonthlySummary[]>([]);
-  const [allDailyData, setAllDailyData] = useState<DailySubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
@@ -112,13 +111,11 @@ export default function AnnualView() {
   async function loadData() {
     setLoading(true);
     try {
-      const [r2026, r2025, dailyEntries, fullYearDaily] = await Promise.all([
+      const [r2026, r2025, dailyEntries] = await Promise.all([
         fetchAnnualSummaries(2026),
         fetchAnnualSummaries(2025),
         fetchSubmissions(thisYear, thisMonth),
-        fetchSubmissions(),  // all history for traffic chart
       ]);
-      setAllDailyData(fullYearDaily || []);
 
       let merged = (r2026 || []).slice();
 
@@ -913,140 +910,6 @@ export default function AnnualView() {
         </div>
       </section>
 
-      {/* ===== 8. Weekly Traffic & Submissions — All History ===== */}
-      <section className="bg-white rounded-xl shadow p-5">
-        <h2 className="text-lg font-semibold mb-4" style={{ color: TP.navy }}>
-          Weekly Website Traffic &amp; Submissions
-        </h2>
-
-        {(() => {
-          if (allDailyData.length === 0) return <p className="text-gray-400 text-sm">No daily data available.</p>;
-
-          // Use ALL daily data — not just entries with visitors
-          const weekMap = new Map<string, { visitors: number; online: number; total: number; label: string; startDate: string }>();
-          allDailyData.forEach(d => {
-            const dt = new Date(d.date + 'T12:00:00');
-            const day = dt.getDay();
-            const diff = dt.getDate() - day + (day === 0 ? -6 : 1);
-            const monday = new Date(dt);
-            monday.setDate(diff);
-            const key = monday.toISOString().slice(0, 10);
-            const existing = weekMap.get(key) || { visitors: 0, online: 0, total: 0, label: '', startDate: key };
-            existing.visitors += (d.visitors || 0);
-            existing.online += (d.online || 0);
-            existing.total += (d.online || 0) + (d.hybrid || 0) + (d.prime || 0);
-            const yr = String(monday.getFullYear()).slice(2);
-            existing.label = `${String(monday.getMonth() + 1)}/${String(monday.getDate()).padStart(2, '0')}/${yr}`;
-            weekMap.set(key, existing);
-          });
-
-          const weeks = Array.from(weekMap.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([, v]) => v);
-          const wLabels = weeks.map(w => w.label);
-          const wVisitors = weeks.map(w => w.visitors > 0 ? w.visitors : null);
-          const wTotal = weeks.map(w => w.total);
-
-          // Stats
-          const totalSubs = wTotal.reduce((s, v) => s + v, 0);
-          const totalVis = weeks.reduce((s, w) => s + w.visitors, 0);
-          const peakWeek = weeks.reduce((best, w) => w.total > best.total ? w : best, weeks[0]);
-
-          // Date range
-          const firstDate = weeks.length > 0 ? weeks[0].startDate : '';
-          const lastDate = weeks.length > 0 ? weeks[weeks.length - 1].startDate : '';
-          const firstLabel = firstDate ? new Date(firstDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '';
-          const lastLabel = lastDate ? new Date(lastDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '';
-
-          return (
-            <>
-              <div className="grid grid-cols-4 gap-4 mb-4">
-                <div className="rounded-xl p-3 border border-gray-200 text-center">
-                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Total Submissions</div>
-                  <div className="text-xl font-bold" style={{ color: TP.blue }}>{totalSubs.toLocaleString()}</div>
-                </div>
-                <div className="rounded-xl p-3 border border-gray-200 text-center">
-                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Total Visitors</div>
-                  <div className="text-xl font-bold" style={{ color: TP.darkPurple }}>{totalVis.toLocaleString()}</div>
-                </div>
-                <div className="rounded-xl p-3 border border-gray-200 text-center">
-                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Peak Week</div>
-                  <div className="text-xl font-bold" style={{ color: TP.navy }}>{peakWeek.total.toLocaleString()}</div>
-                  <div className="text-xs text-gray-400">{peakWeek.label}</div>
-                </div>
-                <div className="rounded-xl p-3 border border-gray-200 text-center">
-                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Weeks Tracked</div>
-                  <div className="text-xl font-bold" style={{ color: TP.navy }}>{weeks.length}</div>
-                </div>
-              </div>
-              <div style={{ height: 400 }}>
-                <Bar
-                  data={{
-                    labels: wLabels,
-                    datasets: [
-                      {
-                        label: 'Visitors',
-                        data: wVisitors,
-                        backgroundColor: TP.lightPurple + '99',
-                        borderColor: TP.darkPurple,
-                        borderWidth: 1,
-                        yAxisID: 'y',
-                        order: 2,
-                      },
-                      {
-                        type: 'line',
-                        label: 'Submissions',
-                        data: wTotal,
-                        borderColor: TP.blue,
-                        backgroundColor: TP.blue + '18',
-                        fill: true,
-                        borderWidth: 2,
-                        pointRadius: 1.5,
-                        pointBackgroundColor: TP.blue,
-                        tension: 0.3,
-                        yAxisID: 'y2',
-                        order: 1,
-                      } as any,
-                    ],
-                  }}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index' as const, intersect: false },
-                    plugins: {
-                      legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8 } },
-                      tooltip: {
-                        callbacks: {
-                          label: (ctx: any) => {
-                            if (ctx.parsed.y == null) return '';
-                            return (ctx.dataset.label || '') + ': ' + ctx.parsed.y.toLocaleString();
-                          },
-                        },
-                      },
-                    },
-                    scales: {
-                      x: { ticks: { maxRotation: 60, font: { size: 7 }, autoSkip: true, maxTicksLimit: 60 } },
-                      y: {
-                        position: 'left' as const,
-                        title: { display: true, text: 'Visitors' },
-                        beginAtZero: true,
-                        ticks: { callback: (v: number | string) => { const n = typeof v === 'string' ? parseFloat(v) : v; return n >= 1000 ? (n / 1000).toFixed(0) + 'K' : n; } },
-                      },
-                      y2: {
-                        position: 'right' as const,
-                        title: { display: true, text: 'Submissions' },
-                        beginAtZero: true,
-                        grid: { drawOnChartArea: false },
-                      },
-                    },
-                  }}
-                />
-              </div>
-              <p className="text-xs text-gray-400 mt-2">
-                Aggregated by week (Mon-Sun). {firstLabel && lastLabel ? `${firstLabel} through ${lastLabel}.` : ''} Visitor data available from Jan 2026; submission data from earliest tracked date.
-              </p>
-            </>
-          );
-        })()}
-      </section>
 
     </div>
   );
