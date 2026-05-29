@@ -29,6 +29,7 @@ const TP = {
    ════════════════════════════════════════════ */
 
 const SEO_START_DATE = '2026-05-19';
+const WEBSITE_LAUNCH_DATE = '2025-12-22';
 
 const GSC_MONTHLY = [
   { month: '2025-02', clicks: 18183, impressions: 541298, ctr: 3.4, position: 72.5 },
@@ -286,15 +287,37 @@ export default function OrganicGrowth() {
   const may2025 = GSC_MONTHLY.find(m => m.month === '2025-05')!;
 
 
-  // SEO implementation index for chart annotations
+  // Annotation indices for chart markers
   const seoMonthIndex = GSC_MONTHLY.findIndex(m => m.month >= SEO_START_DATE.substring(0, 7));
+  const websiteMonthIndex = GSC_MONTHLY.findIndex(m => m.month >= WEBSITE_LAUNCH_DATE.substring(0, 7));
 
   // Branded vs non-branded totals
   const brandedClicks = TOP_QUERIES.filter(q => q.branded).reduce((s, q) => s + q.clicks, 0);
   const nonBrandedClicks = TOP_QUERIES.filter(q => !q.branded).reduce((s, q) => s + q.clicks, 0);
   const totalTopClicks = brandedClicks + nonBrandedClicks;
 
-  // SEO annotation config reused across charts
+  // Annotation configs reused across all charts
+  const websiteAnnotation = websiteMonthIndex >= 0 ? {
+    websiteLine: {
+      type: 'line' as const,
+      xMin: websiteMonthIndex - 0.5,
+      xMax: websiteMonthIndex - 0.5,
+      borderColor: `${TP.blue}B0`,
+      borderWidth: 2.5,
+      borderDash: [6, 3],
+      label: {
+        display: true,
+        content: 'New Site',
+        position: 'end' as const,
+        backgroundColor: TP.blue,
+        color: '#fff',
+        font: { size: 9, weight: 'bold' as const },
+        padding: { top: 2, bottom: 2, left: 5, right: 5 },
+        borderRadius: 3,
+      },
+    },
+  } : {};
+
   const seoAnnotation = seoMonthIndex >= 0 ? {
     seoLine: {
       type: 'line' as const,
@@ -337,7 +360,7 @@ export default function OrganicGrowth() {
     plugins: {
       legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
       tooltip: { callbacks: { label: (ctx: { datasetIndex: number; parsed: { y: number } }) => ctx.datasetIndex === 0 ? `${ctx.parsed.y.toLocaleString()} clicks` : `${ctx.parsed.y.toLocaleString()} avg` } },
-      annotation: { annotations: { ...seoAnnotation } },
+      annotation: { annotations: { ...websiteAnnotation, ...seoAnnotation } },
     },
     scales: { y: { beginAtZero: true, ticks: { callback: (v: number | string) => fmtK(Number(v)) }, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } },
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -354,7 +377,7 @@ export default function OrganicGrowth() {
     plugins: {
       legend: { display: false },
       tooltip: { callbacks: { label: (ctx: { parsed: { y: number } }) => `${ctx.parsed.y.toLocaleString()} impressions` } },
-      annotation: { annotations: { ...seoAnnotation } },
+      annotation: { annotations: { ...websiteAnnotation, ...seoAnnotation } },
     },
     scales: { y: { beginAtZero: true, ticks: { callback: (v: number | string) => fmtK(Number(v)) }, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } },
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -376,7 +399,7 @@ export default function OrganicGrowth() {
     plugins: {
       legend: { display: false },
       tooltip: { callbacks: { label: (ctx: { parsed: { y: number } }) => `CTR: ${ctx.parsed.y.toFixed(1)}%` } },
-      annotation: { annotations: { ...seoAnnotation } },
+      annotation: { annotations: { ...websiteAnnotation, ...seoAnnotation } },
     },
     scales: { y: { beginAtZero: true, ticks: { callback: (v: number | string) => `${Number(v)}%` }, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } },
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -403,6 +426,7 @@ export default function OrganicGrowth() {
             label: { display: true, content: 'Page 1', position: 'start' as const, backgroundColor: 'transparent', color: TP.green, font: { size: 10, weight: 'bold' as const }, padding: 2 } },
           page2: { type: 'line' as const, yMin: 20, yMax: 20, borderColor: `${TP.yellow}80`, borderWidth: 1.5, borderDash: [6, 4],
             label: { display: true, content: 'Page 2', position: 'start' as const, backgroundColor: 'transparent', color: TP.yellow, font: { size: 10, weight: 'bold' as const }, padding: 2 } },
+          ...websiteAnnotation,
           ...seoAnnotation,
         },
       },
@@ -426,12 +450,21 @@ export default function OrganicGrowth() {
         <p style={{ fontSize: 13, color: '#888', margin: 0 }}>Google Search Console, Feb 2025 to present</p>
       </div>
 
-      {/* ═══════ SEO IMPLEMENTATION BANNER ═══════ */}
-      <div style={{ background: `linear-gradient(135deg, ${TP.green}15, ${TP.green}08)`, borderRadius: 10, padding: '16px 20px', border: `2px solid ${TP.green}40`, display: 'flex', alignItems: 'center', gap: 16 }}>
-        <div style={{ background: TP.green, color: '#fff', borderRadius: 8, padding: '8px 14px', fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap' }}>SEO IMPLEMENTED</div>
-        <div>
-          <div style={{ fontWeight: 600, color: TP.navy, fontSize: 14 }}>May 19, 2026 — Title tags, meta descriptions, H1 fixes deployed across 6 pages</div>
-          <div style={{ fontSize: 12, color: '#666', marginTop: 2 }}>{mayDaysReported - (31 - 19)} days of post-SEO data in May. All charts below show a green marker at the implementation date.</div>
+      {/* ═══════ MILESTONE BANNERS ═══════ */}
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: 280, background: `linear-gradient(135deg, ${TP.blue}12, ${TP.blue}06)`, borderRadius: 10, padding: '14px 18px', border: `2px solid ${TP.blue}30`, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ background: TP.blue, color: '#fff', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 12, whiteSpace: 'nowrap' }}>NEW SITE</div>
+          <div>
+            <div style={{ fontWeight: 600, color: TP.navy, fontSize: 13 }}>Dec 22, 2025 — New website launched</div>
+            <div style={{ fontSize: 11, color: '#666', marginTop: 2 }}>Blue marker on all charts below</div>
+          </div>
+        </div>
+        <div style={{ flex: 1, minWidth: 280, background: `linear-gradient(135deg, ${TP.green}12, ${TP.green}06)`, borderRadius: 10, padding: '14px 18px', border: `2px solid ${TP.green}30`, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ background: TP.green, color: '#fff', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 12, whiteSpace: 'nowrap' }}>SEO</div>
+          <div>
+            <div style={{ fontWeight: 600, color: TP.navy, fontSize: 13 }}>May 19, 2026 — Title tags, meta descriptions, H1 fixes across 6 pages</div>
+            <div style={{ fontSize: 11, color: '#666', marginTop: 2 }}>Green marker on all charts below</div>
+          </div>
         </div>
       </div>
 
