@@ -284,7 +284,7 @@ export default function OrganicGrowth() {
   const mayImprPace = Math.round(mayData.impressions / mayDaysReported * 31);
 
   const may2025 = GSC_MONTHLY.find(m => m.month === '2025-05')!;
-  const feb2025 = GSC_MONTHLY.find(m => m.month === '2025-02')!;
+
 
   // SEO implementation index for chart annotations
   const seoMonthIndex = GSC_MONTHLY.findIndex(m => m.month >= SEO_START_DATE.substring(0, 7));
@@ -459,16 +459,16 @@ export default function OrganicGrowth() {
           <div style={{ fontSize: 11, color: TP.green, fontWeight: 600, marginTop: 2 }}>
             {mayData.position <= 10 ? 'Page 1' : mayData.position <= 20 ? 'Page 2' : `Page ${Math.ceil(mayData.position / 10)}`}
           </div>
-          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: TP.green }}>
-            ▲ from {feb2025.position} (Pg 7) in Feb &apos;25
+          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: mayData.position < may2025.position ? TP.green : TP.red }}>
+            {mayData.position < may2025.position ? '▲' : '▼'} from {may2025.position} (Pg {Math.ceil(may2025.position / 10)}) in May &apos;25
           </div>
         </div>
         <div style={cardStyle}>
           <div style={labelStyle}>Click-Through Rate</div>
           <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{mayData.ctr}%</div>
           <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>May 2026</div>
-          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: TP.green }}>
-            ▲ from {feb2025.ctr}% in Feb &apos;25
+          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: mayData.ctr > may2025.ctr ? TP.green : TP.red }}>
+            {mayData.ctr > may2025.ctr ? '▲' : '▼'} from {may2025.ctr}% in May &apos;25
           </div>
         </div>
       </div>
