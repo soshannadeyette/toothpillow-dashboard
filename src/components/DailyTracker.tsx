@@ -506,7 +506,11 @@ export default function DailyTracker() {
         const avgDailyVis = trafficDays.length > 0
           ? Math.round(trafficDays.reduce((sum, e) => sum + e.visitors, 0) / trafficDays.length)
           : 0;
-        const projVis = avgDailyVis * daysInMonth;
+        // Project unique users from GA4 partial-month data, not from daily sessions
+        const ga4Partial = monthlyUniqueUsers;
+        const projVis = ga4Partial > 0 && trafficDays.length > 0
+          ? Math.round(ga4Partial * (daysInMonth / trafficDays.length))
+          : avgDailyVis * daysInMonth;
         const peakDay = trafficDays.reduce((best, e) => e.visitors > (best?.visitors ?? 0) ? e : best, trafficDays[0]);
         const peakLabel = peakDay ? new Date(peakDay.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
         const ga4Users = monthlyUniqueUsers;
