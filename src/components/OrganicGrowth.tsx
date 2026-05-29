@@ -32,7 +32,7 @@ const SEO_START_DATE = '2026-05-19';
 const WEBSITE_LAUNCH_DATE = '2025-12-22';
 
 // Total submissions (online + hybrid + prime) aligned to GSC_MONTHLY months
-// Source: OnlineTrends.tsx hardcoded data + Supabase daily tracker
+// 2025: OnlineTrends.tsx hardcoded actuals. 2026: submission-dashboard.html daily arrays.
 const SUBMISSIONS_BY_MONTH: Record<string, number> = {
   '2025-02': 1464 + 77 + 20,    // 1,561
   '2025-03': 1279 + 214 + 19,   // 1,512
@@ -45,10 +45,10 @@ const SUBMISSIONS_BY_MONTH: Record<string, number> = {
   '2025-10': 975 + 526 + 7,     // 1,508
   '2025-11': 1135 + 460 + 13,   // 1,608
   '2025-12': 776 + 452 + 25,    // 1,253
-  '2026-01': 1067 + 365 + 23,   // 1,455
-  '2026-02': 1174 + 411 + 15,   // 1,600
-  '2026-03': 1291 + 418 + 51,   // 1,760
-  '2026-04': 1420 + 346 + 34,   // 1,800
+  '2026-01': 938 + 343 + 0,     // 1,281 (actual from daily tracker)
+  '2026-02': 1207 + 293 + 18,   // 1,518 (actual from daily tracker)
+  '2026-03': 1293 + 299 + 21,   // 1,613 (actual from daily tracker)
+  '2026-04': 969 + 250 + 11,    // 1,230 (actual from daily tracker)
   '2026-05': 978,                // MTD through May 28
 };
 
