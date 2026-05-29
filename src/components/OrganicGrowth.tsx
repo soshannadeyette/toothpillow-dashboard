@@ -458,11 +458,11 @@ export default function OrganicGrowth() {
             <div style={{ fontWeight: 600, color: TP.navy, fontSize: 13 }}>Dec 22, 2025 — New website launched</div>
           </div>
           <div style={{ fontSize: 11, color: '#555', marginTop: 10, lineHeight: 1.5 }}>
-            The old site had basic SEO metadata in place: title tags, meta descriptions, Open Graph tags, and a heading structure.
-            The new site launched without any of these. No title tags, no meta descriptions, no canonical URLs, no structured data.
-            When Google re-crawled and re-indexed the new pages, the missing metadata caused rankings to shift and impressions to drop
-            from 213K (Jan) to 66K (Feb). The site went from appearing for a large volume of low-relevance queries at positions 50–70 to a
-            smaller set of queries at better positions. SEO metadata was restored on May 19, 2026.
+            The old site (pre-Dec 2025) had basic SEO metadata: title tags, meta descriptions, Open Graph tags (og:title, og:description, og:image, og:url),
+            Twitter card tags, and heading structure. The new site launched with only a title tag and viewport meta. Meta descriptions, all OG tags,
+            all Twitter tags, canonical URLs, and structured data were dropped in the migration. When Google re-crawled the new pages, the missing
+            metadata caused impressions to fall from 213K (Jan) to 66K (Feb). The site stopped appearing for a large volume of low-relevance queries
+            it had previously ranked for at positions 50–70. SEO metadata was restored on May 19, 2026.
           </div>
         </div>
         <div style={{ flex: 1, minWidth: 280, background: `linear-gradient(135deg, ${TP.green}12, ${TP.green}06)`, borderRadius: 10, padding: '14px 18px', border: `2px solid ${TP.green}30` }}>
