@@ -450,33 +450,67 @@ export default function OrganicGrowth() {
         <p style={{ fontSize: 13, color: '#888', margin: 0 }}>Google Search Console, Feb 2025 to present</p>
       </div>
 
-      {/* ═══════ MILESTONE BANNERS ═══════ */}
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: 280, background: `linear-gradient(135deg, ${TP.blue}12, ${TP.blue}06)`, borderRadius: 10, padding: '14px 18px', border: `2px solid ${TP.blue}30` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ background: TP.blue, color: '#fff', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 12, whiteSpace: 'nowrap' }}>NEW SITE</div>
-            <div style={{ fontWeight: 600, color: TP.navy, fontSize: 13 }}>Dec 22, 2025 — New website launched</div>
+      {/* ═══════ SEO MIGRATION COMPARISON ═══════ */}
+      {(() => {
+        const check = '✅';
+        const cross = '❌';
+        const elements = [
+          { name: 'Title tags', old: true, mid: true, now: true },
+          { name: 'Meta descriptions', old: true, mid: false, now: true },
+          { name: 'OG tags (title, description, image, url)', old: true, mid: false, now: true },
+          { name: 'Twitter tags (title, description, image)', old: true, mid: false, now: true },
+          { name: 'Twitter card type', old: false, mid: false, now: true },
+          { name: 'Canonical URL', old: false, mid: false, now: true },
+          { name: 'H1/H2 heading structure', old: true, mid: true, now: true },
+          { name: 'JSON-LD structured data', old: false, mid: false, now: false },
+        ];
+        const hdrStyle = { padding: '8px 12px', textAlign: 'center' as const, fontWeight: 700, fontSize: 12, color: '#fff', borderBottom: `2px solid #e5e7eb` };
+        const cellStyle = { padding: '6px 12px', fontSize: 12, borderBottom: '1px solid #f0f0f0' };
+        const centerCell = { ...cellStyle, textAlign: 'center' as const, fontSize: 14 };
+        return (
+          <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4, marginTop: 0 }}>SEO Elements Across Site Versions</h3>
+            <p style={{ fontSize: 11, color: '#888', margin: '0 0 12px 0' }}>What Google had to work with at each stage. The migration dropped 4 of 6 existing SEO elements, contributing to the impression decline visible in the charts below.</p>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th style={{ ...hdrStyle, textAlign: 'left' as const, background: '#f8f9fa', color: TP.navy, width: '40%' }}>SEO Element</th>
+                  <th style={{ ...hdrStyle, background: '#f8f9fa', color: TP.navy, width: '20%' }}>
+                    <div>Old Site</div>
+                    <div style={{ fontWeight: 400, fontSize: 10, marginTop: 2 }}>Pre-Dec 2025</div>
+                  </th>
+                  <th style={{ ...hdrStyle, background: `${TP.blue}18`, color: TP.navy, width: '20%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                      <span style={{ background: TP.blue, color: '#fff', borderRadius: 4, padding: '1px 6px', fontSize: 9, fontWeight: 700 }}>NEW SITE</span>
+                    </div>
+                    <div style={{ fontWeight: 400, fontSize: 10, marginTop: 2 }}>Dec 2025 – May 2026</div>
+                  </th>
+                  <th style={{ ...hdrStyle, background: `${TP.green}18`, color: TP.navy, width: '20%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                      <span style={{ background: TP.green, color: '#fff', borderRadius: 4, padding: '1px 6px', fontSize: 9, fontWeight: 700 }}>SEO</span>
+                    </div>
+                    <div style={{ fontWeight: 400, fontSize: 10, marginTop: 2 }}>May 19, 2026+</div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {elements.map((el, i) => (
+                  <tr key={i} style={{ background: i % 2 === 0 ? '#fff' : '#fafbfc' }}>
+                    <td style={{ ...cellStyle, fontWeight: 500, color: TP.navy }}>{el.name}</td>
+                    <td style={centerCell}>{el.old ? check : cross}</td>
+                    <td style={centerCell}>{el.mid ? check : cross}</td>
+                    <td style={centerCell}>{el.now ? check : cross}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div style={{ display: 'flex', gap: 16, marginTop: 12, fontSize: 11, color: '#666' }}>
+              <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: TP.blue, marginRight: 4 }}></span> Blue line on charts = New site launch (Dec 22)</span>
+              <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: TP.green, marginRight: 4 }}></span> Green line on charts = SEO implemented (May 19)</span>
+            </div>
           </div>
-          <div style={{ fontSize: 11, color: '#555', marginTop: 10, lineHeight: 1.5 }}>
-            The old site (pre-Dec 2025) had basic SEO metadata: title tags, meta descriptions, Open Graph tags (og:title, og:description, og:image, og:url),
-            Twitter card tags, and heading structure. The new site launched with only a title tag and viewport meta. Meta descriptions, all OG tags,
-            all Twitter tags, canonical URLs, and structured data were dropped in the migration. When Google re-crawled the new pages, the missing
-            metadata caused impressions to fall from 213K (Jan) to 66K (Feb). The site stopped appearing for a large volume of low-relevance queries
-            it had previously ranked for at positions 50–70. SEO metadata was restored on May 19, 2026.
-          </div>
-        </div>
-        <div style={{ flex: 1, minWidth: 280, background: `linear-gradient(135deg, ${TP.green}12, ${TP.green}06)`, borderRadius: 10, padding: '14px 18px', border: `2px solid ${TP.green}30` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ background: TP.green, color: '#fff', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 12, whiteSpace: 'nowrap' }}>SEO</div>
-            <div style={{ fontWeight: 600, color: TP.navy, fontSize: 13 }}>May 19, 2026 — Title tags, meta descriptions, H1 fixes across 6 pages</div>
-          </div>
-          <div style={{ fontSize: 11, color: '#555', marginTop: 10, lineHeight: 1.5 }}>
-            Restored and improved what was lost in the migration: custom title tags, meta descriptions, H1 tags, canonical URLs, and Twitter card tags
-            across Home, Symptoms, Assessment, Avoiding Braces, FAQs, and Our Doctors pages. Remaining gap: JSON-LD structured data
-            (Organization, Service, FAQPage schema) is not yet implemented site-wide.
-          </div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* ═══════ SECTION 1: HEADLINE STAT CARDS ═══════ */}
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
