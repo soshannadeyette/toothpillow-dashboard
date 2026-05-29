@@ -16,7 +16,7 @@ import {
 import { Bar, Line } from 'react-chartjs-2';
 import { fetchAnnualSummaries, upsertMonthlySummary, fetchSubmissions, currentMonth, currentYear } from '@/lib/api';
 import type { MonthlySummary, DailySubmission } from '@/lib/types';
-import { MONTHLY_GOALS_2026, MONTH_NAMES } from '@/lib/types';
+import { MONTHLY_GOALS_2026, MONTH_NAMES, TRAFFIC_2025, TRAFFIC_2026, TRAFFIC_USA_2026 } from '@/lib/types';
 
 ChartJS.register(
   CategoryScale,
@@ -59,17 +59,7 @@ const HYBRID_GOALS_2026: Record<number, number> = {
 };
 const PRIME_GOAL = 25;
 
-// 2025 website traffic — GA4 Total Users, worldwide (confirmed May 19, 2026)
-const TRAFFIC_2025: Record<number, number> = {
-  1: 57814, 2: 58901, 3: 57747, 4: 33895, 5: 31621, 6: 31681,
-  7: 73193, 8: 37180, 9: 29179, 10: 28271, 11: 54674, 12: 36031,
-};
-
-// 2026 website traffic — GA4 Total Users, worldwide (updated May 28, 2026)
-// May is partial (through 5/28); will be updated when month completes
-const TRAFFIC_2026: Record<number, number> = {
-  1: 37320, 2: 51480, 3: 39218, 4: 30311, 5: 26858,
-};
+// Traffic constants imported from @/lib/types
 
 // Daily GA4 Total Users — May 2026 (through 5/28)
 // Source: GA4 property 402506531, pulled May 28 2026
@@ -81,10 +71,6 @@ const GA4_DAILY_MAY_2026: Record<number, number> = {
   22: 1474, 23: 1327, 24: 917, 25: 928, 26: 1352, 27: 1660, 28: 389,
 };
 
-// 2026 website traffic — GA4 Total Users, USA only (updated May 28, 2026)
-const TRAFFIC_USA_2026: Record<number, number> = {
-  1: 33544, 2: 44756, 3: 33417, 4: 25521, 5: 22214,
-};
 
 // 2025 submissions (for conversion calc)
 const SUBS_2025: Record<number, number> = {

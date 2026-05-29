@@ -16,7 +16,7 @@ import {
 import { Bar, Line } from 'react-chartjs-2';
 import { fetchSubmissions, upsertSubmission, currentYear, currentMonth, todayStr } from '@/lib/api';
 import type { DailySubmission } from '@/lib/types';
-import { MONTHLY_GOALS_2026, MONTH_NAMES } from '@/lib/types';
+import { MONTHLY_GOALS_2026, MONTH_NAMES, TRAFFIC_2026, TRAFFIC_USA_2026 } from '@/lib/types';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler);
 
@@ -123,7 +123,11 @@ export default function DailyTracker() {
   const totalVisitors = entries.reduce((s, e) => s + e.visitors, 0);
   const daysTracked = entries.length;
   const dailyAvg = daysTracked > 0 ? (totalSubmissions / daysTracked).toFixed(1) : '0';
-  const convRate = totalVisitors > 0 ? ((totalOnline / totalVisitors) * 100).toFixed(1) : '0';
+  // Monthly conversion rate using GA4 unique users (not daily session sums)
+  const monthlyUniqueUsers = TRAFFIC_2026[selectedMonth] || 0;
+  const monthlyUSAUsers = TRAFFIC_USA_2026[selectedMonth] || 0;
+  const convRate = monthlyUniqueUsers > 0 ? ((totalOnline / monthlyUniqueUsers) * 100).toFixed(2) : null;
+  const usaConvRate = monthlyUSAUsers > 0 ? ((totalOnline / monthlyUSAUsers) * 100).toFixed(2) : null;
 
   // Days remaining in month
   const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
@@ -505,11 +509,6 @@ export default function DailyTracker() {
           ? Math.round(daysWithTraffic.reduce((s, e) => s + e.visitors, 0) / daysWithTraffic.length)
           : 0;
         const projectedVisitors = avgVisitors * daysInMonth;
-        const avgConvRate = daysWithTraffic.length > 0
-          ? (daysWithTraffic.reduce((s, e) => {
-              return s + (e.visitors > 0 ? (e.online / e.visitors) * 100 : 0);
-            }, 0) / daysWithTraffic.length).toFixed(2)
-          : '0';
         const bestDay = daysWithTraffic.reduce((best, e) =>
           e.visitors > (best?.visitors ?? 0) ? e : best, daysWithTraffic[0]);
         const bestDayLabel = bestDay ? new Date(bestDay.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
@@ -529,9 +528,9 @@ export default function DailyTracker() {
                 <div className="text-xs text-gray-400 mt-1">Projected: {projectedVisitors.toLocaleString()}/mo</div>
               </div>
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.green}` }}>
-                <div className="text-xl font-bold" style={{ color: TP.green }}>{avgConvRate}%</div>
-                <div className="text-sm text-gray-500">Avg Conversion Rate</div>
-                <div className="text-xs text-gray-400 mt-1">Online Submissions / Visitors</div>
+                <div className="text-xl font-bold" style={{ color: TP.green }}>{convRate ? `${convRate}%` : '--'}</div>
+                <div className="text-sm text-gray-500">Monthly Conversion Rate</div>
+                <div className="text-xs text-gray-400 mt-1">{monthlyUniqueUsers > 0 ? `${totalOnline.toLocaleString()} subs / ${monthlyUniqueUsers.toLocaleString()} unique users` : 'No GA4 data for this month'}</div>
               </div>
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.bubblegum}` }}>
                 <div className="text-xl font-bold" style={{ color: TP.navy }}>{bestDay ? bestDay.visitors.toLocaleString() : '--'}</div>
@@ -605,7 +604,7 @@ export default function DailyTracker() {
         );
       })()}
 
-      {/* Sub-totals by type + Conversion */}
+      {/* Sub-totals by type */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.blue}` }}>
           <div className="text-xl font-bold" style={{ color: TP.blue }}>{totalOnline.toLocaleString()}</div>
@@ -619,9 +618,10 @@ export default function DailyTracker() {
           <div className="text-xl font-bold" style={{ color: TP.red }}>{totalPrime.toLocaleString()}</div>
           <div className="text-sm text-gray-500">Prime</div>
         </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.blue}` }}>
-          <div className="text-xl font-bold" style={{ color: TP.navy }}>{convRate}%</div>
-          <div className="text-sm text-gray-500">Online Conv % ({totalVisitors.toLocaleString()} visitors)</div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.green}` }}>
+          <div className="text-xl font-bold" style={{ color: TP.green }}>{usaConvRate ? `${usaConvRate}%` : convRate ? `${convRate}%` : '--'}</div>
+          <div className="text-sm text-gray-500">{usaConvRate ? 'USA Conv Rate' : 'Conv Rate'}</div>
+          <div className="text-xs text-gray-400 mt-1">{monthlyUSAUsers > 0 ? `${monthlyUSAUsers.toLocaleString()} USA users` : monthlyUniqueUsers > 0 ? `${monthlyUniqueUsers.toLocaleString()} unique users` : 'No GA4 data'}</div>
         </div>
       </div>
 
@@ -636,19 +636,18 @@ export default function DailyTracker() {
               <th className="px-3 py-2 font-medium text-right">Prime</th>
               <th className="px-3 py-2 font-medium text-right">Total</th>
               <th className="px-3 py-2 font-medium text-right">Visitors</th>
-              <th className="px-3 py-2 font-medium text-right">Conv %</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7} className="px-3 py-8 text-center text-gray-400">
+                <td colSpan={6} className="px-3 py-8 text-center text-gray-400">
                   Loading...
                 </td>
               </tr>
             ) : entries.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-3 py-8 text-center text-gray-400">
+                <td colSpan={6} className="px-3 py-8 text-center text-gray-400">
                   No entries yet
                 </td>
               </tr>
@@ -671,9 +670,6 @@ export default function DailyTracker() {
                     <td className="px-3 py-2 border-t border-gray-100 text-right" style={{ color: TP.red }}>{e.prime}</td>
                     <td className="px-3 py-2 border-t border-gray-100 text-right font-medium">{total}</td>
                     <td className="px-3 py-2 border-t border-gray-100 text-right">{e.visitors.toLocaleString()}</td>
-                    <td className="px-3 py-2 border-t border-gray-100 text-right" style={{ color: e.visitors > 0 ? TP.green : '#ccc' }}>
-                      {e.visitors > 0 ? `${((e.online / e.visitors) * 100).toFixed(1)}%` : '--'}
-                    </td>
                   </tr>
                 );
               })
@@ -686,7 +682,6 @@ export default function DailyTracker() {
                 <td className="px-3 py-2 border-t border-gray-200 text-right" style={{ color: TP.red }}>{totalPrime}</td>
                 <td className="px-3 py-2 border-t border-gray-200 text-right">{totalSubmissions}</td>
                 <td className="px-3 py-2 border-t border-gray-200 text-right">{totalVisitors.toLocaleString()}</td>
-                <td className="px-3 py-2 border-t border-gray-200 text-right" style={{ color: TP.green }}>{convRate}%</td>
               </tr>
             )}
           </tbody>
