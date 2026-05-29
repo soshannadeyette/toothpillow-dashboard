@@ -427,6 +427,7 @@ export default function AmbassadorGrowth() {
         const bar = meta.data[3];
         if (!bar) return;
         const paceVal = di === 0 ? infPace : ambPace;
+        const label = di === 0 ? 'Inf' : 'Amb';
         const top = yScale.getPixelForValue(paceVal);
         const { x, width } = bar as unknown as { x: number; width: number };
         const color = di === 0 ? TP.teal : TP.blue;
@@ -443,7 +444,7 @@ export default function AmbassadorGrowth() {
         ctx.fillStyle = color + '90';
         ctx.font = '600 10px system-ui, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`~${paceVal}`, x, top - 5);
+        ctx.fillText(`${label} pace: ~${paceVal.toLocaleString()}`, x, top - 5);
         ctx.restore();
       });
     },
@@ -503,7 +504,7 @@ export default function AmbassadorGrowth() {
       ctx.fillStyle = TP.navy + '80';
       ctx.font = '600 10px system-ui, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(`~${projTotal} pace`, x, top - 5);
+      ctx.fillText(`Full-year pace: ~${projTotal.toLocaleString()}`, x, top - 5);
       ctx.restore();
     },
   }), [basePace]);
@@ -558,7 +559,7 @@ export default function AmbassadorGrowth() {
           const topY = Math.min(bar0.y, bar1.y);
           ctx.fillText(`${ref.actual[3]} YTD`, bar0.x, topY - 22);
           ctx.fillStyle = TP.blue + 'A0';
-          ctx.fillText(`~${ref.paceVal} pace`, bar0.x, topY - 6);
+          ctx.fillText(`Full-year pace: ~${ref.paceVal.toLocaleString()}`, bar0.x, topY - 6);
           ctx.fillStyle = TP.navy;
         }
       }
@@ -972,7 +973,7 @@ export default function AmbassadorGrowth() {
                   ctx.fillStyle = TP.navy + '80';
                   ctx.font = '600 11px system-ui, sans-serif';
                   ctx.textAlign = 'center';
-                  ctx.fillText(`~${projTotal} projected`, x, projTop - 6);
+                  ctx.fillText(`Full-year pace: ~${projTotal.toLocaleString()}`, x, projTop - 6);
                   ctx.restore();
                 },
               } satisfies Plugin<'bar'>]}
