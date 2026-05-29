@@ -571,7 +571,7 @@ export default function AVDiagnostics() {
             </tbody>
           </table>
         </div>
-        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* May 23–28 = {POST_UPDATE_DAYS_ELAPSED} days post-update. 8 of 128 submissions were returning (created before May 23).</div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* May 23–28 = {POST_UPDATE_DAYS_ELAPSED} days post-update. 16 of 157 submissions were returning (created before May 23).</div>
       </div>
 
       {/* ===== NEW: Lag Distribution ===== */}
@@ -1015,7 +1015,7 @@ export default function AVDiagnostics() {
         </div>
 
         <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 10 }}>
-          Source: Salesforce export May 28 2026 07:39 PST. Waiting rate is a point-in-time snapshot — it will
+          Source: Salesforce export May 28 2026 15:37 PST. Waiting rate is a point-in-time snapshot — it will
           decrease as some accounts eventually complete or are closed out.
         </div>
       </div>
