@@ -101,7 +101,7 @@ export default function AnnualView() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
-  const [trafficView, setTrafficView] = useState<'weekly' | 'daily'>('weekly');
+  // Traffic chart is always weekly, no toggle needed
 
   const thisMonth = currentMonth();
   const thisYear = currentYear();
@@ -116,7 +116,7 @@ export default function AnnualView() {
         fetchAnnualSummaries(2026),
         fetchAnnualSummaries(2025),
         fetchSubmissions(thisYear, thisMonth),
-        fetchSubmissions(thisYear),
+        fetchSubmissions(),  // all history for traffic chart
       ]);
       setAllDailyData(fullYearDaily || []);
 
@@ -913,31 +913,11 @@ export default function AnnualView() {
         </div>
       </section>
 
-      {/* ===== 8. Year-Long Daily Traffic & Conversion ===== */}
+      {/* ===== 8. Weekly Traffic & Conversion — All History ===== */}
       <section className="bg-white rounded-xl shadow p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold" style={{ color: TP.navy }}>
-            2026 Website Traffic &amp; Conversion Rate
-          </h2>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setTrafficView('weekly')}
-              className="px-3 py-1 rounded-md text-xs font-semibold"
-              style={{
-                background: trafficView === 'weekly' ? TP.blue : '#f3f4f6',
-                color: trafficView === 'weekly' ? '#fff' : '#666',
-              }}
-            >Weekly</button>
-            <button
-              onClick={() => setTrafficView('daily')}
-              className="px-3 py-1 rounded-md text-xs font-semibold"
-              style={{
-                background: trafficView === 'daily' ? TP.blue : '#f3f4f6',
-                color: trafficView === 'daily' ? '#fff' : '#666',
-              }}
-            >Daily</button>
-          </div>
-        </div>
+        <h2 className="text-lg font-semibold mb-4" style={{ color: TP.navy }}>
+          Weekly Website Traffic &amp; Conversion Rate
+        </h2>
 
         {(() => {
           if (allDailyData.length === 0) return <p className="text-gray-400 text-sm">No daily data available.</p>;
@@ -946,89 +926,10 @@ export default function AnnualView() {
           const withVisitors = allDailyData.filter(d => (d.visitors || 0) > 0);
           if (withVisitors.length === 0) return <p className="text-gray-400 text-sm">No visitor data available.</p>;
 
-          if (trafficView === 'daily') {
-            // Daily view
-            const labels = withVisitors.map(d => {
-              const dt = new Date(d.date + 'T12:00:00');
-              return `${String(dt.getMonth() + 1).padStart(2, '0')}/${String(dt.getDate()).padStart(2, '0')}`;
-            });
-            const visitors = withVisitors.map(d => d.visitors || 0);
-            const online = withVisitors.map(d => d.online || 0);
-            const convRates = withVisitors.map(d => {
-              const v = d.visitors || 0;
-              const o = d.online || 0;
-              return v > 0 ? parseFloat(((o / v) * 100).toFixed(2)) : 0;
-            });
-
-            return (
-              <div style={{ height: 400 }}>
-                <Bar
-                  data={{
-                    labels,
-                    datasets: [
-                      {
-                        label: 'Visitors',
-                        data: visitors,
-                        backgroundColor: TP.lightPurple + '99',
-                        borderColor: TP.darkPurple,
-                        borderWidth: 1,
-                        yAxisID: 'y',
-                        order: 2,
-                      },
-                      {
-                        label: 'Online Submissions',
-                        data: online,
-                        backgroundColor: TP.blue + '99',
-                        borderColor: TP.blue,
-                        borderWidth: 1,
-                        yAxisID: 'y',
-                        order: 3,
-                      },
-                      {
-                        type: 'line',
-                        label: 'Conversion %',
-                        data: convRates,
-                        borderColor: TP.green,
-                        backgroundColor: 'transparent',
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        tension: 0.3,
-                        yAxisID: 'y1',
-                        order: 1,
-                      } as any,
-                    ],
-                  }}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index' as const, intersect: false },
-                    plugins: {
-                      legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8 } },
-                      tooltip: {
-                        callbacks: {
-                          label: (ctx: any) => {
-                            if (ctx.dataset.label === 'Conversion %') return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(2) + '%';
-                            return (ctx.dataset.label || '') + ': ' + ctx.parsed.y.toLocaleString();
-                          },
-                        },
-                      },
-                    },
-                    scales: {
-                      x: { ticks: { maxRotation: 90, font: { size: 8 }, autoSkip: true, maxTicksLimit: 40 } },
-                      y: { position: 'left' as const, title: { display: true, text: 'Count' }, beginAtZero: true },
-                      y1: { position: 'right' as const, title: { display: true, text: 'Conv %' }, beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { callback: (v: string | number) => v + '%' } },
-                    },
-                  }}
-                />
-              </div>
-            );
-          }
-
-          // Weekly view — aggregate by ISO week
+          // Aggregate by ISO week (Mon–Sun)
           const weekMap = new Map<string, { visitors: number; online: number; label: string; startDate: string }>();
           withVisitors.forEach(d => {
             const dt = new Date(d.date + 'T12:00:00');
-            // Get Monday of this week
             const day = dt.getDay();
             const diff = dt.getDate() - day + (day === 0 ? -6 : 1);
             const monday = new Date(dt);
@@ -1037,7 +938,8 @@ export default function AnnualView() {
             const existing = weekMap.get(key) || { visitors: 0, online: 0, label: '', startDate: key };
             existing.visitors += (d.visitors || 0);
             existing.online += (d.online || 0);
-            existing.label = `${String(monday.getMonth() + 1)}/${String(monday.getDate()).padStart(2, '0')}`;
+            const yr = String(monday.getFullYear()).slice(2);
+            existing.label = `${String(monday.getMonth() + 1)}/${String(monday.getDate()).padStart(2, '0')}/${yr}`;
             weekMap.set(key, existing);
           });
 
@@ -1052,20 +954,30 @@ export default function AnnualView() {
           const totalOnline = wOnline.reduce((s, v) => s + v, 0);
           const avgConv = totalVis > 0 ? (totalOnline / totalVis * 100).toFixed(2) : '0';
 
+          // Find date range
+          const firstDate = weeks.length > 0 ? weeks[0].startDate : '';
+          const lastDate = weeks.length > 0 ? weeks[weeks.length - 1].startDate : '';
+          const firstLabel = firstDate ? new Date(firstDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '';
+          const lastLabel = lastDate ? new Date(lastDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '';
+
           return (
             <>
-              <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="grid grid-cols-4 gap-4 mb-4">
                 <div className="rounded-xl p-3 border border-gray-200 text-center">
-                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">YTD Visitors</div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Total Visitors</div>
                   <div className="text-xl font-bold" style={{ color: TP.darkPurple }}>{totalVis.toLocaleString()}</div>
                 </div>
                 <div className="rounded-xl p-3 border border-gray-200 text-center">
-                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">YTD Online Subs</div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Total Online Subs</div>
                   <div className="text-xl font-bold" style={{ color: TP.blue }}>{totalOnline.toLocaleString()}</div>
                 </div>
                 <div className="rounded-xl p-3 border border-gray-200 text-center">
                   <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Avg Conversion</div>
                   <div className="text-xl font-bold" style={{ color: TP.green }}>{avgConv}%</div>
+                </div>
+                <div className="rounded-xl p-3 border border-gray-200 text-center">
+                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Weeks Tracked</div>
+                  <div className="text-xl font-bold" style={{ color: TP.navy }}>{weeks.length}</div>
                 </div>
               </div>
               <div style={{ height: 400 }}>
@@ -1098,7 +1010,7 @@ export default function AnnualView() {
                         borderColor: TP.green,
                         backgroundColor: 'transparent',
                         borderWidth: 2.5,
-                        pointRadius: 4,
+                        pointRadius: 2,
                         pointBackgroundColor: TP.green,
                         tension: 0.3,
                         yAxisID: 'y1',
@@ -1122,7 +1034,7 @@ export default function AnnualView() {
                       },
                     },
                     scales: {
-                      x: { ticks: { font: { size: 10 } } },
+                      x: { ticks: { maxRotation: 60, font: { size: 8 }, autoSkip: true, maxTicksLimit: 50 } },
                       y: { position: 'left' as const, title: { display: true, text: 'Count' }, beginAtZero: true },
                       y1: { position: 'right' as const, title: { display: true, text: 'Conv %' }, beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { callback: (v: string | number) => v + '%' } },
                     },
@@ -1130,7 +1042,7 @@ export default function AnnualView() {
                 />
               </div>
               <p className="text-xs text-gray-400 mt-2">
-                Visitors from GA4. Conversion rate = online submissions / visitors. {trafficView === 'weekly' ? 'Aggregated by week (Mon–Sun).' : ''} Days without visitor data are excluded.
+                Visitors from GA4. Conversion rate = online submissions / visitors. Aggregated by week (Mon-Sun). {firstLabel && lastLabel ? `${firstLabel} through ${lastLabel}.` : ''} Days without visitor data are excluded.
               </p>
             </>
           );
