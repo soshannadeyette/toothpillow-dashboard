@@ -4,16 +4,16 @@ import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  BarElement,
+
   LineElement,
   PointElement,
   Title,
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Bar, Chart, Line } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Title, Tooltip, Legend);
 
 const TP = {
   blue: '#3A6EA4',
@@ -136,32 +136,6 @@ export default function AVDiagnostics() {
   const postDays = MAY_DAILY.filter(d => d.day >= 23);
   const preAvgStarts = Math.round(preDays.reduce((s, d) => s + d.starts, 0) / preDays.length);
   const postAvgStarts = Math.round(postDays.reduce((s, d) => s + d.starts, 0) / postDays.length);
-
-  // Pipeline funnel chart
-  const funnelLabels = FUNNEL_DATA.map(d => d.label);
-  const funnelChartData = {
-    labels: funnelLabels,
-    datasets: [
-      { label: 'Checked Out', data: FUNNEL_DATA.map(d => d.checkedOut), backgroundColor: 'rgba(29,158,117,0.8)', borderRadius: 0 },
-      { label: 'Checkout Link Sent', data: FUNNEL_DATA.map(d => d.checkout), backgroundColor: 'rgba(58,110,164,0.7)', borderRadius: 0 },
-      { label: 'In Review', data: FUNNEL_DATA.map(d => d.inReview), backgroundColor: 'rgba(127,119,221,0.7)', borderRadius: 0 },
-      { label: 'Waiting (stuck)', data: FUNNEL_DATA.map(d => d.waiting), backgroundColor: 'rgba(226,75,74,0.7)', borderRadius: 0 },
-      { label: 'Closed / Denied', data: FUNNEL_DATA.map(d => d.closed), backgroundColor: 'rgba(156,163,175,0.5)', borderRadius: 0 },
-      { label: 'On Hold', data: FUNNEL_DATA.map(d => d.onHold), backgroundColor: 'rgba(239,159,39,0.5)', borderRadius: 4 },
-    ],
-  };
-  const funnelChartOpts = {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      title: { display: true, text: 'Where all 2026 accounts are now (current stage)', font: { size: 14, weight: 500 as const }, color: TP.navy },
-      tooltip: { callbacks: { label: (ctx: { dataset: { label: string }; parsed: { y: number } }) => ctx.dataset.label + ': ' + ctx.parsed.y.toLocaleString() } },
-    },
-    scales: {
-      x: { stacked: true, ticks: { autoSkip: false } },
-      y: { stacked: true, ticks: { callback: (v: number | string) => Number(v).toLocaleString() } },
-    },
-  };
 
   // ── Styles ────────────────────────────────────────────────────────
   const card = (bg: string, border: string): React.CSSProperties => ({
@@ -345,81 +319,6 @@ export default function AVDiagnostics() {
               <span style={{ fontWeight: 700, color: '#166534' }}>0.2 days</span>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Weekly cohort outcomes section removed */}
-
-      {/* ═══════ SECTION 5: MAY DAILY CHART ═══════ */}
-      <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>May daily: submitted vs waiting</h3>
-        <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 12px' }}>
-          Lighter bars (May 23+) = post-update. Line = total account starts that day.
-        </p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(29,158,117,0.7)' }} /> Submitted</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(226,75,74,0.7)' }} /> Waiting</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, background: TP.navy, borderRadius: 1 }} /> Total starts</span>
-        </div>
-        <div style={{ height: 280 }}>
-          <Chart
-            type="bar"
-            data={{
-              labels: MAY_DAILY.map(d => d.day.toString()),
-              datasets: [
-                {
-                  type: 'bar' as const, label: 'Submitted', data: MAY_DAILY.map(d => d.submitted),
-                  backgroundColor: MAY_DAILY.map(d => d.day >= 23 ? 'rgba(29,158,117,0.35)' : 'rgba(29,158,117,0.7)'),
-                  borderColor: MAY_DAILY.map(d => d.day >= 23 ? 'rgba(29,158,117,0.6)' : 'rgba(29,158,117,0)'),
-                  borderWidth: 1, borderRadius: 0, stack: 'main', order: 2,
-                },
-                {
-                  type: 'bar' as const, label: 'Waiting', data: MAY_DAILY.map(d => d.waiting),
-                  backgroundColor: MAY_DAILY.map(d => d.day >= 23 ? 'rgba(226,75,74,0.35)' : 'rgba(226,75,74,0.7)'),
-                  borderColor: MAY_DAILY.map(d => d.day >= 23 ? 'rgba(226,75,74,0.6)' : 'rgba(226,75,74,0)'),
-                  borderWidth: 1, borderRadius: 0, stack: 'main', order: 2,
-                },
-                {
-                  type: 'line' as const, label: 'Starts', data: MAY_DAILY.map(d => d.starts),
-                  borderColor: TP.navy, backgroundColor: TP.navy, borderWidth: 2,
-                  pointRadius: 3, pointBackgroundColor: TP.navy, tension: 0.3, order: 1,
-                  yAxisID: 'y1',
-                },
-              ],
-            }}
-            options={{
-              responsive: true, maintainAspectRatio: false,
-              plugins: {
-                legend: { display: false },
-                title: { display: false },
-                tooltip: { callbacks: { label: (ctx: { dataset: { label: string }; parsed: { y: number } }) => ctx.dataset.label + ': ' + ctx.parsed.y } },
-              },
-              scales: {
-                x: { stacked: true, title: { display: true, text: 'Day of May', font: { size: 11 } } },
-                y: { stacked: true, ticks: { callback: (v: number | string) => Number(v).toLocaleString() } },
-                y1: { display: false, stacked: false, min: 0, max: 100 },
-              },
-            } as any}
-          />
-        </div>
-      </div>
-
-      {/* ═══════ SECTION 6: PIPELINE FUNNEL ═══════ */}
-      <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>2026 pipeline by month</h3>
-        <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 12px' }}>
-          Current stage of all accounts created each month. Jan is fully resolved. Feb–Apr still have large waiting blocks. May is early.
-        </p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(29,158,117,0.8)' }} /> Checked Out</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(58,110,164,0.7)' }} /> Checkout Link</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(127,119,221,0.7)' }} /> In Review</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(226,75,74,0.7)' }} /> Waiting</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(156,163,175,0.5)' }} /> Closed</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(239,159,39,0.5)' }} /> On Hold</span>
-        </div>
-        <div style={{ height: 300 }}>
-          <Bar data={funnelChartData} options={funnelChartOpts as any} />
         </div>
       </div>
 
