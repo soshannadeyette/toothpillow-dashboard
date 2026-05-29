@@ -450,63 +450,74 @@ export default function OrganicGrowth() {
         <p style={{ fontSize: 13, color: '#888', margin: 0 }}>Google Search Console, Feb 2025 to present</p>
       </div>
 
-      {/* ═══════ SEO MIGRATION COMPARISON ═══════ */}
+      {/* ═══════ SEO MIGRATION — 3 CARDS ═══════ */}
       {(() => {
-        const check = '✅';
-        const cross = '❌';
-        const elements = [
-          { name: 'Title tags', old: true, mid: true, now: true },
-          { name: 'Meta descriptions', old: true, mid: false, now: true },
-          { name: 'OG tags (title, description, image, url)', old: true, mid: false, now: true },
-          { name: 'Twitter tags (title, description, image)', old: true, mid: false, now: true },
-          { name: 'Twitter card type', old: false, mid: false, now: true },
-          { name: 'Canonical URL', old: false, mid: false, now: true },
-          { name: 'H1/H2 heading structure', old: true, mid: true, now: true },
-          { name: 'JSON-LD structured data', old: false, mid: false, now: false },
+        const items = [
+          { name: 'Title tags',           old: true,  mid: true,  now: true },
+          { name: 'Meta descriptions',    old: true,  mid: false, now: true },
+          { name: 'OG tags',              old: true,  mid: false, now: true },
+          { name: 'Twitter tags',         old: true,  mid: false, now: true },
+          { name: 'Canonical URL',        old: false, mid: false, now: true },
+          { name: 'H1 heading structure', old: true,  mid: true,  now: true },
+          { name: 'JSON-LD schema',       old: false, mid: false, now: true },
         ];
-        const hdrStyle = { padding: '8px 12px', textAlign: 'center' as const, fontWeight: 700, fontSize: 12, color: '#fff', borderBottom: `2px solid #e5e7eb` };
-        const cellStyle = { padding: '6px 12px', fontSize: 12, borderBottom: '1px solid #f0f0f0' };
-        const centerCell = { ...cellStyle, textAlign: 'center' as const, fontSize: 14 };
+        const oldCount = items.filter(i => i.old).length;
+        const midCount = items.filter(i => i.mid).length;
+        const nowCount = items.filter(i => i.now).length;
+        const rowStyle = { display: 'flex', alignItems: 'center', gap: 6, padding: '4px 0', fontSize: 12 };
         return (
-          <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-            <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4, marginTop: 0 }}>SEO Elements Across Site Versions</h3>
-            <p style={{ fontSize: 11, color: '#888', margin: '0 0 12px 0' }}>What Google had to work with at each stage. The migration dropped 4 of 6 existing SEO elements, contributing to the impression decline visible in the charts below.</p>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  <th style={{ ...hdrStyle, textAlign: 'left' as const, background: '#f8f9fa', color: TP.navy, width: '40%' }}>SEO Element</th>
-                  <th style={{ ...hdrStyle, background: '#f8f9fa', color: TP.navy, width: '20%' }}>
-                    <div>Old Site</div>
-                    <div style={{ fontWeight: 400, fontSize: 10, marginTop: 2 }}>Pre-Dec 2025</div>
-                  </th>
-                  <th style={{ ...hdrStyle, background: `${TP.blue}18`, color: TP.navy, width: '20%' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                      <span style={{ background: TP.blue, color: '#fff', borderRadius: 4, padding: '1px 6px', fontSize: 9, fontWeight: 700 }}>NEW SITE</span>
-                    </div>
-                    <div style={{ fontWeight: 400, fontSize: 10, marginTop: 2 }}>Dec 2025 – May 2026</div>
-                  </th>
-                  <th style={{ ...hdrStyle, background: `${TP.green}18`, color: TP.navy, width: '20%' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                      <span style={{ background: TP.green, color: '#fff', borderRadius: 4, padding: '1px 6px', fontSize: 9, fontWeight: 700 }}>SEO</span>
-                    </div>
-                    <div style={{ fontWeight: 400, fontSize: 10, marginTop: 2 }}>May 19, 2026+</div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {elements.map((el, i) => (
-                  <tr key={i} style={{ background: i % 2 === 0 ? '#fff' : '#fafbfc' }}>
-                    <td style={{ ...cellStyle, fontWeight: 500, color: TP.navy }}>{el.name}</td>
-                    <td style={centerCell}>{el.old ? check : cross}</td>
-                    <td style={centerCell}>{el.mid ? check : cross}</td>
-                    <td style={centerCell}>{el.now ? check : cross}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <div style={{ display: 'flex', gap: 16, marginTop: 12, fontSize: 11, color: '#666' }}>
-              <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: TP.blue, marginRight: 4 }}></span> Blue line on charts = New site launch (Dec 22)</span>
-              <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: TP.green, marginRight: 4 }}></span> Green line on charts = SEO implemented (May 19)</span>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            {/* CARD 1: Old Site */}
+            <div style={{ flex: 1, minWidth: 220, background: '#fff', borderRadius: 10, padding: '16px 18px', border: '1px solid #e5e7eb' }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: TP.navy }}>Old Site</div>
+              <div style={{ fontSize: 11, color: '#888', marginBottom: 10 }}>Pre-Dec 2025</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy, marginBottom: 10 }}>{oldCount}/{items.length} <span style={{ fontSize: 12, fontWeight: 500, color: '#888' }}>elements</span></div>
+              {items.map((el, i) => (
+                <div key={i} style={rowStyle}>
+                  <span style={{ fontSize: 13 }}>{el.old ? '✅' : '❌'}</span>
+                  <span style={{ color: el.old ? TP.navy : '#bbb' }}>{el.name}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* CARD 2: New Site (the crash) */}
+            <div style={{ flex: 1, minWidth: 220, background: `linear-gradient(135deg, ${TP.red}08, ${TP.red}04)`, borderRadius: 10, padding: '16px 18px', border: `2px solid ${TP.red}40` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ background: TP.blue, color: '#fff', borderRadius: 4, padding: '2px 8px', fontSize: 10, fontWeight: 700 }}>NEW SITE</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: TP.navy }}>New Site</span>
+              </div>
+              <div style={{ fontSize: 11, color: '#888', marginBottom: 10 }}>Dec 22, 2025 – May 18, 2026</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: TP.red, marginBottom: 4 }}>{midCount}/{items.length} <span style={{ fontSize: 12, fontWeight: 500 }}>elements</span></div>
+              <div style={{ fontSize: 11, color: TP.red, fontWeight: 600, marginBottom: 10 }}>5 elements lost in migration</div>
+              {items.map((el, i) => (
+                <div key={i} style={rowStyle}>
+                  <span style={{ fontSize: 13 }}>{el.mid ? '✅' : '❌'}</span>
+                  <span style={{ color: el.mid ? TP.navy : TP.red, fontWeight: el.mid ? 400 : 600 }}>{el.name}</span>
+                </div>
+              ))}
+              <div style={{ marginTop: 10, padding: '8px 10px', background: `${TP.red}10`, borderRadius: 6, fontSize: 11, color: TP.red, fontWeight: 500, lineHeight: 1.5 }}>
+                Impressions fell from 213K to 66K after Google re-indexed the new pages without metadata.
+              </div>
+            </div>
+
+            {/* CARD 3: Post-SEO */}
+            <div style={{ flex: 1, minWidth: 220, background: `linear-gradient(135deg, ${TP.green}08, ${TP.green}04)`, borderRadius: 10, padding: '16px 18px', border: `2px solid ${TP.green}40` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ background: TP.green, color: '#fff', borderRadius: 4, padding: '2px 8px', fontSize: 10, fontWeight: 700 }}>SEO</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: TP.navy }}>Post-SEO</span>
+              </div>
+              <div style={{ fontSize: 11, color: '#888', marginBottom: 10 }}>May 19, 2026+</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: TP.green, marginBottom: 4 }}>{nowCount}/{items.length} <span style={{ fontSize: 12, fontWeight: 500 }}>elements</span></div>
+              <div style={{ fontSize: 11, color: TP.green, fontWeight: 600, marginBottom: 10 }}>All elements restored + 2 new</div>
+              {items.map((el, i) => (
+                <div key={i} style={rowStyle}>
+                  <span style={{ fontSize: 13 }}>{el.now ? '✅' : '❌'}</span>
+                  <span style={{ color: el.now ? TP.navy : '#bbb' }}>{el.name}</span>
+                </div>
+              ))}
+              <div style={{ marginTop: 10, padding: '8px 10px', background: `${TP.green}10`, borderRadius: 6, fontSize: 11, color: '#555', lineHeight: 1.5 }}>
+                Restored everything lost + added canonical URLs, Twitter card, and JSON-LD schema across 6 pages.
+              </div>
             </div>
           </div>
         );
