@@ -16,35 +16,8 @@ import {
   type Plugin,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-import { KENDRA_DAILY, LAUREN_DAILY, SHANNON_DAILY } from '@/lib/ambassadorDaily';
-import type { DailyAmbSub } from '@/lib/ambassadorDaily';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend);
-
-/* ════════════════════════════════════════════════════════════════════════════
-   Top Ambassador Daily Submission Helpers
-   ════════════════════════════════════════════════════════════════════════ */
-function ambTotal(data: DailyAmbSub[]): number {
-  return data.reduce((s, d) => s + d.n, 0);
-}
-
-function ambPeakDay(data: DailyAmbSub[]): DailyAmbSub {
-  return data.reduce((best, d) => d.n > best.n ? d : best, data[0]);
-}
-
-function ambDateLabel(iso: string): string {
-  const dt = new Date(iso + 'T12:00:00');
-  return `${dt.getMonth() + 1}/${dt.getDate()}/${String(dt.getFullYear()).slice(2)}`;
-}
-
-function ambDateLabelShort(iso: string): string {
-  const dt = new Date(iso + 'T12:00:00');
-  return `${dt.getMonth() + 1}/${dt.getDate()}`;
-}
-
-function amb2026(data: DailyAmbSub[]): DailyAmbSub[] {
-  return data.filter(d => d.d >= '2026-01-01');
-}
 
 /* ════════════════════════════════════════════════════════════════════════════
    TP Kids Color Palette
@@ -73,7 +46,7 @@ const infSubs: Record<string, number> = {
   '2023-10':6,'2023-11':294,'2023-12':1039,
   '2024-01':431,'2024-02':315,'2024-03':1593,'2024-04':569,'2024-05':654,'2024-06':1253,'2024-07':485,'2024-08':594,'2024-09':1124,'2024-10':498,'2024-11':367,'2024-12':515,
   '2025-01':521,'2025-02':605,'2025-03':521,'2025-04':511,'2025-05':428,'2025-06':330,'2025-07':906,'2025-08':440,'2025-09':290,'2025-10':273,'2025-11':485,'2025-12':273,
-  '2026-01':312,'2026-02':517,'2026-03':463,'2026-04':237,'2026-05':224,
+  '2026-01':312,'2026-02':517,'2026-03':463,'2026-04':237,'2026-05':240,
 };
 
 const newAddsAmb: Record<string, number> = {
@@ -88,8 +61,8 @@ const newAddsInf: Record<string, number> = {
 };
 
 const ambSubsYear: Record<number, number> = {2023:465, 2024:435, 2025:566, 2026:271};
-const infSubsYear: Record<number, number> = {2023:1339, 2024:8398, 2025:5583, 2026:1753};
-const combSubsYear: Record<number, number> = {2023:1804, 2024:8833, 2025:6149, 2026:2024};
+const infSubsYear: Record<number, number> = {2023:1339, 2024:8398, 2025:5583, 2026:1769};
+const combSubsYear: Record<number, number> = {2023:1804, 2024:8833, 2025:6149, 2026:2040};
 const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:76};
 const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:17};
 const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:94};
@@ -98,22 +71,22 @@ const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:
 // Active ambassadors with ≥1 submission per year (from Salesforce)
 const activeInfByYear: Record<number, number> = {2023:6, 2024:60, 2025:82, 2026:66};
 const activeAmbByYear: Record<number, number> = {2023:24, 2024:85, 2025:127, 2026:104};
-const activeTotalByYear: Record<number, number> = {2023:30, 2024:145, 2025:209, 2026:170};
+const activeTotalByYear: Record<number, number> = {2023:30, 2024:145, 2025:209, 2026:173};
 
 const halfCarriedBy: Record<number, number> = {2023:1, 2024:2, 2025:5, 2026:8};
 const tenPlusByYear: Record<number, number> = {2023:8, 2024:40, 2025:55, 2026:30};
 // Mega-3 = Lauren Johnson + Kendra Needham + Ginny Yurich (top recruited-ambassador producers)
-const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:377};
-const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:1647};
+const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:383};
+const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:1657};
 
-const ANN = 12 / 4.903; // 4 full months + 28/31 of May = 4.903 (data through 5/28)
+const ANN = 12 / 4.935; // 4 full months + 29/31 of May = 4.935 (data through 5/29)
 
 const recruit26 = [
   {label:'Jan', amb:5, inf:3, accent:'#B6CAE3'},
   {label:'Feb', amb:13, inf:1, accent:'#8CD1C8'},
   {label:'Mar', amb:10, inf:2, accent:'#3A6EA4'},
   {label:'Apr', amb:28, inf:5, accent:'#FDBE67'},
-  {label:'May', amb:20, inf:6, accent:'#B26CA6', tag:'through 5/28'},
+  {label:'May', amb:20, inf:6, accent:'#B26CA6', tag:'through 5/29'},
 ];
 
 const concRows = [
@@ -123,26 +96,26 @@ const concRows = [
   {y:'2026', n:8, color:'#8CD1C8', names:'Shannon, Sosh, Lauren, Kendra, Jeff, Amy B., Ginny, Melody'},
 ];
 
-// Updated from Salesforce Launch Bonus Tracker export 2026-05-28
+// Updated from Salesforce Launch Bonus Tracker export 2026-05-29
 const moversData: Record<string, {y25:number; y26:number; type:string}> = {
   'Shannon Tripp':        {y25:866,  y26:257, type:'Inf'},
-  'Soshanna Salsman':     {y25:914,  y26:169, type:'Inf'},
-  'Lauren Johnson NNM':   {y25:831,  y26:157, type:'Inf'},
-  'Kendra Needham':       {y25:386,  y26:141, type:'Inf'},
+  'Soshanna Salsman':     {y25:914,  y26:175, type:'Inf'},
+  'Lauren Johnson NNM':   {y25:831,  y26:158, type:'Inf'},
+  'Kendra Needham':       {y25:386,  y26:146, type:'Inf'},
   'Jeff Cruz':            {y25:84,   y26:112, type:'Inf'},
   'Amy Bernhard':         {y25:112,  y26:95,  type:'Inf'},
   'Ginny Yurich':         {y25:291,  y26:79,  type:'Inf'},
   'Melody Brandon':       {y25:123,  y26:76,  type:'Inf'},
-  'Jasyra Santiago-Hines':{y25:57,   y26:73,  type:'Inf'},
+  'Jasyra Santiago-Hines':{y25:57,   y26:75,  type:'Inf'},
   'Ellen Fisher':         {y25:53,   y26:57,  type:'Inf'},
   'Taylor Kulik':         {y25:103,  y26:48,  type:'Inf'},
   'Eden Lee':             {y25:185,  y26:41,  type:'Inf'},
   'Katelyn Alsop':        {y25:0,    y26:40,  type:'Inf'},
-  'Emily Boazman':        {y25:0,    y26:35,  type:'Inf'},
+  'Emily Boazman':        {y25:0,    y26:36,  type:'Inf'},
   'Amy Erickson':         {y25:51,   y26:34,  type:'Inf'},
   'Lauren Stadler':       {y25:93,   y26:25,  type:'Inf'},
   'Jennie Hoglund':       {y25:29,   y26:24,  type:'Inf'},
-  'Thuy Improta':         {y25:245,  y26:24,  type:'Inf'},
+  'Thuy Improta':         {y25:245,  y26:25,  type:'Inf'},
   'Ashley Turner':        {y25:39,   y26:21,  type:'Inf'},
   'Carly Brown':          {y25:0,    y26:20,  type:'Inf'},
   'Taylor Moran':         {y25:62,   y26:19,  type:'Inf'},
@@ -181,18 +154,18 @@ const moversData: Record<string, {y25:number; y26:number; type:string}> = {
   'Heather Reed':         {y25:4,    y26:1,   type:'Amb'},
 };
 
-// Launch Bonus Tracker — updated from Salesforce export 2026-05-28
+// Launch Bonus Tracker — updated from Salesforce export 2026-05-29
 // bonusSubs = submissions counted ONLY from window start date forward
 // Sorted by bonusSubs descending. Katelyn Alsop has a separate Jan 19 window.
 const launchBonusData = [
   {name:'Shannon Tripp',onboard:'06/27/2025',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:50,tier:2,earned:1250},
-  {name:'Soshanna Salsman',onboard:'04/30/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:47,tier:1,earned:250},
-  {name:'Lauren Johnson NNM',onboard:'05/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:42,tier:1,earned:250},
+  {name:'Soshanna Salsman',onboard:'04/30/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:53,tier:2,earned:1250},
+  {name:'Lauren Johnson NNM',onboard:'05/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:43,tier:1,earned:250},
   {name:'Katelyn Alsop (James)',onboard:'01/19/2026',is2026:true,winStart:'01/19/2026',winEnd:'01/19/2027',bonusSubs:40,tier:1,earned:250},
-  {name:'Emily Boazman',onboard:'04/02/2026',is2026:true,winStart:'04/02/2026',winEnd:'04/02/2027',bonusSubs:34,tier:1,earned:250},
-  {name:'Kendra Needham',onboard:'11/01/2023',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:31,tier:1,earned:250},
+  {name:'Kendra Needham',onboard:'11/01/2023',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:36,tier:1,earned:250},
+  {name:'Emily Boazman',onboard:'04/02/2026',is2026:true,winStart:'04/02/2026',winEnd:'04/02/2027',bonusSubs:35,tier:1,earned:250},
   {name:'Jeff Cruz Talia_likeitis',onboard:'08/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:27,tier:1,earned:250},
-  {name:'Jasyra Santiago-Hines',onboard:'02/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:21,tier:0,earned:0},
+  {name:'Jasyra Santiago-Hines',onboard:'02/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:23,tier:0,earned:0},
   {name:'Ginny Yurich',onboard:'06/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:21,tier:0,earned:0},
   {name:'Carly Brown',onboard:'04/21/2026',is2026:true,winStart:'04/21/2026',winEnd:'04/21/2027',bonusSubs:20,tier:0,earned:0},
   {name:'Hayley Lombard',onboard:'05/19/2026',is2026:true,winStart:'05/19/2026',winEnd:'05/19/2027',bonusSubs:15,tier:0,earned:0},
@@ -202,7 +175,7 @@ const launchBonusData = [
   {name:'Melody Brandon',onboard:'04/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:11,tier:0,earned:0},
   {name:'Eden Lee loverlees',onboard:'12/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:10,tier:0,earned:0},
   {name:'Melina Moses',onboard:'03/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:9,tier:0,earned:0},
-  {name:'Thuy Improta *ministry*',onboard:'07/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:9,tier:0,earned:0},
+  {name:'Thuy Improta *ministry*',onboard:'07/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:10,tier:0,earned:0},
   {name:'Eryn Carroll NMM',onboard:'07/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:8,tier:0,earned:0},
   {name:'Courtland Nall',onboard:'08/04/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:7,tier:0,earned:0},
   {name:'Ellen Fisher',onboard:'10/28/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:7,tier:0,earned:0},
@@ -623,26 +596,6 @@ export default function AmbassadorGrowth() {
   });
 
   const concMax = 9;
-
-  /* ── Top Producer daily chart helpers ── */
-  const ambBarChartOpts = (title: string) => ({
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      title: { display: true, text: title, font: { size: 14, weight: 'bold' as const }, color: TP.navy },
-      tooltip: {
-        callbacks: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          label: (ctx: any) => `${ctx.parsed.y.toLocaleString()} submissions`,
-        },
-      },
-    },
-    scales: {
-      x: { ticks: { maxRotation: 60, font: { size: 7 }, autoSkip: true, maxTicksLimit: 50 } },
-      y: { beginAtZero: true, title: { display: true, text: 'Submissions', font: { size: 10 } } },
-    },
-  });
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -1347,86 +1300,6 @@ export default function AmbassadorGrowth() {
         </div>
       </div>
 
-      {/* ════════ Top Producer Daily History — 2026 Only ════════ */}
-      <div>
-        <h3 style={sectionHeader}>Top Producer Submission History — 2026</h3>
-        <p style={sectionSub}>Daily submissions this year for the three highest-volume ambassadors. Data from Salesforce.</p>
-
-        {/* Lauren Johnson — 2026 */}
-        <div style={{ ...chartWrap, marginBottom: '1.5rem' }}>
-          <div style={{ marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy }}>Lauren Johnson (NNM)</span>
-            <span style={{ fontSize: '0.75rem', color: '#888', marginLeft: 12 }}>
-              {ambTotal(amb2026(LAUREN_DAILY)).toLocaleString()} submissions in 2026
-            </span>
-          </div>
-          <div style={{ height: 220 }}>
-            <Bar
-              data={{
-                labels: amb2026(LAUREN_DAILY).map(d => ambDateLabelShort(d.d)),
-                datasets: [{
-                  data: amb2026(LAUREN_DAILY).map(d => d.n),
-                  backgroundColor: TP.teal,
-                  borderColor: TP.teal,
-                  borderWidth: 0.5,
-                  borderRadius: 1,
-                }],
-              }}
-              options={ambBarChartOpts(`2026 — ${ambTotal(amb2026(LAUREN_DAILY))} submissions`)}
-            />
-          </div>
-        </div>
-
-        {/* Kendra Needham — 2026 */}
-        <div style={{ ...chartWrap, marginBottom: '1.5rem' }}>
-          <div style={{ marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy }}>Kendra Needham</span>
-            <span style={{ fontSize: '0.75rem', color: '#888', marginLeft: 12 }}>
-              {ambTotal(amb2026(KENDRA_DAILY)).toLocaleString()} submissions in 2026
-            </span>
-          </div>
-          <div style={{ height: 220 }}>
-            <Bar
-              data={{
-                labels: amb2026(KENDRA_DAILY).map(d => ambDateLabelShort(d.d)),
-                datasets: [{
-                  data: amb2026(KENDRA_DAILY).map(d => d.n),
-                  backgroundColor: TP.gold,
-                  borderColor: TP.gold,
-                  borderWidth: 0.5,
-                  borderRadius: 1,
-                }],
-              }}
-              options={ambBarChartOpts(`2026 — ${ambTotal(amb2026(KENDRA_DAILY))} submissions`)}
-            />
-          </div>
-        </div>
-
-        {/* Shannon Tripp — 2026 */}
-        <div style={{ ...chartWrap, marginBottom: '1.5rem' }}>
-          <div style={{ marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy }}>Shannon Tripp</span>
-            <span style={{ fontSize: '0.75rem', color: '#888', marginLeft: 12 }}>
-              {ambTotal(amb2026(SHANNON_DAILY)).toLocaleString()} submissions in 2026
-            </span>
-          </div>
-          <div style={{ height: 220 }}>
-            <Bar
-              data={{
-                labels: amb2026(SHANNON_DAILY).map(d => ambDateLabelShort(d.d)),
-                datasets: [{
-                  data: amb2026(SHANNON_DAILY).map(d => d.n),
-                  backgroundColor: TP.purple,
-                  borderColor: TP.purple,
-                  borderWidth: 0.5,
-                  borderRadius: 1,
-                }],
-              }}
-              options={ambBarChartOpts(`2026 — ${ambTotal(amb2026(SHANNON_DAILY))} submissions`)}
-            />
-          </div>
-        </div>
-      </div>
 
     </div>
   );
