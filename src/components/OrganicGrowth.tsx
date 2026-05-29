@@ -452,18 +452,28 @@ export default function OrganicGrowth() {
 
       {/* ═══════ MILESTONE BANNERS ═══════ */}
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: 280, background: `linear-gradient(135deg, ${TP.blue}12, ${TP.blue}06)`, borderRadius: 10, padding: '14px 18px', border: `2px solid ${TP.blue}30`, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ background: TP.blue, color: '#fff', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 12, whiteSpace: 'nowrap' }}>NEW SITE</div>
-          <div>
+        <div style={{ flex: 1, minWidth: 280, background: `linear-gradient(135deg, ${TP.blue}12, ${TP.blue}06)`, borderRadius: 10, padding: '14px 18px', border: `2px solid ${TP.blue}30` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ background: TP.blue, color: '#fff', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 12, whiteSpace: 'nowrap' }}>NEW SITE</div>
             <div style={{ fontWeight: 600, color: TP.navy, fontSize: 13 }}>Dec 22, 2025 — New website launched</div>
-            <div style={{ fontSize: 11, color: '#666', marginTop: 2 }}>Blue marker on all charts below</div>
+          </div>
+          <div style={{ fontSize: 11, color: '#555', marginTop: 10, lineHeight: 1.5 }}>
+            The old site had basic SEO metadata in place: title tags, meta descriptions, Open Graph tags, and a heading structure.
+            The new site launched without any of these. No title tags, no meta descriptions, no canonical URLs, no structured data.
+            When Google re-crawled and re-indexed the new pages, the missing metadata caused rankings to shift and impressions to drop
+            from 213K (Jan) to 66K (Feb). The site went from appearing for a large volume of low-relevance queries at positions 50–70 to a
+            smaller set of queries at better positions. SEO metadata was restored on May 19, 2026.
           </div>
         </div>
-        <div style={{ flex: 1, minWidth: 280, background: `linear-gradient(135deg, ${TP.green}12, ${TP.green}06)`, borderRadius: 10, padding: '14px 18px', border: `2px solid ${TP.green}30`, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ background: TP.green, color: '#fff', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 12, whiteSpace: 'nowrap' }}>SEO</div>
-          <div>
+        <div style={{ flex: 1, minWidth: 280, background: `linear-gradient(135deg, ${TP.green}12, ${TP.green}06)`, borderRadius: 10, padding: '14px 18px', border: `2px solid ${TP.green}30` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ background: TP.green, color: '#fff', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 12, whiteSpace: 'nowrap' }}>SEO</div>
             <div style={{ fontWeight: 600, color: TP.navy, fontSize: 13 }}>May 19, 2026 — Title tags, meta descriptions, H1 fixes across 6 pages</div>
-            <div style={{ fontSize: 11, color: '#666', marginTop: 2 }}>Green marker on all charts below</div>
+          </div>
+          <div style={{ fontSize: 11, color: '#555', marginTop: 10, lineHeight: 1.5 }}>
+            Restored and improved what was lost in the migration: custom title tags, meta descriptions, H1 tags, canonical URLs, and Twitter card tags
+            across Home, Symptoms, Assessment, Avoiding Braces, FAQs, and Our Doctors pages. Remaining gap: JSON-LD structured data
+            (Organization, Service, FAQPage schema) is not yet implemented site-wide.
           </div>
         </div>
       </div>
