@@ -348,66 +348,7 @@ export default function AVDiagnostics() {
         </div>
       </div>
 
-      {/* ═══════ SECTION 4: COHORT AGING (visual stacked bars) ═══════ */}
-      <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>Weekly cohort outcomes</h3>
-        <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px' }}>
-          Everyone who started in each week: where did they end up? Green = completed. Red = still waiting. Gray = closed/denied.
-        </p>
-
-        <div style={{ display: 'grid', gap: 14, marginBottom: 16 }}>
-          {COHORT_AGING.map((c) => {
-            const completed = c.within7d + c.d8to14 + c.d15plus;
-            const other = c.starts - completed - c.waiting;
-            const pct7 = c.starts > 0 ? c.within7d / c.starts * 100 : 0;
-            const pct814 = c.starts > 0 ? c.d8to14 / c.starts * 100 : 0;
-            const pct15 = c.starts > 0 ? c.d15plus / c.starts * 100 : 0;
-            const pctWait = c.starts > 0 ? c.waiting / c.starts * 100 : 0;
-            const pctOther = c.starts > 0 ? other / c.starts * 100 : 0;
-            const compPct = c.starts > 0 ? completed / c.starts * 100 : 0;
-            const borderColor = c.postUpdate ? TP.green : '#E5E7EB';
-            const bgColor = c.postUpdate ? '#F0FDF4' : '#FAFAFA';
-            return (
-              <div key={c.label} style={{ background: bgColor, border: `1.5px solid ${borderColor}`, borderRadius: 10, padding: 16 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontWeight: 700, color: TP.navy, fontSize: 14 }}>{c.label}</span>
-                    {c.postUpdate && <span style={{ fontSize: 10, background: TP.green, color: 'white', padding: '2px 8px', borderRadius: 10, fontWeight: 700 }}>POST-UPDATE</span>}
-                    {!c.mature7d && <span style={{ fontSize: 10, color: TP.amber, fontWeight: 600 }}>STILL AGING</span>}
-                  </div>
-                  <span style={{ fontSize: 12, color: '#6B7280' }}>{c.starts} started</span>
-                </div>
-
-                <div style={{ display: 'flex', height: 28, borderRadius: 6, overflow: 'hidden', marginBottom: 8 }}>
-                  {pct7 > 0 && <div style={{ width: `${pct7}%`, background: '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 11, fontWeight: 700 }}>{pct7 > 8 ? `${Math.round(pct7)}%` : ''}</div>}
-                  {pct814 > 0 && <div style={{ width: `${pct814}%`, background: '#34D399' }} />}
-                  {pct15 > 0 && <div style={{ width: `${pct15}%`, background: '#A7F3D0' }} />}
-                  {pctWait > 0 && <div style={{ width: `${pctWait}%`, background: '#E24B4A', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 11, fontWeight: 700 }}>{pctWait > 8 ? `${Math.round(pctWait)}%` : ''}</div>}
-                  {pctOther > 0 && <div style={{ width: `${Math.max(pctOther, 1)}%`, background: '#D1D5DB' }} />}
-                </div>
-
-                <div style={{ display: 'flex', gap: 16, fontSize: 12, flexWrap: 'wrap' }}>
-                  <span style={{ color: '#065F46' }}><strong style={{ color: '#1D9E75' }}>Completed: {completed}</strong> ({compPct.toFixed(1)}%)</span>
-                  <span style={{ color: TP.red }}><strong>Waiting: {c.waiting}</strong> ({pctWait.toFixed(1)}%)</span>
-                  {other > 0 && <span style={{ color: '#6B7280' }}><strong>Other: {other}</strong></span>}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div style={{ display: 'flex', gap: 14, fontSize: 11, color: '#6B7280', flexWrap: 'wrap' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: '#1D9E75' }} /> Completed within 7d</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: '#34D399' }} /> Days 8–14</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: '#E24B4A' }} /> Still waiting</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: '#D1D5DB' }} /> Closed/denied</span>
-        </div>
-
-        <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8, padding: 14, fontSize: 12, color: '#92400E', lineHeight: 1.6, marginTop: 16 }}>
-          <strong>Note:</strong> The May 22–29 cohort is {POST_UPDATE_DAYS_ELAPSED} days old. Some &quot;waiting&quot; accounts will still complete as they age.
-          The post-update green bar will grow. Fully comparable by <strong>June 4</strong> (7-day maturity).
-        </div>
-      </div>
+      {/* Weekly cohort outcomes section removed */}
 
       {/* ═══════ SECTION 5: MAY DAILY CHART ═══════ */}
       <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 24 }}>
