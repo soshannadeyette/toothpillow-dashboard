@@ -59,15 +59,6 @@ const HYBRID_GOALS_2026: Record<number, number> = {
 };
 const PRIME_GOAL = 25;
 
-// Ambassador commission data (personal payouts, separate from role income)
-const AMB_COMMISSIONS: Record<string, number> = {
-  'January': 1803.95,
-  'February': 2588.20,
-  'March': 1441.40,
-  'April': 1552.18,
-  'May': 2789.23,
-};
-
 // 2025 website traffic — GA4 Total Users, worldwide (confirmed May 19, 2026)
 const TRAFFIC_2025: Record<number, number> = {
   1: 57814, 2: 58901, 3: 57747, 4: 33895, 5: 31621, 6: 31681,
@@ -109,10 +100,6 @@ function pct(val: number, total: number): string {
 function fmtPct(val: number | null | undefined): string {
   if (val == null) return '--';
   return val.toFixed(2) + '%';
-}
-
-function fmtDollar(val: number): string {
-  return '$' + val.toLocaleString();
 }
 
 function goalPctColor(val: number): string {
@@ -157,7 +144,6 @@ export default function AnnualView() {
         const totalPrime = dailyEntries.reduce((s: number, e: DailySubmission) => s + (e.prime || 0), 0);
         const totalSubs = totalOnline + totalHybrid + totalPrime;
         const totalVisitors = dailyEntries.reduce((s: number, e: DailySubmission) => s + (e.visitors || 0), 0);
-        const totalIncome = dailyEntries.reduce((s: number, e: DailySubmission) => s + (e.income || 0), 0);
         const goalObj = (MONTHLY_GOALS_2026 as { month: number; total: number }[]).find(g => g.month === thisMonth);
         const convRate = totalVisitors > 0 ? parseFloat(((totalOnline / totalVisitors) * 100).toFixed(2)) : 0;
 
@@ -170,7 +156,7 @@ export default function AnnualView() {
           online_submissions: totalOnline,
           hybrid_submissions: totalHybrid,
           prime_submissions: totalPrime,
-          total_income: totalIncome,
+          total_income: 0,
           total_visitors: totalVisitors,
           usa_visitors: 0,
           conversion_rate: convRate,
@@ -260,16 +246,12 @@ export default function AnnualView() {
   const ytdPrime = months2026.reduce((s, m) => s + (m.prime_submissions || 0), 0);
   const ytdGoal = months2026.reduce((s, m) => s + (m.goal || 0), 0);
   const ytdVisitors = months2026.reduce((s, m) => s + (m.total_visitors || 0), 0);
-  const ytdIncome = months2026.reduce((s, m) => s + (m.total_income || 0), 0);
   const ytdConvAll = months2026.filter(m => m.conversion_rate != null);
   const ytdConvAvg = ytdConvAll.length
     ? ytdConvAll.reduce((s, m) => s + (m.conversion_rate || 0), 0) / ytdConvAll.length
     : 0;
   const goalPctVal = ytdGoal > 0 ? (ytdSubs / ytdGoal) * 100 : 0;
 
-  // Ambassador commission YTD
-  const ytdAmbComm = months2026.reduce((s, m) => s + (AMB_COMMISSIONS[MN[m.month]] || 0), 0);
-  const ytdCombinedIncome = ytdIncome + ytdAmbComm;
   const monthsTracked = months2026.filter(m => m.total_submissions > 0).length;
 
   // Chart labels
@@ -454,18 +436,6 @@ export default function AnnualView() {
     scales: { y: { beginAtZero: true } },
   };
 
-  // Income projections
-  const projectedFullYear = monthsTracked > 0
-    ? Math.round((ytdCombinedIncome / monthsTracked) * 12)
-    : 0;
-
-  // Build cumulative income for table
-  let cumIncome = 0;
-  const incomeRows = months2026.map(m => {
-    const income = m.total_income || 0;
-    cumIncome += income;
-    return { ...m, income, cumIncome };
-  });
 
   if (loading) {
     return (
@@ -597,16 +567,6 @@ export default function AnnualView() {
             <div className="text-xs text-gray-400">avg across months</div>
           </div>
 
-          <div
-            className="bg-white rounded-xl shadow p-4"
-            style={{ borderLeft: `4px solid ${TP.green}` }}
-          >
-            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">YTD Income</div>
-            <div className="text-2xl font-bold" style={{ color: TP.green }}>
-              {fmtDollar(Math.round(ytdCombinedIncome))}
-            </div>
-            <div className="text-xs text-gray-400">role + ambassador</div>
-          </div>
         </div>
       </section>
 
@@ -967,107 +927,7 @@ export default function AnnualView() {
         </div>
       </section>
 
-      {/* ===== 8. Income Analysis ===== */}
-      <section className="bg-white rounded-xl shadow p-5">
-        <h2 className="text-lg font-semibold mb-4" style={{ color: TP.navy }}>
-          Income Analysis
-        </h2>
-
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div
-            className="rounded-xl p-4"
-            style={{ borderLeft: `4px solid ${TP.yellow}`, backgroundColor: TP.cream }}
-          >
-            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">YTD Role Income</div>
-            <div className="text-2xl font-bold" style={{ color: '#d97706' }}>
-              {fmtDollar(ytdIncome)}
-            </div>
-            <div className="text-xs text-gray-400 mt-1">$5 per online submission</div>
-          </div>
-          <div
-            className="rounded-xl p-4"
-            style={{ borderLeft: `4px solid ${TP.darkPurple}` }}
-          >
-            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">YTD Ambassador Commission</div>
-            <div className="text-2xl font-bold" style={{ color: TP.darkPurple }}>
-              ${ytdAmbComm.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </div>
-            <div className="text-xs text-gray-400 mt-1">Personal ambassador payouts</div>
-          </div>
-          <div
-            className="rounded-xl p-4"
-            style={{ borderLeft: `4px solid ${TP.green}` }}
-          >
-            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">YTD Combined Income</div>
-            <div className="text-2xl font-bold" style={{ color: TP.green }}>
-              {fmtDollar(Math.round(ytdCombinedIncome))}
-            </div>
-            <div className="text-xs text-gray-400 mt-1">
-              {monthsTracked > 0 ? fmtDollar(Math.round(ytdCombinedIncome / monthsTracked)) + '/mo avg' : '--'}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div
-            className="rounded-xl p-4"
-            style={{ borderLeft: `4px solid ${TP.blue}` }}
-          >
-            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Projected Full Year</div>
-            <div className="text-2xl font-bold" style={{ color: TP.blue }}>
-              {fmtDollar(projectedFullYear)}
-            </div>
-            <div className="text-xs text-gray-400 mt-1">
-              Based on {monthsTracked} month{monthsTracked !== 1 ? 's' : ''} tracked
-            </div>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead>
-              <tr className="border-b border-gray-200">
-                {['Month','Submissions','Role Income','Amb Commission','Combined'].map(h => (
-                  <th key={h} className="py-2 px-2 font-semibold text-gray-600 whitespace-nowrap">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {incomeRows.map(m => {
-                const monthName = m.month_name || allMonthLabels[m.month - 1];
-                const comm = AMB_COMMISSIONS[monthName] || 0;
-                const combined = m.income + comm;
-                return (
-                  <tr key={m.month} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-2 px-2 font-medium">{monthName}</td>
-                    <td className="py-2 px-2">{(m.total_submissions || 0).toLocaleString()}</td>
-                    <td className="py-2 px-2" style={{ color: '#d97706' }}>{fmtDollar(m.income)}</td>
-                    <td className="py-2 px-2" style={{ color: TP.darkPurple }}>
-                      ${comm.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
-                    <td className="py-2 px-2 font-semibold" style={{ color: TP.green }}>
-                      {fmtDollar(Math.round(combined))}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-            <tfoot>
-              <tr className="font-bold bg-gray-50">
-                <td className="py-2 px-2">TOTAL</td>
-                <td className="py-2 px-2">{ytdSubs.toLocaleString()}</td>
-                <td className="py-2 px-2" style={{ color: '#d97706' }}>{fmtDollar(ytdIncome)}</td>
-                <td className="py-2 px-2" style={{ color: TP.darkPurple }}>
-                  ${ytdAmbComm.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </td>
-                <td className="py-2 px-2" style={{ color: TP.green }}>{fmtDollar(Math.round(ytdCombinedIncome))}</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </section>
-
-      {/* ===== 9. Year-Long Daily Traffic & Conversion ===== */}
+      {/* ===== 8. Year-Long Daily Traffic & Conversion ===== */}
       <section className="bg-white rounded-xl shadow p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold" style={{ color: TP.navy }}>

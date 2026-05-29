@@ -8,7 +8,7 @@ export interface DailySubmission {
   prime: number;
   total?: number; // computed column
   visitors: number;
-  income: number;
+  income?: number;
   created_at?: string;
   updated_at?: string;
 }
@@ -37,7 +37,7 @@ export interface MonthlySummary {
   online_submissions: number;
   hybrid_submissions: number;
   prime_submissions: number;
-  total_income: number;
+  total_income?: number;
   total_visitors: number;
   usa_visitors: number;
   conversion_rate: number;

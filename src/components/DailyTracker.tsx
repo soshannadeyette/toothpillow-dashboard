@@ -52,7 +52,6 @@ export default function DailyTracker() {
   const [formHybrid, setFormHybrid] = useState('');
   const [formPrime, setFormPrime] = useState('');
   const [formVisitors, setFormVisitors] = useState('');
-  const [formIncome, setFormIncome] = useState('');
 
   const tableRef = useRef<HTMLDivElement>(null);
 
@@ -93,14 +92,12 @@ export default function DailyTracker() {
       if (formHybrid.trim() !== '')   payload.hybrid   = parseInt(formHybrid);
       if (formPrime.trim() !== '')    payload.prime    = parseInt(formPrime);
       if (formVisitors.trim() !== '') payload.visitors = parseInt(formVisitors);
-      // income is auto-calculated server-side as online * $5
       await upsertSubmission(payload as Partial<import('@/lib/types').DailySubmission>);
       // Clear form
       setFormOnline('');
       setFormHybrid('');
       setFormPrime('');
       setFormVisitors('');
-      setFormIncome('');
       // Reload
       await loadData();
     } catch (e) {
@@ -116,7 +113,6 @@ export default function DailyTracker() {
     setFormHybrid(String(entry.hybrid));
     setFormPrime(String(entry.prime));
     setFormVisitors(String(entry.visitors));
-    setFormIncome(String(entry.income));
   };
 
   // Computed stats
@@ -125,7 +121,6 @@ export default function DailyTracker() {
   const totalHybrid = entries.reduce((s, e) => s + e.hybrid, 0);
   const totalPrime = entries.reduce((s, e) => s + e.prime, 0);
   const totalVisitors = entries.reduce((s, e) => s + e.visitors, 0);
-  const totalIncome = entries.reduce((s, e) => s + e.income, 0);
   const daysTracked = entries.length;
   const dailyAvg = daysTracked > 0 ? (totalSubmissions / daysTracked).toFixed(1) : '0';
   const convRate = totalVisitors > 0 ? ((totalOnline / totalVisitors) * 100).toFixed(1) : '0';
@@ -144,8 +139,6 @@ export default function DailyTracker() {
   const projectedEOM = daysTracked > 0 ? Math.round((totalSubmissions / daysTracked) * daysInMonth) : 0;
   const projectedPctOfGoal = goal > 0 ? ((projectedEOM / goal) * 100).toFixed(1) : '0';
 
-  // Income projections
-  const projectedIncome = daysTracked > 0 ? Math.round((totalIncome / daysTracked) * daysInMonth) : 0;
 
   // Progress bar percentages
   const progressPct = goal > 0 ? Math.min((totalSubmissions / goal) * 100, 100) : 0;
@@ -398,12 +391,6 @@ export default function DailyTracker() {
               className="border border-gray-300 rounded-md px-3 py-2 text-sm w-24"
             />
           </div>
-          <div>
-            <label className="block text-xs text-gray-500 mb-1">Income ($)</label>
-            <div className="border border-gray-200 bg-gray-50 rounded-md px-3 py-2 text-sm w-24 text-gray-400">
-              {formOnline.trim() ? `$${parseInt(formOnline) * 5}` : 'auto'}
-            </div>
-          </div>
           <button
             onClick={handleSave}
             disabled={saving || !formDate}
@@ -652,30 +639,6 @@ export default function DailyTracker() {
         </div>
       </div>
 
-      {/* Income section */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4" style={{ borderLeft: `4px solid ${TP.green}` }}>
-          <div className="text-sm text-gray-500 mb-1">Income Earned</div>
-          <div className="text-2xl font-bold" style={{ color: '#4CAF50' }}>
-            ${totalIncome.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-          </div>
-          <div className="text-xs text-gray-400 mt-1">
-            ${daysTracked > 0 ? (totalIncome / daysTracked).toFixed(0) : '0'}/day avg
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4" style={{ borderLeft: `4px solid ${TP.green}` }}>
-          <div className="text-sm text-gray-500 mb-1">Projected Income</div>
-          <div className="text-2xl font-bold" style={{ color: '#4CAF50' }}>
-            {daysTracked > 0
-              ? `$${projectedIncome.toLocaleString()}`
-              : '--'}
-          </div>
-          <div className="text-xs text-gray-400 mt-1">
-            Based on {daysTracked} day{daysTracked !== 1 ? 's' : ''} tracked
-          </div>
-        </div>
-      </div>
-
       {/* Data table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" ref={tableRef}>
         <table className="w-full text-sm text-left">
@@ -688,19 +651,18 @@ export default function DailyTracker() {
               <th className="px-3 py-2 font-medium text-right">Total</th>
               <th className="px-3 py-2 font-medium text-right">Visitors</th>
               <th className="px-3 py-2 font-medium text-right">Conv %</th>
-              <th className="px-3 py-2 font-medium text-right">Income</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={8} className="px-3 py-8 text-center text-gray-400">
+                <td colSpan={7} className="px-3 py-8 text-center text-gray-400">
                   Loading...
                 </td>
               </tr>
             ) : entries.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-3 py-8 text-center text-gray-400">
+                <td colSpan={7} className="px-3 py-8 text-center text-gray-400">
                   No entries yet
                 </td>
               </tr>
@@ -726,7 +688,6 @@ export default function DailyTracker() {
                     <td className="px-3 py-2 border-t border-gray-100 text-right" style={{ color: e.visitors > 0 ? TP.green : '#ccc' }}>
                       {e.visitors > 0 ? `${((e.online / e.visitors) * 100).toFixed(1)}%` : '--'}
                     </td>
-                    <td className="px-3 py-2 border-t border-gray-100 text-right">${e.income}</td>
                   </tr>
                 );
               })
@@ -740,7 +701,6 @@ export default function DailyTracker() {
                 <td className="px-3 py-2 border-t border-gray-200 text-right">{totalSubmissions}</td>
                 <td className="px-3 py-2 border-t border-gray-200 text-right">{totalVisitors.toLocaleString()}</td>
                 <td className="px-3 py-2 border-t border-gray-200 text-right" style={{ color: TP.green }}>{convRate}%</td>
-                <td className="px-3 py-2 border-t border-gray-200 text-right">${totalIncome}</td>
               </tr>
             )}
           </tbody>
