@@ -655,22 +655,6 @@ export default function AmbassadorGrowth() {
           })}
         </div>
 
-        {/* Green callout */}
-        <div style={{
-          background: '#ecfdf5',
-          border: '1px solid #a7f3d0',
-          borderRadius: 10,
-          padding: '1.25rem 1.5rem',
-          marginBottom: '1.5rem',
-          lineHeight: 1.65,
-          fontSize: '0.875rem',
-          color: '#1a3a2a',
-        }}>
-          Ambassador adds went from 73 (2024) to 141 (2025) to a 2026 pace of ~{addsAmbPace}.
-          Influencer adds have slowed (61 → 29 → pace ~{infAddsPace}), but that&apos;s because the ambassador channel is where the scalable growth is — these are parents who go through the program and refer others.
-          They don&apos;t require influencer outreach or management.
-        </div>
-
         <div style={chartWrap}>
           <div style={{ height: 320 }}>
             <Bar data={newAddsChartData} options={newAddsChartOpts} />
@@ -856,44 +840,24 @@ export default function AmbassadorGrowth() {
           })}
         </div>
 
-        {/* Bar chart */}
+        {/* Bar chart — projection shown as shadow overlay on 2026 bar */}
         <div style={{ background: '#fff', borderRadius: 12, padding: '1rem', boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}>
           <div style={{ height: 280 }}>
             <Bar
               data={{
-                labels: ['2023', '2024', '2025', '2026 YTD', '2026 Projected'],
+                labels: ['2023', '2024', '2025', '2026'],
                 datasets: [
                   {
                     label: 'Influencer',
-                    data: [activeInfByYear[2023], activeInfByYear[2024], activeInfByYear[2025], activeInfByYear[2026], 0],
+                    data: [activeInfByYear[2023], activeInfByYear[2024], activeInfByYear[2025], activeInfByYear[2026]],
                     backgroundColor: TP.teal,
                     borderRadius: 4,
-                    stack: 'actual',
                   },
                   {
                     label: 'Ambassador',
-                    data: [activeAmbByYear[2023], activeAmbByYear[2024], activeAmbByYear[2025], activeAmbByYear[2026], 0],
+                    data: [activeAmbByYear[2023], activeAmbByYear[2024], activeAmbByYear[2025], activeAmbByYear[2026]],
                     backgroundColor: TP.blue,
                     borderRadius: 4,
-                    stack: 'actual',
-                  },
-                  {
-                    label: 'Projected Influencer',
-                    data: [0, 0, 0, 0, Math.round(activeInfByYear[2026] * ANN)],
-                    backgroundColor: TP.teal + '30',
-                    borderColor: TP.teal + '60',
-                    borderWidth: 1,
-                    borderRadius: 4,
-                    stack: 'projected',
-                  },
-                  {
-                    label: 'Projected Ambassador',
-                    data: [0, 0, 0, 0, Math.round(activeAmbByYear[2026] * ANN)],
-                    backgroundColor: TP.blue + '30',
-                    borderColor: TP.blue + '60',
-                    borderWidth: 1,
-                    borderRadius: 4,
-                    stack: 'projected',
                   },
                 ],
               }}
@@ -903,31 +867,58 @@ export default function AmbassadorGrowth() {
                 plugins: {
                   legend: {
                     position: 'top' as const,
-                    labels: {
-                      usePointStyle: true, padding: 16, font: { size: 12 },
-                      filter: (item: { text: string }) => !item.text.startsWith('Projected'),
-                    },
+                    labels: { usePointStyle: true, padding: 16, font: { size: 12 } },
                   },
-                  tooltip: {
-                    mode: 'index' as const, intersect: false,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    callbacks: { label: (ctx: any) => { if (ctx.parsed.y === 0) return ''; return `${ctx.dataset.label}: ${ctx.parsed.y}`; } },
-                  },
+                  tooltip: { mode: 'index' as const, intersect: false },
                 },
                 scales: {
                   x: { stacked: true },
                   y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Active Ambassadors', font: { size: 11 } } },
                 },
               } satisfies ChartOptions<'bar'>}
+              plugins={[{
+                id: 'projectedShadow',
+                beforeDatasetsDraw(chart) {
+                  const meta = chart.getDatasetMeta(0);
+                  const bar2026 = meta.data[3];
+                  if (!bar2026) return;
+                  const projTotal = Math.round(activeInfByYear[2026] * ANN) + Math.round(activeAmbByYear[2026] * ANN);
+                  const yScale = chart.scales.y;
+                  const projTop = yScale.getPixelForValue(projTotal);
+                  const projBottom = yScale.getPixelForValue(0);
+                  const { x, width } = bar2026 as unknown as { x: number; width: number };
+                  const ctx = chart.ctx;
+                  ctx.save();
+                  ctx.fillStyle = TP.navy + '10';
+                  ctx.strokeStyle = TP.navy + '35';
+                  ctx.lineWidth = 1.5;
+                  ctx.setLineDash([5, 3]);
+                  const r = 4;
+                  const left = x - width / 2;
+                  ctx.beginPath();
+                  ctx.moveTo(left + r, projTop);
+                  ctx.lineTo(left + width - r, projTop);
+                  ctx.quadraticCurveTo(left + width, projTop, left + width, projTop + r);
+                  ctx.lineTo(left + width, projBottom);
+                  ctx.lineTo(left, projBottom);
+                  ctx.lineTo(left, projTop + r);
+                  ctx.quadraticCurveTo(left, projTop, left + r, projTop);
+                  ctx.closePath();
+                  ctx.fill();
+                  ctx.stroke();
+                  // Label
+                  ctx.setLineDash([]);
+                  ctx.fillStyle = TP.navy + '80';
+                  ctx.font = '600 11px system-ui, sans-serif';
+                  ctx.textAlign = 'center';
+                  ctx.fillText(`~${projTotal} projected`, x, projTop - 6);
+                  ctx.restore();
+                },
+              } satisfies Plugin<'bar'>]}
             />
           </div>
         </div>
 
-        <div style={{ background: '#f0f7f4', borderRadius: 10, padding: '0.875rem 1.125rem', marginTop: '1rem', fontSize: '0.88rem', lineHeight: 1.6 }}>
-          <strong style={{ color: TP.navy }}>The base is widening.</strong>{' '}
-          In 2023, 30 people generated submissions. By 2025 that grew to 209. Even at 5 months into 2026, 170 people have already submitted at least once — on pace for ~{Math.round(activeTotalByYear[2026] * ANN)} for the year.
-          More people producing means less dependence on any single ambassador.
-        </div>
       </div>
 
       {/* ════════ SECTION 6: Ambassador Program Health ════════ */}
