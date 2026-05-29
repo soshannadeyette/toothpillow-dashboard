@@ -37,6 +37,15 @@ function ambDateLabel(iso: string): string {
   return `${dt.getMonth() + 1}/${dt.getDate()}/${String(dt.getFullYear()).slice(2)}`;
 }
 
+function ambDateLabelShort(iso: string): string {
+  const dt = new Date(iso + 'T12:00:00');
+  return `${dt.getMonth() + 1}/${dt.getDate()}`;
+}
+
+function amb2026(data: DailyAmbSub[]): DailyAmbSub[] {
+  return data.filter(d => d.d >= '2026-01-01');
+}
+
 /* ════════════════════════════════════════════════════════════════════════════
    TP Kids Color Palette
    ════════════════════════════════════════════════════════════════════════ */
@@ -573,8 +582,8 @@ export default function AmbassadorGrowth() {
         <h3 style={sectionHeader}>Top Producer Submission History</h3>
         <p style={sectionSub}>Daily submissions for the three highest-volume ambassadors. Data from Salesforce.</p>
 
-        {/* Lauren Johnson */}
-        <div style={{ ...chartWrap, marginBottom: '1.5rem' }}>
+        {/* Lauren Johnson — All History (scrollable) */}
+        <div style={{ ...chartWrap, marginBottom: '0.75rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <div>
               <span style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy }}>Lauren Johnson (NNM)</span>
@@ -582,26 +591,47 @@ export default function AmbassadorGrowth() {
                 {ambTotal(LAUREN_DAILY).toLocaleString()} lifetime · Peak: {ambPeakDay(LAUREN_DAILY).n} on {ambDateLabel(ambPeakDay(LAUREN_DAILY).d)}
               </span>
             </div>
+            <span style={{ fontSize: '0.65rem', color: '#aaa' }}>scroll to explore →</span>
           </div>
-          <div style={{ height: 280 }}>
+          <div style={{ overflowX: 'auto', overflowY: 'hidden' }}>
+            <div style={{ minWidth: Math.max(800, LAUREN_DAILY.length * 5), height: 280 }}>
+              <Bar
+                data={{
+                  labels: LAUREN_DAILY.map(d => ambDateLabel(d.d)),
+                  datasets: [{
+                    data: LAUREN_DAILY.map(d => d.n),
+                    backgroundColor: TP.teal + '90',
+                    borderColor: TP.teal,
+                    borderWidth: 0.5,
+                    borderRadius: 1,
+                  }],
+                }}
+                options={{ ...ambBarChartOpts('All History'), maintainAspectRatio: false }}
+              />
+            </div>
+          </div>
+        </div>
+        {/* Lauren Johnson — 2026 Only */}
+        <div style={{ ...chartWrap, marginBottom: '1.5rem' }}>
+          <div style={{ height: 220 }}>
             <Bar
               data={{
-                labels: LAUREN_DAILY.map(d => ambDateLabel(d.d)),
+                labels: amb2026(LAUREN_DAILY).map(d => ambDateLabelShort(d.d)),
                 datasets: [{
-                  data: LAUREN_DAILY.map(d => d.n),
-                  backgroundColor: TP.teal + '90',
+                  data: amb2026(LAUREN_DAILY).map(d => d.n),
+                  backgroundColor: TP.teal,
                   borderColor: TP.teal,
                   borderWidth: 0.5,
                   borderRadius: 1,
                 }],
               }}
-              options={ambBarChartOpts('Lauren Johnson (NNM)')}
+              options={ambBarChartOpts(`2026 — ${ambTotal(amb2026(LAUREN_DAILY))} submissions`)}
             />
           </div>
         </div>
 
-        {/* Kendra Needham */}
-        <div style={{ ...chartWrap, marginBottom: '1.5rem' }}>
+        {/* Kendra Needham — All History (scrollable) */}
+        <div style={{ ...chartWrap, marginBottom: '0.75rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <div>
               <span style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy }}>Kendra Needham</span>
@@ -609,26 +639,47 @@ export default function AmbassadorGrowth() {
                 {ambTotal(KENDRA_DAILY).toLocaleString()} lifetime · Peak: {ambPeakDay(KENDRA_DAILY).n} on {ambDateLabel(ambPeakDay(KENDRA_DAILY).d)}
               </span>
             </div>
+            <span style={{ fontSize: '0.65rem', color: '#aaa' }}>scroll to explore →</span>
           </div>
-          <div style={{ height: 280 }}>
+          <div style={{ overflowX: 'auto', overflowY: 'hidden' }}>
+            <div style={{ minWidth: Math.max(800, KENDRA_DAILY.length * 5), height: 280 }}>
+              <Bar
+                data={{
+                  labels: KENDRA_DAILY.map(d => ambDateLabel(d.d)),
+                  datasets: [{
+                    data: KENDRA_DAILY.map(d => d.n),
+                    backgroundColor: TP.gold + '90',
+                    borderColor: TP.gold,
+                    borderWidth: 0.5,
+                    borderRadius: 1,
+                  }],
+                }}
+                options={{ ...ambBarChartOpts('All History'), maintainAspectRatio: false }}
+              />
+            </div>
+          </div>
+        </div>
+        {/* Kendra Needham — 2026 Only */}
+        <div style={{ ...chartWrap, marginBottom: '1.5rem' }}>
+          <div style={{ height: 220 }}>
             <Bar
               data={{
-                labels: KENDRA_DAILY.map(d => ambDateLabel(d.d)),
+                labels: amb2026(KENDRA_DAILY).map(d => ambDateLabelShort(d.d)),
                 datasets: [{
-                  data: KENDRA_DAILY.map(d => d.n),
-                  backgroundColor: TP.gold + '90',
+                  data: amb2026(KENDRA_DAILY).map(d => d.n),
+                  backgroundColor: TP.gold,
                   borderColor: TP.gold,
                   borderWidth: 0.5,
                   borderRadius: 1,
                 }],
               }}
-              options={ambBarChartOpts('Kendra Needham')}
+              options={ambBarChartOpts(`2026 — ${ambTotal(amb2026(KENDRA_DAILY))} submissions`)}
             />
           </div>
         </div>
 
-        {/* Shannon Tripp */}
-        <div style={{ ...chartWrap, marginBottom: '1.5rem' }}>
+        {/* Shannon Tripp — All History (scrollable) */}
+        <div style={{ ...chartWrap, marginBottom: '0.75rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <div>
               <span style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy }}>Shannon Tripp</span>
@@ -636,20 +687,41 @@ export default function AmbassadorGrowth() {
                 {ambTotal(SHANNON_DAILY).toLocaleString()} lifetime · Peak: {ambPeakDay(SHANNON_DAILY).n} on {ambDateLabel(ambPeakDay(SHANNON_DAILY).d)}
               </span>
             </div>
+            <span style={{ fontSize: '0.65rem', color: '#aaa' }}>scroll to explore →</span>
           </div>
-          <div style={{ height: 280 }}>
+          <div style={{ overflowX: 'auto', overflowY: 'hidden' }}>
+            <div style={{ minWidth: Math.max(800, SHANNON_DAILY.length * 5), height: 280 }}>
+              <Bar
+                data={{
+                  labels: SHANNON_DAILY.map(d => ambDateLabel(d.d)),
+                  datasets: [{
+                    data: SHANNON_DAILY.map(d => d.n),
+                    backgroundColor: TP.purple + '90',
+                    borderColor: TP.purple,
+                    borderWidth: 0.5,
+                    borderRadius: 1,
+                  }],
+                }}
+                options={{ ...ambBarChartOpts('All History'), maintainAspectRatio: false }}
+              />
+            </div>
+          </div>
+        </div>
+        {/* Shannon Tripp — 2026 Only */}
+        <div style={{ ...chartWrap, marginBottom: '1.5rem' }}>
+          <div style={{ height: 220 }}>
             <Bar
               data={{
-                labels: SHANNON_DAILY.map(d => ambDateLabel(d.d)),
+                labels: amb2026(SHANNON_DAILY).map(d => ambDateLabelShort(d.d)),
                 datasets: [{
-                  data: SHANNON_DAILY.map(d => d.n),
-                  backgroundColor: TP.purple + '90',
+                  data: amb2026(SHANNON_DAILY).map(d => d.n),
+                  backgroundColor: TP.purple,
                   borderColor: TP.purple,
                   borderWidth: 0.5,
                   borderRadius: 1,
                 }],
               }}
-              options={ambBarChartOpts('Shannon Tripp')}
+              options={ambBarChartOpts(`2026 — ${ambTotal(amb2026(SHANNON_DAILY))} submissions`)}
             />
           </div>
         </div>
