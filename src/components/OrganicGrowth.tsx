@@ -49,7 +49,7 @@ const SUBMISSIONS_BY_MONTH: Record<string, number> = {
   '2026-02': 1207 + 293 + 18,   // 1,518 (actual from daily tracker)
   '2026-03': 1293 + 299 + 21,   // 1,613 (actual from daily tracker)
   '2026-04': 969 + 250 + 11,    // 1,230 (actual from daily tracker)
-  '2026-05': 978,                // MTD through May 28
+  '2026-05': 835 + 189 + 13,     // 1,037 (actual from 5/29 Salesforce export)
 };
 
 const GSC_MONTHLY = [
