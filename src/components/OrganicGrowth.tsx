@@ -495,8 +495,10 @@ export default function OrganicGrowth() {
                   <span style={{ color: el.mid ? TP.navy : TP.red, fontWeight: el.mid ? 400 : 600 }}>{el.name}</span>
                 </div>
               ))}
-              <div style={{ marginTop: 10, padding: '8px 10px', background: `${TP.red}10`, borderRadius: 6, fontSize: 11, color: TP.red, fontWeight: 500, lineHeight: 1.5 }}>
-                Impressions fell from 213K to 66K after Google re-indexed the new pages without metadata.
+              <div style={{ marginTop: 10, padding: '8px 10px', background: `${TP.red}10`, borderRadius: 6, fontSize: 11, color: '#555', fontWeight: 400, lineHeight: 1.6 }}>
+                <span style={{ fontWeight: 600, color: TP.red }}>Impressions fell from 213K to 66K</span> once Google finished re-indexing the new pages without metadata.
+                The drop lagged the launch by ~2 months because Google re-crawls pages on a cycle, not instantly. Dec and Jan still looked normal because
+                Google was serving old cached index entries. By Feb, enough pages had been re-crawled that the missing metadata showed in the data.
               </div>
             </div>
 
@@ -582,6 +584,11 @@ export default function OrganicGrowth() {
           <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12, marginTop: 0 }}>Click-Through Rate Trend</h3>
           <div style={{ height: 250 }}>
             <Line data={ctrData} options={ctrOpts as object} />
+          </div>
+          <div style={{ marginTop: 8, padding: '6px 10px', background: '#f8f9fa', borderRadius: 6, fontSize: 11, color: '#666', lineHeight: 1.5 }}>
+            CTR rose after the new site launch because impressions dropped, not because clicks increased. Clicks stayed around 10–12K/month while
+            impressions fell from 213K to 66K. Fewer junk impressions at positions 50–70 means a higher click-through percentage on the remaining
+            branded queries where Toothpillow still ranks on name alone.
           </div>
         </div>
       </div>
