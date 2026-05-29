@@ -128,6 +128,9 @@ export default function AVDiagnostics() {
   const preCohort = COHORT_DATA.find(c => c.label === 'May 15–21')!;
   const postCohort = COHORT_DATA.find(c => c.label === 'May 22–29')!;
 
+  // Aging cohort data (starts, completions, waiting)
+  const postAgingCohort = COHORT_AGING.find(c => c.label === 'May 22–29')!;
+
   // Pre vs post daily comparison
   const preDays = MAY_DAILY.filter(d => d.day >= 15 && d.day <= 21);
   const postDays = MAY_DAILY.filter(d => d.day >= 23);
@@ -195,15 +198,15 @@ export default function AVDiagnostics() {
           </div>
         </div>
 
-        {/* Next-day completion (among completers) */}
-        <div style={card('#F0FDF4', '#BBF7D0')}>
-          <div style={{ ...cardLabel, color: '#166534' }}>Within 1 day</div>
-          <div style={{ ...cardNum, color: '#166534' }}>{postCohort.within1d}%</div>
-          <div style={{ ...cardSub, color: '#15803D' }}>
-            {arrow(true)} from {preCohort.within1d}% pre-update
+        {/* Completions — raw volume */}
+        <div style={card('#EFF6FF', '#BFDBFE')}>
+          <div style={{ ...cardLabel, color: '#1E40AF' }}>Completions</div>
+          <div style={{ ...cardNum, color: '#1E40AF' }}>{postAgingCohort.within7d + postAgingCohort.d8to14 + postAgingCohort.d15plus}</div>
+          <div style={{ ...cardSub, color: '#2563EB' }}>
+            from {postAgingCohort.starts} starts ({POST_UPDATE_DAYS_ELAPSED} days old)
           </div>
-          <div style={{ fontSize: 11, color: '#166534', marginTop: 2 }}>
-            Of patients who complete, {postCohort.within1d}% finish within a day
+          <div style={{ fontSize: 11, color: '#1E40AF', marginTop: 2 }}>
+            {postAgingCohort.waiting} still in progress, cohort still aging
           </div>
         </div>
 
@@ -254,13 +257,13 @@ export default function AVDiagnostics() {
         <div style={{ height: 300 }}>
           <Line
             data={{
-              labels: ['Same day', 'Within 1 day', 'Within 3 days', 'Within 7 days'],
+              labels: ['Same day', 'Within 1 day', 'Within 3 days'],
               datasets: COHORT_DATA.map((c, i) => {
                 const colors = [TP.skyBlue, TP.purple, TP.amber, TP.green];
                 const isPost = c.label === 'May 22–29';
                 return {
                   label: c.label,
-                  data: [c.sameDay, c.within1d, c.within3d, c.within7d],
+                  data: [c.sameDay, c.within1d, c.within3d],
                   borderColor: colors[i],
                   backgroundColor: colors[i],
                   borderWidth: isPost ? 3.5 : 2,
@@ -305,10 +308,6 @@ export default function AVDiagnostics() {
               <span style={{ color: '#6B7280' }}>Within 3 days</span>
               <span style={{ fontWeight: 700, color: '#991B1B' }}>{preCohort.within3d}%</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-              <span style={{ color: '#6B7280' }}>Within 7 days</span>
-              <span style={{ fontWeight: 700, color: '#991B1B' }}>{preCohort.within7d}%</span>
-            </div>
             <div style={{ borderTop: '1px solid #FECACA', paddingTop: 8, display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span style={{ color: '#6B7280' }}>Avg starts/day</span>
               <span style={{ fontWeight: 700, color: '#991B1B' }}>{preAvgStarts}</span>
@@ -336,10 +335,6 @@ export default function AVDiagnostics() {
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span style={{ color: '#6B7280' }}>Within 3 days</span>
               <span style={{ fontWeight: 700, color: '#166534' }}>{postCohort.within3d}% <span style={{ fontSize: 11, color: '#15803D' }}>+{(postCohort.within3d - preCohort.within3d).toFixed(0)}pp</span></span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-              <span style={{ color: '#6B7280' }}>Within 7 days</span>
-              <span style={{ fontWeight: 700, color: '#166534' }}>{postCohort.within7d}% <span style={{ fontSize: 11, color: '#15803D' }}>+{(postCohort.within7d - preCohort.within7d).toFixed(0)}pp</span></span>
             </div>
             <div style={{ borderTop: '1px solid #BBF7D0', paddingTop: 8, display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span style={{ color: '#6B7280' }}>Avg starts/day</span>
