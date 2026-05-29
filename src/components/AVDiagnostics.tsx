@@ -31,7 +31,7 @@ const TP = {
 };
 
 // ── Hardcoded data (source of truth) ──────────────────────────────────
-// Source: Salesforce "Waiting on Info Ratios" export, pulled May 28 2026 15:37 PST
+// Source: Salesforce "Waiting on Info Ratios" export, pulled May 29 2026 11:38 PST
 // "starts" = Salesforce Person Account creations (assessment starts)
 // "waiting" = current WAITING stage (needs info / needs photos) — never finished
 // "submitted" = have a Submission Date — completed their assessment
@@ -41,8 +41,8 @@ const AV_DATA = [
   { label: 'Feb 26', month: 2,  year: 2026, traffic: 51480, starts: 2193, waiting: 888, submitted: 1293, partial: false, period: 'full' as const },
   { label: 'Mar 26', month: 3,  year: 2026, traffic: 39218, starts: 2263, waiting: 967, submitted: 1285, partial: false, period: 'full' as const },
   { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1431, waiting: 569, submitted: 854,  partial: false, period: 'full' as const },
-  { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1037, waiting: 499, submitted: 538, partial: false, period: 'pre-update' as const },
-  { label: 'May 23–28', month: 5,  year: 2026, traffic: 5039,  starts: 327,  waiting: 170,  submitted: 157,  partial: true,  period: 'post-update' as const },
+  { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1037, waiting: 495, submitted: 540, partial: false, period: 'pre-update' as const },
+  { label: 'May 23–29', month: 5,  year: 2026, traffic: 5039,  starts: 403,  waiting: 213,  submitted: 190,  partial: true,  period: 'post-update' as const },
 ];
 
 // ── Full pipeline funnel by month (source of truth) ──────────────────
@@ -55,7 +55,7 @@ const FUNNEL_DATA = [
   { label: 'Feb 26', waiting: 888, inReview:  6, checkout: 480, checkedOut: 320, closed: 472, onHold: 27 },
   { label: 'Mar 26', waiting: 967, inReview: 13, checkout: 530, checkedOut: 359, closed: 366, onHold: 28 },
   { label: 'Apr 26', waiting: 569, inReview: 36, checkout: 434, checkedOut: 164, closed: 212, onHold: 16 },
-  { label: 'May 26', waiting: 667, inReview: 247, checkout: 320, checkedOut: 68,  closed: 52,  onHold: 10 },
+  { label: 'May 26', waiting: 708, inReview: 236, checkout: 351, checkedOut: 73,  closed: 61,  onHold: 11 },
 ];
 
 // ── May daily data (source of truth) ─────────────────────────────────
@@ -77,18 +77,19 @@ const MAY_DAILY = [
   { day: 14, starts: 49, waiting: 25, submitted: 24 },
   { day: 15, starts: 40, waiting: 18, submitted: 22 },
   { day: 16, starts: 33, waiting: 13, submitted: 20 },
-  { day: 17, starts: 59, waiting: 35, submitted: 24 },
-  { day: 18, starts: 48, waiting: 17, submitted: 31 },
+  { day: 17, starts: 59, waiting: 34, submitted: 25 },
+  { day: 18, starts: 48, waiting: 15, submitted: 31 },
   { day: 19, starts: 62, waiting: 33, submitted: 29 },
   { day: 20, starts: 46, waiting: 24, submitted: 22 },
   { day: 21, starts: 41, waiting: 20, submitted: 21 },
-  { day: 22, starts: 76, waiting: 48, submitted: 28 },
-  { day: 23, starts: 68, waiting: 47, submitted: 21 },
+  { day: 22, starts: 76, waiting: 47, submitted: 29 },
+  { day: 23, starts: 68, waiting: 46, submitted: 22 },
   { day: 24, starts: 41, waiting: 25, submitted: 16 },
   { day: 25, starts: 38, waiting: 18, submitted: 20 },
   { day: 26, starts: 44, waiting: 13, submitted: 31 },
-  { day: 27, starts: 82, waiting: 42, submitted: 40 },
-  { day: 28, starts: 54, waiting: 25, submitted: 29 },
+  { day: 27, starts: 83, waiting: 40, submitted: 43 },
+  { day: 28, starts: 88, waiting: 44, submitted: 44 },
+  { day: 29, starts: 41, waiting: 27, submitted: 14 },
 ];
 
 // ── Conversion lag data (source of truth) ─────────────────────────────
@@ -100,14 +101,14 @@ const CONVERSION_LAG = [
   { label: 'Feb 26',    submissions: 1208, sameDay: 992, within7d: 1166, returning: 216, medianLag: 0, meanLag: 3.2  },
   { label: 'Mar 26',    submissions: 1287, sameDay: 963, within7d: 1175, returning: 324, medianLag: 0, meanLag: 7.9  },
   { label: 'Apr 26',    submissions: 967,  sameDay: 685, within7d: 810,  returning: 282, medianLag: 0, meanLag: 17.9 },
-  { label: 'May 1–22',  submissions: 538,  sameDay: 389, within7d: 518,  returning: 149, medianLag: 0, meanLag: 1.0  },
-  { label: 'May 23–28', submissions: 157,  sameDay: 141, within7d: 157,  returning: 16,  medianLag: 0, meanLag: 0.1  },
+  { label: 'May 1–22',  submissions: 540,  sameDay: 391, within7d: 520,  returning: 149, medianLag: 0, meanLag: 1.0  },
+  { label: 'May 23–29', submissions: 190,  sameDay: 168, within7d: 190,  returning: 22,  medianLag: 0, meanLag: 0.2  },
 ];
 
 // Traffic for conversion rate calc (matches AV_DATA where available)
 const CONV_TRAFFIC: Record<string, number> = {
   'Jan 26': 37320, 'Feb 26': 51480, 'Mar 26': 39218,
-  'Apr 26': 30311, 'May 1–22': 21819, 'May 23–28': 5039,
+  'Apr 26': 30311, 'May 1–22': 21819, 'May 23–29': 5039,
 };
 
 // ── Lag distribution (source of truth) ───────────────────────────────
@@ -118,8 +119,8 @@ const LAG_DISTRIBUTION = [
   { label: 'Feb 26',   total: 1208, buckets: [992, 77, 55, 42, 18,  8, 16] },
   { label: 'Mar 26',   total: 1287, buckets: [963, 97, 57, 58, 44, 30, 38] },
   { label: 'Apr 26',   total: 967,  buckets: [685, 55, 39, 31, 21, 35, 101] },
-  { label: 'May 1–22',  total: 538,  buckets: [392, 64, 39, 23, 14,  6,  0] },
-  { label: 'May 23–28', total: 157,  buckets: [142, 12,  3,  0,  0,  0,  0] },
+  { label: 'May 1–22',  total: 540,  buckets: [391, 65, 40, 24, 14,  6,  0] },
+  { label: 'May 23–29', total: 190,  buckets: [168, 16,  5,  1,  0,  0,  0] },
 ];
 
 // ── Weekly cohort completion curves (source of truth) ────────────────
@@ -127,8 +128,8 @@ const LAG_DISTRIBUTION = [
 const COHORT_DATA = [
   { label: 'May 1–7',   n: 174, sameDay: 77.0, within1d: 88.5, within3d: 93.7, within7d: 96.0 },
   { label: 'May 8–14',  n: 167, sameDay: 69.5, within1d: 83.2, within3d: 89.2, within7d: 95.8 },
-  { label: 'May 15–21', n: 169, sameDay: 70.4, within1d: 81.1, within3d: 91.7, within7d: 96.4 },
-  { label: 'May 22–28', n: 185, sameDay: 87.0, within1d: 97.3, within3d: 100.0, within7d: 100.0 },
+  { label: 'May 15–21', n: 170, sameDay: 70.0, within1d: 80.6, within3d: 91.2, within7d: 95.9 },
+  { label: 'May 22–29', n: 219, sameDay: 85.8, within1d: 96.3, within3d: 99.1, within7d: 100.0 },
 ];
 
 // ── Daily cohorts around update (May 17–27) ─────────────────────────
@@ -139,14 +140,15 @@ const DAILY_COHORTS = [
   { day: 'May 18', n: 48, sameDay: 23, d1: 2, d2_3: 2, d4_7: 2 },
   { day: 'May 19', n: 62, sameDay: 22, d1: 4, d2_3: 3, d4_7: 0 },
   { day: 'May 20', n: 46, sameDay: 16, d1: 1, d2_3: 3, d4_7: 1 },
-  { day: 'May 21', n: 41, sameDay: 15, d1: 3, d2_3: 1, d4_7: 1 },
-  { day: 'May 22', n: 76, sameDay: 20, d1: 6, d2_3: 2, d4_7: 0 },
-  { day: 'May 23', n: 68, sameDay: 20, d1: 0, d2_3: 1, d4_7: 0 },
+  { day: 'May 21', n: 41, sameDay: 15, d1: 3, d2_3: 1, d4_7: 2 },
+  { day: 'May 22', n: 76, sameDay: 20, d1: 6, d2_3: 2, d4_7: 1 },
+  { day: 'May 23', n: 68, sameDay: 20, d1: 0, d2_3: 1, d4_7: 1 },
   { day: 'May 24', n: 41, sameDay: 14, d1: 1, d2_3: 1, d4_7: 0 },
   { day: 'May 25', n: 38, sameDay: 17, d1: 3, d2_3: 0, d4_7: 0 },
   { day: 'May 26', n: 44, sameDay: 29, d1: 1, d2_3: 1, d4_7: 0 },
-  { day: 'May 27', n: 82, sameDay: 33, d1: 7, d2_3: 0, d4_7: 0 },
-  { day: 'May 28', n: 54, sameDay: 29, d1: 0, d2_3: 0, d4_7: 0 },
+  { day: 'May 27', n: 83, sameDay: 32, d1: 9, d2_3: 2, d4_7: 0 },
+  { day: 'May 28', n: 88, sameDay: 42, d1: 2, d2_3: 0, d4_7: 0 },
+  { day: 'May 29', n: 41, sameDay: 14, d1: 0, d2_3: 0, d4_7: 0 },
 ];
 
 // ── Cohort aging comparison (source of truth) ───────────────────────
@@ -154,14 +156,14 @@ const DAILY_COHORTS = [
 //   completed (within 7d + days 8-14 + 15+) | waiting | other
 // These add up to starts. "mature" = every person has had that many days.
 const COHORT_AGING = [
-  { label: 'May 1–7',   starts: 327, within7d: 167, d8to14: 4, d15plus: 2, waiting: 154, daysElapsed: 21, mature7d: true,  mature14d: true,  postUpdate: false },
-  { label: 'May 8–14',  starts: 305, within7d: 157, d8to14: 5, d15plus: 3, waiting: 140, daysElapsed: 14, mature7d: true,  mature14d: true,  postUpdate: false },
-  { label: 'May 15–21', starts: 330, within7d: 163, d8to14: 4, d15plus: 0, waiting: 163, daysElapsed: 7,  mature7d: true,  mature14d: false, postUpdate: false },
-  { label: 'May 22–28', starts: 367, within7d: 156, d8to14: 0, d15plus: 0, waiting: 211, daysElapsed: 0,  mature7d: false, mature14d: false, postUpdate: true  },
+  { label: 'May 1–7',   starts: 327, within7d: 167, d8to14: 4, d15plus: 3, waiting: 153, daysElapsed: 22, mature7d: true,  mature14d: true,  postUpdate: false },
+  { label: 'May 8–14',  starts: 305, within7d: 160, d8to14: 4, d15plus: 3, waiting: 138, daysElapsed: 15, mature7d: true,  mature14d: true,  postUpdate: false },
+  { label: 'May 15–21', starts: 329, within7d: 163, d8to14: 7, d15plus: 0, waiting: 157, daysElapsed: 8,  mature7d: true,  mature14d: false, postUpdate: false },
+  { label: 'May 22–29', starts: 479, within7d: 219, d8to14: 0, d15plus: 0, waiting: 260, daysElapsed: 0,  mature7d: false, mature14d: false, postUpdate: true  },
 ];
 
 // ── Post-update tracking ────────────────────────────────────────────
-const POST_UPDATE_DAYS_ELAPSED = 6; // May 23-28 = 6 days post-update
+const POST_UPDATE_DAYS_ELAPSED = 7; // May 23-29 = 7 days post-update
 
 function num(v: number): string { return v.toLocaleString(); }
 function pct(v: number, t: number): string { return t > 0 ? (v / t * 100).toFixed(1) + '%' : '--'; }
@@ -333,14 +335,14 @@ export default function AVDiagnostics() {
     datasets: [
       {
         label: 'Same-day %', data: sameDayPcts,
-        backgroundColor: lagLabels.map(l => l === 'May 23–28' ? 'rgba(58,110,164,0.3)' : 'rgba(58,110,164,0.7)'),
-        borderColor: lagLabels.map(l => l === 'May 23–28' ? 'rgba(58,110,164,0.5)' : 'rgba(58,110,164,0)'),
+        backgroundColor: lagLabels.map(l => l === 'May 23–29' ? 'rgba(58,110,164,0.3)' : 'rgba(58,110,164,0.7)'),
+        borderColor: lagLabels.map(l => l === 'May 23–29' ? 'rgba(58,110,164,0.5)' : 'rgba(58,110,164,0)'),
         borderWidth: 1.5, borderRadius: 0,
       },
       {
         label: 'Returning %', data: returningPcts,
-        backgroundColor: lagLabels.map(l => l === 'May 23–28' ? 'rgba(239,159,39,0.3)' : 'rgba(239,159,39,0.7)'),
-        borderColor: lagLabels.map(l => l === 'May 23–28' ? 'rgba(239,159,39,0.5)' : 'rgba(239,159,39,0)'),
+        backgroundColor: lagLabels.map(l => l === 'May 23–29' ? 'rgba(239,159,39,0.3)' : 'rgba(239,159,39,0.7)'),
+        borderColor: lagLabels.map(l => l === 'May 23–29' ? 'rgba(239,159,39,0.5)' : 'rgba(239,159,39,0)'),
         borderWidth: 1.5, borderRadius: 4,
       },
     ],
@@ -499,7 +501,7 @@ export default function AVDiagnostics() {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(58,110,164,0.7)' }} /> Same-day</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(239,159,39,0.7)' }} /> Returning</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(150,150,150,0.15)', border: '1.5px solid rgba(150,150,150,0.5)' }} /> May 23–28 ({POST_UPDATE_DAYS_ELAPSED} days)</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: 'rgba(150,150,150,0.15)', border: '1.5px solid rgba(150,150,150,0.5)' }} /> May 23–29 ({POST_UPDATE_DAYS_ELAPSED} days)</span>
         </div>
         <div style={{ height: 300 }}>
           <Bar data={lagChartData} options={lagChartOpts as any} />
@@ -537,7 +539,7 @@ export default function AVDiagnostics() {
                 const cr = t ? (d.submissions / t * 100).toFixed(1) : '--';
                 const sdPct = (d.sameDay / d.submissions * 100).toFixed(1);
                 const retPct = (d.returning / d.submissions * 100).toFixed(1);
-                const isPost = d.label === 'May 23–28';
+                const isPost = d.label === 'May 23–29';
                 const rowBg = isPost ? '#F0FDF4' : d.label === 'May 1–22' ? '#FFF5F5' : undefined;
                 return (
                   <tr key={d.label} style={{ borderBottom: '1px solid #F3F4F6', background: rowBg }}>
@@ -558,7 +560,7 @@ export default function AVDiagnostics() {
             </tbody>
           </table>
         </div>
-        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* May 23–28 = {POST_UPDATE_DAYS_ELAPSED} days post-update. 16 of 157 submissions were returning (created before May 23).</div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* May 23–29 = {POST_UPDATE_DAYS_ELAPSED} days post-update. 22 of 190 submissions were returning (created before May 23).</div>
       </div>
 
       {/* ===== NEW: Lag Distribution ===== */}
@@ -590,7 +592,7 @@ export default function AVDiagnostics() {
                 return {
                   label: bucket,
                   data: LAG_DISTRIBUTION.map(d => Math.round(d.buckets[i] / d.total * 1000) / 10),
-                  backgroundColor: LAG_DISTRIBUTION.map(d => d.label === 'May 23–28' ? colors[i].replace('0.8', '0.35') : colors[i]),
+                  backgroundColor: LAG_DISTRIBUTION.map(d => d.label === 'May 23–29' ? colors[i].replace('0.8', '0.35') : colors[i]),
                   borderRadius: i === LAG_BUCKETS.length - 1 ? 4 : 0,
                 };
               }),
@@ -627,7 +629,7 @@ export default function AVDiagnostics() {
             </thead>
             <tbody>
               {LAG_DISTRIBUTION.map(d => {
-                const isPost = d.label === 'May 23–28';
+                const isPost = d.label === 'May 23–29';
                 const isPre = d.label === 'May 1–22';
                 const rowBg = isPost ? '#F0FDF4' : isPre ? '#FFF5F5' : undefined;
                 return (
@@ -798,7 +800,7 @@ export default function AVDiagnostics() {
                 <div style={{ fontSize: 12, color: '#6B7280' }}>{preTotalSub} of {preTotalStarts} completed</div>
               </div>
               <div style={{ flex: 1, minWidth: 140, background: '#F0FDF4', borderRadius: 8, padding: '12px 16px' }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: '#166534', textTransform: 'uppercase', letterSpacing: 0.5 }}>Post-update (May 23–28)</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#166534', textTransform: 'uppercase', letterSpacing: 0.5 }}>Post-update (May 23–29)</div>
                 <div style={{ fontSize: 28, fontWeight: 700, color: '#166534' }}>{postOverall}%</div>
                 <div style={{ fontSize: 12, color: '#6B7280' }}>{postTotalSub} of {postTotalStarts} completed</div>
               </div>
@@ -916,7 +918,7 @@ export default function AVDiagnostics() {
           Source: Salesforce &quot;Waiting on Info Ratios&quot; export, May 28 2026. &quot;Starts&quot; = Person Account creations.
           &quot;Submitted&quot; = have a Submission Date. &quot;Waiting&quot; = current stage is WAITING (never finished).
           &quot;Other&quot; = in pipeline, closed, denied, or on hold.
-          * May 23–28 is {POST_UPDATE_DAYS_ELAPSED} days post-update — recent accounts haven&apos;t had time to mature.
+          * May 23–29 is {POST_UPDATE_DAYS_ELAPSED} days post-update — recent accounts haven&apos;t had time to mature.
         </div>
       </div>
 
