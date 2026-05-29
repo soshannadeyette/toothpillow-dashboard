@@ -4,16 +4,16 @@ import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-
+  BarElement,
   LineElement,
   PointElement,
   Title,
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Line } from 'react-chartjs-2';
+import { Bar, Line } from 'react-chartjs-2';
 
-ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend);
 
 const TP = {
   blue: '#3A6EA4',
@@ -91,8 +91,17 @@ const MAY_DAILY = [
   { day: 29, starts: 41, waiting: 27, submitted: 14 },
 ];
 
-// ── Conversion lag + distribution data archived ─────────────────────
-// Removed from render — raw data preserved in Salesforce exports if needed
+// ── Lag distribution by month (source of truth) ────────────────────
+// Buckets: Same day, 1 day, 2–3 days, 4–7 days, 8–14 days, 15–30 days, 31+ days
+// Used for fair cross-month comparison using a fixed 3-day window
+const LAG_DISTRIBUTION = [
+  { label: 'Jan',        buckets: [959, 13, 27,  8,  8,  7, 32] },
+  { label: 'Feb',        buckets: [992, 77, 55, 42, 18,  8, 16] },
+  { label: 'Mar',        buckets: [963, 97, 57, 58, 44, 30, 38] },
+  { label: 'Apr',        buckets: [685, 55, 39, 31, 21, 35, 101] },
+  { label: 'May 1–22',   buckets: [391, 65, 40, 24, 14,  6,  0] },
+  { label: 'May 23–29',  buckets: [168, 16,  5,  1,  0,  0,  0] },
+];
 
 // ── Weekly cohort completion curves (source of truth) ────────────────
 // Created-date cohorts: what % completed by day 0, 1, 3, 7
@@ -125,8 +134,24 @@ function num(v: number): string { return v.toLocaleString(); }
 export default function AVDiagnostics() {
 
   // ── Derived: cohort comparison (the real measure of update impact) ────
-  const preCohort = COHORT_DATA.find(c => c.label === 'May 15–21')!;
-  const postCohort = COHORT_DATA.find(c => c.label === 'May 22–29')!;
+  // NORMALIZE: use within-7-day completers as denominator for all cohorts.
+  // Raw COHORT_DATA uses all-eventual-completers (including day 8, 9, 12+ returners)
+  // which unfairly deflates pre-update percentages since the post-update cohort
+  // is too young to have late returners. This makes the comparison apples-to-apples.
+  const normalize = (c: typeof COHORT_DATA[0]) => {
+    const scale = 100 / c.within7d; // within7d% → 100%, everything else scales up
+    return {
+      ...c,
+      sameDay:   Math.round(c.sameDay * scale * 10) / 10,
+      within1d:  Math.round(c.within1d * scale * 10) / 10,
+      within3d:  Math.round(c.within3d * scale * 10) / 10,
+      within7d:  100.0,
+      n7d:       Math.round(c.n * c.within7d / 100), // count of 7-day completers
+    };
+  };
+  const NORM = COHORT_DATA.map(normalize);
+  const preCohort = NORM.find(c => c.label === 'May 15–21')!;
+  const postCohort = NORM.find(c => c.label === 'May 22–29')!;
 
   // Aging cohort data (starts, completions, waiting)
   const postAgingCohort = COHORT_AGING.find(c => c.label === 'May 22–29')!;
@@ -136,6 +161,16 @@ export default function AVDiagnostics() {
   const postDays = MAY_DAILY.filter(d => d.day >= 23);
   const preAvgStarts = Math.round(preDays.reduce((s, d) => s + d.starts, 0) / preDays.length);
   const postAvgStarts = Math.round(postDays.reduce((s, d) => s + d.starts, 0) / postDays.length);
+
+  // ── Fair comparison: same-day rate using 3-day window across all months ────
+  // For each period, denominator = people who completed within 3 days (same day + 1 day + 2-3 day buckets)
+  // This makes every period comparable regardless of how old the cohort is
+  const fairComp = LAG_DISTRIBUTION.map(d => {
+    const within3d = d.buckets[0] + d.buckets[1] + d.buckets[2];
+    const sameDayPct = within3d > 0 ? Math.round(d.buckets[0] / within3d * 1000) / 10 : 0;
+    const within1dPct = within3d > 0 ? Math.round((d.buckets[0] + d.buckets[1]) / within3d * 1000) / 10 : 0;
+    return { label: d.label, within3d, sameDayPct, within1dPct, isPost: d.label === 'May 23–29' };
+  });
 
   // ── Styles ────────────────────────────────────────────────────────
   const card = (bg: string, border: string): React.CSSProperties => ({
@@ -157,6 +192,64 @@ export default function AVDiagnostics() {
         </p>
       </div>
 
+      {/* ═══════ SECTION 0: FAIR COMPARISON — SAME-DAY RATE OVER TIME ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 28 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>Same-day completion rate (fair comparison)</h3>
+        <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px' }}>
+          Among patients who completed within 3 days, what % finished same day? Same window applied to every period so no cohort has an unfair advantage.
+        </p>
+        <div style={{ height: 300 }}>
+          <Bar
+            data={{
+              labels: fairComp.map(d => d.label),
+              datasets: [{
+                label: 'Same-day %',
+                data: fairComp.map(d => d.sameDayPct),
+                backgroundColor: fairComp.map(d => d.isPost ? TP.green : TP.blue),
+                borderRadius: 6,
+                barPercentage: 0.7,
+              }],
+            }}
+            options={{
+              responsive: true, maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: (ctx: { parsed: { y: number } }) => ctx.parsed.y + '% same day' } },
+              },
+              scales: {
+                y: { min: 70, max: 100, ticks: { callback: (v: number | string) => v + '%' } },
+              },
+            } as any}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: 16, fontSize: 12, color: '#6B7280', marginTop: 12 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: TP.blue }} /> Pre-update months</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: TP.green }} /> Post-update (May 23–29)</span>
+        </div>
+        <div style={{ marginTop: 12, fontSize: 12, color: '#6B7280' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid #E5E7EB' }}>
+                <th style={{ textAlign: 'left', padding: '6px 8px', fontWeight: 600 }}>Period</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>Completed within 3 days</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>Same-day rate</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>Within 1 day</th>
+              </tr>
+            </thead>
+            <tbody>
+              {fairComp.map(d => (
+                <tr key={d.label} style={{ borderBottom: '1px solid #F3F4F6', background: d.isPost ? '#F0FDF4' : 'transparent', fontWeight: d.isPost ? 700 : 400 }}>
+                  <td style={{ padding: '6px 8px' }}>{d.label}{d.isPost ? ' (post-update)' : ''}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right' }}>{d.within3d.toLocaleString()}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', color: d.isPost ? TP.green : 'inherit' }}>{d.sameDayPct}%</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', color: d.isPost ? TP.green : 'inherit' }}>{d.within1dPct}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* ═══════ SECTION 1: HERO STAT CARDS ═══════ */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginBottom: 32 }}>
 
@@ -168,7 +261,7 @@ export default function AVDiagnostics() {
             {arrow(true)} from {preCohort.sameDay}% pre-update
           </div>
           <div style={{ fontSize: 11, color: '#166534', marginTop: 2 }}>
-            Of patients who complete, {postCohort.sameDay}% finish same day
+            +{(postCohort.sameDay - preCohort.sameDay).toFixed(0)}pp vs pre-update (same 7-day window)
           </div>
         </div>
 
@@ -213,17 +306,17 @@ export default function AVDiagnostics() {
       <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 24 }}>
         <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>Completion speed by weekly cohort</h3>
         <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px' }}>
-          Of the patients who completed their assessment, how fast did they finish? Post-update (green) is the fastest cohort this year.
+          Of patients who completed within 7 days, how fast did they finish? Using same 7-day window for all cohorts so the comparison is fair.
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
-          {COHORT_DATA.map((c, i) => {
+          {NORM.map((c, i) => {
             const colors = [TP.skyBlue, TP.purple, TP.amber, TP.green];
             const isPost = c.label === 'May 22–29';
             return (
               <span key={c.label} style={{ display: 'flex', alignItems: 'center', gap: 5, fontWeight: isPost ? 700 : 400 }}>
                 <span style={{ width: 14, height: 3, background: colors[i], borderRadius: 2 }} />
-                {c.label} ({c.n} completed){isPost ? ' — post-update' : ''}
+                {c.label} ({c.n7d} within 7d){isPost ? ' — post-update' : ''}
               </span>
             );
           })}
@@ -232,7 +325,7 @@ export default function AVDiagnostics() {
           <Line
             data={{
               labels: ['Same day', 'Within 1 day', 'Within 3 days'],
-              datasets: COHORT_DATA.map((c, i) => {
+              datasets: NORM.map((c, i) => {
                 const colors = [TP.skyBlue, TP.purple, TP.amber, TP.green];
                 const isPost = c.label === 'May 22–29';
                 return {
@@ -268,7 +361,7 @@ export default function AVDiagnostics() {
         {/* Pre-update */}
         <div style={{ background: '#FFF5F5', borderRadius: 12, padding: 20, border: '1.5px solid #FECACA' }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: '#991B1B', textTransform: 'uppercase', marginBottom: 4 }}>Before update (May 15–21)</div>
-          <div style={{ fontSize: 11, color: '#9B1C1C', marginBottom: 10 }}>Speed among patients who completed</div>
+          <div style={{ fontSize: 11, color: '#9B1C1C', marginBottom: 10 }}>Speed among {preCohort.n7d} patients who completed within 7 days</div>
           <div style={{ display: 'grid', gap: 10 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span style={{ color: '#6B7280' }}>Same-day completion</span>
@@ -296,7 +389,7 @@ export default function AVDiagnostics() {
         {/* Post-update */}
         <div style={{ background: '#F0FDF4', borderRadius: 12, padding: 20, border: '1.5px solid #BBF7D0' }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: '#166534', textTransform: 'uppercase', marginBottom: 4 }}>After update (May 23–29)</div>
-          <div style={{ fontSize: 11, color: '#15803D', marginBottom: 10 }}>Speed among patients who completed</div>
+          <div style={{ fontSize: 11, color: '#15803D', marginBottom: 10 }}>Speed among {postCohort.n7d} patients who completed within 7 days</div>
           <div style={{ display: 'grid', gap: 10 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span style={{ color: '#6B7280' }}>Same-day completion</span>
