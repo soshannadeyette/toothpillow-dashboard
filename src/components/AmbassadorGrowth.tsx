@@ -400,22 +400,54 @@ export default function AmbassadorGrowth() {
 
   /* ── Chart: Channel YOY grouped bar ── */
   const channelChartData: ChartData<'bar'> = {
-    labels: ['2023', '2024', '2025', '2026 YTD', '2026 Pace'],
+    labels: ['2023', '2024', '2025', '2026'],
     datasets: [
       {
         label: 'Influencer',
-        data: [infSubsYear[2023], infSubsYear[2024], infSubsYear[2025], infSubsYear[2026], infPace],
-        backgroundColor: [TP.teal, TP.teal, TP.teal, TP.teal + '80', TP.teal + '40'],
+        data: [infSubsYear[2023], infSubsYear[2024], infSubsYear[2025], infSubsYear[2026]],
+        backgroundColor: TP.teal,
         borderRadius: 4,
       },
       {
         label: 'Ambassador',
-        data: [ambSubsYear[2023], ambSubsYear[2024], ambSubsYear[2025], ambSubsYear[2026], ambPace],
-        backgroundColor: [TP.blue, TP.blue, TP.blue, TP.blue + '80', TP.blue + '40'],
+        data: [ambSubsYear[2023], ambSubsYear[2024], ambSubsYear[2025], ambSubsYear[2026]],
+        backgroundColor: TP.blue,
         borderRadius: 4,
       },
     ],
   };
+  const channelShadowPlugin: Plugin<'bar'> = useMemo(() => ({
+    id: 'channelShadow',
+    beforeDatasetsDraw(chart) {
+      const ctx = chart.ctx;
+      const yScale = chart.scales.y;
+      const bottom = yScale.getPixelForValue(0);
+      [0, 1].forEach((di) => {
+        const meta = chart.getDatasetMeta(di);
+        const bar = meta.data[3];
+        if (!bar) return;
+        const paceVal = di === 0 ? infPace : ambPace;
+        const top = yScale.getPixelForValue(paceVal);
+        const { x, width } = bar as unknown as { x: number; width: number };
+        const color = di === 0 ? TP.teal : TP.blue;
+        ctx.save();
+        ctx.fillStyle = color + '15';
+        ctx.strokeStyle = color + '40';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([5, 3]);
+        ctx.beginPath();
+        ctx.rect(x - width / 2, top, width, bottom - top);
+        ctx.fill();
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = color + '90';
+        ctx.font = '600 10px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`~${paceVal}`, x, top - 5);
+        ctx.restore();
+      });
+    },
+  }), [infPace, ambPace]);
   const channelChartOpts: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
@@ -430,22 +462,51 @@ export default function AmbassadorGrowth() {
 
   /* ── Chart: Base Program stacked bar ── */
   const baseChartData: ChartData<'bar'> = {
-    labels: ['2023', '2024', '2025', '2026 Pace'],
+    labels: ['2023', '2024', '2025', '2026'],
     datasets: [
       {
         label: 'Base Program',
-        data: [baseByYear[2023], baseByYear[2024], baseByYear[2025], basePace],
+        data: [baseByYear[2023], baseByYear[2024], baseByYear[2025], baseByYear[2026]],
         backgroundColor: TP.blue,
         borderRadius: 4,
       },
       {
         label: 'Mega-3',
-        data: [mega3ByYear[2023], mega3ByYear[2024], mega3ByYear[2025], Math.round(mega3ByYear[2026] * ANN)],
+        data: [mega3ByYear[2023], mega3ByYear[2024], mega3ByYear[2025], mega3ByYear[2026]],
         backgroundColor: TP.gold,
         borderRadius: 4,
       },
     ],
   };
+  const baseShadowPlugin: Plugin<'bar'> = useMemo(() => ({
+    id: 'baseShadow',
+    beforeDatasetsDraw(chart) {
+      const ctx = chart.ctx;
+      const yScale = chart.scales.y;
+      const bottom = yScale.getPixelForValue(0);
+      const projTotal = basePace + Math.round(mega3ByYear[2026] * ANN);
+      const meta = chart.getDatasetMeta(0);
+      const bar = meta.data[3];
+      if (!bar) return;
+      const top = yScale.getPixelForValue(projTotal);
+      const { x, width } = bar as unknown as { x: number; width: number };
+      ctx.save();
+      ctx.fillStyle = TP.navy + '10';
+      ctx.strokeStyle = TP.navy + '35';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 3]);
+      ctx.beginPath();
+      ctx.rect(x - width / 2, top, width, bottom - top);
+      ctx.fill();
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = TP.navy + '80';
+      ctx.font = '600 10px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`~${projTotal} pace`, x, top - 5);
+      ctx.restore();
+    },
+  }), [basePace]);
   const baseChartOpts: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
@@ -727,7 +788,7 @@ export default function AmbassadorGrowth() {
 
         <div style={chartWrap}>
           <div style={{ height: 320 }}>
-            <Bar data={channelChartData} options={channelChartOpts} />
+            <Bar data={channelChartData} options={channelChartOpts} plugins={[channelShadowPlugin]} />
           </div>
         </div>
       </div>
@@ -766,7 +827,7 @@ export default function AmbassadorGrowth() {
 
         <div style={chartWrap}>
           <div style={{ height: 320 }}>
-            <Bar data={baseChartData} options={baseChartOpts} />
+            <Bar data={baseChartData} options={baseChartOpts} plugins={[baseShadowPlugin]} />
           </div>
         </div>
       </div>
