@@ -15,7 +15,7 @@ const TP = {
   blue: '#3A6EA4', skyBlue: '#B6CAE3', lightBlue: '#D6E5F7',
   cream: '#FEF8EE', green: '#8CD1C8', yellow: '#FDBE67',
   peach: '#FBCCC5', red: '#DD5759', darkPurple: '#B26CA6',
-  lightPurple: '#DDBBD9', bubblegum: '#F6AACB',
+  lightPurple: '#DDBBD9', bubblegum: '#F6AACB', amber: '#EF9F27',
   text: '#333333', navy: '#1B2A4A',
 };
 
@@ -30,6 +30,27 @@ const TP = {
 
 const SEO_START_DATE = '2026-05-19';
 const WEBSITE_LAUNCH_DATE = '2025-12-22';
+
+// Total submissions (online + hybrid + prime) aligned to GSC_MONTHLY months
+// Source: OnlineTrends.tsx hardcoded data + Supabase daily tracker
+const SUBMISSIONS_BY_MONTH: Record<string, number> = {
+  '2025-02': 1464 + 77 + 20,    // 1,561
+  '2025-03': 1279 + 214 + 19,   // 1,512
+  '2025-04': 1186 + 461 + 18,   // 1,665
+  '2025-05': 1031 + 319 + 9,    // 1,359
+  '2025-06': 787 + 288 + 23,    // 1,098
+  '2025-07': 2386 + 292 + 11,   // 2,689
+  '2025-08': 2178 + 351 + 13,   // 2,542
+  '2025-09': 1180 + 406 + 14,   // 1,600
+  '2025-10': 975 + 526 + 7,     // 1,508
+  '2025-11': 1135 + 460 + 13,   // 1,608
+  '2025-12': 776 + 452 + 25,    // 1,253
+  '2026-01': 1067 + 365 + 23,   // 1,455
+  '2026-02': 1174 + 411 + 15,   // 1,600
+  '2026-03': 1291 + 418 + 51,   // 1,760
+  '2026-04': 1420 + 346 + 34,   // 1,800
+  '2026-05': 978,                // MTD through May 28
+};
 
 const GSC_MONTHLY = [
   { month: '2025-02', clicks: 18183, impressions: 541298, ctr: 3.4, position: 72.5 },
@@ -290,6 +311,7 @@ export default function OrganicGrowth() {
   // Annotation indices for chart markers
   const seoMonthIndex = GSC_MONTHLY.findIndex(m => m.month >= SEO_START_DATE.substring(0, 7));
   const websiteMonthIndex = GSC_MONTHLY.findIndex(m => m.month >= WEBSITE_LAUNCH_DATE.substring(0, 7));
+  const coreUpdateIndex = GSC_MONTHLY.findIndex(m => m.month === '2025-09');
 
   // Branded vs non-branded totals
   const brandedClicks = TOP_QUERIES.filter(q => q.branded).reduce((s, q) => s + q.clicks, 0);
@@ -340,6 +362,27 @@ export default function OrganicGrowth() {
     },
   } : {};
 
+  const coreUpdateAnnotation = coreUpdateIndex >= 0 ? {
+    coreUpdateLine: {
+      type: 'line' as const,
+      xMin: coreUpdateIndex - 0.5,
+      xMax: coreUpdateIndex - 0.5,
+      borderColor: `${TP.amber}B0`,
+      borderWidth: 2.5,
+      borderDash: [6, 3],
+      label: {
+        display: true,
+        content: 'Core Update',
+        position: 'end' as const,
+        backgroundColor: TP.amber,
+        color: '#fff',
+        font: { size: 9, weight: 'bold' as const },
+        padding: { top: 2, bottom: 2, left: 5, right: 5 },
+        borderRadius: 3,
+      },
+    },
+  } : {};
+
   // ── Chart: Monthly Organic Clicks with 3-month MA ──
   const monthlyClicksData = useMemo(() => {
     const clickValues = GSC_MONTHLY.map(m => m.clicks);
@@ -361,26 +404,34 @@ export default function OrganicGrowth() {
     plugins: {
       legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
       tooltip: { callbacks: { label: (ctx: { datasetIndex: number; parsed: { y: number } }) => ctx.datasetIndex === 0 ? `${ctx.parsed.y.toLocaleString()} clicks` : `${ctx.parsed.y.toLocaleString()} avg` } },
-      annotation: { annotations: { ...websiteAnnotation, ...seoAnnotation } },
+      annotation: { annotations: { ...websiteAnnotation, ...seoAnnotation, ...coreUpdateAnnotation } },
     },
     scales: { y: { beginAtZero: true, ticks: { callback: (v: number | string) => fmtK(Number(v)) }, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } },
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [seoMonthIndex]);
 
-  // ── Chart: Monthly Impressions ──
+  // ── Chart: Monthly Impressions + Submissions overlay ──
   const impressionsData = useMemo(() => ({
     labels: GSC_MONTHLY.map(m => monthLabel(m.month)),
-    datasets: [{ label: 'Impressions', data: GSC_MONTHLY.map(m => m.impressions), backgroundColor: `${TP.darkPurple}70`, borderRadius: 4, borderSkipped: false as const }],
+    datasets: [
+      { label: 'Impressions', data: GSC_MONTHLY.map(m => m.impressions), backgroundColor: `${TP.darkPurple}70`, borderRadius: 4, borderSkipped: false as const, order: 2, yAxisID: 'y' },
+      { label: 'Submissions', data: GSC_MONTHLY.map(m => SUBMISSIONS_BY_MONTH[m.month] || null), type: 'line' as const,
+        borderColor: TP.green, backgroundColor: TP.green, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: TP.green, tension: 0.3, order: 1, yAxisID: 'y1' },
+    ],
   }), []);
 
   const impressionsOpts = useMemo(() => ({
     responsive: true, maintainAspectRatio: false,
     plugins: {
-      legend: { display: false },
-      tooltip: { callbacks: { label: (ctx: { parsed: { y: number } }) => `${ctx.parsed.y.toLocaleString()} impressions` } },
-      annotation: { annotations: { ...websiteAnnotation, ...seoAnnotation } },
+      legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
+      tooltip: { callbacks: { label: (ctx: { datasetIndex: number; parsed: { y: number } }) => ctx.datasetIndex === 0 ? `${ctx.parsed.y.toLocaleString()} impressions` : `${ctx.parsed.y.toLocaleString()} submissions` } },
+      annotation: { annotations: { ...websiteAnnotation, ...seoAnnotation, ...coreUpdateAnnotation } },
     },
-    scales: { y: { beginAtZero: true, ticks: { callback: (v: number | string) => fmtK(Number(v)) }, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } },
+    scales: {
+      y: { beginAtZero: true, ticks: { callback: (v: number | string) => fmtK(Number(v)) }, grid: { color: '#f0f0f0' }, title: { display: true, text: 'Impressions', font: { size: 11 }, color: TP.darkPurple } },
+      y1: { position: 'right' as const, beginAtZero: true, grid: { display: false }, ticks: { callback: (v: number | string) => fmtK(Number(v)) }, title: { display: true, text: 'Submissions', font: { size: 11 }, color: TP.green } },
+      x: { grid: { display: false } },
+    },
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [seoMonthIndex]);
 
@@ -407,6 +458,7 @@ export default function OrganicGrowth() {
             label: { display: true, content: 'Page 2', position: 'start' as const, backgroundColor: 'transparent', color: TP.yellow, font: { size: 10, weight: 'bold' as const }, padding: 2 } },
           ...websiteAnnotation,
           ...seoAnnotation,
+          ...coreUpdateAnnotation,
         },
       },
     },
@@ -545,11 +597,36 @@ export default function OrganicGrowth() {
         </div>
       </div>
 
-      {/* ═══════ SECTION 3: MONTHLY IMPRESSIONS ═══════ */}
+      {/* ═══════ SECTION 3: MONTHLY IMPRESSIONS + SUBMISSIONS ═══════ */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12, marginTop: 0 }}>Monthly Impressions</h3>
-        <div style={{ height: 300 }}>
-          <Bar data={impressionsData} options={impressionsOpts as object} />
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12, marginTop: 0 }}>Monthly Impressions vs Submissions</h3>
+        <div style={{ height: 320 }}>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <Bar data={impressionsData as any} options={impressionsOpts as object} />
+        </div>
+      </div>
+
+      {/* ═══════ SEPTEMBER DROP CALLOUT ═══════ */}
+      <div style={{ background: `${TP.amber}0C`, borderRadius: 10, padding: '16px 20px', border: `1.5px solid ${TP.amber}40` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <span style={{ background: TP.amber, color: '#fff', borderRadius: 4, padding: '2px 8px', fontSize: 10, fontWeight: 700 }}>CORE UPDATE</span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: TP.navy }}>September 2025 traffic drop</span>
+        </div>
+        <div style={{ fontSize: 12, color: '#555', lineHeight: 1.7 }}>
+          <p style={{ margin: '0 0 8px' }}>
+            Impressions fell from 717K (Aug) to 173K (Sep) and clicks dropped from 18.6K to 14.1K. The most likely cause is
+            Google&apos;s <strong>August 2025 Core Update</strong>, which finished rolling out in early September 2025.
+          </p>
+          <p style={{ margin: '0 0 8px' }}>
+            This update specifically targeted YMYL (&quot;Your Money or Your Life&quot;) sites, which includes health and medical content.
+            Sites without strong E-E-A-T signals (Experience, Expertise, Authoritativeness, Trustworthiness) and pages that looked
+            thin relative to competitors were demoted. Toothpillow had no JSON-LD structured data on the home page at the time, no
+            canonical URLs, and limited schema markup, all of which weakened the site&apos;s authority signals to Google.
+          </p>
+          <p style={{ margin: 0 }}>
+            Impressions never recovered to pre-update levels. The December new-site migration then compounded the problem by stripping
+            the remaining metadata, which drove impressions down further to 66K by February 2026.
+          </p>
         </div>
       </div>
 
