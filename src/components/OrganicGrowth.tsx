@@ -446,7 +446,7 @@ export default function OrganicGrowth() {
         return (
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             {/* CARD 1: Old Site */}
-            <div style={{ flex: 1, minWidth: 220, background: '#fff', borderRadius: 10, padding: '16px 18px', border: '1px solid #e5e7eb' }}>
+            <div style={{ flex: 0.8, minWidth: 200, background: '#fff', borderRadius: 10, padding: '16px 18px', border: '1px solid #e5e7eb' }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: TP.navy }}>Old Site</div>
               <div style={{ fontSize: 11, color: '#888', marginBottom: 10 }}>Pre-Dec 2025</div>
               <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy, marginBottom: 10 }}>{oldCount}/{items.length} <span style={{ fontSize: 12, fontWeight: 500, color: '#888' }}>elements</span></div>
@@ -459,7 +459,7 @@ export default function OrganicGrowth() {
             </div>
 
             {/* CARD 2: New Site (the crash) */}
-            <div style={{ flex: 1, minWidth: 220, background: `linear-gradient(135deg, ${TP.red}08, ${TP.red}04)`, borderRadius: 10, padding: '16px 18px', border: `2px solid ${TP.red}40` }}>
+            <div style={{ flex: 1.4, minWidth: 280, background: `linear-gradient(135deg, ${TP.red}08, ${TP.red}04)`, borderRadius: 10, padding: '16px 18px', border: `2px solid ${TP.red}40` }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ background: TP.blue, color: '#fff', borderRadius: 4, padding: '2px 8px', fontSize: 10, fontWeight: 700 }}>NEW SITE</span>
                 <span style={{ fontSize: 13, fontWeight: 700, color: TP.navy }}>New Site</span>
@@ -481,7 +481,7 @@ export default function OrganicGrowth() {
             </div>
 
             {/* CARD 3: Post-SEO */}
-            <div style={{ flex: 1, minWidth: 220, background: `linear-gradient(135deg, ${TP.green}08, ${TP.green}04)`, borderRadius: 10, padding: '16px 18px', border: `2px solid ${TP.green}40` }}>
+            <div style={{ flex: 0.8, minWidth: 200, background: `linear-gradient(135deg, ${TP.green}08, ${TP.green}04)`, borderRadius: 10, padding: '16px 18px', border: `2px solid ${TP.green}40` }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ background: TP.green, color: '#fff', borderRadius: 4, padding: '2px 8px', fontSize: 10, fontWeight: 700 }}>SEO</span>
                 <span style={{ fontSize: 13, fontWeight: 700, color: TP.navy }}>Post-SEO</span>
