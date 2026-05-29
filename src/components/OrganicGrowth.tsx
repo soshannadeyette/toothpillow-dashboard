@@ -21,11 +21,11 @@ const TP = {
 
 /* ════════════════════════════════════════════
    HARDCODED GSC DATA — Source of truth
-   Data verified from Google Search Console on May 28, 2026
+   Data pulled fresh from Google Search Console on May 29, 2026
    Property verified ~Feb 2025, 16 months of history available
    Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
    SEO program reset date: May 19, 2026
-   May 2026 monthly/weekly data current through May 26 (GSC ~2-day lag)
+   May 2026 data current through May 27 (GSC ~2-day lag)
    ════════════════════════════════════════════ */
 
 const SEO_START_DATE = '2026-05-19';
@@ -46,7 +46,7 @@ const GSC_MONTHLY = [
   { month: '2026-02', clicks: 10579, impressions: 66544, ctr: 15.9, position: 11.9 },
   { month: '2026-03', clicks: 12601, impressions: 74269, ctr: 17.0, position: 18.4 },
   { month: '2026-04', clicks: 11180, impressions: 105758, ctr: 10.6, position: 32.7 },
-  { month: '2026-05', clicks: 7927, impressions: 43839, ctr: 18.1, position: 19.5 },
+  { month: '2026-05', clicks: 8263, impressions: 45377, ctr: 18.2, position: 13.3 },
 ];
 
 const GSC_WEEKLY = [
@@ -156,7 +156,7 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
     [1,339,1522],[2,218,1003],[3,202,907],[4,299,2293],[5,317,3915],[6,343,5614],[7,322,1831],
     [8,305,1259],[9,186,877],[10,179,973],[11,337,1412],[12,389,1397],[13,342,1367],[14,373,3003],
     [15,262,1250],[16,176,900],[17,203,905],[18,311,1339],[19,337,1358],[20,330,1551],[21,387,1881],
-    [22,487,1600],[23,464,1559],[24,248,1403],[25,230,1124],[26,338,1553],
+    [22,487,1600],[23,464,1559],[24,248,1403],[25,230,1124],[26,338,1553],[27,339,1581],
   ],
 };
 
@@ -220,24 +220,12 @@ const CLICK_DRIVING_KEYWORDS = [
     status: 'New May 2026', posHistory: null },
 ];
 
-// Online Search submissions from Referrer tab (Salesforce "Online Search" referrer type)
-// These represent actual assessment submissions that came through organic search
-const ONLINE_SEARCH_SUBMISSIONS: Record<string, number> = {
-  '2023-01': 31, '2023-02': 22, '2023-03': 32, '2023-04': 29, '2023-05': 22, '2023-06': 22,
-  '2023-07': 40, '2023-08': 45, '2023-09': 41, '2023-10': 47, '2023-11': 59, '2023-12': 37,
-  '2024-01': 42, '2024-02': 45, '2024-03': 56, '2024-04': 62, '2024-05': 60, '2024-06': 52,
-  '2024-07': 100, '2024-08': 101, '2024-09': 84, '2024-10': 79, '2024-11': 90, '2024-12': 71,
-  '2025-01': 113, '2025-02': 124, '2025-03': 131, '2025-04': 125, '2025-05': 88, '2025-06': 57,
-  '2025-07': 146, '2025-08': 155, '2025-09': 108, '2025-10': 110, '2025-11': 122, '2025-12': 82,
-  '2026-01': 122, '2026-02': 166, '2026-03': 131, '2026-04': 145, '2026-05': 174,
-};
 
 /* ════════════════════════════════════════════
    HELPERS
    ════════════════════════════════════════════ */
 
 // Suppress unused-variable warnings for data kept for future use
-void SEO_START_DATE;
 void GSC_WEEKLY;
 void GSC_DAILY_2026;
 void GSC_DAILY_MAY_2026;
@@ -266,21 +254,14 @@ function delta(current: number, previous: number): string {
 
 export default function OrganicGrowth() {
   const mayData = GSC_MONTHLY[GSC_MONTHLY.length - 1];
-  const mayDaysReported = 26;
+  const mayDaysReported = 27;
   const mayClickPace = Math.round(mayData.clicks / mayDaysReported * 31);
 
   const may2025 = GSC_MONTHLY.find(m => m.month === '2025-05')!;
   const feb2025 = GSC_MONTHLY.find(m => m.month === '2025-02')!;
 
-  // Submission totals by year
-  const sub2023Total = Object.entries(ONLINE_SEARCH_SUBMISSIONS).filter(([k]) => k.startsWith('2023')).reduce((s, [, v]) => s + v, 0);
-  const sub2024Total = Object.entries(ONLINE_SEARCH_SUBMISSIONS).filter(([k]) => k.startsWith('2024')).reduce((s, [, v]) => s + v, 0);
-  const sub2025Total = Object.entries(ONLINE_SEARCH_SUBMISSIONS).filter(([k]) => k.startsWith('2025')).reduce((s, [, v]) => s + v, 0);
-  const sub2026YTD = Object.entries(ONLINE_SEARCH_SUBMISSIONS).filter(([k]) => k.startsWith('2026')).reduce((s, [, v]) => s + v, 0);
-  const sub2026Pace = Math.round(sub2026YTD / 5 * 12);
-
-  const may2026Subs = ONLINE_SEARCH_SUBMISSIONS['2026-05']; // 174 through 23 days
-  const may2025Subs = ONLINE_SEARCH_SUBMISSIONS['2025-05']; // 88
+  // SEO implementation index for chart annotations
+  const seoMonthIndex = GSC_MONTHLY.findIndex(m => m.month >= SEO_START_DATE.substring(0, 7));
 
   // ── Section 2: Monthly Organic Clicks bar chart with 3-month MA ──
   const monthlyClicksData = useMemo(() => {
@@ -328,48 +309,36 @@ export default function OrganicGrowth() {
             ctx.datasetIndex === 0 ? `${ctx.parsed.y.toLocaleString()} clicks` : `${ctx.parsed.y.toLocaleString()} avg`,
         },
       },
+      annotation: seoMonthIndex >= 0 ? {
+        annotations: {
+          seoLine: {
+            type: 'line' as const,
+            xMin: seoMonthIndex - 0.5,
+            xMax: seoMonthIndex - 0.5,
+            borderColor: `${TP.green}90`,
+            borderWidth: 2,
+            borderDash: [6, 3],
+            label: {
+              display: true,
+              content: 'SEO Started',
+              position: 'start' as const,
+              backgroundColor: `${TP.green}18`,
+              color: TP.green,
+              font: { size: 10, weight: 'bold' as const },
+              padding: 4,
+            },
+          },
+        },
+      } : {},
     },
     scales: {
       y: { beginAtZero: true, ticks: { callback: (v: number | string) => fmtK(Number(v)) }, grid: { color: '#f0f0f0' } },
       x: { grid: { display: false } },
     },
-  }), []);
-
-  // ── Section 3: Online Search Submissions ──
-  const subMonths = Object.keys(ONLINE_SEARCH_SUBMISSIONS).sort();
-  const yearColorMap: Record<string, string> = {
-    '2023': `${TP.blue}40`,
-    '2024': `${TP.blue}70`,
-    '2025': `${TP.blue}A0`,
-    '2026': TP.blue,
-  };
-
-  const submissionsChartData = useMemo(() => ({
-    labels: subMonths.map(m => monthLabel(m)),
-    datasets: [{
-      label: 'Search Submissions',
-      data: subMonths.map(m => ONLINE_SEARCH_SUBMISSIONS[m]),
-      backgroundColor: subMonths.map(m => yearColorMap[m.slice(0, 4)] || TP.blue),
-      borderRadius: 3,
-      borderSkipped: false as const,
-    }],
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), []);
+  }), [seoMonthIndex]);
 
-  const submissionsChartOptions = useMemo(() => ({
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: { callbacks: { label: (ctx: { parsed: { y: number } }) => `${ctx.parsed.y} submissions` } },
-    },
-    scales: {
-      y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
-      x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } },
-    },
-  }), []);
-
-  // ── Section 4: Search Position Trend (reversed Y) ──
+  // ── Section 3: Search Position Trend (reversed Y) ──
   const positionChartData = useMemo(() => ({
     labels: GSC_MONTHLY.map(m => monthLabel(m.month)),
     datasets: [{
@@ -427,6 +396,25 @@ export default function OrganicGrowth() {
               padding: 2,
             },
           },
+          ...(seoMonthIndex >= 0 ? {
+            seoLine: {
+              type: 'line' as const,
+              xMin: seoMonthIndex - 0.5,
+              xMax: seoMonthIndex - 0.5,
+              borderColor: `${TP.green}90`,
+              borderWidth: 2,
+              borderDash: [6, 3],
+              label: {
+                display: true,
+                content: 'SEO Started',
+                position: 'end' as const,
+                backgroundColor: `${TP.green}18`,
+                color: TP.green,
+                font: { size: 10, weight: 'bold' as const },
+                padding: 4,
+              },
+            },
+          } : {}),
         },
       },
     },
@@ -458,7 +446,7 @@ export default function OrganicGrowth() {
       <div>
         <h2 style={{ fontSize: 22, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Organic Search Growth</h2>
         <p style={{ fontSize: 13, color: '#888', margin: 0 }}>
-          Google Search Console + Salesforce, Feb 2025 to present
+          Google Search Console, Feb 2025 to present
         </p>
       </div>
 
@@ -468,19 +456,9 @@ export default function OrganicGrowth() {
         <div style={{ background: '#fff', borderRadius: 10, padding: '16px 20px', border: '1px solid #e5e7eb', flex: '1 1 0', minWidth: 160 }}>
           <div style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>Organic Clicks</div>
           <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{fmtK(mayClickPace)}</div>
-          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>May pace (26 days reported)</div>
+          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>May pace ({mayDaysReported} days reported)</div>
           <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: mayClickPace < may2025.clicks ? TP.red : TP.green }}>
             {mayClickPace >= may2025.clicks ? '▲' : '▼'} {delta(mayClickPace, may2025.clicks)} vs May 2025 ({fmtK(may2025.clicks)})
-          </div>
-        </div>
-
-        {/* Search Submissions */}
-        <div style={{ background: '#fff', borderRadius: 10, padding: '16px 20px', border: '1px solid #e5e7eb', flex: '1 1 0', minWidth: 160 }}>
-          <div style={{ fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>Search Submissions</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{may2026Subs}</div>
-          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>May through 23 days, pace ~{Math.round(174 / 23 * 31)}/mo</div>
-          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: TP.green }}>
-            ▲ {delta(may2026Subs, may2025Subs)} vs May 2025 ({may2025Subs})
           </div>
         </div>
 
@@ -514,36 +492,7 @@ export default function OrganicGrowth() {
         </div>
       </div>
 
-      {/* ═══════ SECTION 3: ONLINE SEARCH SUBMISSIONS ═══════ */}
-      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12, marginTop: 0 }}>Organic Search Submissions</h3>
-        <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-          <div style={{ background: '#fff', borderRadius: 8, padding: '10px 14px', border: '1px solid #e5e7eb', flex: '1 1 0', minWidth: 120 }}>
-            <div style={{ fontSize: 11, color: '#888' }}>2023</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy }}>{sub2023Total}</div>
-          </div>
-          <div style={{ background: '#fff', borderRadius: 8, padding: '10px 14px', border: '1px solid #e5e7eb', flex: '1 1 0', minWidth: 120 }}>
-            <div style={{ fontSize: 11, color: '#888' }}>2024</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy }}>{sub2024Total}</div>
-            <div style={{ fontSize: 11, color: TP.green, fontWeight: 600 }}>{delta(sub2024Total, sub2023Total)} YoY</div>
-          </div>
-          <div style={{ background: '#fff', borderRadius: 8, padding: '10px 14px', border: '1px solid #e5e7eb', flex: '1 1 0', minWidth: 120 }}>
-            <div style={{ fontSize: 11, color: '#888' }}>2025</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy }}>{sub2025Total}</div>
-            <div style={{ fontSize: 11, color: TP.green, fontWeight: 600 }}>{delta(sub2025Total, sub2024Total)} YoY</div>
-          </div>
-          <div style={{ background: '#fff', borderRadius: 8, padding: '10px 14px', border: `1px solid ${TP.green}60`, flex: '1 1 0', minWidth: 120 }}>
-            <div style={{ fontSize: 11, color: '#888' }}>2026 YTD</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy }}>{sub2026YTD}</div>
-            <div style={{ fontSize: 11, color: TP.green, fontWeight: 600 }}>Pace: ~{fmtK(sub2026Pace)}/yr</div>
-          </div>
-        </div>
-        <div style={{ height: 280 }}>
-          <Bar data={submissionsChartData} options={submissionsChartOptions as object} />
-        </div>
-      </div>
-
-      {/* ═══════ SECTION 4: SEARCH POSITION TREND ═══════ */}
+      {/* ═══════ SECTION 3: SEARCH POSITION TREND ═══════ */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
         <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12, marginTop: 0 }}>Average Search Position</h3>
         <div style={{ height: 300 }}>
@@ -551,7 +500,7 @@ export default function OrganicGrowth() {
         </div>
       </div>
 
-      {/* ═══════ SECTION 5: KEYWORD MOVEMENT ═══════ */}
+      {/* ═══════ SECTION 4: KEYWORD MOVEMENT ═══════ */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
         <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12, marginTop: 0 }}>Non-Branded Keywords Moving Toward Page 1</h3>
 
@@ -645,7 +594,7 @@ export default function OrganicGrowth() {
 
       {/* Data source note */}
       <div style={{ fontSize: 11, color: '#aaa', textAlign: 'center', padding: '8px 0' }}>
-        Google Search Console + Salesforce. Updated May 28, 2026.
+        Google Search Console. Updated May 29, 2026.
       </div>
     </div>
   );
