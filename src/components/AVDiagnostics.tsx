@@ -417,19 +417,6 @@ export default function AVDiagnostics() {
         </div>
       </div>
 
-      {/* ===== Trend callout ===== */}
-      <div style={{ background: '#FFFBEB', borderRadius: 10, padding: '14px 18px', border: '1px solid #FDE68A', marginBottom: 24 }}>
-        <div style={{ fontWeight: 600, color: '#92400E', fontSize: 14, marginBottom: 4 }}>January was healthy. February broke. It hasn&apos;t recovered.</div>
-        <div style={{ fontSize: 13, color: '#78350F', lineHeight: 1.6 }}>
-          In January, 90% of people who started an assessment finished it and only 9% got stuck in waiting.
-          Starting in February, completion dropped to ~58% and has stayed there. About 40% of every month&apos;s
-          accounts since February are still sitting in &quot;Waiting — Needs info&quot; with no submission date, meaning
-          they never finished. That&apos;s over 3,000 people across Feb–May. Assessment update shipped May 22 —
-          post-update data ({POST_UPDATE_DAYS_ELAPSED} days) is too early to draw conclusions since recent
-          accounts haven&apos;t had time to move through the pipeline.
-        </div>
-      </div>
-
       {/* ===== Chart 1: Completion rate vs waiting rate ===== */}
       <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #E5E7EB', padding: 20, marginBottom: 20 }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
