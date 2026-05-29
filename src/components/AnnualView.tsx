@@ -913,31 +913,28 @@ export default function AnnualView() {
         </div>
       </section>
 
-      {/* ===== 8. Weekly Traffic & Conversion — All History ===== */}
+      {/* ===== 8. Weekly Traffic & Submissions — All History ===== */}
       <section className="bg-white rounded-xl shadow p-5">
         <h2 className="text-lg font-semibold mb-4" style={{ color: TP.navy }}>
-          Weekly Website Traffic &amp; Conversion Rate
+          Weekly Website Traffic &amp; Submissions
         </h2>
 
         {(() => {
           if (allDailyData.length === 0) return <p className="text-gray-400 text-sm">No daily data available.</p>;
 
-          // Filter to entries with visitor data
-          const withVisitors = allDailyData.filter(d => (d.visitors || 0) > 0);
-          if (withVisitors.length === 0) return <p className="text-gray-400 text-sm">No visitor data available.</p>;
-
-          // Aggregate by ISO week (Mon–Sun)
-          const weekMap = new Map<string, { visitors: number; online: number; label: string; startDate: string }>();
-          withVisitors.forEach(d => {
+          // Use ALL daily data — not just entries with visitors
+          const weekMap = new Map<string, { visitors: number; online: number; total: number; label: string; startDate: string }>();
+          allDailyData.forEach(d => {
             const dt = new Date(d.date + 'T12:00:00');
             const day = dt.getDay();
             const diff = dt.getDate() - day + (day === 0 ? -6 : 1);
             const monday = new Date(dt);
             monday.setDate(diff);
             const key = monday.toISOString().slice(0, 10);
-            const existing = weekMap.get(key) || { visitors: 0, online: 0, label: '', startDate: key };
+            const existing = weekMap.get(key) || { visitors: 0, online: 0, total: 0, label: '', startDate: key };
             existing.visitors += (d.visitors || 0);
             existing.online += (d.online || 0);
+            existing.total += (d.online || 0) + (d.hybrid || 0) + (d.prime || 0);
             const yr = String(monday.getFullYear()).slice(2);
             existing.label = `${String(monday.getMonth() + 1)}/${String(monday.getDate()).padStart(2, '0')}/${yr}`;
             weekMap.set(key, existing);
@@ -945,16 +942,15 @@ export default function AnnualView() {
 
           const weeks = Array.from(weekMap.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([, v]) => v);
           const wLabels = weeks.map(w => w.label);
-          const wVisitors = weeks.map(w => w.visitors);
-          const wOnline = weeks.map(w => w.online);
-          const wConv = weeks.map(w => w.visitors > 0 ? parseFloat(((w.online / w.visitors) * 100).toFixed(2)) : 0);
+          const wVisitors = weeks.map(w => w.visitors > 0 ? w.visitors : null);
+          const wTotal = weeks.map(w => w.total);
 
           // Stats
-          const totalVis = wVisitors.reduce((s, v) => s + v, 0);
-          const totalOnline = wOnline.reduce((s, v) => s + v, 0);
-          const avgConv = totalVis > 0 ? (totalOnline / totalVis * 100).toFixed(2) : '0';
+          const totalSubs = wTotal.reduce((s, v) => s + v, 0);
+          const totalVis = weeks.reduce((s, w) => s + w.visitors, 0);
+          const peakWeek = weeks.reduce((best, w) => w.total > best.total ? w : best, weeks[0]);
 
-          // Find date range
+          // Date range
           const firstDate = weeks.length > 0 ? weeks[0].startDate : '';
           const lastDate = weeks.length > 0 ? weeks[weeks.length - 1].startDate : '';
           const firstLabel = firstDate ? new Date(firstDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '';
@@ -964,16 +960,17 @@ export default function AnnualView() {
             <>
               <div className="grid grid-cols-4 gap-4 mb-4">
                 <div className="rounded-xl p-3 border border-gray-200 text-center">
+                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Total Submissions</div>
+                  <div className="text-xl font-bold" style={{ color: TP.blue }}>{totalSubs.toLocaleString()}</div>
+                </div>
+                <div className="rounded-xl p-3 border border-gray-200 text-center">
                   <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Total Visitors</div>
                   <div className="text-xl font-bold" style={{ color: TP.darkPurple }}>{totalVis.toLocaleString()}</div>
                 </div>
                 <div className="rounded-xl p-3 border border-gray-200 text-center">
-                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Total Online Subs</div>
-                  <div className="text-xl font-bold" style={{ color: TP.blue }}>{totalOnline.toLocaleString()}</div>
-                </div>
-                <div className="rounded-xl p-3 border border-gray-200 text-center">
-                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Avg Conversion</div>
-                  <div className="text-xl font-bold" style={{ color: TP.green }}>{avgConv}%</div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Peak Week</div>
+                  <div className="text-xl font-bold" style={{ color: TP.navy }}>{peakWeek.total.toLocaleString()}</div>
+                  <div className="text-xs text-gray-400">{peakWeek.label}</div>
                 </div>
                 <div className="rounded-xl p-3 border border-gray-200 text-center">
                   <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Weeks Tracked</div>
@@ -995,25 +992,17 @@ export default function AnnualView() {
                         order: 2,
                       },
                       {
-                        label: 'Online Submissions',
-                        data: wOnline,
-                        backgroundColor: TP.blue + '99',
-                        borderColor: TP.blue,
-                        borderWidth: 1,
-                        yAxisID: 'y',
-                        order: 3,
-                      },
-                      {
                         type: 'line',
-                        label: 'Conversion %',
-                        data: wConv,
-                        borderColor: TP.green,
-                        backgroundColor: 'transparent',
-                        borderWidth: 2.5,
-                        pointRadius: 2,
-                        pointBackgroundColor: TP.green,
+                        label: 'Submissions',
+                        data: wTotal,
+                        borderColor: TP.blue,
+                        backgroundColor: TP.blue + '18',
+                        fill: true,
+                        borderWidth: 2,
+                        pointRadius: 1.5,
+                        pointBackgroundColor: TP.blue,
                         tension: 0.3,
-                        yAxisID: 'y1',
+                        yAxisID: 'y2',
                         order: 1,
                       } as any,
                     ],
@@ -1027,22 +1016,32 @@ export default function AnnualView() {
                       tooltip: {
                         callbacks: {
                           label: (ctx: any) => {
-                            if (ctx.dataset.label === 'Conversion %') return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(2) + '%';
+                            if (ctx.parsed.y == null) return '';
                             return (ctx.dataset.label || '') + ': ' + ctx.parsed.y.toLocaleString();
                           },
                         },
                       },
                     },
                     scales: {
-                      x: { ticks: { maxRotation: 60, font: { size: 8 }, autoSkip: true, maxTicksLimit: 50 } },
-                      y: { position: 'left' as const, title: { display: true, text: 'Count' }, beginAtZero: true },
-                      y1: { position: 'right' as const, title: { display: true, text: 'Conv %' }, beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { callback: (v: string | number) => v + '%' } },
+                      x: { ticks: { maxRotation: 60, font: { size: 7 }, autoSkip: true, maxTicksLimit: 60 } },
+                      y: {
+                        position: 'left' as const,
+                        title: { display: true, text: 'Visitors' },
+                        beginAtZero: true,
+                        ticks: { callback: (v: number | string) => { const n = typeof v === 'string' ? parseFloat(v) : v; return n >= 1000 ? (n / 1000).toFixed(0) + 'K' : n; } },
+                      },
+                      y2: {
+                        position: 'right' as const,
+                        title: { display: true, text: 'Submissions' },
+                        beginAtZero: true,
+                        grid: { drawOnChartArea: false },
+                      },
                     },
                   }}
                 />
               </div>
               <p className="text-xs text-gray-400 mt-2">
-                Visitors from GA4. Conversion rate = online submissions / visitors. Aggregated by week (Mon-Sun). {firstLabel && lastLabel ? `${firstLabel} through ${lastLabel}.` : ''} Days without visitor data are excluded.
+                Aggregated by week (Mon-Sun). {firstLabel && lastLabel ? `${firstLabel} through ${lastLabel}.` : ''} Visitor data available from Jan 2026; submission data from earliest tracked date.
               </p>
             </>
           );
