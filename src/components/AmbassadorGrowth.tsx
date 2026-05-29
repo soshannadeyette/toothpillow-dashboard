@@ -15,44 +15,26 @@ import {
   type ChartData,
   type Plugin,
 } from 'chart.js';
-import { Bar, Line } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
+import { KENDRA_DAILY, LAUREN_DAILY, SHANNON_DAILY } from '@/lib/ambassadorDaily';
+import type { DailyAmbSub } from '@/lib/ambassadorDaily';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend);
 
 /* ════════════════════════════════════════════════════════════════════════════
-   Top Ambassador Monthly Submission History (from Salesforce exports)
+   Top Ambassador Daily Submission Helpers
    ════════════════════════════════════════════════════════════════════════ */
-type AmbMonthly = { key: string; subs: number };
-
-const KENDRA_MONTHLY: AmbMonthly[] = [
-  {key:'2023-09',subs:1},{key:'2023-11',subs:275},{key:'2023-12',subs:1009},
-  {key:'2024-01',subs:395},{key:'2024-02',subs:271},{key:'2024-03',subs:374},{key:'2024-04',subs:158},{key:'2024-05',subs:164},{key:'2024-06',subs:138},{key:'2024-07',subs:80},{key:'2024-08',subs:57},{key:'2024-09',subs:92},{key:'2024-10',subs:51},{key:'2024-11',subs:36},{key:'2024-12',subs:38},
-  {key:'2025-01',subs:50},{key:'2025-02',subs:41},{key:'2025-03',subs:29},{key:'2025-04',subs:59},{key:'2025-05',subs:32},{key:'2025-06',subs:39},{key:'2025-07',subs:29},{key:'2025-08',subs:20},{key:'2025-09',subs:23},{key:'2025-10',subs:33},{key:'2025-11',subs:19},{key:'2025-12',subs:9},
-  {key:'2026-01',subs:28},{key:'2026-02',subs:45},{key:'2026-03',subs:38},{key:'2026-04',subs:20},{key:'2026-05',subs:11},
-];
-
-const LAUREN_MONTHLY: AmbMonthly[] = [
-  {key:'2023-12',subs:4},
-  {key:'2024-01',subs:5},{key:'2024-02',subs:3},{key:'2024-03',subs:1188},{key:'2024-04',subs:265},{key:'2024-05',subs:270},{key:'2024-06',subs:450},{key:'2024-07',subs:199},{key:'2024-08',subs:147},{key:'2024-09',subs:166},{key:'2024-10',subs:88},{key:'2024-11',subs:99},{key:'2024-12',subs:85},
-  {key:'2025-01',subs:120},{key:'2025-02',subs:96},{key:'2025-03',subs:87},{key:'2025-04',subs:130},{key:'2025-05',subs:66},{key:'2025-06',subs:31},{key:'2025-07',subs:89},{key:'2025-08',subs:68},{key:'2025-09',subs:48},{key:'2025-10',subs:39},{key:'2025-11',subs:26},{key:'2025-12',subs:29},
-  {key:'2026-01',subs:46},{key:'2026-02',subs:31},{key:'2026-03',subs:38},{key:'2026-04',subs:24},{key:'2026-05',subs:18},
-];
-
-const SHANNON_MONTHLY: AmbMonthly[] = [
-  {key:'2025-05',subs:1},{key:'2025-06',subs:11},{key:'2025-07',subs:470},{key:'2025-08',subs:71},{key:'2025-09',subs:28},{key:'2025-10',subs:33},{key:'2025-11',subs:197},{key:'2025-12',subs:55},
-  {key:'2026-01',subs:39},{key:'2026-02',subs:112},{key:'2026-03',subs:56},{key:'2026-04',subs:35},{key:'2026-05',subs:15},
-];
-
-// Build a unified timeline of all months across the three ambassadors
-function buildTimeline(datasets: AmbMonthly[][]): string[] {
-  const allKeys = new Set<string>();
-  datasets.forEach(ds => ds.forEach(d => allKeys.add(d.key)));
-  return Array.from(allKeys).sort();
+function ambTotal(data: DailyAmbSub[]): number {
+  return data.reduce((s, d) => s + d.n, 0);
 }
 
-function lookupSubs(data: AmbMonthly[], key: string): number | null {
-  const entry = data.find(d => d.key === key);
-  return entry ? entry.subs : null;
+function ambPeakDay(data: DailyAmbSub[]): DailyAmbSub {
+  return data.reduce((best, d) => d.n > best.n ? d : best, data[0]);
+}
+
+function ambDateLabel(iso: string): string {
+  const dt = new Date(iso + 'T12:00:00');
+  return `${dt.getMonth() + 1}/${dt.getDate()}/${String(dt.getFullYear()).slice(2)}`;
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
@@ -563,125 +545,113 @@ export default function AmbassadorGrowth() {
 
   const concMax = 9;
 
-  /* ── Top Producer History chart data ── */
-  const topProducerTimeline = buildTimeline([KENDRA_MONTHLY, LAUREN_MONTHLY, SHANNON_MONTHLY]);
-  const topProducerLabels = topProducerTimeline.map(k => {
-    const [yr, mo] = k.split('-');
-    return `${MONTH_LABELS_SHORT[parseInt(mo, 10)]} '${yr.slice(2)}`;
+  /* ── Top Producer daily chart helpers ── */
+  const ambBarChartOpts = (title: string) => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      title: { display: true, text: title, font: { size: 14, weight: 'bold' as const }, color: TP.navy },
+      tooltip: {
+        callbacks: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          label: (ctx: any) => `${ctx.parsed.y.toLocaleString()} submissions`,
+        },
+      },
+    },
+    scales: {
+      x: { ticks: { maxRotation: 60, font: { size: 7 }, autoSkip: true, maxTicksLimit: 50 } },
+      y: { beginAtZero: true, title: { display: true, text: 'Submissions', font: { size: 10 } } },
+    },
   });
-
-  const kendraTotals = KENDRA_MONTHLY.reduce((s, d) => s + d.subs, 0);
-  const laurenTotals = LAUREN_MONTHLY.reduce((s, d) => s + d.subs, 0);
-  const shannonTotals = SHANNON_MONTHLY.reduce((s, d) => s + d.subs, 0);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
 
-      {/* ════════ SECTION 1: Top Producer Monthly History ════════ */}
+      {/* ════════ SECTION 1: Top Producer Daily History ════════ */}
       <div>
         <h3 style={sectionHeader}>Top Producer Submission History</h3>
-        <p style={sectionSub}>Month-over-month submissions for the three highest-volume ambassadors. Data from Salesforce.</p>
+        <p style={sectionSub}>Daily submissions for the three highest-volume ambassadors. Data from Salesforce.</p>
 
-        {/* Summary cards */}
-        <div style={{ ...gridRow(3), marginBottom: '1.5rem' }}>
-          <div style={statCard(TP.teal)}>
-            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#666' }}>Lauren Johnson (NNM)</div>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: TP.navy }}>{laurenTotals.toLocaleString()}</div>
-            <div style={{ fontSize: '0.7rem', color: '#888' }}>lifetime submissions</div>
+        {/* Lauren Johnson */}
+        <div style={{ ...chartWrap, marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <div>
+              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy }}>Lauren Johnson (NNM)</span>
+              <span style={{ fontSize: '0.75rem', color: '#888', marginLeft: 12 }}>
+                {ambTotal(LAUREN_DAILY).toLocaleString()} lifetime · Peak: {ambPeakDay(LAUREN_DAILY).n} on {ambDateLabel(ambPeakDay(LAUREN_DAILY).d)}
+              </span>
+            </div>
           </div>
-          <div style={statCard(TP.gold)}>
-            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#666' }}>Kendra Needham</div>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: TP.navy }}>{kendraTotals.toLocaleString()}</div>
-            <div style={{ fontSize: '0.7rem', color: '#888' }}>lifetime submissions</div>
-          </div>
-          <div style={statCard(TP.purple)}>
-            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#666' }}>Shannon Tripp</div>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: TP.navy }}>{shannonTotals.toLocaleString()}</div>
-            <div style={{ fontSize: '0.7rem', color: '#888' }}>lifetime submissions</div>
-          </div>
-        </div>
-
-        {/* Line chart */}
-        <div style={chartWrap}>
-          <div style={{ height: 380 }}>
-            <Line
+          <div style={{ height: 280 }}>
+            <Bar
               data={{
-                labels: topProducerLabels,
-                datasets: [
-                  {
-                    label: 'Lauren Johnson (NNM)',
-                    data: topProducerTimeline.map(k => lookupSubs(LAUREN_MONTHLY, k)),
-                    borderColor: TP.teal,
-                    backgroundColor: TP.teal + '20',
-                    borderWidth: 2.5,
-                    pointRadius: 3,
-                    pointBackgroundColor: TP.teal,
-                    tension: 0.3,
-                    spanGaps: true,
-                  },
-                  {
-                    label: 'Kendra Needham',
-                    data: topProducerTimeline.map(k => lookupSubs(KENDRA_MONTHLY, k)),
-                    borderColor: TP.gold,
-                    backgroundColor: TP.gold + '20',
-                    borderWidth: 2.5,
-                    pointRadius: 3,
-                    pointBackgroundColor: TP.gold,
-                    tension: 0.3,
-                    spanGaps: true,
-                  },
-                  {
-                    label: 'Shannon Tripp',
-                    data: topProducerTimeline.map(k => lookupSubs(SHANNON_MONTHLY, k)),
-                    borderColor: TP.purple,
-                    backgroundColor: TP.purple + '20',
-                    borderWidth: 2.5,
-                    pointRadius: 3,
-                    pointBackgroundColor: TP.purple,
-                    tension: 0.3,
-                    spanGaps: true,
-                  },
-                ],
+                labels: LAUREN_DAILY.map(d => ambDateLabel(d.d)),
+                datasets: [{
+                  data: LAUREN_DAILY.map(d => d.n),
+                  backgroundColor: TP.teal + '90',
+                  borderColor: TP.teal,
+                  borderWidth: 0.5,
+                  borderRadius: 1,
+                }],
               }}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'index' as const, intersect: false },
-                plugins: {
-                  legend: { position: 'top' as const, labels: { usePointStyle: true, padding: 16 } },
-                  tooltip: {
-                    mode: 'index' as const,
-                    intersect: false,
-                    callbacks: {
-                      label: (ctx: any) => {
-                        if (ctx.parsed.y == null) return '';
-                        return `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`;
-                      },
-                    },
-                  },
-                },
-                scales: {
-                  x: { ticks: { maxRotation: 45, font: { size: 10 } } },
-                  y: { beginAtZero: true, title: { display: true, text: 'Submissions', font: { size: 11 } } },
-                },
-              }}
+              options={ambBarChartOpts('Lauren Johnson (NNM)')}
             />
           </div>
         </div>
 
-        {/* Insight callout */}
-        <div style={{
-          background: '#f0f7f4',
-          borderRadius: 10,
-          padding: '0.875rem 1.125rem',
-          marginTop: '1rem',
-          fontSize: '0.88rem',
-          lineHeight: 1.6,
-        }}>
-          <strong style={{ color: TP.navy }}>What the data shows:</strong>{' '}
-          Lauren&apos;s viral March 2024 spike (1,188 subs) and Shannon&apos;s July 2025 spike (470) were one-time events that inflated yearly totals.
-          Outside those spikes, all three have settled into a steady 20–60 submissions/month range in 2026.
-          This is why the base program growth (excluding these mega-influencers) is the more reliable indicator of program health.
+        {/* Kendra Needham */}
+        <div style={{ ...chartWrap, marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <div>
+              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy }}>Kendra Needham</span>
+              <span style={{ fontSize: '0.75rem', color: '#888', marginLeft: 12 }}>
+                {ambTotal(KENDRA_DAILY).toLocaleString()} lifetime · Peak: {ambPeakDay(KENDRA_DAILY).n} on {ambDateLabel(ambPeakDay(KENDRA_DAILY).d)}
+              </span>
+            </div>
+          </div>
+          <div style={{ height: 280 }}>
+            <Bar
+              data={{
+                labels: KENDRA_DAILY.map(d => ambDateLabel(d.d)),
+                datasets: [{
+                  data: KENDRA_DAILY.map(d => d.n),
+                  backgroundColor: TP.gold + '90',
+                  borderColor: TP.gold,
+                  borderWidth: 0.5,
+                  borderRadius: 1,
+                }],
+              }}
+              options={ambBarChartOpts('Kendra Needham')}
+            />
+          </div>
+        </div>
+
+        {/* Shannon Tripp */}
+        <div style={{ ...chartWrap, marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <div>
+              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy }}>Shannon Tripp</span>
+              <span style={{ fontSize: '0.75rem', color: '#888', marginLeft: 12 }}>
+                {ambTotal(SHANNON_DAILY).toLocaleString()} lifetime · Peak: {ambPeakDay(SHANNON_DAILY).n} on {ambDateLabel(ambPeakDay(SHANNON_DAILY).d)}
+              </span>
+            </div>
+          </div>
+          <div style={{ height: 280 }}>
+            <Bar
+              data={{
+                labels: SHANNON_DAILY.map(d => ambDateLabel(d.d)),
+                datasets: [{
+                  data: SHANNON_DAILY.map(d => d.n),
+                  backgroundColor: TP.purple + '90',
+                  borderColor: TP.purple,
+                  borderWidth: 0.5,
+                  borderRadius: 1,
+                }],
+              }}
+              options={ambBarChartOpts('Shannon Tripp')}
+            />
+          </div>
         </div>
       </div>
 
