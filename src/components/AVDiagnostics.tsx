@@ -191,19 +191,19 @@ export default function AVDiagnostics() {
             {arrow(true)} from {preCohort.sameDay}% pre-update
           </div>
           <div style={{ fontSize: 11, color: '#166534', marginTop: 2 }}>
-            +{(postCohort.sameDay - preCohort.sameDay).toFixed(1)}pp improvement
+            Of patients who complete, {postCohort.sameDay}% finish same day
           </div>
         </div>
 
-        {/* 7-day completion */}
+        {/* Next-day completion (among completers) */}
         <div style={card('#F0FDF4', '#BBF7D0')}>
-          <div style={{ ...cardLabel, color: '#166534' }}>Within 7 days</div>
-          <div style={{ ...cardNum, color: '#166534' }}>{postCohort.within7d}%</div>
+          <div style={{ ...cardLabel, color: '#166534' }}>Within 1 day</div>
+          <div style={{ ...cardNum, color: '#166534' }}>{postCohort.within1d}%</div>
           <div style={{ ...cardSub, color: '#15803D' }}>
-            {arrow(true)} from {preCohort.within7d}% pre-update
+            {arrow(true)} from {preCohort.within1d}% pre-update
           </div>
           <div style={{ fontSize: 11, color: '#166534', marginTop: 2 }}>
-            {postCohort.n} of {postCohort.n} submitted within a week
+            Of patients who complete, {postCohort.within1d}% finish within a day
           </div>
         </div>
 
@@ -236,7 +236,7 @@ export default function AVDiagnostics() {
       <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 24 }}>
         <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>Completion speed by weekly cohort</h3>
         <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px' }}>
-          Among people who completed, how fast did they finish? Post-update (green) is the fastest cohort this year.
+          Of the patients who completed their assessment, how fast did they finish? Post-update (green) is the fastest cohort this year.
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
@@ -290,7 +290,8 @@ export default function AVDiagnostics() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
         {/* Pre-update */}
         <div style={{ background: '#FFF5F5', borderRadius: 12, padding: 20, border: '1.5px solid #FECACA' }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#991B1B', textTransform: 'uppercase', marginBottom: 12 }}>Before update (May 15–21)</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#991B1B', textTransform: 'uppercase', marginBottom: 4 }}>Before update (May 15–21)</div>
+          <div style={{ fontSize: 11, color: '#9B1C1C', marginBottom: 10 }}>Speed among patients who completed</div>
           <div style={{ display: 'grid', gap: 10 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span style={{ color: '#6B7280' }}>Same-day completion</span>
@@ -321,7 +322,8 @@ export default function AVDiagnostics() {
 
         {/* Post-update */}
         <div style={{ background: '#F0FDF4', borderRadius: 12, padding: 20, border: '1.5px solid #BBF7D0' }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#166534', textTransform: 'uppercase', marginBottom: 12 }}>After update (May 23–29)</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#166534', textTransform: 'uppercase', marginBottom: 4 }}>After update (May 23–29)</div>
+          <div style={{ fontSize: 11, color: '#15803D', marginBottom: 10 }}>Speed among patients who completed</div>
           <div style={{ display: 'grid', gap: 10 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span style={{ color: '#6B7280' }}>Same-day completion</span>
