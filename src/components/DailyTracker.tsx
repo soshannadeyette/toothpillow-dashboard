@@ -505,10 +505,6 @@ export default function DailyTracker() {
           ? Math.round(daysWithTraffic.reduce((s, e) => s + e.visitors, 0) / daysWithTraffic.length)
           : 0;
         const projectedVisitors = avgVisitors * daysInMonth;
-        const dailyConvRates = entries.map(e => {
-          if (e.visitors <= 0) return 0;
-          return parseFloat(((e.online / e.visitors) * 100).toFixed(2));
-        });
         const avgConvRate = daysWithTraffic.length > 0
           ? (daysWithTraffic.reduce((s, e) => {
               return s + (e.visitors > 0 ? (e.online / e.visitors) * 100 : 0);
@@ -546,7 +542,7 @@ export default function DailyTracker() {
 
             {/* Traffic + Conversion chart */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-sm font-bold text-gray-700 mb-3">Daily Website Traffic & Conversion Rate</h3>
+              <h3 className="text-sm font-bold text-gray-700 mb-3">Daily Website Traffic & Submissions</h3>
               <div style={{ height: 340 }}>
                 <Bar
                   data={{
@@ -577,20 +573,6 @@ export default function DailyTracker() {
                         order: 1,
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       } as any,
-                      {
-                        label: 'Conversion %',
-                        data: dailyConvRates,
-                        type: 'line',
-                        borderColor: TP.green,
-                        backgroundColor: 'transparent',
-                        pointRadius: 3,
-                        pointBackgroundColor: TP.green,
-                        borderWidth: 2.5,
-                        tension: 0.3,
-                        yAxisID: 'y1',
-                        order: 1,
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      } as any,
                     ],
                   }}
                   options={{
@@ -601,7 +583,6 @@ export default function DailyTracker() {
                       tooltip: {
                         callbacks: {
                           label: (ctx: { datasetIndex: number; parsed: { y: number }; dataset: { label?: string } }) => {
-                            if (ctx.datasetIndex === 2) return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}%`;
                             return `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`;
                           },
                         },
@@ -610,7 +591,6 @@ export default function DailyTracker() {
                     scales: {
                       y: { beginAtZero: true, position: 'left' as const, title: { display: true, text: 'Visitors', font: { size: 11 } }, grid: { color: '#f0f0f0' } },
                       y2: { beginAtZero: true, position: 'right' as const, title: { display: true, text: 'Submissions', font: { size: 11, weight: 'bold' as const }, color: TP.blue }, ticks: { color: TP.blue, font: { size: 10 } }, grid: { display: false } },
-                      y1: { beginAtZero: true, position: 'right' as const, title: { display: true, text: 'Conv %', font: { size: 11 }, color: TP.green }, ticks: { callback: (v: number | string) => `${v}%`, color: TP.green, font: { size: 10 } }, grid: { display: false } },
                       x: { grid: { display: false } },
                     },
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -618,7 +598,7 @@ export default function DailyTracker() {
                 />
               </div>
               <div className="text-xs text-gray-400 mt-2">
-                Visitors from GA4. Conversion rate = online submissions / visitors. Hybrid and prime come through separate channels and are excluded. Days without visitor data are excluded from averages.
+                Visitors from GA4. Hybrid and prime come through separate channels and are excluded. Days without visitor data are excluded from averages.
               </div>
             </div>
           </>
