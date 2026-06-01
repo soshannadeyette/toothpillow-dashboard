@@ -111,78 +111,76 @@ export default function AnnualView() {
   async function loadData() {
     setLoading(true);
     try {
-      const [monthlySummaries, r2025, allDailyEntries] = await Promise.all([
+      const [r2026, r2025, dailyEntries] = await Promise.all([
         fetchAnnualSummaries(2026),
         fetchAnnualSummaries(2025),
-        fetchSubmissions(thisYear),           // ALL months for 2026
+        fetchSubmissions(thisYear, thisMonth),  // current month daily entries only
       ]);
 
-      // Group daily entries by month
-      const dailyByMonth = new Map<number, DailySubmission[]>();
-      for (const entry of (allDailyEntries || [])) {
-        const m = new Date(entry.date + 'T12:00:00').getMonth() + 1;
-        if (!dailyByMonth.has(m)) dailyByMonth.set(m, []);
-        dailyByMonth.get(m)!.push(entry);
-      }
+      // Start with monthly_summary from DB (finalized month-end numbers)
+      let merged = (r2026 || []).slice();
 
-      // Monthly summaries from DB — used as fallback for visitor data only
-      const dbSummaryByMonth = new Map<number, MonthlySummary>();
-      for (const ms of (monthlySummaries || [])) {
-        dbSummaryByMonth.set(ms.month, ms);
-      }
+      // Override CURRENT month with live daily tracker data
+      if (dailyEntries && dailyEntries.length > 0) {
+        const totalOnline = dailyEntries.reduce((s: number, e: DailySubmission) => s + (e.online || 0), 0);
+        const totalHybrid = dailyEntries.reduce((s: number, e: DailySubmission) => s + (e.hybrid || 0), 0);
+        const totalPrime = dailyEntries.reduce((s: number, e: DailySubmission) => s + (e.prime || 0), 0);
+        const totalSubs = totalOnline + totalHybrid + totalPrime;
+        const totalVisitors = dailyEntries.reduce((s: number, e: DailySubmission) => s + (e.visitors || 0), 0);
+        const goalObj = (MONTHLY_GOALS_2026 as { month: number; total: number }[]).find(g => g.month === thisMonth);
+        const hasMonth = merged.some(m => m.month === thisMonth && m.year === thisYear);
 
-      // Build all monthly summaries from daily tracker entries (single source of truth)
-      const merged: MonthlySummary[] = [];
+        const liveSummary: MonthlySummary = {
+          year: thisYear,
+          month: thisMonth,
+          month_name: MN[thisMonth] || '',
+          goal: goalObj?.total || 0,
+          total_submissions: totalSubs,
+          online_submissions: totalOnline,
+          hybrid_submissions: totalHybrid,
+          prime_submissions: totalPrime,
+          total_income: 0,
+          total_visitors: totalVisitors,
+          usa_visitors: 0,
+          conversion_rate: totalVisitors > 0 ? parseFloat(((totalOnline / totalVisitors) * 100).toFixed(2)) : 0,
+          usa_conversion_rate: 0,
+          days_tracked: dailyEntries.length,
+          daily_avg: dailyEntries.length > 0 ? parseFloat((totalSubs / dailyEntries.length).toFixed(1)) : 0,
+        };
 
-      for (let month = 1; month <= 12; month++) {
-        const entries = dailyByMonth.get(month);
-        const dbRow = dbSummaryByMonth.get(month);
-        const goalObj = (MONTHLY_GOALS_2026 as { month: number; total: number }[]).find(g => g.month === month);
-
-        if (entries && entries.length > 0) {
-          // Compute from daily tracker entries
-          const totalOnline = entries.reduce((s, e) => s + (e.online || 0), 0);
-          const totalHybrid = entries.reduce((s, e) => s + (e.hybrid || 0), 0);
-          const totalPrime = entries.reduce((s, e) => s + (e.prime || 0), 0);
-          const totalSubs = totalOnline + totalHybrid + totalPrime;
-          const dailyVisitors = entries.reduce((s, e) => s + (e.visitors || 0), 0);
-
-          // Visitor data priority: DB monthly_summary > daily tracker sum > hardcoded TRAFFIC
-          const vis = dbRow?.total_visitors || dailyVisitors || TRAFFIC_2026[month] || 0;
-          const usaVis = dbRow?.usa_visitors || TRAFFIC_USA_2026[month] || 0;
-
-          merged.push({
-            year: thisYear,
-            month,
-            month_name: MN[month] || '',
-            goal: goalObj?.total || 0,
-            total_submissions: totalSubs,
-            online_submissions: totalOnline,
-            hybrid_submissions: totalHybrid,
-            prime_submissions: totalPrime,
-            total_income: 0,
-            total_visitors: vis,
-            usa_visitors: usaVis,
-            conversion_rate: vis > 0 ? parseFloat(((totalOnline / vis) * 100).toFixed(2)) : 0,
-            usa_conversion_rate: usaVis > 0 ? parseFloat(((totalOnline / usaVis) * 100).toFixed(2)) : 0,
-            days_tracked: entries.length,
-            daily_avg: parseFloat((totalSubs / entries.length).toFixed(1)),
+        if (hasMonth) {
+          merged = merged.map(m => {
+            if (m.month === thisMonth && m.year === thisYear) {
+              const vis = m.total_visitors || liveSummary.total_visitors;
+              const usaVis = m.usa_visitors || liveSummary.usa_visitors;
+              return {
+                ...liveSummary,
+                total_visitors: vis,
+                usa_visitors: usaVis,
+                conversion_rate: vis > 0 ? parseFloat(((totalOnline / vis) * 100).toFixed(2)) : 0,
+                usa_conversion_rate: usaVis > 0 ? parseFloat(((totalOnline / usaVis) * 100).toFixed(2)) : 0,
+              };
+            }
+            return m;
           });
-        } else if (dbRow) {
-          // No daily entries for this month — fall back to DB monthly_summary
-          const vis = dbRow.total_visitors || TRAFFIC_2026[month] || 0;
-          const usaVis = dbRow.usa_visitors || TRAFFIC_USA_2026[month] || 0;
-          const onlineSubs = dbRow.online_submissions || 0;
-          merged.push({
-            ...dbRow,
-            total_visitors: vis,
-            usa_visitors: usaVis,
-            conversion_rate: vis > 0 ? parseFloat(((onlineSubs / vis) * 100).toFixed(2)) : 0,
-            usa_conversion_rate: usaVis > 0 ? parseFloat(((onlineSubs / usaVis) * 100).toFixed(2)) : 0,
-          });
+        } else {
+          merged.push(liveSummary);
         }
-        // else: no data at all for this month — skip
       }
+
+      // Inject GA4 visitor data — DB takes priority, then hardcoded fallback
+      merged = merged.map(m => {
+        const onlineSubs = m.online_submissions || 0;
+        const vis = m.total_visitors || TRAFFIC_2026[m.month] || 0;
+        const usaVis = m.usa_visitors || TRAFFIC_USA_2026[m.month] || 0;
+        return {
+          ...m,
+          total_visitors: vis,
+          usa_visitors: usaVis,
+          conversion_rate: vis > 0 ? parseFloat(((onlineSubs / vis) * 100).toFixed(2)) : 0,
+          usa_conversion_rate: usaVis > 0 ? parseFloat(((onlineSubs / usaVis) * 100).toFixed(2)) : 0,
+        };
+      });
 
       setData2026(merged);
       setData2025(r2025 || []);
