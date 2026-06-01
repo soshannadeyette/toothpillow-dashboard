@@ -160,7 +160,7 @@ const moversData: Record<string, {y25:number; y26:number; type:string}> = {
 // Sorted by bonusSubs descending. Katelyn Alsop has a separate Jan 19 window.
 const launchBonusData = [
   {name:'Shannon Tripp',onboard:'06/27/2025',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:50,tier:2,earned:1250},
-  {name:'Soshanna Salsman',onboard:'04/30/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:53,tier:2,earned:1250},
+  {name:'Soshanna Salsman',onboard:'04/30/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:53,tier:2,earned:1250,omit:true},
   {name:'Lauren Johnson NNM',onboard:'05/01/2024',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:43,tier:1,earned:250},
   {name:'Katelyn Alsop (James)',onboard:'01/19/2026',is2026:true,winStart:'01/19/2026',winEnd:'01/19/2027',bonusSubs:40,tier:1,earned:250},
   {name:'Kendra Needham',onboard:'11/01/2023',is2026:false,winStart:'04/01/2026',winEnd:'04/01/2027',bonusSubs:36,tier:1,earned:250},
@@ -1260,7 +1260,7 @@ export default function AmbassadorGrowth() {
                     : `${25 - row.bonusSubs} to $250`;
                 return (
                   <tr key={row.name} style={{ background: i % 2 === 0 ? '#fff' : '#f9fafb', borderBottom: '1px solid #f0f0f0' }}>
-                    <td style={{ padding: '10px 12px', fontWeight: 600, color: row.is2026 ? TP.purple : TP.navy, fontSize: '0.82rem' }}>
+                    <td style={{ padding: '10px 12px', fontWeight: 600, color: 'omit' in row && row.omit ? '#999' : row.is2026 ? TP.purple : TP.navy, fontSize: '0.82rem', textDecoration: 'omit' in row && row.omit ? 'line-through' : 'none', textDecorationColor: '#E24B4A' }}>
                       {row.name}
                       {row.is2026 && (
                         <span style={{ fontSize: '0.6rem', background: '#f3e8f1', color: TP.purple, padding: '1px 6px', borderRadius: 4, marginLeft: 4 }}>2026</span>
@@ -1288,7 +1288,7 @@ export default function AmbassadorGrowth() {
                         : <span style={{ color: '#ccc' }}>$0</span>
                       }
                     </td>
-                    <td style={{ textAlign: 'right', padding: '10px 12px', fontSize: '0.78rem', color: TP.navy }}>{nextTier}</td>
+                    <td style={{ textAlign: 'right', padding: '10px 12px', fontSize: '0.78rem', color: 'omit' in row && row.omit ? '#E24B4A' : TP.navy, fontWeight: 'omit' in row && row.omit ? 700 : 400 }}>{'omit' in row && row.omit ? 'OMIT' : nextTier}</td>
                   </tr>
                 );
               })}
