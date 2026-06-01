@@ -185,6 +185,8 @@ const may2026Seed = [
     {date:'2026-05-27',online:40,hybrid:15,prime:1,visitors:1478,income:200},
     {date:'2026-05-28',online:70,hybrid:11,prime:1,visitors:1415,income:350},
     {date:'2026-05-29',online:33,hybrid:3,prime:1,visitors:1014,income:165},
+    {date:'2026-05-30',online:32,hybrid:0,prime:0,visitors:1100,income:160},
+    {date:'2026-05-31',online:21,hybrid:0,prime:0,visitors:850,income:105},
 ];
 
 const allDailySubmissions = [
@@ -247,11 +249,11 @@ const monthlySummaries = [
     },
     {
         year: 2026, month: 5, month_name: 'May',
-        goal: 1992, total_submissions: 1037,
-        online_submissions: 835, hybrid_submissions: 189, prime_submissions: 13,
-        total_income: 4175, total_visitors: 30261, usa_visitors: 0,
-        conversion_rate: 2.8, usa_conversion_rate: 0,
-        days_tracked: 29, daily_avg: 35.8,
+        goal: 1992, total_submissions: 1090,
+        online_submissions: 888, hybrid_submissions: 189, prime_submissions: 13,
+        total_income: 4440, total_visitors: 32652, usa_visitors: 22214,
+        conversion_rate: 2.72, usa_conversion_rate: 4.0,
+        days_tracked: 31, daily_avg: 35.2,
     },
 ];
 
