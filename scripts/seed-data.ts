@@ -184,9 +184,9 @@ const may2026Seed = [
     {date:'2026-05-26',online:40,hybrid:22,prime:0,visitors:1378,income:200},
     {date:'2026-05-27',online:40,hybrid:15,prime:1,visitors:1478,income:200},
     {date:'2026-05-28',online:70,hybrid:11,prime:1,visitors:1415,income:350},
-    {date:'2026-05-29',online:33,hybrid:3,prime:1,visitors:1014,income:165},
-    {date:'2026-05-30',online:32,hybrid:0,prime:0,visitors:1100,income:160},
-    {date:'2026-05-31',online:21,hybrid:0,prime:0,visitors:850,income:105},
+    {date:'2026-05-29',online:68,hybrid:3,prime:1,visitors:1014,income:340},
+    {date:'2026-05-30',online:38,hybrid:0,prime:0,visitors:1100,income:190},
+    {date:'2026-05-31',online:26,hybrid:0,prime:0,visitors:850,income:130},
 ];
 
 const allDailySubmissions = [
@@ -249,11 +249,11 @@ const monthlySummaries = [
     },
     {
         year: 2026, month: 5, month_name: 'May',
-        goal: 1992, total_submissions: 1090,
-        online_submissions: 888, hybrid_submissions: 189, prime_submissions: 13,
-        total_income: 4440, total_visitors: 32652, usa_visitors: 22214,
-        conversion_rate: 2.72, usa_conversion_rate: 4.0,
-        days_tracked: 31, daily_avg: 35.2,
+        goal: 1992, total_submissions: 1136,
+        online_submissions: 934, hybrid_submissions: 189, prime_submissions: 13,
+        total_income: 4670, total_visitors: 32652, usa_visitors: 22214,
+        conversion_rate: 2.86, usa_conversion_rate: 4.21,
+        days_tracked: 31, daily_avg: 36.6,
     },
 ];
 
