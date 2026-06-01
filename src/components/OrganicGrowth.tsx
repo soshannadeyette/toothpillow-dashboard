@@ -45,11 +45,11 @@ const SUBMISSIONS_BY_MONTH: Record<string, number> = {
   '2025-10': 975 + 526 + 7,     // 1,508
   '2025-11': 1135 + 460 + 13,   // 1,608
   '2025-12': 776 + 452 + 25,    // 1,253
-  '2026-01': 938 + 343 + 0,     // 1,281 (actual from daily tracker)
-  '2026-02': 1207 + 293 + 18,   // 1,518 (actual from daily tracker)
-  '2026-03': 1293 + 299 + 21,   // 1,613 (actual from daily tracker)
-  '2026-04': 969 + 250 + 11,    // 1,230 (actual from daily tracker)
-  '2026-05': 835 + 189 + 13,     // 1,037 (actual from 5/29 Salesforce export)
+  '2026-01': 1056 + 345 + 20,   // 1,421 (Salesforce month-end)
+  '2026-02': 1206 + 294 + 18,   // 1,518 (Salesforce month-end)
+  '2026-03': 1288 + 299 + 21,   // 1,608 (Salesforce month-end)
+  '2026-04': 969 + 250 + 11,    // 1,230 (Salesforce month-end)
+  '2026-05': 934 + 189 + 13,     // 1,136 (actual from 6/1 Salesforce export)
 };
 
 const GSC_MONTHLY = [
