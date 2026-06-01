@@ -14,108 +14,169 @@ import {
   Filler,
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
-import { fetchSubmissions, currentMonth as getCentralMonth } from '@/lib/api';
+import { fetchSubmissions } from '@/lib/api';
 import type { DailySubmission } from '@/lib/types';
-import { MONTHLY_GOALS_2026, MONTH_NAMES } from '@/lib/types';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler);
 
-// ---- 2025 historical data ----
-const HIST_2025: Record<number, { total: number; days: number; avg: number }> = {
-  1: { total: 1434, days: 31, avg: 46.3 },
-  2: { total: 1560, days: 28, avg: 55.7 },
-  3: { total: 1513, days: 31, avg: 48.8 },
-  4: { total: 1665, days: 30, avg: 55.5 },
-  5: { total: 1360, days: 31, avg: 43.9 },
-  6: { total: 1098, days: 30, avg: 36.6 },
-  7: { total: 2690, days: 31, avg: 86.8 },
-  8: { total: 2542, days: 31, avg: 82.0 },
-  9: { total: 1601, days: 30, avg: 53.4 },
-  10: { total: 1508, days: 31, avg: 48.6 },
-  11: { total: 1609, days: 30, avg: 53.6 },
-  12: { total: 1253, days: 31, avg: 40.4 },
+// ---- Toothpillow palette (matches AnnualView.tsx) ----
+const TP = {
+  blue: '#3A6EA4',
+  skyBlue: '#B6CAE3',
+  lightBlue: '#D6E5F7',
+  cream: '#FEF8EE',
+  green: '#8CD1C8',
+  yellow: '#FDBE67',
+  peach: '#FBCCC5',
+  red: '#DD5759',
+  darkPurple: '#B26CA6',
+  lightPurple: '#DDBBD9',
+  bubblegum: '#F6AACB',
+  maroon: '#D46476',
+  text: '#333333',
+  navy: '#1B2A4A',
 };
 
-const DAILY_2025: number[][] = [
-  [49,64,68,27,39,58,42,50,39,38,27,41,46,41,62,49,51,37,24,64,41,58,56,34,26,25,52,60,65,51,50],
-  [36,32,71,69,55,77,49,33,49,51,52,66,33,40,54,63,108,64,57,60,49,40,57,81,59,67,49,39],
-  [43,45,48,81,62,47,51,42,35,60,46,52,79,57,50,38,82,44,62,34,54,42,35,52,54,51,46,35,19,19,48],
-  [49,54,94,81,40,47,69,70,74,56,51,24,27,69,66,70,52,51,16,17,56,62,100,77,41,25,29,48,54,96],
-  [64,43,21,30,63,44,64,47,36,26,23,78,47,59,44,38,31,40,53,62,39,52,26,27,27,44,66,45,47,46,28],
-  [30,45,49,54,52,26,10,40,48,30,49,50,34,17,15,46,49,65,55,21,21,24,52,30,41,32,26,21,22,44],
-  [162,218,72,31,36,34,73,66,47,55,39,20,25,46,51,63,80,40,26,30,63,69,70,49,242,126,103,247,182,178,147],
-  [105,77,64,141,113,119,112,84,59,68,112,93,107,93,61,62,67,77,117,96,89,71,28,41,65,91,77,114,70,37,32],
-  [36,58,69,107,57,29,44,69,92,56,56,41,19,28,77,57,53,63,44,24,16,55,61,66,63,67,23,37,57,77],
-  [65,65,61,13,26,62,59,47,56,31,17,25,56,56,57,62,34,17,41,62,72,84,59,49,27,30,64,68,53,58,32],
-  [22,35,57,58,75,70,65,82,55,92,91,96,74,50,24,31,68,63,67,53,42,27,28,59,53,59,17,33,18,45],
-  [52,65,61,40,39,22,27,54,56,62,73,35,21,22,32,43,67,58,35,15,11,45,48,14,9,20,14,24,49,93,47],
-];
-
-// ---- OKR data ----
-const OKR_OBJECTIVES = [
-  {
-    title: 'O1: Strengthen Ambassador Activation',
-    color: '#3A6EA4',
-    keyResult: '% of ambassadors who have ever had a submission',
-    baseline: '64% (251 of 428)',
-    target: '75% by end of Q2',
-    activities: 'Launch ambassador course in Circle.so, ambassador dashboard live (waiting on dev), build and roll out ambassador onboarding program, promote Launch Incentive program, develop ambassador e-book, develop downline builder program for top ambassadors, ambassador text outreach',
-  },
-  {
-    title: 'O2: Execute Paid Media & Partnerships',
-    color: '#B26CA6',
-    keyResult: 'Contracted Q2 placements completed on schedule',
-    baseline: '~50% complete (Alex Clark, Daily Wire, Discover Ag in flight)',
-    target: '100% executed by end of Q2; 2 new Q3/Q4 placements signed',
-    activities: 'Alex Clark / Culture Apothecary (newsletter #3 4/17, ad reads, filming 5/13, founder episode 6/1), Daily Wire / Michael Knowles (ad read 4/27), Discover Ag (ad reads 4/23 + 4/30), research and secure 2-3 new podcast/ad read placements for Q3+Q4, optimize Google Ads',
-  },
-  {
-    title: 'O3: Improve Online Conversion Rate',
-    color: '#8CD1C8',
-    keyResult: 'Online assessment conversion rate',
-    baseline: '3.5% (March 2026)',
-    target: '4.0% by end of June 2026',
-    activities: 'FAQ page, Plans & Pricing page, adult landing page, research page, script and produce eWebinar, on-page SEO (title tags, meta descriptions, structural)',
-  },
-];
-
-// ---- Helper functions ----
-interface WeekBucket {
-  label: string;
-  startDate: string;
-  endDate: string;
+// ---- Types ----
+interface WeekData {
+  weekStart: string; // YYYY-MM-DD (Sunday)
+  weekEnd: string;   // YYYY-MM-DD (Saturday)
+  label: string;     // e.g. "Jan 4 - Jan 10"
   entries: DailySubmission[];
   online: number;
   hybrid: number;
   prime: number;
   total: number;
-  visitors: number;
+  days: number;
+  dailyAvg: number;
+  complete: boolean; // true if 7 days of data
 }
 
-function getMonday(d: Date): Date {
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  return new Date(d.getFullYear(), d.getMonth(), diff);
+// ---- Helpers ----
+const MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const DOW_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function parseDate(s: string): Date {
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
 }
 
-function formatShort(dateStr: string): string {
-  const d = new Date(dateStr + 'T12:00:00');
-  return `${d.getMonth() + 1}/${d.getDate()}`;
+function formatLabel(dateStr: string): string {
+  const d = parseDate(dateStr);
+  return `${MONTH_ABBR[d.getMonth()]} ${d.getDate()}`;
 }
 
-function rollingAvg(data: number[], window: number): (number | null)[] {
-  return data.map((_, i) => {
-    if (i < window - 1) return null;
+function formatRange(start: string, end: string): string {
+  return `${formatLabel(start)} - ${formatLabel(end)}`;
+}
+
+function addDays(dateStr: string, n: number): string {
+  const d = parseDate(dateStr);
+  d.setDate(d.getDate() + n);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function getSunday(dateStr: string): string {
+  const d = parseDate(dateStr);
+  const day = d.getDay(); // 0=Sun
+  d.setDate(d.getDate() - day);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function computeWeeks(entries: DailySubmission[]): WeekData[] {
+  if (entries.length === 0) return [];
+
+  // Build a map of date -> entry
+  const byDate: Record<string, DailySubmission> = {};
+  for (const e of entries) {
+    byDate[e.date] = e;
+  }
+
+  // Determine the range of Sundays
+  const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
+  const firstSunday = getSunday(sorted[0].date);
+  const lastDate = sorted[sorted.length - 1].date;
+  const lastSunday = getSunday(lastDate);
+
+  const weeks: WeekData[] = [];
+  let current = firstSunday;
+
+  while (current <= lastSunday) {
+    const saturday = addDays(current, 6);
+    const weekEntries: DailySubmission[] = [];
+    for (let i = 0; i < 7; i++) {
+      const day = addDays(current, i);
+      if (byDate[day]) {
+        weekEntries.push(byDate[day]);
+      }
+    }
+
+    const online = weekEntries.reduce((s, e) => s + e.online, 0);
+    const hybrid = weekEntries.reduce((s, e) => s + e.hybrid, 0);
+    const prime = weekEntries.reduce((s, e) => s + e.prime, 0);
+    const total = online + hybrid + prime;
+    const days = weekEntries.length;
+
+    weeks.push({
+      weekStart: current,
+      weekEnd: saturday,
+      label: formatRange(current, saturday),
+      entries: weekEntries,
+      online,
+      hybrid,
+      prime,
+      total,
+      days,
+      dailyAvg: days > 0 ? Math.round((total / days) * 10) / 10 : 0,
+      complete: days === 7,
+    });
+
+    current = addDays(current, 7);
+  }
+
+  return weeks;
+}
+
+function computeRolling7(entries: DailySubmission[]): { date: string; total: number; roll: number | null }[] {
+  const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
+  return sorted.map((e, i) => {
+    const total = (e.total ?? e.online + e.hybrid + e.prime);
+    if (i < 6) return { date: e.date, total, roll: null };
     let sum = 0;
-    for (let j = i - window + 1; j <= i; j++) sum += data[j];
-    return Math.round((sum / window) * 10) / 10;
+    for (let j = i - 6; j <= i; j++) {
+      const ej = sorted[j];
+      sum += (ej.total ?? ej.online + ej.hybrid + ej.prime);
+    }
+    return { date: e.date, total, roll: Math.round((sum / 7) * 10) / 10 };
   });
 }
 
+function computeDowNorms(entries: DailySubmission[]): { dow: number; name: string; avg: number; total: number; count: number }[] {
+  const buckets: Record<number, { total: number; count: number }> = {};
+  for (let i = 0; i < 7; i++) buckets[i] = { total: 0, count: 0 };
+
+  for (const e of entries) {
+    const d = parseDate(e.date);
+    const dow = d.getDay();
+    const t = e.total ?? e.online + e.hybrid + e.prime;
+    buckets[dow].total += t;
+    buckets[dow].count += 1;
+  }
+
+  // Sunday-first ordering
+  return [0, 1, 2, 3, 4, 5, 6].map(dow => ({
+    dow,
+    name: DOW_NAMES[dow],
+    avg: buckets[dow].count > 0 ? Math.round((buckets[dow].total / buckets[dow].count) * 10) / 10 : 0,
+    total: buckets[dow].total,
+    count: buckets[dow].count,
+  }));
+}
+
+// ---- Component ----
 export default function WeeklyReport() {
   const [allEntries, setAllEntries] = useState<DailySubmission[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedWeekIdx, setSelectedWeekIdx] = useState(0);
 
   useEffect(() => {
     async function load() {
@@ -132,639 +193,397 @@ export default function WeeklyReport() {
     load();
   }, []);
 
-  // Bucket entries into Mon-Sun weeks
-  const weeks: WeekBucket[] = useMemo(() => {
-    if (allEntries.length === 0) return [];
-    const buckets: Record<string, DailySubmission[]> = {};
-    for (const e of allEntries) {
-      const d = new Date(e.date + 'T12:00:00');
-      const mon = getMonday(d);
-      const key = mon.toISOString().slice(0, 10);
-      if (!buckets[key]) buckets[key] = [];
-      buckets[key].push(e);
-    }
-    const sorted = Object.keys(buckets).sort().reverse();
-    return sorted.map((monday) => {
-      const entries = buckets[monday].sort((a, b) => a.date.localeCompare(b.date));
-      const sun = new Date(monday + 'T12:00:00');
-      sun.setDate(sun.getDate() + 6);
-      const online = entries.reduce((s, e) => s + e.online, 0);
-      const hybrid = entries.reduce((s, e) => s + e.hybrid, 0);
-      const prime = entries.reduce((s, e) => s + e.prime, 0);
-      return {
-        label: `${formatShort(monday)} - ${formatShort(sun.toISOString().slice(0, 10))}`,
-        startDate: monday,
-        endDate: sun.toISOString().slice(0, 10),
-        entries,
-        online,
-        hybrid,
-        prime,
-        total: online + hybrid + prime,
-        visitors: entries.reduce((s, e) => s + e.visitors, 0),
-      };
-    });
-  }, [allEntries]);
+  // All weeks (including partial)
+  const allWeeks = useMemo(() => computeWeeks(allEntries), [allEntries]);
+  // Only complete weeks for trend chart
+  const completeWeeks = useMemo(() => allWeeks.filter(w => w.complete), [allWeeks]);
 
-  useEffect(() => {
-    if (weeks.length > 0) setSelectedWeekIdx(0);
-  }, [weeks.length]);
+  // KPI: Total submissions YTD
+  const ytdTotal = useMemo(() => allEntries.reduce((s, e) => s + (e.total ?? e.online + e.hybrid + e.prime), 0), [allEntries]);
 
-  const week = weeks[selectedWeekIdx] || null;
+  // KPI: Current week (most recent week with any data)
+  const currentWeek = allWeeks.length > 0 ? allWeeks[allWeeks.length - 1] : null;
 
-  // Determine report month from selected week's end date
-  const reportMonth = week ? new Date(week.endDate + 'T12:00:00').getMonth() + 1 : getCentralMonth();
-  const reportYear = 2026;
+  // KPI: Best week (among complete weeks)
+  const bestWeek = useMemo(() => {
+    if (completeWeeks.length === 0) return null;
+    return completeWeeks.reduce((best, w) => w.total > best.total ? w : best);
+  }, [completeWeeks]);
 
-  // Month-to-date: all entries up through the selected week's end date
-  const mtdEntries = useMemo(() => {
-    if (!week) return [];
-    const monthStart = `${reportYear}-${String(reportMonth).padStart(2, '0')}-01`;
-    const weekEnd = week.endDate;
-    return allEntries.filter((e) => {
-      const m = new Date(e.date + 'T12:00:00').getMonth() + 1;
-      return m === reportMonth && e.date >= monthStart && e.date <= weekEnd;
-    });
-  }, [allEntries, week, reportMonth, reportYear]);
+  // KPI: Last 4 vs first 4 complete weeks trend
+  const trendPct = useMemo(() => {
+    if (completeWeeks.length < 8) return null;
+    const first4 = completeWeeks.slice(0, 4);
+    const last4 = completeWeeks.slice(-4);
+    const first4Avg = first4.reduce((s, w) => s + w.dailyAvg, 0) / 4;
+    const last4Avg = last4.reduce((s, w) => s + w.dailyAvg, 0) / 4;
+    if (first4Avg === 0) return null;
+    return Math.round(((last4Avg - first4Avg) / first4Avg) * 100);
+  }, [completeWeeks]);
 
-  const monthGoal = MONTHLY_GOALS_2026.find((g) => g.month === reportMonth && g.year === reportYear);
-  const goal = monthGoal?.total ?? 0;
-  const daysInMonth = new Date(reportYear, reportMonth, 0).getDate();
+  // Rolling 7-day data
+  const rollingData = useMemo(() => computeRolling7(allEntries), [allEntries]);
 
-  // MTD calculations
-  const mtdTotal = mtdEntries.reduce((s, e) => s + (e.total ?? e.online + e.hybrid + e.prime), 0);
-  const mtdOnline = mtdEntries.reduce((s, e) => s + e.online, 0);
-  const mtdHybrid = mtdEntries.reduce((s, e) => s + e.hybrid, 0);
-  const mtdPrime = mtdEntries.reduce((s, e) => s + e.prime, 0);
-  const mtdVisitors = mtdEntries.reduce((s, e) => s + e.visitors, 0);
-  const mtdDays = mtdEntries.length;
-  const shouldBeAt = Math.round((goal / daysInMonth) * mtdDays);
-  const aheadBehind = mtdTotal - shouldBeAt;
-  const daysRemaining = daysInMonth - mtdDays;
-  const gap = goal - mtdTotal;
-  const neededPerDay = daysRemaining > 0 ? Math.ceil(gap / daysRemaining) : 0;
-  const mtdProjected = mtdDays > 0 ? Math.round((mtdTotal / mtdDays) * daysInMonth) : 0;
-  const projectedPct = goal > 0 ? ((mtdProjected / goal) * 100).toFixed(1) : '0';
-  const progressPct = goal > 0 ? Math.min((mtdTotal / goal) * 100, 100) : 0;
-  const pacePct = goal > 0 ? Math.min((shouldBeAt / goal) * 100, 100) : 0;
-  const mtdConvRate = mtdVisitors > 0 ? ((mtdOnline / mtdVisitors) * 100).toFixed(1) : '0';
+  // Day-of-week norms
+  const dowNorms = useMemo(() => computeDowNorms(allEntries), [allEntries]);
 
-  // Week conversion rate (online only — hybrid/prime come through separate channels)
-  const weekOnline = week ? week.entries.reduce((s: number, e: DailySubmission) => s + e.online, 0) : 0;
-  const weekConvRate = week && week.visitors > 0 ? ((weekOnline / week.visitors) * 100).toFixed(1) : '0';
+  // Recent 12 weeks for WoW table (newest first)
+  const recent12 = useMemo(() => {
+    const all = [...allWeeks].reverse();
+    return all.slice(0, 12);
+  }, [allWeeks]);
 
-  // ---- Submission Trend (all entries for the month, daily totals + 7-day rolling avg) ----
-  const monthEntries = useMemo(() => {
-    return allEntries
-      .filter((e) => new Date(e.date + 'T12:00:00').getMonth() + 1 === reportMonth)
-      .sort((a, b) => a.date.localeCompare(b.date));
-  }, [allEntries, reportMonth]);
-
-  const dailyTotals = monthEntries.map((e) => e.total ?? e.online + e.hybrid + e.prime);
-  const dailyTarget = goal > 0 ? Math.round(goal / daysInMonth) : 0;
-  const rolling7 = rollingAvg(dailyTotals, 7);
-
-  const trendLabels = monthEntries.map((e) => {
-    const d = new Date(e.date + 'T12:00:00');
-    return `${d.getMonth() + 1}/${d.getDate()}`;
-  });
-
-  // Find week highlight indices in month entries
-  const weekStartIdx = week ? monthEntries.findIndex((e) => e.date >= week.startDate) : -1;
-  const weekEndIdx = week ? monthEntries.findIndex((e) => e.date > week.endDate) : -1;
-  const weekEndActual = weekEndIdx === -1 ? monthEntries.length - 1 : weekEndIdx - 1;
-
-  // ---- YOY calculations ----
-  const prevYear = HIST_2025[reportMonth];
-  const yoyChangePace = prevYear && prevYear.total > 0 ? Math.round(((mtdProjected - prevYear.total) / prevYear.total) * 100) : 0;
-  const prevDailyArr = DAILY_2025[reportMonth - 1] || [];
-  let prev2025SameDay = 0;
-  for (let d = 0; d < mtdDays && d < prevDailyArr.length; d++) {
-    prev2025SameDay += prevDailyArr[d];
-  }
-  const sameDayDiff = mtdTotal - prev2025SameDay;
-
-  // Weekly stacked bar chart
-  const weekChartData = week
-    ? {
-        labels: week.entries.map((e) => {
-          const d = new Date(e.date + 'T12:00:00');
-          return d.toLocaleDateString('en-US', { weekday: 'short' });
-        }),
-        datasets: [
-          { label: 'Online', data: week.entries.map((e) => e.online), backgroundColor: '#2563eb', stack: 'stack' },
-          { label: 'Hybrid', data: week.entries.map((e) => e.hybrid), backgroundColor: '#d97706', stack: 'stack' },
-          { label: 'Prime', data: week.entries.map((e) => e.prime), backgroundColor: '#dc2626', stack: 'stack' },
-        ],
-      }
-    : null;
-
-  // Trend line chart
-  const trendChartData = {
-    labels: trendLabels,
+  // ---- Chart: Weekly Trend (complete weeks only) ----
+  const weeklyTrendData = useMemo(() => ({
+    labels: completeWeeks.map(w => formatLabel(w.weekStart)),
     datasets: [
       {
-        label: 'Daily Total',
-        data: dailyTotals,
-        borderColor: '#93c5fd',
-        backgroundColor: 'rgba(147, 197, 253, 0.15)',
-        fill: true,
-        tension: 0.3,
-        pointRadius: 2,
-        borderWidth: 1.5,
+        type: 'bar' as const,
+        label: 'Total (week)',
+        data: completeWeeks.map(w => w.total),
+        backgroundColor: `${TP.blue}55`,
+        borderColor: `${TP.blue}BB`,
+        borderWidth: 1,
+        borderRadius: 4,
+        yAxisID: 'y',
         order: 2,
       },
       {
-        label: '7-Day Rolling Avg',
-        data: rolling7,
-        borderColor: '#2563eb',
+        type: 'line' as const,
+        label: 'Avg / day',
+        data: completeWeeks.map(w => w.dailyAvg),
+        borderColor: TP.green,
+        backgroundColor: TP.green,
         borderWidth: 2.5,
-        pointRadius: 0,
-        tension: 0.4,
+        pointRadius: 3,
+        tension: 0.3,
+        yAxisID: 'y1',
         order: 1,
       },
+    ],
+  }), [completeWeeks]);
+
+  // ---- Chart: Day-of-Week Norms ----
+  const dowChartData = useMemo(() => ({
+    labels: dowNorms.map(d => d.name),
+    datasets: [
       {
-        label: `Daily Target (${dailyTarget})`,
-        data: Array(trendLabels.length).fill(dailyTarget),
-        borderColor: '#f59e0b',
-        borderWidth: 1.5,
-        borderDash: [6, 3],
-        pointRadius: 0,
-        order: 3,
+        label: 'Avg submissions / day',
+        data: dowNorms.map(d => d.avg),
+        backgroundColor: dowNorms.map(d =>
+          d.dow === 0 || d.dow === 6 ? '#94a3b870' : `${TP.blue}99`
+        ),
+        borderRadius: 5,
       },
     ],
-  };
+  }), [dowNorms]);
 
-  // YOY bar chart data
-  const yoyChartData = prevYear
-    ? {
-        labels: ['2025 Actual', '2026 Actual', '2026 Projected'],
-        datasets: [
-          {
-            label: 'Submissions',
-            data: [prevYear.total, mtdTotal, mtdProjected],
-            backgroundColor: ['#94a3b8', '#2563eb', '#93c5fd'],
-            borderRadius: 4,
-          },
-          {
-            label: 'Goal',
-            data: [null, null, goal],
-            backgroundColor: ['transparent', 'transparent', 'rgba(245, 158, 11, 0.2)'],
-            borderColor: ['transparent', 'transparent', '#f59e0b'],
-            borderWidth: 2,
-            borderDash: [4, 4],
-            borderRadius: 4,
-          },
-        ],
-      }
-    : null;
-
-  // Conversion chart data (daily for selected week)
-  const convChartData = week
-    ? {
-        labels: week.entries.map((e) => {
-          const d = new Date(e.date + 'T12:00:00');
-          return d.toLocaleDateString('en-US', { weekday: 'short' });
+  // ---- Chart: Daily with 7-day rolling avg ----
+  const rollingChartData = useMemo(() => ({
+    labels: rollingData.map(d => {
+      const p = parseDate(d.date);
+      return p.getDate() <= 7 ? MONTH_ABBR[p.getMonth()] : '';
+    }),
+    datasets: [
+      {
+        type: 'bar' as const,
+        label: 'Daily submissions',
+        data: rollingData.map(d => d.total),
+        backgroundColor: rollingData.map(d => {
+          const dow = parseDate(d.date).getDay();
+          return dow === 0 || dow === 6 ? 'rgba(148,163,184,0.28)' : `${TP.blue}4D`;
         }),
-        datasets: [
-          {
-            label: 'Conversion %',
-            data: week.entries.map((e) => {
-              return e.visitors > 0 ? Math.round((e.online / e.visitors) * 1000) / 10 : 0;
-            }),
-            borderColor: '#8b5cf6',
-            backgroundColor: 'rgba(139, 92, 246, 0.1)',
-            fill: true,
-            tension: 0.3,
-            pointRadius: 4,
-            borderWidth: 2,
-            yAxisID: 'y',
-          },
-          {
-            label: 'Visitors',
-            data: week.entries.map((e) => e.visitors),
-            borderColor: '#d1d5db',
-            backgroundColor: 'rgba(209, 213, 219, 0.3)',
-            fill: true,
-            tension: 0.3,
-            pointRadius: 3,
-            borderWidth: 1.5,
-            yAxisID: 'y1',
-          },
-        ],
-      }
-    : null;
+        borderWidth: 0,
+        barPercentage: 1,
+        categoryPercentage: 0.92,
+        order: 2,
+      },
+      {
+        type: 'line' as const,
+        label: '7-day rolling avg',
+        data: rollingData.map(d => d.roll),
+        borderColor: TP.darkPurple,
+        borderWidth: 2.5,
+        pointRadius: 0,
+        tension: 0.35,
+        order: 1,
+      },
+    ],
+  }), [rollingData]);
 
   if (loading) {
     return <div className="text-gray-400 py-12 text-center">Loading weekly data...</div>;
   }
 
+  if (allEntries.length === 0) {
+    return <div className="text-gray-400 py-12 text-center">No submission data available.</div>;
+  }
+
   return (
     <div className="space-y-6">
-      {/* Week selector */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => setSelectedWeekIdx(Math.min(selectedWeekIdx + 1, weeks.length - 1))}
-          disabled={selectedWeekIdx >= weeks.length - 1}
-          className="px-3 py-2 text-sm border rounded-md hover:bg-gray-50 disabled:opacity-30"
-        >
-          &larr; Older
-        </button>
-        <select
-          value={selectedWeekIdx}
-          onChange={(e) => setSelectedWeekIdx(parseInt(e.target.value))}
-          className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-        >
-          {weeks.map((w, i) => (
-            <option key={i} value={i}>
-              Week of {w.label}
-            </option>
-          ))}
-        </select>
-        <button
-          onClick={() => setSelectedWeekIdx(Math.max(selectedWeekIdx - 1, 0))}
-          disabled={selectedWeekIdx <= 0}
-          className="px-3 py-2 text-sm border rounded-md hover:bg-gray-50 disabled:opacity-30"
-        >
-          Newer &rarr;
-        </button>
+      {/* Page header */}
+      <div>
+        <h2 className="text-2xl font-bold" style={{ color: TP.navy }}>Weekly Report</h2>
+        <p className="text-sm text-gray-500 mt-1">
+          {ytdTotal.toLocaleString()} submissions across {allEntries.length} days, {completeWeeks.length} complete weeks (Sun-Sat). Partial weeks excluded from charts.
+        </p>
       </div>
 
-      {week && (
-        <>
-          {/* ===== WEEK HEADER ===== */}
-          <div className="mb-2">
-            <h2 className="text-2xl font-bold text-[#3A6EA4] flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-[#3A6EA4] inline-block"></span>
-              {(() => {
-                const parts = week.label.split(' - ');
-                const s = new Date(parts[0] + '/2026');
-                const e = new Date(parts[1] + '/2026');
-                return `${MONTH_NAMES[s.getMonth()]} ${s.getDate()} â ${MONTH_NAMES[e.getMonth()]} ${e.getDate()}`;
-              })()}
-            </h2>
-            <div className="h-1 bg-[#3A6EA4] rounded-full mt-2"></div>
+      {/* ===== KPI CARDS ===== */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Total YTD */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4" style={{ borderLeft: `4px solid ${TP.navy}` }}>
+          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total YTD</div>
+          <div className="text-3xl font-bold mt-1" style={{ color: TP.navy }}>{ytdTotal.toLocaleString()}</div>
+          <div className="text-sm text-gray-400 mt-1">{allEntries.length} days tracked</div>
+        </div>
+
+        {/* Current week */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4" style={{ borderLeft: `4px solid ${TP.blue}` }}>
+          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Current Week</div>
+          <div className="text-3xl font-bold mt-1" style={{ color: TP.blue }}>
+            {currentWeek ? currentWeek.total.toLocaleString() : '--'}
           </div>
-
-          {/* ===== WEEK STATS ===== */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-gray-400 p-4">
-              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Week Total</div>
-              <div className="text-3xl font-bold text-gray-900 mt-1">{week.total}</div>
-              <div className="text-sm text-gray-400 mt-1">{week.entries.length} {week.entries.length === 1 ? 'day' : 'days'} tracked</div>
-            </div>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-amber-500 p-4">
-              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Daily Average</div>
-              <div className="text-3xl font-bold text-amber-500 mt-1">
-                {Math.round(week.total / (week.entries.length || 1))}
-              </div>
-              <div className="text-sm text-gray-400 mt-1">Per day</div>
-            </div>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-teal-500 p-4">
-              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Online</div>
-              <div className="text-3xl font-bold text-teal-600 mt-1">{week.online}</div>
-              <div className="text-sm text-gray-400 mt-1">{week.total > 0 ? Math.round((week.online / week.total) * 100) : 0}% of total</div>
-            </div>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-amber-400 p-4">
-              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Hybrid</div>
-              <div className="text-3xl font-bold text-amber-500 mt-1">{week.hybrid}</div>
-              <div className="text-sm text-gray-400 mt-1">{week.total > 0 ? Math.round((week.hybrid / week.total) * 100) : 0}% of total</div>
-            </div>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-red-400 p-4">
-              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Prime</div>
-              <div className="text-3xl font-bold text-red-500 mt-1">{week.prime}</div>
-              <div className="text-sm text-gray-400 mt-1">{week.total > 0 ? Math.round((week.prime / week.total) * 100) : 0}% of total</div>
-            </div>
+          <div className="text-sm text-gray-400 mt-1">
+            {currentWeek ? `${currentWeek.dailyAvg}/day avg (${currentWeek.days} days)` : ''}
           </div>
+        </div>
 
-          {/* ===== WEEKLY CHART ===== */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Week of {week.label}</h3>
-            <div style={{ height: 280 }}>
-              {weekChartData && (
-                <Bar
-                  data={weekChartData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'top' } },
-                    scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
-                  }}
-                />
-              )}
-            </div>
+        {/* Best week */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4" style={{ borderLeft: `4px solid ${TP.green}` }}>
+          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Best Week</div>
+          <div className="text-3xl font-bold mt-1" style={{ color: '#0d9488' }}>
+            {bestWeek ? bestWeek.total.toLocaleString() : '--'}
           </div>
-
-          {/* ===== WEEK TABLE ===== */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
-                <tr>
-                  <th className="px-3 py-2 font-medium">Day</th>
-                  <th className="px-3 py-2 font-medium text-right">Online</th>
-                  <th className="px-3 py-2 font-medium text-right">Hybrid</th>
-                  <th className="px-3 py-2 font-medium text-right">Prime</th>
-                  <th className="px-3 py-2 font-medium text-right">Total</th>
-                  <th className="px-3 py-2 font-medium text-right">Visitors</th>
-                </tr>
-              </thead>
-              <tbody>
-                {week.entries.map((e) => {
-                  const d = new Date(e.date + 'T12:00:00');
-                  const total = e.total ?? e.online + e.hybrid + e.prime;
-                  return (
-                    <tr key={e.date} className="hover:bg-gray-50">
-                      <td className="px-3 py-2 border-t border-gray-100">
-                        {d.toLocaleDateString('en-US', { weekday: 'short' })} {d.getMonth() + 1}/{d.getDate()}
-                      </td>
-                      <td className="px-3 py-2 border-t border-gray-100 text-right text-blue-600">{e.online}</td>
-                      <td className="px-3 py-2 border-t border-gray-100 text-right text-amber-600">{e.hybrid}</td>
-                      <td className="px-3 py-2 border-t border-gray-100 text-right text-red-600">{e.prime}</td>
-                      <td className="px-3 py-2 border-t border-gray-100 text-right font-medium">{total}</td>
-                      <td className="px-3 py-2 border-t border-gray-100 text-right">{e.visitors.toLocaleString()}</td>
-                    </tr>
-                  );
-                })}
-                <tr className="bg-gray-50 font-medium">
-                  <td className="px-3 py-2 border-t border-gray-200">Total</td>
-                  <td className="px-3 py-2 border-t border-gray-200 text-right text-blue-600">{week.online}</td>
-                  <td className="px-3 py-2 border-t border-gray-200 text-right text-amber-600">{week.hybrid}</td>
-                  <td className="px-3 py-2 border-t border-gray-200 text-right text-red-600">{week.prime}</td>
-                  <td className="px-3 py-2 border-t border-gray-200 text-right">{week.total}</td>
-                  <td className="px-3 py-2 border-t border-gray-200 text-right">{week.visitors.toLocaleString()}</td>
-                </tr>
-              </tbody>
-            </table>
+          <div className="text-sm text-gray-400 mt-1">
+            {bestWeek ? bestWeek.label : ''}
           </div>
+        </div>
 
-          {/* ===== MONTH PROGRESS ===== */}
-          <div className="mt-8">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">
-              {MONTH_NAMES[reportMonth]} Progress (through {week.label.split(' - ')[1]})
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-gray-700 p-5">
-                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Month-to-Date</div>
-                <div className="text-4xl font-bold text-gray-900">{mtdTotal.toLocaleString()}</div>
-                <div className="text-sm text-gray-500 mt-1">{mtdOnline} online, {mtdHybrid} hybrid, {mtdPrime} prime</div>
-              </div>
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-amber-500 p-5">
-                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Should Be At (Day {mtdDays})</div>
-                <div className="text-4xl font-bold text-amber-500">{shouldBeAt.toLocaleString()}</div>
-                <div className="text-sm text-gray-500 mt-1">Target for End of Today</div>
-              </div>
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-blue-600 p-5">
-                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Ahead / Behind</div>
-                <div className={`text-4xl font-bold ${aheadBehind >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-                  {aheadBehind >= 0 ? '+' : ''}{aheadBehind.toLocaleString()}
-                </div>
-                <div className="text-sm text-gray-500 mt-1">{aheadBehind >= 0 ? 'Ahead of Target' : 'Behind Target'}</div>
-              </div>
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-purple-500 p-5">
-                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Daily Target Needed</div>
-                <div className="text-4xl font-bold text-amber-500">{daysRemaining > 0 ? neededPerDay : '--'}</div>
-                <div className="text-sm text-gray-500 mt-1">Per Day to Hit Goal</div>
-              </div>
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-red-500 p-5">
-                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Projected End-of-Month</div>
-                <div className={`text-4xl font-bold ${mtdProjected >= goal ? 'text-green-600' : 'text-red-500'}`}>
-                  {mtdDays > 0 ? mtdProjected.toLocaleString() : '--'}
-                </div>
-                <div className="text-sm text-gray-500 mt-1">At Current Pace</div>
-              </div>
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-green-500 p-5">
-                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Will Hit</div>
-                <div className={`text-4xl font-bold ${Number(projectedPct) >= 100 ? 'text-green-600' : 'text-amber-500'}`}>
-                  {mtdDays > 0 ? `${projectedPct}%` : '--'}
-                </div>
-                <div className="text-sm text-gray-500 mt-1">Of {goal.toLocaleString()} Goal</div>
-              </div>
-            </div>
-
-            {/* Progress bar */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mt-4">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">Progress to Goal</span>
-                <span className="text-sm text-gray-500">{mtdTotal.toLocaleString()} / {goal.toLocaleString()}</span>
-              </div>
-              <div className="relative h-6 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="absolute inset-y-0 left-0 bg-blue-500 rounded-full transition-all"
-                  style={{ width: `${progressPct}%` }}
-                >
-                  {progressPct > 15 && (
-                    <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-white">
-                      {progressPct.toFixed(1)}%
-                    </span>
-                  )}
-                </div>
-                {/* Pace marker */}
-                <div
-                  className="absolute top-0 bottom-0 w-0.5 bg-amber-500"
-                  style={{ left: `${pacePct}%` }}
-                >
-                  <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-xs text-amber-600 font-medium whitespace-nowrap">
-                    Pace
-                  </div>
-                  <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-xs text-amber-600">
-                    {shouldBeAt.toLocaleString()}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 mt-6 text-xs text-gray-500">
-                <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Current Progress</span>
-                <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-amber-500 inline-block"></span> Expected Pace (Day {mtdDays}/{daysInMonth})</span>
-              </div>
-            </div>
+        {/* Last 4 vs First 4 trend */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4" style={{ borderLeft: `4px solid ${TP.darkPurple}` }}>
+          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Last 4 vs First 4 Weeks</div>
+          <div className={`text-3xl font-bold mt-1 ${trendPct !== null && trendPct >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+            {trendPct !== null ? `${trendPct >= 0 ? '+' : ''}${trendPct}%` : '--'}
           </div>
+          <div className="text-sm text-gray-400 mt-1">Avg daily rate change</div>
+        </div>
+      </div>
 
-          {/* ===== SUBMISSION TREND CHART ===== */}
-          {monthEntries.length > 0 && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">
-                {MONTH_NAMES[reportMonth]} Submission Trend
-              </h3>
-              <div style={{ height: 300 }}>
-                <Line
-                  data={trendChartData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                      legend: { position: 'top' },
-                      tooltip: {
-                        callbacks: {
-                          afterBody: (ctx) => {
-                            const idx = ctx[0].dataIndex;
-                            const e = monthEntries[idx];
-                            return `Online: ${e.online}  Hybrid: ${e.hybrid}  Prime: ${e.prime}`;
-                          },
-                        },
+      {/* ===== WEEKLY TREND CHART ===== */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+        <h3 className="text-base font-semibold mb-1" style={{ color: TP.text }}>
+          Weekly Trend
+        </h3>
+        <p className="text-xs text-gray-500 mb-4">
+          Bars show total submissions per complete week (Sun-Sat). Line shows average per day. Partial weeks excluded.
+        </p>
+        <div style={{ height: 340 }}>
+          <Bar
+            data={weeklyTrendData as any}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: { mode: 'index', intersect: false },
+              plugins: {
+                legend: { labels: { usePointStyle: true, boxWidth: 8 } },
+                tooltip: {
+                  callbacks: {
+                    afterTitle: (items) => {
+                      const idx = items[0].dataIndex;
+                      const w = completeWeeks[idx];
+                      return w.label;
+                    },
+                  },
+                },
+              },
+              scales: {
+                x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 14 } },
+                y: { position: 'left', beginAtZero: true, title: { display: true, text: 'Total / week' } },
+                y1: { position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, title: { display: true, text: 'Avg / day' } },
+              },
+            }}
+          />
+        </div>
+      </div>
+
+      {/* ===== WEEK-OVER-WEEK TABLE ===== */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="px-5 py-3 border-b border-gray-100">
+          <h3 className="text-base font-semibold" style={{ color: TP.text }}>Week-over-Week</h3>
+          <p className="text-xs text-gray-500">Most recent 12 weeks. Current/partial week highlighted.</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
+              <tr>
+                <th className="px-4 py-2 font-medium">Week</th>
+                <th className="px-4 py-2 font-medium text-right">Total</th>
+                <th className="px-4 py-2 font-medium text-right">Online</th>
+                <th className="px-4 py-2 font-medium text-right">Hybrid</th>
+                <th className="px-4 py-2 font-medium text-right">Prime</th>
+                <th className="px-4 py-2 font-medium text-right">Avg/Day</th>
+                <th className="px-4 py-2 font-medium text-right">WoW %</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recent12.map((w, i) => {
+                const isCurrent = i === 0 && !w.complete;
+                // WoW change: compare against the next item (which is the prior week since reversed)
+                const prevWeek = recent12[i + 1];
+                const wowPct = prevWeek && prevWeek.total > 0
+                  ? Math.round(((w.total - prevWeek.total) / prevWeek.total) * 100)
+                  : null;
+
+                return (
+                  <tr
+                    key={w.weekStart}
+                    className={isCurrent ? 'bg-blue-50' : 'hover:bg-gray-50'}
+                  >
+                    <td className="px-4 py-2 border-t border-gray-100 whitespace-nowrap">
+                      {w.label}
+                      {isCurrent && (
+                        <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                          current
+                        </span>
+                      )}
+                      {!w.complete && !isCurrent && (
+                        <span className="ml-2 text-xs text-gray-400">({w.days}d)</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2 border-t border-gray-100 text-right font-semibold">{w.total.toLocaleString()}</td>
+                    <td className="px-4 py-2 border-t border-gray-100 text-right text-blue-600">{w.online.toLocaleString()}</td>
+                    <td className="px-4 py-2 border-t border-gray-100 text-right text-amber-600">{w.hybrid.toLocaleString()}</td>
+                    <td className="px-4 py-2 border-t border-gray-100 text-right text-red-600">{w.prime.toLocaleString()}</td>
+                    <td className="px-4 py-2 border-t border-gray-100 text-right">{w.dailyAvg}</td>
+                    <td className={`px-4 py-2 border-t border-gray-100 text-right font-medium ${
+                      wowPct === null ? 'text-gray-400' : wowPct >= 0 ? 'text-green-600' : 'text-red-500'
+                    }`}>
+                      {wowPct !== null ? `${wowPct >= 0 ? '+' : ''}${wowPct}%` : '--'}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ===== TWO-COLUMN: DOW Norms + Rolling Avg ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Day-of-Week Norms */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+          <h3 className="text-base font-semibold mb-1" style={{ color: TP.text }}>
+            Day-of-Week Norms
+          </h3>
+          <p className="text-xs text-gray-500 mb-4">
+            Average submissions per day of week across all data. Weekend dip is typical.
+          </p>
+          <div style={{ height: 240 }}>
+            <Bar
+              data={dowChartData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    callbacks: {
+                      label: (ctx) => {
+                        const d = dowNorms[ctx.dataIndex];
+                        return `${d.avg} avg/day  |  ${d.total.toLocaleString()} total (${d.count} days)`;
                       },
                     },
-                    scales: {
-                      y: { beginAtZero: true },
+                  },
+                },
+                scales: {
+                  x: { grid: { display: false } },
+                  y: { beginAtZero: true, title: { display: true, text: 'Avg / day' } },
+                },
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Day-of-Week Detail Table */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+          <h3 className="text-base font-semibold mb-1" style={{ color: TP.text }}>
+            Weekday Rhythm
+          </h3>
+          <p className="text-xs text-gray-500 mb-4">
+            How a typical week distributes submissions.
+          </p>
+          <table className="w-full text-sm">
+            <thead className="text-xs text-gray-500 uppercase">
+              <tr>
+                <th className="text-left py-1 font-medium">Day</th>
+                <th className="text-right py-1 font-medium">Avg/Day</th>
+                <th className="text-right py-1 font-medium">Total</th>
+                <th className="text-right py-1 font-medium">Share</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dowNorms.map(d => {
+                const weekTotal = dowNorms.reduce((s, n) => s + n.total, 0);
+                const share = weekTotal > 0 ? Math.round((d.total / weekTotal) * 100) : 0;
+                const isWeekend = d.dow === 0 || d.dow === 6;
+                return (
+                  <tr key={d.dow} className={isWeekend ? 'text-gray-400' : ''}>
+                    <td className="py-1.5 border-t border-gray-100 font-medium">{d.name}</td>
+                    <td className="py-1.5 border-t border-gray-100 text-right">{d.avg}</td>
+                    <td className="py-1.5 border-t border-gray-100 text-right">{d.total.toLocaleString()}</td>
+                    <td className="py-1.5 border-t border-gray-100 text-right">{share}%</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ===== 7-DAY ROLLING AVERAGE ===== */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+        <h3 className="text-base font-semibold mb-1" style={{ color: TP.text }}>
+          Daily Submissions with 7-Day Rolling Average
+        </h3>
+        <p className="text-xs text-gray-500 mb-4">
+          Light bars show each day. Bold line is the 7-day rolling average, smoothing out Sunday lows and weekday highs to reveal the underlying trend.
+        </p>
+        <div style={{ height: 340 }}>
+          <Bar
+            data={rollingChartData as any}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: { mode: 'index', intersect: false },
+              plugins: {
+                legend: { labels: { usePointStyle: true, boxWidth: 8 } },
+                tooltip: {
+                  callbacks: {
+                    title: (items) => {
+                      const idx = items[0].dataIndex;
+                      const d = rollingData[idx];
+                      const parsed = parseDate(d.date);
+                      return `${DOW_NAMES[parsed.getDay()]} ${formatLabel(d.date)}`;
                     },
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* ===== WEBSITE CONVERSION ===== */}
-          <div className="mt-8">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Website Conversion</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">MTD Conversion</div>
-                <div className="text-3xl font-bold text-purple-600">{mtdConvRate}%</div>
-                <div className="text-sm text-gray-500 mt-1">{mtdOnline.toLocaleString()} online of {mtdVisitors.toLocaleString()} visitors</div>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Unique Visitors (MTD)</div>
-                <div className="text-3xl font-bold text-gray-900">{mtdVisitors.toLocaleString()}</div>
-                <div className="text-sm text-gray-500 mt-1">Through Day {mtdDays}</div>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">This Week{"'"}s Conversion</div>
-                <div className="text-3xl font-bold text-purple-600">{weekConvRate}%</div>
-                <div className="text-sm text-gray-500 mt-1">{weekOnline} online of {week.visitors.toLocaleString()} visitors</div>
-              </div>
-            </div>
-
-            {/* Conversion chart */}
-            {convChartData && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mt-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Daily Conversion Rate (Week of {week.label})</h3>
-                <div style={{ height: 250 }}>
-                  <Line
-                    data={convChartData}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      interaction: { mode: 'index', intersect: false },
-                      plugins: { legend: { position: 'top' } },
-                      scales: {
-                        y: {
-                          type: 'linear',
-                          position: 'left',
-                          beginAtZero: true,
-                          title: { display: true, text: 'Conversion %' },
-                        },
-                        y1: {
-                          type: 'linear',
-                          position: 'right',
-                          beginAtZero: true,
-                          grid: { drawOnChartArea: false },
-                          title: { display: true, text: 'Visitors' },
-                        },
-                      },
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* ===== YEAR-OVER-YEAR ===== */}
-          {prevYear && (
-            <div className="mt-8">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Year-over-Year Comparison</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">2025 {MONTH_NAMES[reportMonth]}</div>
-                  <div className="text-2xl font-bold text-gray-600">{prevYear.total.toLocaleString()}</div>
-                  <div className="text-sm text-gray-500 mt-1">Total last year</div>
-                </div>
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">2026 Goal</div>
-                  <div className="text-2xl font-bold text-amber-600">{goal.toLocaleString()}</div>
-                  <div className="text-sm text-gray-500 mt-1">Monthly target</div>
-                </div>
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Projected vs 2025</div>
-                  <div className={`text-2xl font-bold ${yoyChangePace >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-                    {yoyChangePace >= 0 ? '+' : ''}{yoyChangePace}%
-                  </div>
-                  <div className="text-sm text-gray-500 mt-1">At current pace</div>
-                </div>
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Same-Day vs 2025</div>
-                  <div className={`text-2xl font-bold ${sameDayDiff >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-                    {sameDayDiff >= 0 ? '+' : ''}{sameDayDiff.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-gray-500 mt-1">Day {mtdDays}: {mtdTotal.toLocaleString()} vs {prev2025SameDay.toLocaleString()}</div>
-                </div>
-              </div>
-
-              {/* YOY chart */}
-              {yoyChartData && (
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mt-4">
-                  <h3 className="text-sm font-medium text-gray-700 mb-3">{MONTH_NAMES[reportMonth]}: 2025 vs 2026</h3>
-                  <div style={{ height: 280 }}>
-                    <Bar
-                      data={yoyChartData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: { display: false },
-                          tooltip: {
-                            callbacks: {
-                              label: (ctx) => {
-                                if (ctx.raw === null) return '';
-                                return `${ctx.dataset.label}: ${(ctx.raw as number).toLocaleString()}`;
-                              },
-                            },
-                          },
-                        },
-                        scales: { y: { beginAtZero: true } },
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ===== OKR SECTION ===== */}
-          <div className="mt-8">
-            <div className="bg-[#1B2A4A] text-white px-5 py-3 rounded-t-xl text-sm font-semibold">
-              Umbrella Goal: <span className="font-normal">Grow online assessment submissions 10% month-over-month through Q2 2026 (March baseline: 1,291 &rarr; June target: 1,718)</span>
-            </div>
-            <div className="space-y-4 mt-0">
-              {OKR_OBJECTIVES.map((obj, i) => (
-                <div key={i} className="bg-white border border-gray-200 rounded-b-lg overflow-hidden shadow-sm">
-                  <div className="px-4 py-3 text-white font-semibold text-sm" style={{ backgroundColor: obj.color }}>
-                    {obj.title}
-                  </div>
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="text-left px-4 py-2 font-medium text-gray-600 text-xs uppercase">Key Result</th>
-                        <th className="text-left px-4 py-2 font-medium text-gray-600 text-xs uppercase">Baseline</th>
-                        <th className="text-left px-4 py-2 font-medium text-gray-600 text-xs uppercase">Target</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="px-4 py-3 text-gray-800">{obj.keyResult}</td>
-                        <td className="px-4 py-3 text-gray-500 text-sm">{obj.baseline}</td>
-                        <td className="px-4 py-3 text-gray-800 font-semibold text-sm">{obj.target}</td>
-                      </tr>
-                      <tr>
-                        <td colSpan={3} className="px-4 py-3 text-gray-600 text-sm border-t border-gray-100 leading-relaxed">
-                          <span className="font-semibold text-gray-700">Current work:</span> {obj.activities}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
+                  },
+                },
+              },
+              scales: {
+                x: {
+                  grid: { display: false },
+                  ticks: {
+                    maxRotation: 0,
+                    autoSkip: true,
+                    maxTicksLimit: 12,
+                  },
+                },
+                y: { beginAtZero: true },
+              },
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import DailyTracker from '@/components/DailyTracker';
+import WeeklyReport from '@/components/WeeklyReport';
 import AnnualView from '@/components/AnnualView';
 import OnlineTrends from '@/components/OnlineTrends';
 import ReferrerView from '@/components/ReferrerView';
@@ -11,6 +12,7 @@ import GoalEditor from '@/components/GoalEditor';
 import OrganicGrowth from '@/components/OrganicGrowth';
 const TABS = [
   { id: 'daily', label: 'Daily Tracker' },
+  { id: 'weekly', label: 'Weekly Report' },
   { id: 'annual', label: 'Annual' },
   { id: 'online', label: 'Online' },
   { id: 'referrer', label: 'Referrer' },
@@ -56,6 +58,7 @@ export default function Dashboard() {
       {/* Tab content */}
       <main className="p-6 max-w-7xl mx-auto">
         {activeTab === 'daily' && <DailyTracker />}
+        {activeTab === 'weekly' && <WeeklyReport />}
         {activeTab === 'annual' && <AnnualView />}
         {activeTab === 'online' && <OnlineTrends />}
         {activeTab === 'referrer' && <ReferrerView />}
