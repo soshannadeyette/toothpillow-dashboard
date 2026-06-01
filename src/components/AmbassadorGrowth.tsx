@@ -40,13 +40,13 @@ const ambSubs: Record<string, number> = {
   '2023-01':9,'2023-02':20,'2023-03':10,'2023-04':16,'2023-05':14,'2023-06':219,'2023-07':81,'2023-08':15,'2023-09':22,'2023-10':17,'2023-11':22,'2023-12':20,
   '2024-01':14,'2024-02':16,'2024-03':29,'2024-04':31,'2024-05':32,'2024-06':24,'2024-07':36,'2024-08':47,'2024-09':71,'2024-10':32,'2024-11':40,'2024-12':63,
   '2025-01':60,'2025-02':69,'2025-03':64,'2025-04':59,'2025-05':47,'2025-06':45,'2025-07':28,'2025-08':47,'2025-09':39,'2025-10':40,'2025-11':39,'2025-12':29,
-  '2026-01':53,'2026-02':58,'2026-03':64,'2026-04':64,'2026-05':32,
+  '2026-01':53,'2026-02':58,'2026-03':64,'2026-04':64,'2026-05':35,
 };
 const infSubs: Record<string, number> = {
   '2023-10':6,'2023-11':294,'2023-12':1039,
   '2024-01':431,'2024-02':315,'2024-03':1593,'2024-04':569,'2024-05':654,'2024-06':1253,'2024-07':485,'2024-08':594,'2024-09':1124,'2024-10':498,'2024-11':367,'2024-12':515,
   '2025-01':521,'2025-02':605,'2025-03':521,'2025-04':511,'2025-05':428,'2025-06':330,'2025-07':906,'2025-08':440,'2025-09':290,'2025-10':273,'2025-11':485,'2025-12':273,
-  '2026-01':312,'2026-02':517,'2026-03':463,'2026-04':237,'2026-05':240,
+  '2026-01':312,'2026-02':517,'2026-03':463,'2026-04':237,'2026-05':267,
 };
 
 const newAddsAmb: Record<string, number> = {
@@ -60,9 +60,9 @@ const newAddsInf: Record<string, number> = {
   '2026-01':3,'2026-02':1,'2026-03':2,'2026-04':5,'2026-05':6,
 };
 
-const ambSubsYear: Record<number, number> = {2023:465, 2024:435, 2025:566, 2026:271};
-const infSubsYear: Record<number, number> = {2023:1339, 2024:8398, 2025:5583, 2026:1769};
-const combSubsYear: Record<number, number> = {2023:1804, 2024:8833, 2025:6149, 2026:2040};
+const ambSubsYear: Record<number, number> = {2023:465, 2024:435, 2025:566, 2026:274};
+const infSubsYear: Record<number, number> = {2023:1339, 2024:8398, 2025:5583, 2026:1796};
+const combSubsYear: Record<number, number> = {2023:1804, 2024:8833, 2025:6149, 2026:2070};
 const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:76};
 const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:17};
 const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:94};
@@ -76,17 +76,17 @@ const activeTotalByYear: Record<number, number> = {2023:30, 2024:145, 2025:209, 
 const halfCarriedBy: Record<number, number> = {2023:1, 2024:2, 2025:5, 2026:8};
 const tenPlusByYear: Record<number, number> = {2023:8, 2024:40, 2025:55, 2026:30};
 // Mega-3 = Lauren Johnson + Kendra Needham + Ginny Yurich (top recruited-ambassador producers)
-const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:383};
-const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:1657};
+const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:387};
+const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:1683};
 
-const ANN = 12 / 4.935; // 4 full months + 29/31 of May = 4.935 (data through 5/29)
+const ANN = 12 / 5; // 5 full months (Jan–May 2026 complete, data pulled June 1)
 
-const recruit26 = [
+const recruit26: {label:string; amb:number; inf:number; accent:string; tag?:string}[] = [
   {label:'Jan', amb:5, inf:3, accent:'#B6CAE3'},
   {label:'Feb', amb:13, inf:1, accent:'#8CD1C8'},
   {label:'Mar', amb:10, inf:2, accent:'#3A6EA4'},
   {label:'Apr', amb:28, inf:5, accent:'#FDBE67'},
-  {label:'May', amb:20, inf:6, accent:'#B26CA6', tag:'through 5/29'},
+  {label:'May', amb:20, inf:6, accent:'#B26CA6'},
 ];
 
 const concRows = [
@@ -96,25 +96,25 @@ const concRows = [
   {y:'2026', n:8, color:'#8CD1C8', names:'Shannon, Sosh, Lauren, Kendra, Jeff, Amy B., Ginny, Melody'},
 ];
 
-// Updated from Salesforce Launch Bonus Tracker export 2026-05-29
+// Updated from Salesforce Launch Bonus Tracker export 2026-06-01
 const moversData: Record<string, {y25:number; y26:number; type:string}> = {
-  'Shannon Tripp':        {y25:866,  y26:257, type:'Inf'},
-  'Soshanna Salsman':     {y25:914,  y26:175, type:'Inf'},
-  'Lauren Johnson NNM':   {y25:831,  y26:158, type:'Inf'},
-  'Kendra Needham':       {y25:386,  y26:146, type:'Inf'},
+  'Shannon Tripp':        {y25:866,  y26:263, type:'Inf'},
+  'Soshanna Salsman':     {y25:914,  y26:180, type:'Inf'},
+  'Lauren Johnson NNM':   {y25:831,  y26:159, type:'Inf'},
+  'Kendra Needham':       {y25:386,  y26:148, type:'Inf'},
   'Jeff Cruz':            {y25:84,   y26:112, type:'Inf'},
   'Amy Bernhard':         {y25:112,  y26:95,  type:'Inf'},
-  'Ginny Yurich':         {y25:291,  y26:79,  type:'Inf'},
-  'Melody Brandon':       {y25:123,  y26:76,  type:'Inf'},
-  'Jasyra Santiago-Hines':{y25:57,   y26:75,  type:'Inf'},
-  'Ellen Fisher':         {y25:53,   y26:57,  type:'Inf'},
+  'Ginny Yurich':         {y25:291,  y26:80,  type:'Inf'},
+  'Melody Brandon':       {y25:123,  y26:80,  type:'Inf'},
+  'Jasyra Santiago-Hines':{y25:57,   y26:76,  type:'Inf'},
+  'Ellen Fisher':         {y25:53,   y26:58,  type:'Inf'},
   'Taylor Kulik':         {y25:103,  y26:48,  type:'Inf'},
   'Eden Lee':             {y25:185,  y26:41,  type:'Inf'},
   'Katelyn Alsop':        {y25:0,    y26:40,  type:'Inf'},
-  'Emily Boazman':        {y25:0,    y26:36,  type:'Inf'},
+  'Emily Boazman':        {y25:0,    y26:38,  type:'Inf'},
   'Amy Erickson':         {y25:51,   y26:34,  type:'Inf'},
-  'Lauren Stadler':       {y25:93,   y26:25,  type:'Inf'},
-  'Jennie Hoglund':       {y25:29,   y26:24,  type:'Inf'},
+  'Lauren Stadler':       {y25:93,   y26:28,  type:'Inf'},
+  'Jennie Hoglund':       {y25:29,   y26:25,  type:'Inf'},
   'Thuy Improta':         {y25:245,  y26:25,  type:'Inf'},
   'Ashley Turner':        {y25:39,   y26:21,  type:'Inf'},
   'Carly Brown':          {y25:0,    y26:20,  type:'Inf'},
@@ -154,7 +154,8 @@ const moversData: Record<string, {y25:number; y26:number; type:string}> = {
   'Heather Reed':         {y25:4,    y26:1,   type:'Amb'},
 };
 
-// Launch Bonus Tracker — updated from Salesforce export 2026-05-29
+// Launch Bonus Tracker — updated from Salesforce export 2026-06-01
+// Top performers YTD 2026: Shannon 263, Sosh 180, Lauren 159, Kendra 148, Jeff 112, Amy B 95, Ginny 80, Melody 80, Jasyra 76, Ellen 58, Taylor K 48, Eden 41, Katelyn 40, Emily B 38, Amy E 34, Lauren S 28, Jennie 25, Thuy 25
 // bonusSubs = submissions counted ONLY from window start date forward
 // Sorted by bonusSubs descending. Katelyn Alsop has a separate Jan 19 window.
 const launchBonusData = [
@@ -239,7 +240,7 @@ export default function AmbassadorGrowth() {
   const ambSubsPace = annualize(ambSubsYear[2026]);
 
   /* ── Movers computation ── */
-  const moverAnnFactor = 12 / 4.903;
+  const moverAnnFactor = 12 / 5;
   const moversComputed = useMemo(() => {
     const entries = Object.entries(moversData).map(([name, d]) => {
       const pace = Math.round(d.y26 * moverAnnFactor);
@@ -305,7 +306,7 @@ export default function AmbassadorGrowth() {
   };
 
   /* ── Chart: New Adds monthly stacked (Jan 2024 – May 2026) ── */
-  const mayPaceFactor = 31 / 28; // May 2026: data through 5/28, 28 of 31 days
+  const mayPaceFactor = 31 / 31; // May 2026: complete month (data pulled June 1)
   const lastIdx26 = MONTHS_JAN24_MAY26.length - 1;
   const mayAmbActual = newAddsAmb['2026-05'] ?? 0;
   const mayInfActual = newAddsInf['2026-05'] ?? 0;
@@ -910,7 +911,7 @@ export default function AmbassadorGrowth() {
       {/* ════════ SECTION 5c: Active Ambassadors Per Year ════════ */}
       <div>
         <h3 style={sectionHeader}>Active Ambassadors Per Year</h3>
-        <p style={sectionSub}>Ambassadors with at least 1 submission in the given year. 2026 is YTD through May 28.</p>
+        <p style={sectionSub}>Ambassadors with at least 1 submission in the given year. 2026 is YTD through May.</p>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.875rem', marginBottom: '1rem' }}>
           {([2023, 2024, 2025, 2026] as const).map((y) => {
@@ -1186,7 +1187,7 @@ export default function AmbassadorGrowth() {
         </div>
 
         <div style={{ fontSize: '0.7rem', color: '#888', marginTop: 8, textAlign: 'center' }}>
-          Annualization factor: 12 / 4.903 = {moverAnnFactor.toFixed(2)}x. Pace = YTD x {moverAnnFactor.toFixed(2)}. &quot;New&quot; = no 2025 submissions on record.
+          Annualization factor: 12 / 5 = {moverAnnFactor.toFixed(2)}x. Pace = YTD x {moverAnnFactor.toFixed(2)}. &quot;New&quot; = no 2025 submissions on record.
         </div>
       </div>
 

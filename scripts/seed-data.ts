@@ -251,8 +251,8 @@ const monthlySummaries = [
         year: 2026, month: 5, month_name: 'May',
         goal: 1992, total_submissions: 1136,
         online_submissions: 934, hybrid_submissions: 189, prime_submissions: 13,
-        total_income: 4670, total_visitors: 32652, usa_visitors: 22214,
-        conversion_rate: 2.86, usa_conversion_rate: 4.21,
+        total_income: 4670, total_visitors: 33108, usa_visitors: 28559,
+        conversion_rate: 2.82, usa_conversion_rate: 3.27,
         days_tracked: 31, daily_avg: 36.6,
     },
 ];
