@@ -14,10 +14,11 @@ import {
   Filler,
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
+import annotationPlugin from 'chartjs-plugin-annotation';
 import { fetchSubmissions } from '@/lib/api';
 import type { DailySubmission } from '@/lib/types';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler);
+ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler, annotationPlugin);
 
 // ---- Toothpillow palette (matches AnnualView.tsx) ----
 const TP = {
@@ -233,6 +234,92 @@ export default function WeeklyReport() {
     return all.slice(0, 12);
   }, [allWeeks]);
 
+  // ---- Event annotations for charts ----
+  // Find week index for a given date
+  const weekIndexForDate = (dateStr: string) => {
+    const d = parseDate(dateStr);
+    return completeWeeks.findIndex(w => {
+      const ws = parseDate(w.weekStart);
+      const we = new Date(ws); we.setDate(we.getDate() + 6);
+      return d >= ws && d <= we;
+    });
+  };
+  // Find day index in rolling data
+  const dayIndexForDate = (dateStr: string) => rollingData.findIndex(d => d.date === dateStr);
+
+  const EVENTS = [
+    { date: '2026-02-16', label: 'Influencer Incentive Start', color: '#4fd18b' },
+    { date: '2026-03-16', label: 'Influencer Incentive End', color: '#4fd18b' },
+    { date: '2026-05-22', label: 'Photo Upload Fix', color: '#5b9dff' },
+    { date: '2026-05-28', label: 'Alex Clark Episode', color: '#ffb454' },
+  ];
+
+  // Build weekly chart annotations (vertical lines + shaded region for incentive)
+  const weeklyAnnotations = useMemo(() => {
+    const annotations: Record<string, object> = {};
+    const incStartIdx = weekIndexForDate('2026-02-16');
+    const incEndIdx = weekIndexForDate('2026-03-16');
+    if (incStartIdx >= 0 && incEndIdx >= 0) {
+      annotations.incentiveBox = {
+        type: 'box', xMin: incStartIdx - 0.5, xMax: incEndIdx + 0.5,
+        backgroundColor: 'rgba(79,209,139,0.08)', borderColor: 'rgba(79,209,139,0.3)', borderWidth: 1,
+        label: { display: true, content: 'Influencer Incentive', position: 'start' as const,
+          color: '#4fd18b', font: { size: 10, weight: 'bold' as const }, backgroundColor: 'transparent', padding: 2 },
+      };
+    }
+    const photoIdx = weekIndexForDate('2026-05-22');
+    if (photoIdx >= 0) {
+      annotations.photoFix = {
+        type: 'line', xMin: photoIdx, xMax: photoIdx, borderColor: '#5b9dff', borderWidth: 2, borderDash: [6, 3],
+        label: { display: true, content: 'Photo Fix', position: 'start' as const,
+          backgroundColor: '#5b9dff', color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { x: 5, y: 2 } },
+      };
+    }
+    const alexIdx = weekIndexForDate('2026-05-28');
+    if (alexIdx >= 0) {
+      annotations.alexClark = {
+        type: 'line', xMin: alexIdx, xMax: alexIdx, borderColor: '#ffb454', borderWidth: 2, borderDash: [6, 3],
+        label: { display: true, content: 'Alex Clark', position: 'end' as const,
+          backgroundColor: '#ffb454', color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { x: 5, y: 2 } },
+      };
+    }
+    return annotations;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [completeWeeks]);
+
+  // Build daily rolling chart annotations
+  const dailyAnnotations = useMemo(() => {
+    const annotations: Record<string, object> = {};
+    const incStartDay = dayIndexForDate('2026-02-16');
+    const incEndDay = dayIndexForDate('2026-03-16');
+    if (incStartDay >= 0 && incEndDay >= 0) {
+      annotations.incentiveBox = {
+        type: 'box', xMin: incStartDay - 0.5, xMax: incEndDay + 0.5,
+        backgroundColor: 'rgba(79,209,139,0.06)', borderColor: 'rgba(79,209,139,0.25)', borderWidth: 1,
+        label: { display: true, content: 'Influencer Incentive', position: 'start' as const,
+          color: '#4fd18b', font: { size: 9, weight: 'bold' as const }, backgroundColor: 'transparent', padding: 2 },
+      };
+    }
+    const photoDay = dayIndexForDate('2026-05-22');
+    if (photoDay >= 0) {
+      annotations.photoFix = {
+        type: 'line', xMin: photoDay, xMax: photoDay, borderColor: '#5b9dff', borderWidth: 1.5, borderDash: [5, 3],
+        label: { display: true, content: 'Photo Fix', position: 'start' as const,
+          backgroundColor: '#5b9dff', color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 4, y: 1 } },
+      };
+    }
+    const alexDay = dayIndexForDate('2026-05-28');
+    if (alexDay >= 0) {
+      annotations.alexClark = {
+        type: 'line', xMin: alexDay, xMax: alexDay, borderColor: '#ffb454', borderWidth: 1.5, borderDash: [5, 3],
+        label: { display: true, content: 'Alex Clark', position: 'end' as const,
+          backgroundColor: '#ffb454', color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 4, y: 1 } },
+      };
+    }
+    return annotations;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rollingData]);
+
   // ---- Chart: Weekly Trend (complete weeks only) ----
   const weeklyTrendData = useMemo(() => ({
     labels: completeWeeks.map(w => formatLabel(w.weekStart)),
@@ -396,6 +483,7 @@ export default function WeeklyReport() {
                     },
                   },
                 },
+                annotation: { annotations: weeklyAnnotations },
               },
               scales: {
                 x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 14 } },
@@ -568,6 +656,7 @@ export default function WeeklyReport() {
                     },
                   },
                 },
+                annotation: { annotations: dailyAnnotations },
               },
               scales: {
                 x: {
