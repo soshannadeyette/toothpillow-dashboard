@@ -14,7 +14,7 @@ import {
   Filler,
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
-import { fetchSubmissions, upsertSubmission, currentYear, currentMonth, todayStr } from '@/lib/api';
+import { fetchSubmissions, upsertSubmission, fetchAnnualSummaries, currentYear, currentMonth, todayStr } from '@/lib/api';
 import type { DailySubmission } from '@/lib/types';
 import { MONTHLY_GOALS_2026, MONTH_NAMES, TRAFFIC_2026, TRAFFIC_USA_2026 } from '@/lib/types';
 
@@ -63,12 +63,22 @@ export default function DailyTracker() {
     (g) => g.month === selectedMonth && g.year === selectedYear
   );
 
+  // DB visitor data from monthly_summary (set via Annual tab Save Visitors)
+  const [dbVisitors, setDbVisitors] = useState(0);
+  const [dbUSAVisitors, setDbUSAVisitors] = useState(0);
+
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchSubmissions(selectedYear, selectedMonth);
+      const [data, summaries] = await Promise.all([
+        fetchSubmissions(selectedYear, selectedMonth),
+        fetchAnnualSummaries(selectedYear),
+      ]);
       setEntries(data);
+      const ms = (summaries || []).find(s => s.month === selectedMonth);
+      setDbVisitors(ms?.total_visitors || 0);
+      setDbUSAVisitors(ms?.usa_visitors || 0);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load data');
     } finally {
@@ -123,9 +133,9 @@ export default function DailyTracker() {
   const totalVisitors = entries.reduce((s, e) => s + e.visitors, 0);
   const daysTracked = entries.length;
   const dailyAvg = daysTracked > 0 ? (totalSubmissions / daysTracked).toFixed(1) : '0';
-  // GA4 monthly unique users for conversion rate (not daily session sums)
-  const monthlyUniqueUsers = TRAFFIC_2026[selectedMonth] || 0;
-  const monthlyUSAUsers = TRAFFIC_USA_2026[selectedMonth] || 0;
+  // GA4 monthly unique users for conversion rate — DB (from Annual tab) takes priority, then hardcoded fallback
+  const monthlyUniqueUsers = dbVisitors || TRAFFIC_2026[selectedMonth] || 0;
+  const monthlyUSAUsers = dbUSAVisitors || TRAFFIC_USA_2026[selectedMonth] || 0;
 
   // Days remaining in month
   const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
