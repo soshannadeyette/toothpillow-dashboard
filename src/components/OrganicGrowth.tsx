@@ -417,6 +417,9 @@ export default function OrganicGrowth() {
       { label: 'Impressions', data: GSC_MONTHLY.map(m => m.impressions), backgroundColor: `${TP.darkPurple}70`, borderRadius: 4, borderSkipped: false as const, order: 2, yAxisID: 'y' },
       { label: 'Submissions', data: GSC_MONTHLY.map(m => SUBMISSIONS_BY_MONTH[m.month] || null), type: 'line' as const,
         borderColor: TP.green, backgroundColor: TP.green, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: TP.green, tension: 0.3, order: 1, yAxisID: 'y1' },
+      { label: 'Clicks', data: GSC_MONTHLY.map(m => m.clicks), type: 'line' as const,
+        borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: TP.blue,
+        tension: 0.3, order: 1, yAxisID: 'y1' },
       { label: 'CTR', data: GSC_MONTHLY.map(m => m.ctr), type: 'line' as const,
         borderColor: TP.amber, backgroundColor: TP.amber, borderWidth: 2, pointRadius: 3, pointBackgroundColor: TP.amber,
         borderDash: [5, 3], tension: 0.3, order: 0, yAxisID: 'y2' },
@@ -427,7 +430,7 @@ export default function OrganicGrowth() {
     responsive: true, maintainAspectRatio: false,
     plugins: {
       legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
-      tooltip: { callbacks: { label: (ctx: { datasetIndex: number; parsed: { y: number } }) => ctx.datasetIndex === 0 ? `${ctx.parsed.y.toLocaleString()} impressions` : ctx.datasetIndex === 1 ? `${ctx.parsed.y.toLocaleString()} submissions` : `${ctx.parsed.y.toFixed(1)}% CTR` } },
+      tooltip: { callbacks: { label: (ctx: { datasetIndex: number; parsed: { y: number } }) => ctx.datasetIndex === 0 ? `${ctx.parsed.y.toLocaleString()} impressions` : ctx.datasetIndex === 1 ? `${ctx.parsed.y.toLocaleString()} submissions` : ctx.datasetIndex === 2 ? `${ctx.parsed.y.toLocaleString()} clicks` : `${ctx.parsed.y.toFixed(1)}% CTR` } },
       annotation: { annotations: { ...websiteAnnotation, ...seoAnnotation, ...coreUpdateAnnotation } },
     },
     scales: {
