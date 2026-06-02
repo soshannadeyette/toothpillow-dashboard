@@ -365,48 +365,50 @@ export default function WeeklyReport() {
   const weeklyTrendData = useMemo(() => {
     const hasPartial = chartWeeks.length > 0 && !chartWeeks[chartWeeks.length - 1].complete;
 
+    // For the current partial week, compute projected full-week total
+    const lastIdx = chartWeeks.length - 1;
+
     return {
       labels: chartWeeks.map(w => formatLabel(w.weekStart)),
       datasets: [
+        // Projected total bar (behind actual) — only visible for partial week
+        ...(hasPartial ? [{
+          type: 'bar' as const,
+          label: 'Projected total',
+          data: chartWeeks.map((w, i) => {
+            if (i === lastIdx && !w.complete && w.days > 0) {
+              return Math.round(w.total * (7 / w.days));
+            }
+            return 0;
+          }),
+          backgroundColor: chartWeeks.map((_, i) =>
+            i === lastIdx ? `${TP.yellow}35` : 'transparent'
+          ),
+          borderColor: chartWeeks.map((_, i) =>
+            i === lastIdx ? `${TP.yellow}90` : 'transparent'
+          ),
+          borderWidth: 2,
+          borderRadius: 4,
+          borderDash: [6, 3] as number[],
+          yAxisID: 'y',
+          order: 4,
+          barPercentage: 0.95,
+        }] : []),
+        // Actual bars
         {
           type: 'bar' as const,
           label: 'Total (week)',
           data: chartWeeks.map(w => w.total),
           backgroundColor: chartWeeks.map((w, i) =>
-            i === chartWeeks.length - 1 && hasPartial ? `${TP.blue}30` : `${TP.blue}55`
+            i === lastIdx && hasPartial ? `${TP.blue}55` : `${TP.blue}55`
           ),
-          borderColor: chartWeeks.map((w, i) =>
-            i === chartWeeks.length - 1 && hasPartial ? `${TP.blue}60` : `${TP.blue}BB`
-          ),
+          borderColor: `${TP.blue}BB`,
           borderWidth: 1,
           borderRadius: 4,
           yAxisID: 'y',
           order: 3,
-          stack: 'stack0',
+          barPercentage: 0.7,
         },
-        // Projected bar for partial week (stacked on top of actual)
-        ...(hasPartial ? [{
-          type: 'bar' as const,
-          label: 'Projected',
-          data: chartWeeks.map((w, i) => {
-            if (i === chartWeeks.length - 1 && !w.complete && w.days > 0) {
-              return Math.round(w.total * (7 / w.days)) - w.total;
-            }
-            return 0;
-          }),
-          backgroundColor: chartWeeks.map((_, i) =>
-            i === chartWeeks.length - 1 ? `${TP.yellow}40` : 'transparent'
-          ),
-          borderColor: chartWeeks.map((_, i) =>
-            i === chartWeeks.length - 1 ? `${TP.yellow}80` : 'transparent'
-          ),
-          borderWidth: 1,
-          borderRadius: 4,
-          borderDash: [4, 2] as number[],
-          yAxisID: 'y',
-          order: 2,
-          stack: 'stack0',
-        }] : []),
         {
           type: 'line' as const,
           label: 'Avg / day',
