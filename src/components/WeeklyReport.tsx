@@ -254,11 +254,20 @@ export default function WeeklyReport() {
     return all.slice(0, 12);
   }, [allWeeks]);
 
+  // ---- Chart weeks: complete + current partial projected ----
+  const chartWeeks = useMemo(() => {
+    const weeks = [...completeWeeks];
+    if (currentWeek && !currentWeek.complete && currentWeek.days > 0) {
+      weeks.push(currentWeek);
+    }
+    return weeks;
+  }, [completeWeeks, currentWeek]);
+
   // ---- Event annotations for charts ----
   // Find week index for a given date
   const weekIndexForDate = (dateStr: string) => {
     const d = parseDate(dateStr);
-    return completeWeeks.findIndex(w => {
+    return chartWeeks.findIndex(w => {
       const ws = parseDate(w.weekStart);
       const we = new Date(ws); we.setDate(we.getDate() + 6);
       return d >= ws && d <= we;
@@ -305,7 +314,7 @@ export default function WeeklyReport() {
     }
     return annotations;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [completeWeeks]);
+  }, [chartWeeks]);
 
   // Build daily rolling chart annotations
   const dailyAnnotations = useMemo(() => {
@@ -340,35 +349,67 @@ export default function WeeklyReport() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rollingData]);
 
-  // ---- Chart: Weekly Trend (complete weeks only) ----
-  const weeklyTrendData = useMemo(() => ({
-    labels: completeWeeks.map(w => formatLabel(w.weekStart)),
-    datasets: [
-      {
-        type: 'bar' as const,
-        label: 'Total (week)',
-        data: completeWeeks.map(w => w.total),
-        backgroundColor: `${TP.blue}55`,
-        borderColor: `${TP.blue}BB`,
-        borderWidth: 1,
-        borderRadius: 4,
-        yAxisID: 'y',
-        order: 2,
-      },
-      {
-        type: 'line' as const,
-        label: 'Avg / day',
-        data: completeWeeks.map(w => w.dailyAvg),
-        borderColor: TP.green,
-        backgroundColor: TP.green,
-        borderWidth: 2.5,
-        pointRadius: 3,
-        tension: 0.3,
-        yAxisID: 'y1',
-        order: 1,
-      },
-    ],
-  }), [completeWeeks]);
+  // ---- Chart: Weekly Trend (complete weeks + current projected) ----
+  const weeklyTrendData = useMemo(() => {
+    const hasPartial = chartWeeks.length > 0 && !chartWeeks[chartWeeks.length - 1].complete;
+
+    return {
+      labels: chartWeeks.map(w => formatLabel(w.weekStart)),
+      datasets: [
+        {
+          type: 'bar' as const,
+          label: 'Total (week)',
+          data: chartWeeks.map(w => w.total),
+          backgroundColor: chartWeeks.map((w, i) =>
+            i === chartWeeks.length - 1 && hasPartial ? `${TP.blue}30` : `${TP.blue}55`
+          ),
+          borderColor: chartWeeks.map((w, i) =>
+            i === chartWeeks.length - 1 && hasPartial ? `${TP.blue}60` : `${TP.blue}BB`
+          ),
+          borderWidth: 1,
+          borderRadius: 4,
+          borderDash: undefined,
+          yAxisID: 'y',
+          order: 3,
+        },
+        // Projected bar for partial week (stacked on top of actual)
+        ...(hasPartial ? [{
+          type: 'bar' as const,
+          label: 'Projected',
+          data: chartWeeks.map((w, i) => {
+            if (i === chartWeeks.length - 1 && !w.complete && w.days > 0) {
+              return Math.round(w.total * (7 / w.days)) - w.total;
+            }
+            return 0;
+          }),
+          backgroundColor: chartWeeks.map((_, i) =>
+            i === chartWeeks.length - 1 ? `${TP.yellow}40` : 'transparent'
+          ),
+          borderColor: chartWeeks.map((_, i) =>
+            i === chartWeeks.length - 1 ? `${TP.yellow}80` : 'transparent'
+          ),
+          borderWidth: 1,
+          borderRadius: 4,
+          borderDash: [4, 2] as number[],
+          yAxisID: 'y',
+          order: 2,
+          stack: 'stack0',
+        }] : []),
+        {
+          type: 'line' as const,
+          label: 'Avg / day',
+          data: chartWeeks.map(w => w.dailyAvg),
+          borderColor: TP.green,
+          backgroundColor: TP.green,
+          borderWidth: 2.5,
+          pointRadius: 3,
+          tension: 0.3,
+          yAxisID: 'y1',
+          order: 1,
+        },
+      ],
+    };
+  }, [chartWeeks]);
 
   // ---- Chart: Day-of-Week Norms ----
   const dowChartData = useMemo(() => ({
@@ -483,7 +524,7 @@ export default function WeeklyReport() {
           Weekly Trend
         </h3>
         <p className="text-xs text-gray-500 mb-4">
-          Bars show total submissions per complete week (Sun-Sat). Line shows average per day. Partial weeks excluded.
+          Bars show total submissions per week (Sun-Sat). Current partial week shown with projected total (faded). Line shows average per day.
         </p>
         <div style={{ height: 340 }}>
           <Bar
@@ -498,7 +539,7 @@ export default function WeeklyReport() {
                   callbacks: {
                     afterTitle: (items) => {
                       const idx = items[0].dataIndex;
-                      const w = completeWeeks[idx];
+                      const w = chartWeeks[idx];
                       return w.label;
                     },
                   },
