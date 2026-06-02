@@ -243,14 +243,15 @@ export default function WeeklyReport() {
   }, [completeWeeks]);
 
   // KPI: Last 4 vs first 4 complete weeks trend
+  // Recent momentum: last 4 complete weeks vs the 4 before them
   const trendPct = useMemo(() => {
     if (completeWeeks.length < 8) return null;
-    const first4 = completeWeeks.slice(0, 4);
-    const last4 = completeWeeks.slice(-4);
-    const first4Avg = first4.reduce((s, w) => s + w.dailyAvg, 0) / 4;
-    const last4Avg = last4.reduce((s, w) => s + w.dailyAvg, 0) / 4;
-    if (first4Avg === 0) return null;
-    return Math.round(((last4Avg - first4Avg) / first4Avg) * 100);
+    const recent4 = completeWeeks.slice(-4);
+    const prior4 = completeWeeks.slice(-8, -4);
+    const recentAvg = recent4.reduce((s, w) => s + w.dailyAvg, 0) / 4;
+    const priorAvg = prior4.reduce((s, w) => s + w.dailyAvg, 0) / 4;
+    if (priorAvg === 0) return null;
+    return Math.round(((recentAvg - priorAvg) / priorAvg) * 100);
   }, [completeWeeks]);
 
   // Rolling 7-day data
@@ -519,13 +520,13 @@ export default function WeeklyReport() {
           </div>
         </div>
 
-        {/* Last 4 vs First 4 trend */}
+        {/* Recent momentum */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4" style={{ borderLeft: `4px solid ${TP.darkPurple}` }}>
-          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Last 4 vs First 4 Weeks</div>
+          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">4-Week Momentum</div>
           <div className={`text-3xl font-bold mt-1 ${trendPct !== null && trendPct >= 0 ? 'text-green-600' : 'text-red-500'}`}>
             {trendPct !== null ? `${trendPct >= 0 ? '+' : ''}${trendPct}%` : '--'}
           </div>
-          <div className="text-sm text-gray-400 mt-1">Avg daily rate change</div>
+          <div className="text-sm text-gray-400 mt-1">Last 4 weeks vs prior 4</div>
         </div>
       </div>
 
