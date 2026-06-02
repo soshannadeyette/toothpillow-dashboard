@@ -379,9 +379,9 @@ export default function WeeklyReport() {
           ),
           borderWidth: 1,
           borderRadius: 4,
-          borderDash: undefined,
           yAxisID: 'y',
           order: 3,
+          stack: 'stack0',
         },
         // Projected bar for partial week (stacked on top of actual)
         ...(hasPartial ? [{
