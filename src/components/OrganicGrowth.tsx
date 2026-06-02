@@ -69,6 +69,7 @@ const GSC_MONTHLY = [
   { month: '2026-03', clicks: 12601, impressions: 74269, ctr: 17.0, position: 26.9 },
   { month: '2026-04', clicks: 11180, impressions: 105758, ctr: 10.6, position: 37.4 },
   { month: '2026-05', clicks: 10082, impressions: 51676, ctr: 19.5, position: 21.5 },
+  { month: '2026-06', clicks: 736, impressions: 2771, ctr: 26.6, position: 24.7 },
 ];
 
 const GSC_WEEKLY = [
