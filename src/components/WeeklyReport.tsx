@@ -371,7 +371,7 @@ export default function WeeklyReport() {
     return {
       labels: chartWeeks.map(w => formatLabel(w.weekStart)),
       datasets: [
-        // Projected total bar (behind actual) — only visible for partial week
+        // Projected total bar — renders on hidden x2 axis so it overlaps (behind) actual
         ...(hasPartial ? [{
           type: 'bar' as const,
           label: 'Projected total',
@@ -382,32 +382,32 @@ export default function WeeklyReport() {
             return 0;
           }),
           backgroundColor: chartWeeks.map((_, i) =>
-            i === lastIdx ? `${TP.yellow}35` : 'transparent'
+            i === lastIdx ? `${TP.yellow}30` : 'transparent'
           ),
           borderColor: chartWeeks.map((_, i) =>
-            i === lastIdx ? `${TP.yellow}90` : 'transparent'
+            i === lastIdx ? `${TP.yellow}AA` : 'transparent'
           ),
           borderWidth: 2,
-          borderRadius: 4,
+          borderRadius: 6,
           borderDash: [6, 3] as number[],
           yAxisID: 'y',
+          xAxisID: 'x2',
           order: 4,
-          barPercentage: 0.95,
+          barPercentage: 1.0,
+          categoryPercentage: 0.75,
         }] : []),
         // Actual bars
         {
           type: 'bar' as const,
           label: 'Total (week)',
           data: chartWeeks.map(w => w.total),
-          backgroundColor: chartWeeks.map((w, i) =>
-            i === lastIdx && hasPartial ? `${TP.blue}55` : `${TP.blue}55`
-          ),
+          backgroundColor: `${TP.blue}55`,
           borderColor: `${TP.blue}BB`,
           borderWidth: 1,
           borderRadius: 4,
           yAxisID: 'y',
+          xAxisID: 'x',
           order: 3,
-          barPercentage: 0.7,
         },
         {
           type: 'line' as const,
@@ -562,6 +562,7 @@ export default function WeeklyReport() {
               },
               scales: {
                 x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 14 } },
+                x2: { display: false, grid: { display: false }, offset: true },
                 y: { position: 'left', beginAtZero: true, title: { display: true, text: 'Total / week' } },
                 y1: { position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, title: { display: true, text: 'Avg / day' } },
               },
