@@ -371,32 +371,7 @@ export default function WeeklyReport() {
     return {
       labels: chartWeeks.map(w => formatLabel(w.weekStart)),
       datasets: [
-        // Projected total bar — renders on hidden x2 axis so it overlaps (behind) actual
-        ...(hasPartial ? [{
-          type: 'bar' as const,
-          label: 'Projected total',
-          data: chartWeeks.map((w, i) => {
-            if (i === lastIdx && !w.complete && w.days > 0) {
-              return Math.round(w.total * (7 / w.days));
-            }
-            return 0;
-          }),
-          backgroundColor: chartWeeks.map((_, i) =>
-            i === lastIdx ? `${TP.yellow}30` : 'transparent'
-          ),
-          borderColor: chartWeeks.map((_, i) =>
-            i === lastIdx ? `${TP.yellow}AA` : 'transparent'
-          ),
-          borderWidth: 2,
-          borderRadius: 6,
-          borderDash: [6, 3] as number[],
-          yAxisID: 'y',
-          xAxisID: 'x2',
-          order: 4,
-          barPercentage: 1.0,
-          categoryPercentage: 0.75,
-        }] : []),
-        // Actual bars
+        // Actual bars (solid blue)
         {
           type: 'bar' as const,
           label: 'Total (week)',
@@ -406,9 +381,28 @@ export default function WeeklyReport() {
           borderWidth: 1,
           borderRadius: 4,
           yAxisID: 'y',
-          xAxisID: 'x',
           order: 3,
+          stack: 'main',
         },
+        // Projected remaining (stacked on top of actual, yellow)
+        ...(hasPartial ? [{
+          type: 'bar' as const,
+          label: 'Projected remaining',
+          data: chartWeeks.map((w, i) => {
+            if (i === lastIdx && !w.complete && w.days > 0) {
+              return Math.round(w.total * (7 / w.days)) - w.total;
+            }
+            return 0;
+          }),
+          backgroundColor: `${TP.yellow}40`,
+          borderColor: `${TP.yellow}90`,
+          borderWidth: 2,
+          borderRadius: 4,
+          borderDash: [6, 3] as number[],
+          yAxisID: 'y',
+          order: 3,
+          stack: 'main',
+        }] : []),
         {
           type: 'line' as const,
           label: 'Avg / day',
@@ -561,8 +555,7 @@ export default function WeeklyReport() {
                 annotation: { annotations: weeklyAnnotations },
               },
               scales: {
-                x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 14 } },
-                x2: { display: false, grid: { display: false }, offset: true },
+                x: { stacked: true, grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 14 } },
                 y: { position: 'left', beginAtZero: true, title: { display: true, text: 'Total / week' } },
                 y1: { position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, title: { display: true, text: 'Avg / day' } },
               },
