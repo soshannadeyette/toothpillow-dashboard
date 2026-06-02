@@ -90,12 +90,12 @@ const REFERRER_DATA: Record<string, RefMonth> = {
   "2026-02": {total:1503, Parent:66, "Dental Office":312, "Airway Ambassador":58, Influencer:517, Podcast:92, Instagram:70, TikTok:3, Facebook:25, "Meta Ad":5, "Online Search":282, "Unknown Referral":46, "Unknown Professional Referral":27, Other:0},
   "2026-03": {total:1604, Parent:75, "Dental Office":321, "Airway Ambassador":64, Influencer:463, Podcast:163, Instagram:74, TikTok:1, Facebook:11, "Meta Ad":2, "Online Search":339, "Unknown Referral":58, "Unknown Professional Referral":21, Other:12},
   "2026-04": {total:1228, Parent:75, "Dental Office":259, "Airway Ambassador":64, Influencer:238, Podcast:125, Instagram:39, TikTok:1, Facebook:10, "Meta Ad":0, "Online Search":298, "Unknown Referral":70, "Unknown Professional Referral":25, Other:23},
-  "2026-05": {total:1113, Parent:52, "Dental Office":212, "Airway Ambassador":35, Influencer:267, Podcast:124, Instagram:55, TikTok:4, Facebook:13, "Meta Ad":1, "Online Search":255, "Unknown Referral":54, "Unknown Professional Referral":7, Other:0, "Google Ad":28, MYO:3, "Health Care Professional":3},
+  "2026-05": {total:1113, Parent:51, "Dental Office":212, "Airway Ambassador":36, Influencer:267, Podcast:124, Instagram:55, TikTok:4, Facebook:13, "Meta Ad":1, "Online Search":255, "Unknown Referral":54, "Unknown Professional Referral":7, Other:0, "Google Ad":28, MYO:3, "Health Care Professional":3},
 };
 
 /* ────── May 2026 Final (Salesforce export pulled June 1, 2026) ────── */
 const MAY_2026_SF: Record<string, number> = {
-  total: 1113, Parent: 52, 'Dental Office': 212, 'Airway Ambassador': 35,
+  total: 1113, Parent: 51, 'Dental Office': 212, 'Airway Ambassador': 36,
   Influencer: 267, Podcast: 124, Instagram: 55, TikTok: 4, Facebook: 13,
   'Meta Ad': 1, 'Online Search': 255, 'Unknown Referral': 54,
   'Unknown Professional Referral': 7, 'Google Ad': 28, MYO: 3,
