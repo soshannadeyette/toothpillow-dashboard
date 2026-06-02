@@ -42,8 +42,19 @@ const TP = {
 // Key = week start date (Sunday). Source: GA4, provided weekly by Sosh.
 // Conversion rate = online submissions / visitors for each week.
 const WEEKLY_VISITORS: Record<string, { world: number; usa: number }> = {
-  // Sosh to provide weekly GA4 data — format: 'YYYY-MM-DD': { world: X, usa: Y }
-  // Example: '2026-01-04': { world: 5320, usa: 4800 },
+  // Source: GA4, provided by Sosh June 1 2026. Weeks are Sun-Sat.
+  '2026-03-15': { world: 9808, usa: 8462 },
+  '2026-03-22': { world: 10532, usa: 8866 },
+  '2026-03-29': { world: 8241, usa: 6984 },
+  '2026-04-05': { world: 8957, usa: 7535 },
+  '2026-04-12': { world: 7739, usa: 6504 },
+  '2026-04-19': { world: 7207, usa: 6301 },
+  '2026-04-26': { world: 7778, usa: 6700 },
+  '2026-05-03': { world: 7062, usa: 5974 },
+  '2026-05-10': { world: 6749, usa: 5829 },
+  '2026-05-17': { world: 8732, usa: 7766 },
+  '2026-05-24': { world: 10343, usa: 8923 },
+  '2026-05-31': { world: 3430, usa: 3046 },
 };
 
 // ---- Types ----
