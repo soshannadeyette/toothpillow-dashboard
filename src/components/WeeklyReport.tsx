@@ -38,6 +38,14 @@ const TP = {
   navy: '#1B2A4A',
 };
 
+// ---- Weekly GA4 Visitors (World + USA) ----
+// Key = week start date (Sunday). Source: GA4, provided weekly by Sosh.
+// Conversion rate = online submissions / visitors for each week.
+const WEEKLY_VISITORS: Record<string, { world: number; usa: number }> = {
+  // Sosh to provide weekly GA4 data — format: 'YYYY-MM-DD': { world: X, usa: Y }
+  // Example: '2026-01-04': { world: 5320, usa: 4800 },
+};
+
 // ---- Types ----
 interface WeekData {
   weekStart: string; // YYYY-MM-DD (Sunday)
@@ -51,6 +59,10 @@ interface WeekData {
   days: number;
   dailyAvg: number;
   complete: boolean; // true if 7 days of data
+  visitorsWorld: number;
+  visitorsUSA: number;
+  convWorld: number | null; // online / world visitors %
+  convUSA: number | null;   // online / USA visitors %
 }
 
 // ---- Helpers ----
@@ -118,6 +130,10 @@ function computeWeeks(entries: DailySubmission[]): WeekData[] {
     const total = online + hybrid + prime;
     const days = weekEntries.length;
 
+    const vis = WEEKLY_VISITORS[current];
+    const vWorld = vis?.world || 0;
+    const vUSA = vis?.usa || 0;
+
     weeks.push({
       weekStart: current,
       weekEnd: saturday,
@@ -130,6 +146,10 @@ function computeWeeks(entries: DailySubmission[]): WeekData[] {
       days,
       dailyAvg: days > 0 ? Math.round((total / days) * 10) / 10 : 0,
       complete: days === 7,
+      visitorsWorld: vWorld,
+      visitorsUSA: vUSA,
+      convWorld: vWorld > 0 ? Math.round((online / vWorld) * 10000) / 100 : null,
+      convUSA: vUSA > 0 ? Math.round((online / vUSA) * 10000) / 100 : null,
     });
 
     current = addDays(current, 7);
@@ -511,6 +531,8 @@ export default function WeeklyReport() {
                 <th className="px-4 py-2 font-medium text-right">Hybrid</th>
                 <th className="px-4 py-2 font-medium text-right">Prime</th>
                 <th className="px-4 py-2 font-medium text-right">Avg/Day</th>
+                <th className="px-4 py-2 font-medium text-right">Conv %</th>
+                <th className="px-4 py-2 font-medium text-right">USA Conv %</th>
                 <th className="px-4 py-2 font-medium text-right">WoW %</th>
               </tr>
             </thead>
@@ -544,6 +566,12 @@ export default function WeeklyReport() {
                     <td className="px-4 py-2 border-t border-gray-100 text-right text-amber-600">{w.hybrid.toLocaleString()}</td>
                     <td className="px-4 py-2 border-t border-gray-100 text-right text-red-600">{w.prime.toLocaleString()}</td>
                     <td className="px-4 py-2 border-t border-gray-100 text-right">{w.dailyAvg}</td>
+                    <td className="px-4 py-2 border-t border-gray-100 text-right text-purple-600">
+                      {w.convWorld !== null ? `${w.convWorld}%` : <span className="text-gray-300">--</span>}
+                    </td>
+                    <td className="px-4 py-2 border-t border-gray-100 text-right text-purple-600">
+                      {w.convUSA !== null ? `${w.convUSA}%` : <span className="text-gray-300">--</span>}
+                    </td>
                     <td className={`px-4 py-2 border-t border-gray-100 text-right font-medium ${
                       wowPct === null ? 'text-gray-400' : wowPct >= 0 ? 'text-green-600' : 'text-red-500'
                     }`}>
