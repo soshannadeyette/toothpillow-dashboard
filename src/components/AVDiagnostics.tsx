@@ -425,42 +425,59 @@ export default function AVDiagnostics() {
         </div>
       </div>
 
-      {/* ═══════ SECTION 4: COHORT AGING — WEEKLY OUTCOMES ═══════ */}
+      {/* ═══════ SECTION 4: COHORT AGING — DID THE PHOTO UPLOAD CHANGE WORK? ═══════ */}
       <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>Weekly cohort outcomes — completed vs waiting</h3>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>Cohort aging comparison — did the photo upload change work?</h3>
         <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px' }}>
-          Each row tracks everyone who started that week. Shows where they ended up. Younger cohorts haven&apos;t had time for late completers.
+          Each row tracks everyone who started that week. The stacked bar shows where they ended up: completed (green), still waiting (red), or other (gray).
+          These add up to 100%. Within &quot;completed,&quot; the shade shows speed — dark green within 7 days, lighter shades took longer.
+          A cohort is <strong>mature</strong> when every person in it has had enough time to reach that window.
         </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {COHORT_AGING.map(c => {
             const completed = c.within7d + c.d8to14 + c.d15plus;
-            const compPct = Math.round(completed / c.starts * 100);
-            const waitPct = 100 - compPct;
+            const other = c.starts - completed - c.waiting;
+            const w7pct = Math.round(c.within7d / c.starts * 100);
+            const d8pct = Math.round(c.d8to14 / c.starts * 100);
+            const d15pct = Math.round(c.d15plus / c.starts * 100);
+            const compPct = w7pct + d8pct + d15pct;
+            const waitPct = Math.round(c.waiting / c.starts * 100);
+            const otherPct = Math.max(0, 100 - compPct - waitPct);
             return (
-              <div key={c.label} style={{ background: c.postUpdate ? '#F0FDF410' : 'transparent', borderRadius: 10, border: c.postUpdate ? `1.5px solid ${TP.green}40` : '1.5px solid #E5E7EB', padding: '14px 18px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <div>
-                    <span style={{ fontWeight: 700, color: TP.navy, fontSize: 14 }}>{c.label}</span>
-                    {c.postUpdate && <span style={{ fontSize: 10, fontWeight: 700, background: TP.green, color: '#fff', padding: '2px 8px', borderRadius: 4, marginLeft: 8 }}>POST-UPDATE</span>}
-                    {!c.mature7d && <span style={{ fontSize: 10, color: TP.amber, fontWeight: 600, marginLeft: 8 }}>STILL AGING</span>}
+              <div key={c.label} style={{ background: '#fff', borderRadius: 12, border: c.postUpdate ? `2px solid ${TP.green}50` : '2px solid #E5E7EB', padding: '16px 20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontWeight: 700, color: TP.navy, fontSize: 15 }}>{c.label}</span>
+                    {c.postUpdate && <span style={{ fontSize: 10, fontWeight: 700, background: TP.green, color: '#fff', padding: '2px 8px', borderRadius: 4 }}>POST-UPDATE</span>}
+                    {!c.mature7d && <span style={{ fontSize: 10, color: TP.coral, fontWeight: 600 }}>STILL AGING</span>}
                   </div>
                   <span style={{ fontSize: 12, color: '#6B7280' }}>{c.starts} started · {c.daysElapsed} days old</span>
                 </div>
-                <div style={{ display: 'flex', height: 24, borderRadius: 6, overflow: 'hidden', background: '#f0f0f0' }}>
-                  <div style={{ width: `${compPct}%`, background: TP.green, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: '#fff' }}>{compPct}%</span>
-                  </div>
+                <div style={{ display: 'flex', height: 30, borderRadius: 8, overflow: 'hidden', background: '#f0f0f0' }}>
+                  {w7pct > 0 && <div style={{ width: `${w7pct}%`, background: TP.green, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: w7pct > 8 ? 0 : 20 }}>
+                    {w7pct > 10 && <span style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>{compPct}%</span>}
+                  </div>}
+                  {d8pct > 0 && <div style={{ width: `${d8pct}%`, background: `${TP.green}80` }} />}
+                  {d15pct > 0 && <div style={{ width: `${d15pct}%`, background: `${TP.green}50` }} />}
                   <div style={{ width: `${waitPct}%`, background: TP.red, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: '#fff' }}>{waitPct}%</span>
+                    {waitPct > 10 && <span style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>{waitPct}%</span>}
                   </div>
+                  {otherPct > 0 && <div style={{ width: `${otherPct}%`, background: '#D1D5DB' }} />}
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, fontSize: 11, color: '#6B7280' }}>
-                  <span style={{ color: TP.green }}>Completed: {completed} ({compPct}%) — {c.within7d} within 7d{c.d8to14 > 0 ? `, ${c.d8to14} days 8-14` : ''}{c.d15plus > 0 ? `, ${c.d15plus} after 14d` : ''}</span>
-                  <span style={{ color: TP.red }}>Waiting: {c.waiting} ({waitPct}%)</span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 6, fontSize: 11 }}>
+                  <span style={{ color: TP.green, fontWeight: 600 }}>Completed: {completed} ({compPct}%) — {c.within7d} within 7d{c.d8to14 > 0 ? `, ${c.d8to14} days 8-14` : ''}{c.d15plus > 0 ? `, ${c.d15plus} after 14d` : ''}</span>
+                  <span style={{ color: TP.red, fontWeight: 600 }}>Waiting: {c.waiting} ({waitPct}%)</span>
+                  {other > 0 && <span style={{ color: '#6B7280' }}>Other: {other} ({otherPct}%)</span>}
                 </div>
               </div>
             );
           })}
+        </div>
+        <div style={{ display: 'flex', gap: 16, marginTop: 12, fontSize: 11, color: '#6B7280' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: TP.green }} /> Completed within 7 days</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: `${TP.green}80` }} /> Completed days 8–14</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: TP.red }} /> Still waiting</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: '#D1D5DB' }} /> Other (closed, denied, etc.)</span>
         </div>
       </div>
 
