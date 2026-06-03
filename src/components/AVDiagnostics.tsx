@@ -12,8 +12,9 @@ import {
   Legend,
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
+import annotationPlugin from 'chartjs-plugin-annotation';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
 const TP = {
   blue: '#3A6EA4',
@@ -421,6 +422,170 @@ export default function AVDiagnostics() {
               <span style={{ fontWeight: 700, color: '#166534' }}>0.2 days</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* ═══════ SECTION 4: COHORT AGING — WEEKLY OUTCOMES ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 24 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>Weekly cohort outcomes — completed vs waiting</h3>
+        <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px' }}>
+          Each row tracks everyone who started that week. Shows where they ended up. Younger cohorts haven&apos;t had time for late completers.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {COHORT_AGING.map(c => {
+            const completed = c.within7d + c.d8to14 + c.d15plus;
+            const compPct = Math.round(completed / c.starts * 100);
+            const waitPct = 100 - compPct;
+            return (
+              <div key={c.label} style={{ background: c.postUpdate ? '#F0FDF410' : 'transparent', borderRadius: 10, border: c.postUpdate ? `1.5px solid ${TP.green}40` : '1.5px solid #E5E7EB', padding: '14px 18px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <div>
+                    <span style={{ fontWeight: 700, color: TP.navy, fontSize: 14 }}>{c.label}</span>
+                    {c.postUpdate && <span style={{ fontSize: 10, fontWeight: 700, background: TP.green, color: '#fff', padding: '2px 8px', borderRadius: 4, marginLeft: 8 }}>POST-UPDATE</span>}
+                    {!c.mature7d && <span style={{ fontSize: 10, color: TP.amber, fontWeight: 600, marginLeft: 8 }}>STILL AGING</span>}
+                  </div>
+                  <span style={{ fontSize: 12, color: '#6B7280' }}>{c.starts} started · {c.daysElapsed} days old</span>
+                </div>
+                <div style={{ display: 'flex', height: 24, borderRadius: 6, overflow: 'hidden', background: '#f0f0f0' }}>
+                  <div style={{ width: `${compPct}%`, background: TP.green, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: '#fff' }}>{compPct}%</span>
+                  </div>
+                  <div style={{ width: `${waitPct}%`, background: TP.red, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: '#fff' }}>{waitPct}%</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, fontSize: 11, color: '#6B7280' }}>
+                  <span style={{ color: TP.green }}>Completed: {completed} ({compPct}%) — {c.within7d} within 7d{c.d8to14 > 0 ? `, ${c.d8to14} days 8-14` : ''}{c.d15plus > 0 ? `, ${c.d15plus} after 14d` : ''}</span>
+                  <span style={{ color: TP.red }}>Waiting: {c.waiting} ({waitPct}%)</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ═══════ SECTION 5: MAY DAILY — STARTS vs SUBMITTED vs WAITING ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 24 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>May daily: starts vs submitted vs waiting</h3>
+        <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px' }}>
+          Stacked bars show submitted (green) and waiting (red). Line shows total starts. Lighter bars = post-update (May 23+).
+        </p>
+        <div style={{ height: 340 }}>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <Bar
+            data={{
+              labels: MAY_DAILY.map(d => d.day.toString()),
+              datasets: [
+                { label: 'Submitted', data: MAY_DAILY.map(d => d.submitted), backgroundColor: MAY_DAILY.map(d => d.day >= 23 ? `${TP.green}60` : TP.green), borderRadius: 2, stack: 'stack0' },
+                { label: 'Waiting', data: MAY_DAILY.map(d => d.waiting), backgroundColor: MAY_DAILY.map(d => d.day >= 23 ? `${TP.red}60` : `${TP.red}BB`), borderRadius: 2, stack: 'stack0' },
+                { label: 'Total starts', data: MAY_DAILY.map(d => d.starts), type: 'line' as const, borderColor: TP.navy, borderWidth: 2, pointRadius: 2, tension: 0.3, order: 0 } as any,
+              ],
+            } as any}
+            options={{
+              responsive: true, maintainAspectRatio: false,
+              plugins: {
+                legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, font: { size: 11 } } },
+                tooltip: { mode: 'index' as const, intersect: false },
+                annotation: { annotations: {
+                  updateLine: { type: 'line' as const, xMin: 21.5, xMax: 21.5, borderColor: TP.navy, borderWidth: 2, borderDash: [6, 3],
+                    label: { display: true, content: 'May 22 Update', position: 'start' as const, backgroundColor: TP.navy, color: '#fff', font: { size: 10, weight: 'bold' as const }, padding: { x: 6, y: 3 } } },
+                  podcastLine: { type: 'line' as const, xMin: 27.5, xMax: 27.5, borderColor: TP.amber, borderWidth: 2, borderDash: [6, 3],
+                    label: { display: true, content: 'Alex Clark', position: 'end' as const, backgroundColor: TP.amber, color: '#fff', font: { size: 10, weight: 'bold' as const }, padding: { x: 6, y: 3 } } },
+                } },
+              },
+              scales: {
+                x: { stacked: true, grid: { display: false }, ticks: { font: { size: 9 } } },
+                y: { stacked: true, beginAtZero: true },
+              },
+            } as any}
+          />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: 8, flexWrap: 'wrap' }}>
+          {MAY_DAILY.map(d => (
+            <span key={d.day} style={{ fontSize: 9, color: d.starts > 0 ? (d.submitted / d.starts >= 0.55 ? TP.green : d.submitted / d.starts <= 0.4 ? TP.red : '#6B7280') : '#ccc', width: `${100/31}%`, textAlign: 'center' }}>
+              {d.starts > 0 ? Math.round(d.submitted / d.starts * 100) + '%' : ''}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ═══════ SECTION 6: STARTS vs SUBMITTED BY MONTH ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 24 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>Monthly: starts, submitted, waiting</h3>
+        <div style={{ height: 300 }}>
+          <Bar
+            data={{
+              labels: AV_DATA.map(d => d.label),
+              datasets: [
+                { label: 'Submitted', data: AV_DATA.map(d => d.submitted), backgroundColor: TP.green, borderRadius: 4, stack: 'stack0' },
+                { label: 'Waiting', data: AV_DATA.map(d => d.waiting), backgroundColor: `${TP.amber}90`, borderRadius: 4, stack: 'stack0' },
+              ],
+            }}
+            options={{
+              responsive: true, maintainAspectRatio: false,
+              plugins: { legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8 } } },
+              scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true } },
+            }}
+          />
+        </div>
+        <div style={{ overflowX: 'auto', marginTop: 12 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid #E5E7EB' }}>
+                <th style={{ textAlign: 'left', padding: '6px 8px', fontWeight: 600 }}>Period</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>Starts</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>Submitted</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>Comp %</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>Waiting</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>Wait %</th>
+              </tr>
+            </thead>
+            <tbody>
+              {AV_DATA.map(d => (
+                <tr key={d.label} style={{ borderBottom: '1px solid #F3F4F6', background: d.period === 'post-update' ? '#F0FDF4' : 'transparent', fontWeight: d.period === 'post-update' ? 600 : 400 }}>
+                  <td style={{ padding: '6px 8px' }}>{d.label}{d.period === 'post-update' ? ' (post-update)' : ''}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right' }}>{d.starts.toLocaleString()}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right' }}>{d.submitted.toLocaleString()}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right' }}>{d.starts > 0 ? Math.round(d.submitted / d.starts * 100) : 0}%</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right' }}>{d.waiting.toLocaleString()}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', color: d.waiting / d.starts > 0.45 ? TP.red : 'inherit' }}>{d.starts > 0 ? Math.round(d.waiting / d.starts * 100) : 0}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ═══════ SECTION 7: PIPELINE ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 24 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>Pipeline snapshot</h3>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid #E5E7EB' }}>
+                <th style={{ textAlign: 'left', padding: '6px 8px', fontWeight: 600 }}>Month</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>Waiting</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>In Review</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>Checkout</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>Checked Out</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>Closed</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>On Hold</th>
+              </tr>
+            </thead>
+            <tbody>
+              {FUNNEL_DATA.map(d => (
+                <tr key={d.label} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                  <td style={{ padding: '6px 8px', fontWeight: 600 }}>{d.label}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', color: TP.amber }}>{d.waiting}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', color: TP.purple }}>{d.inReview}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', color: TP.blue }}>{d.checkout}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', color: TP.green }}>{d.checkedOut}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', color: TP.red }}>{d.closed}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', color: '#999' }}>{d.onHold}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
