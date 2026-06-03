@@ -94,32 +94,28 @@ const REFERRER_DATA: Record<string, RefMonth> = {
   "2026-06": {total:188, Parent:3, "Dental Office":41, "Airway Ambassador":1, Influencer:34, Podcast:58, Instagram:8, TikTok:0, Facebook:0, "Meta Ad":0, "Online Search":27, "Unknown Referral":8, "Unknown Professional Referral":0, Other:0, "Google Ad":8},
 };
 
-/* ────── May 2026 Final (Salesforce export pulled June 1, 2026) ────── */
-const MAY_2026_SF: Record<string, number> = {
-  total: 1128, Parent: 49, 'Dental Office': 212, 'Airway Ambassador': 39,
-  Influencer: 269, Podcast: 125, Instagram: 55, TikTok: 4, Facebook: 13,
-  'Meta Ad': 1, 'Online Search': 262, 'Unknown Referral': 58,
-  'Unknown Professional Referral': 7, 'Google Ad': 28, MYO: 3,
-  'Health Care Professional': 3,
-};
-const MAY_2026_SF_DAYS = 31;
-const MAY_2026_DAYS_IN_MONTH = 31;
+/* ────── Current month projection ────── */
+// Update these when changing the current partial month
+const CURRENT_MONTH_KEY = '2026-06';
+const CURRENT_MONTH_DAYS_TRACKED = 3;
+const CURRENT_MONTH_DAYS_TOTAL = 30;
 
-function buildMay2026Projected(): { actual: RefMonth; projected: RefMonth } {
-  const sfTotal = MAY_2026_SF.total || 1;
-  const pace = MAY_2026_DAYS_IN_MONTH / MAY_2026_SF_DAYS;
+function buildProjected(monthKey: string, daysTracked: number, daysTotal: number): { actual: RefMonth; projected: RefMonth } {
+  const monthData = REFERRER_DATA[monthKey];
+  if (!monthData) return { actual: {} as RefMonth, projected: {} as RefMonth };
+  const pace = daysTotal / daysTracked;
   const srcKeys = [
     'Parent', 'Dental Office', 'Airway Ambassador', 'Influencer', 'Podcast',
     'Instagram', 'TikTok', 'Facebook', 'Meta Ad', 'Online Search',
-    'Unknown Referral', 'Unknown Professional Referral',
+    'Unknown Referral', 'Unknown Professional Referral', 'Google Ad',
   ];
 
-  const actual: Record<string, number> = { total: sfTotal };
+  const actual: Record<string, number> = { total: monthData.total };
   const projected: Record<string, number> = { total: 0 };
 
   let scaledSum = 0;
   srcKeys.forEach((k) => {
-    const v = MAY_2026_SF[k] || 0;
+    const v = monthData[k] || 0;
     actual[k] = v;
     const proj = Math.round(v * pace);
     projected[k] = proj;
@@ -127,17 +123,21 @@ function buildMay2026Projected(): { actual: RefMonth; projected: RefMonth } {
     scaledSum += v;
   });
 
-  // Fill Other
-  actual.Other = Math.max(0, sfTotal - scaledSum);
+  actual.Other = Math.max(0, monthData.total - scaledSum);
   projected.Other = Math.round(actual.Other * pace);
 
   return { actual: actual as unknown as RefMonth, projected: projected as unknown as RefMonth };
 }
 
-const { actual: may2026Actual, projected: may2026Projected } = buildMay2026Projected();
+const { actual: currentMonthActual, projected: currentMonthProjected } = buildProjected(CURRENT_MONTH_KEY, CURRENT_MONTH_DAYS_TRACKED, CURRENT_MONTH_DAYS_TOTAL);
 
-// Inject May 2026 ACTUALS into referrer data (chart shows real numbers)
-const ALL_DATA: Record<string, RefMonth> = { ...REFERRER_DATA, '2026-05': may2026Actual };
+// Keep backward compat variable names used throughout render
+const may2026Actual = currentMonthActual;
+const may2026Projected = currentMonthProjected;
+const MAY_2026_SF_DAYS = CURRENT_MONTH_DAYS_TRACKED;
+const MAY_2026_DAYS_IN_MONTH = CURRENT_MONTH_DAYS_TOTAL;
+
+const ALL_DATA: Record<string, RefMonth> = { ...REFERRER_DATA };
 
 /* ────── Chart source definitions ────── */
 
@@ -213,7 +213,7 @@ export default function ReferrerView() {
 
   const latestKey = allMonths[allMonths.length - 1];
   const latest = ALL_DATA[latestKey];
-  const isProjected = latestKey === '2026-05';
+  const isProjected = latestKey === CURRENT_MONTH_KEY && CURRENT_MONTH_DAYS_TRACKED < CURRENT_MONTH_DAYS_TOTAL;
 
   /* ──── Top source cards ──── */
   const topSources = useMemo(() => {
@@ -337,7 +337,7 @@ export default function ReferrerView() {
           background: '#f0f4f8', borderRadius: 10, padding: '14px 18px',
           marginBottom: 18, fontSize: '0.88em', color: '#555',
         }}>
-          {fmtMonthFull('2026-05')} -- Through day {MAY_2026_SF_DAYS} of {MAY_2026_DAYS_IN_MONTH} · Actual: <strong>{may2026Actual.total.toLocaleString()}</strong> · Projected end-of-month: <strong>{may2026Projected.total.toLocaleString()}</strong>
+          {fmtMonthFull(CURRENT_MONTH_KEY)} — Through day {CURRENT_MONTH_DAYS_TRACKED} of {CURRENT_MONTH_DAYS_TOTAL} · Actual: <strong>{currentMonthActual.total.toLocaleString()}</strong> · Projected end-of-month: <strong>{currentMonthProjected.total.toLocaleString()}</strong>
         </div>
       )}
 
@@ -420,7 +420,7 @@ export default function ReferrerView() {
       <SectionHeader color="#5BA88C" label="Parent vs Ambassador" />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
-        <StatCard label={`May So Far (${MAY_2026_SF_DAYS} days)`} color={TP.text}
+        <StatCard label={`${fmtMonthFull(CURRENT_MONTH_KEY)} So Far (${CURRENT_MONTH_DAYS_TRACKED} days)`} color={TP.text}
           value={`Parent ${may2026Actual.Parent} · Amb ${may2026Actual['Airway Ambassador']}`}
           sub={`On pace for Parent ${latestGap.parent} · Amb ${latestGap.amb}`}
           isText
