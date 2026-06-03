@@ -261,42 +261,43 @@ const monthlySummaries = [
 // ===================== SEED FUNCTIONS =====================
 
 async function seedDailySubmissions() {
-    console.log(`Seeding ${allDailySubmissions.length} daily submission rows...`);
-    // Supabase upsert in batches of 50
+    console.log(`Seeding ${allDailySubmissions.length} daily submission rows (insert only, skip existing)...`);
+    // Insert only — DO NOT overwrite data the user has entered via the Daily Tracker form.
+    // onConflict: 'date' with ignoreDuplicates: true means existing rows are kept as-is.
     for (let i = 0; i < allDailySubmissions.length; i += 50) {
         const batch = allDailySubmissions.slice(i, i + 50);
         const { error } = await supabase
             .from('daily_submissions')
-            .upsert(batch, { onConflict: 'date' });
+            .upsert(batch, { onConflict: 'date', ignoreDuplicates: true });
         if (error) {
             console.error(`  Error at batch ${i}:`, error.message);
         } else {
-            console.log(`  Inserted batch ${i}-${i + batch.length}`);
+            console.log(`  Inserted batch ${i}-${i + batch.length} (skipped existing)`);
         }
     }
 }
 
 async function seedGoogleAds() {
-    console.log(`Seeding ${googleAdsDaily.length} Google Ads daily rows...`);
+    console.log(`Seeding ${googleAdsDaily.length} Google Ads daily rows (skip existing)...`);
     const { error } = await supabase
         .from('google_ads_daily')
-        .upsert(googleAdsDaily, { onConflict: 'date' });
+        .upsert(googleAdsDaily, { onConflict: 'date', ignoreDuplicates: true });
     if (error) {
         console.error('  Error:', error.message);
     } else {
-        console.log('  Done');
+        console.log('  Done (skipped existing)');
     }
 }
 
 async function seedMonthlySummaries() {
-    console.log(`Seeding ${monthlySummaries.length} monthly summary rows...`);
+    console.log(`Seeding ${monthlySummaries.length} monthly summary rows (skip existing)...`);
     const { error } = await supabase
         .from('monthly_summary')
-        .upsert(monthlySummaries, { onConflict: 'year,month' });
+        .upsert(monthlySummaries, { onConflict: 'year,month', ignoreDuplicates: true });
     if (error) {
         console.error('  Error:', error.message);
     } else {
-        console.log('  Done');
+        console.log('  Done (skipped existing)');
     }
 }
 
