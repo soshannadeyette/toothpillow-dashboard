@@ -203,15 +203,16 @@ const allDailySubmissions = [
 
 // ===================== GOOGLE ADS DAILY =====================
 
-// Google Ads daily — ALL REAL DATA from Google Ads card exports, Jun 4 2026
-// Clicks/imps/cost from clicks card. Conversions (submit) from conversions card.
-// 63 days, Apr 3 - Jun 4 2026. 4,983 clicks, 661 conversions, $16,404 spend.
-// Blackout May 11-20: tracking link broken, conversion data unreliable for those days.
-// submit = Google Ads conversions (form opens). started/finished/treatment not tracked in GA.
 // Google Ads daily — ALL REAL DATA
-// submit = GA conversions (661 total). started/finished/treatment from Salesforce pipeline.
-// 63 days, Apr 3 - Jun 4. Blackout May 11-20: tracking unreliable.
+// submit = GA conversions. started/finished/treatment from Salesforce pipeline.
+// Blackout May 11-20: tracking unreliable.
+// March entries zeroed out to overwrite old stale Supabase data.
 const googleAdsDaily = [
+    { date: '2026-03-25', spend: 0, impressions: 0, clicks: 0, submit: 0, started: 0, finished: 0, treatment: 0 },
+    { date: '2026-03-26', spend: 0, impressions: 0, clicks: 0, submit: 0, started: 0, finished: 0, treatment: 0 },
+    { date: '2026-03-27', spend: 0, impressions: 0, clicks: 0, submit: 0, started: 0, finished: 0, treatment: 0 },
+    { date: '2026-03-28', spend: 0, impressions: 0, clicks: 0, submit: 0, started: 0, finished: 0, treatment: 0 },
+    { date: '2026-03-31', spend: 0, impressions: 0, clicks: 0, submit: 0, started: 0, finished: 0, treatment: 0 },
     { date: '2026-04-03', spend: 11.99, impressions: 24, clicks: 4, submit: 0, started: 0, finished: 0, treatment: 0 },
     { date: '2026-04-04', spend: 103.63, impressions: 568, clicks: 28, submit: 0, started: 0, finished: 0, treatment: 0 },
     { date: '2026-04-05', spend: 107.09, impressions: 561, clicks: 32, submit: 3, started: 0, finished: 0, treatment: 0 },
