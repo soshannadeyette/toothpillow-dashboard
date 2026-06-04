@@ -344,14 +344,15 @@ async function seedDailySubmissions() {
 }
 
 async function seedGoogleAds() {
-    console.log(`Seeding ${googleAdsDaily.length} Google Ads daily rows (skip existing)...`);
+    // Google Ads DOES overwrite — this is platform export data, not user-entered.
+    console.log(`Seeding ${googleAdsDaily.length} Google Ads daily rows (upsert/overwrite)...`);
     const { error } = await supabase
         .from('google_ads_daily')
-        .upsert(googleAdsDaily, { onConflict: 'date', ignoreDuplicates: true });
+        .upsert(googleAdsDaily, { onConflict: 'date' });
     if (error) {
         console.error('  Error:', error.message);
     } else {
-        console.log('  Done (skipped existing)');
+        console.log('  Done (upserted)');
     }
 }
 
