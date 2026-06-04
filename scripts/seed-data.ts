@@ -303,14 +303,16 @@ async function seedGoogleAds() {
 }
 
 async function seedMonthlySummaries() {
-    console.log(`Seeding ${monthlySummaries.length} monthly summary rows (skip existing)...`);
+    // Monthly summary DOES overwrite — this is finalized data from Salesforce exports,
+    // not user-entered data. The seed is the source of truth for completed months.
+    console.log(`Seeding ${monthlySummaries.length} monthly summary rows (upsert/overwrite)...`);
     const { error } = await supabase
         .from('monthly_summary')
-        .upsert(monthlySummaries, { onConflict: 'year,month', ignoreDuplicates: true });
+        .upsert(monthlySummaries, { onConflict: 'year,month' });
     if (error) {
         console.error('  Error:', error.message);
     } else {
-        console.log('  Done (skipped existing)');
+        console.log('  Done (upserted)');
     }
 }
 
