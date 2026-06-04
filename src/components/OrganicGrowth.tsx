@@ -230,42 +230,41 @@ const KEYWORD_CLIMBERS = [
 ];
 // posHistory is 16 values: Feb'25..May'26 monthly avg position, null = no data that month
 
-// Non-branded keywords already driving clicks (page 1 performers)
-// These are the proof points — keywords that crossed the threshold into actual traffic
+// Non-branded keywords already driving clicks (sorted by best position)
+// Source: GSC 16-month aggregate, pulled June 4, 2026
 const CLICK_DRIVING_KEYWORDS = [
-  { query: 'pillow for mouth breathers', posNow: 11.5, clicksNow: 4, imprNow: 61,
-    status: 'Page 1 since Feb 2025', posHistory: [6,6,4,3,4,5,4,17,14,11,9,8,8,11,10,7] },
-  { query: 'myo munchee alternative', posNow: 1.0, clicksNow: 2, imprNow: 4,
-    status: 'Page 1 since Feb 2025', posHistory: null },
-  { query: 'mouth guard for mouth breathing kids', posNow: 3.6, clicksNow: 2, imprNow: 7,
-    status: 'New May 2026', posHistory: null },
-  { query: 'sleep apnea pillow for kids', posNow: 9.3, clicksNow: 2, imprNow: 6,
-    status: 'New May 2026', posHistory: null },
+  { query: 'pediatric airway dentist near me', posNow: 0.5, clicksNow: 8, imprNow: 1527, status: 'Near page 1' },
+  { query: 'airway dentist near me', posNow: 0.7, clicksNow: 17, imprNow: 2347, status: 'Near page 1' },
+  { query: 'sleep apnea pillow for child', posNow: 1.0, clicksNow: 6, imprNow: 578, status: 'Page 1' },
+  { query: 'airway dentistry kids', posNow: 1.1, clicksNow: 9, imprNow: 820, status: 'Page 1' },
+  { query: 'dental pillow', posNow: 1.6, clicksNow: 19, imprNow: 1180, status: 'Page 1' },
+  { query: 'tooth cushion', posNow: 1.8, clicksNow: 10, imprNow: 549, status: 'Page 1' },
+  { query: 'airway dentist for kids', posNow: 2.0, clicksNow: 6, imprNow: 303, status: 'Page 1' },
+  { query: 'orthodontic pillow', posNow: 2.1, clicksNow: 13, imprNow: 618, status: 'Page 1' },
+  { query: 'pillow for mouth breathers', posNow: 8.4, clicksNow: 352, imprNow: 5121, status: 'Page 1 since Feb 2025' },
 ];
-
-// Top queries from GSC — 16-month aggregate (Feb 2025–May 2026)
-// Source: GSC Performance > Queries tab, pulled May 29, 2026
+// Source: GSC 16-month aggregate, pulled June 4, 2026
 const TOP_QUERIES = [
-  { query: 'tooth pillow', clicks: 78444, impressions: 125401, ctr: 62.6, position: 1.1, branded: true },
-  { query: 'toothpillow', clicks: 53657, impressions: 81195, ctr: 66.1, position: 1.6, branded: true },
-  { query: 'tooth pillow for kids', clicks: 9131, impressions: 14857, ctr: 61.5, position: 1.0, branded: true },
-  { query: 'toothpillow for kids', clicks: 5398, impressions: 7497, ctr: 72.0, position: 1.0, branded: true },
-  { query: 'tooth pillow device', clicks: 4620, impressions: 8461, ctr: 54.6, position: 2.7, branded: true },
-  { query: 'tooth pillow for adults', clicks: 3207, impressions: 7775, ctr: 41.2, position: 5.0, branded: true },
-  { query: 'mouth pillow', clicks: 2426, impressions: 8131, ctr: 29.8, position: 1.2, branded: false },
-  { query: 'toothpillow login', clicks: 1694, impressions: 3166, ctr: 53.5, position: 1.0, branded: true },
-  { query: 'tooth pillow appliance', clicks: 1566, impressions: 4907, ctr: 31.9, position: 10.5, branded: true },
-  { query: 'mouth pillow kids', clicks: 1431, impressions: 3280, ctr: 43.6, position: 1.0, branded: false },
-  { query: 'tooth pillow canada', clicks: 1321, impressions: 2398, ctr: 55.1, position: 1.0, branded: true },
-  { query: 'toothpillow for adults', clicks: 1280, impressions: 4764, ctr: 26.9, position: 11.1, branded: true },
-  { query: 'teeth pillow', clicks: 1115, impressions: 3207, ctr: 34.8, position: 2.1, branded: false },
-  { query: 'mouth pillow for adults', clicks: 946, impressions: 3891, ctr: 24.3, position: 2.2, branded: false },
-  { query: 'tongue pillow', clicks: 548, impressions: 1842, ctr: 29.8, position: 2.3, branded: false },
-  { query: 'what is a tooth pillow', clicks: 512, impressions: 5612, ctr: 9.1, position: 1.5, branded: true },
-  { query: 'toothpillow reviews', clicks: 487, impressions: 8234, ctr: 5.9, position: 3.8, branded: true },
-  { query: 'toothpillow cost', clicks: 436, impressions: 3418, ctr: 12.8, position: 3.1, branded: true },
-  { query: 'pillow for mouth breathers', clicks: 324, impressions: 4891, ctr: 6.6, position: 11.5, branded: false },
-  { query: 'orthodontic evaluation near me', clicks: 291, impressions: 7124, ctr: 4.1, position: 45.8, branded: false },
+  { query: 'tooth pillow', clicks: 79385, impressions: 126813, ctr: 62.6, position: 1.1, branded: true },
+  { query: 'toothpillow', clicks: 54346, impressions: 82142, ctr: 66.2, position: 1.6, branded: true },
+  { query: 'tooth pillow for kids', clicks: 9274, impressions: 15092, ctr: 61.4, position: 1.0, branded: true },
+  { query: 'toothpillow for kids', clicks: 5416, impressions: 7529, ctr: 71.9, position: 1.0, branded: true },
+  { query: 'tooth pillow device', clicks: 4630, impressions: 8497, ctr: 54.5, position: 2.7, branded: true },
+  { query: 'tooth pillow for adults', clicks: 3387, impressions: 8091, ctr: 41.9, position: 5.0, branded: true },
+  { query: 'mouth pillow', clicks: 2446, impressions: 8297, ctr: 29.5, position: 1.2, branded: false },
+  { query: 'toothpillow for adults', clicks: 1877, impressions: 4987, ctr: 37.6, position: 3.8, branded: true },
+  { query: 'the tooth pillow', clicks: 1711, impressions: 2263, ctr: 75.6, position: 1.0, branded: true },
+  { query: 'my tooth pillow', clicks: 1540, impressions: 1988, ctr: 77.5, position: 1.0, branded: true },
+  { query: 'tooth pillow appliance', clicks: 1173, impressions: 3249, ctr: 36.1, position: 10.5, branded: true },
+  { query: 'teeth pillow', clicks: 979, impressions: 2363, ctr: 41.4, position: 2.1, branded: false },
+  { query: 'tooth pillow canada', clicks: 954, impressions: 1631, ctr: 58.5, position: 1.0, branded: true },
+  { query: 'what is a tooth pillow', clicks: 829, impressions: 2748, ctr: 30.2, position: 1.5, branded: true },
+  { query: 'toothpillow reviews', clicks: 796, impressions: 7206, ctr: 11.0, position: 3.8, branded: true },
+  { query: 'toothpillow cost', clicks: 725, impressions: 2472, ctr: 29.3, position: 3.1, branded: true },
+  { query: 'mouth pillow for adults', clicks: 696, impressions: 2782, ctr: 25.0, position: 2.2, branded: false },
+  { query: 'tongue pillow', clicks: 614, impressions: 1650, ctr: 37.2, position: 2.3, branded: false },
+  { query: 'pillow for mouth breathers', clicks: 352, impressions: 5121, ctr: 6.9, position: 8.4, branded: false },
+  { query: 'airway dentist near me', clicks: 17, impressions: 2347, ctr: 0.7, position: 0.7, branded: false },
 ];
 
 
