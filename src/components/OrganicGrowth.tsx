@@ -21,7 +21,7 @@ const TP = {
 
 /* ════════════════════════════════════════════
    HARDCODED GSC DATA — Source of truth
-   Data pulled fresh from Google Search Console on June 1, 2026
+   Data pulled fresh from Google Search Console on June 4, 2026
    Property verified ~Feb 2025, 16 months of history available
    Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
    SEO program reset date: May 19, 2026
@@ -69,7 +69,7 @@ const GSC_MONTHLY = [
   { month: '2026-03', clicks: 12601, impressions: 74269, ctr: 17.0, position: 26.9 },
   { month: '2026-04', clicks: 11180, impressions: 105758, ctr: 10.6, position: 37.4 },
   { month: '2026-05', clicks: 10082, impressions: 51676, ctr: 19.5, position: 21.5 },
-  { month: '2026-06', clicks: 736, impressions: 2771, ctr: 26.6, position: 24.7 },
+  { month: '2026-06', clicks: 1768, impressions: 6374, ctr: 27.7, position: 27.8 },
 ];
 
 const GSC_WEEKLY = [
