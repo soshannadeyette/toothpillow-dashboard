@@ -187,8 +187,8 @@ const may2026Seed = [
     {date:'2026-05-29',online:68,hybrid:3,prime:1,visitors:1014,income:340},
     {date:'2026-05-30',online:38,hybrid:0,prime:0,visitors:1100,income:190},
     {date:'2026-05-31',online:26,hybrid:0,prime:0,visitors:850,income:130},
-    {date:'2026-06-01',online:67,hybrid:3,prime:0,visitors:1200,income:335},
-    {date:'2026-06-02',online:52,hybrid:3,prime:0,visitors:1100,income:260},
+    {date:'2026-06-01',online:77,hybrid:13,prime:0,visitors:1200,income:385},
+    {date:'2026-06-02',online:62,hybrid:12,prime:0,visitors:1100,income:310},
     {date:'2026-06-03',online:41,hybrid:18,prime:0,visitors:900,income:205},
 ];
 

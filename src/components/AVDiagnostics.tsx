@@ -43,7 +43,7 @@ const AV_DATA = [
   { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1431, waiting: 569, submitted: 854,  partial: false, period: 'full' as const },
   { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1037, waiting: 487, submitted: 550, partial: false, period: 'pre-update' as const },
   { label: 'May 23–31', month: 5,  year: 2026, traffic: 11212,  starts: 580,  waiting: 282,  submitted: 298,  partial: false,  period: 'post-update' as const },
-  { label: 'Jun 1–2', month: 6, year: 2026, traffic: 0, starts: 193, waiting: 75, submitted: 118, partial: true, period: 'post-update' as const },
+  { label: 'Jun 1–3', month: 6, year: 2026, traffic: 0, starts: 267, waiting: 112, submitted: 155, partial: true, period: 'post-update' as const },
 ];
 
 // ── Full pipeline funnel by month (source of truth) ──────────────────
@@ -57,7 +57,7 @@ const FUNNEL_DATA = [
   { label: 'Mar 26', waiting: 967, inReview: 13, checkout: 530, checkedOut: 359, closed: 366, onHold: 28 },
   { label: 'Apr 26', waiting: 569, inReview: 36, checkout: 434, checkedOut: 164, closed: 212, onHold: 16 },
   { label: 'May 26', waiting: 766, inReview: 230, checkout: 455, checkedOut: 77, closed: 69, onHold: 18 },
-  { label: 'Jun 1–2', waiting: 75, inReview: 100, checkout: 6, checkedOut: 0, closed: 8, onHold: 4 },
+  { label: 'Jun 1–3', waiting: 112, inReview: 100, checkout: 14, checkedOut: 0, closed: 9, onHold: 4 },
 ];
 
 // ── May daily data (source of truth) ─────────────────────────────────
@@ -106,7 +106,7 @@ const LAG_DISTRIBUTION = [
   { label: 'Apr',        buckets: [685, 55, 39, 31, 21, 35, 101] },
   { label: 'May 1–22',   buckets: [390, 64, 39, 24, 19, 10, 1] },
   { label: 'May 23–31',  buckets: [260, 25, 8, 2, 2, 0, 0] },
-  { label: 'Jun 1–2',    buckets: [112, 6, 0, 0, 0, 0, 0] },
+  { label: 'Jun 1–3',    buckets: [141, 14, 0, 0, 0, 0, 0] },
 ];
 
 // ── Weekly cohort completion curves (source of truth) ────────────────
@@ -117,7 +117,7 @@ const COHORT_DATA = [
   { label: 'May 15–21', n: 176, sameDay: 68.2, within1d: 78.4, within3d: 88.6, within7d: 93.2 },
   { label: 'May 22–28', n: 210, sameDay: 82.4, within1d: 94.3, within3d: 97.6, within7d: 99.0 },
   { label: 'May 29–31', n: 117, sameDay: 91.5, within1d: 97.4, within3d: 100.0, within7d: 100.0 },
-  { label: 'Jun 1–2',   n: 118, sameDay: 94.9, within1d: 100.0, within3d: 100.0, within7d: 100.0 },
+  { label: 'Jun 1–3',   n: 155, sameDay: 91.0, within1d: 100.0, within3d: 100.0, within7d: 100.0 },
 ];
 
 // ── Daily cohorts archived ──────────────────────────────────────────
@@ -143,7 +143,7 @@ const COHORT_AGING = [
   { label: 'May 10–16', starts: 304, within7d: 164, d8to14: 3, d15plus: 2, waiting: 135, daysElapsed: 17, mature7d: true, mature14d: true, postUpdate: false },
   { label: 'May 17–23', starts: 400, within7d: 175, d8to14: 11, d15plus: 1, waiting: 213, daysElapsed: 10, mature7d: true, mature14d: false, postUpdate: false },
   { label: 'May 24–30', starts: 458, within7d: 250, d8to14: 1, d15plus: 0, waiting: 207, daysElapsed: 3, mature7d: false, mature14d: false, postUpdate: true },
-  { label: 'May 31–Jun 06', starts: 246, within7d: 147, d8to14: 0, d15plus: 0, waiting: 99, daysElapsed: 0, mature7d: false, mature14d: false, postUpdate: true },
+  { label: 'May 31–Jun 06', starts: 320, within7d: 209, d8to14: 0, d15plus: 0, waiting: 111, daysElapsed: 0, mature7d: false, mature14d: false, postUpdate: true },
 ];
 
 // ── Post-update tracking ────────────────────────────────────────────
@@ -201,10 +201,10 @@ export default function AVDiagnostics() {
     const within3d = d.buckets[0] + d.buckets[1] + d.buckets[2];
     const sameDayPct = within3d > 0 ? Math.round(d.buckets[0] / within3d * 1000) / 10 : 0;
     const within1dPct = within3d > 0 ? Math.round((d.buckets[0] + d.buckets[1]) / within3d * 1000) / 10 : 0;
-    const isPost = d.label === 'May 23–31' || d.label === 'Jun 1–2';
+    const isPost = d.label === 'May 23–31' || d.label === 'Jun 1–3';
     return { label: d.label, within3d, sameDayPct, within1dPct, isPost };
   });
-  const fairComp = fairCompAll.filter(d => d.label === 'May 1–22' || d.label === 'May 23–31' || d.label === 'Jun 1–2');
+  const fairComp = fairCompAll.filter(d => d.label === 'May 1–22' || d.label === 'May 23–31' || d.label === 'Jun 1–3');
   const fairPre = fairComp.find(d => d.label === 'May 1–22')!;
   const fairPost = fairComp.find(d => d.label === 'May 23–31')!;
 
@@ -348,7 +348,7 @@ export default function AVDiagnostics() {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
           {NORM.map((c, i) => {
             const colors = [TP.skyBlue, TP.purple, TP.amber, TP.green, TP.coral, TP.navy];
-            const isPost = c.label === 'May 22–28' || c.label === 'May 29–31' || c.label === 'Jun 1–2';
+            const isPost = c.label === 'May 22–28' || c.label === 'May 29–31' || c.label === 'Jun 1–3';
             return (
               <span key={c.label} style={{ display: 'flex', alignItems: 'center', gap: 5, fontWeight: isPost ? 700 : 400 }}>
                 <span style={{ width: 14, height: 3, background: colors[i], borderRadius: 2 }} />
@@ -363,7 +363,7 @@ export default function AVDiagnostics() {
               labels: ['Same day', 'Within 1 day', 'Within 3 days'],
               datasets: NORM.map((c, i) => {
                 const colors = [TP.skyBlue, TP.purple, TP.amber, TP.green, TP.coral, TP.navy];
-                const isPost = c.label === 'May 22–28' || c.label === 'May 29–31' || c.label === 'Jun 1–2';
+                const isPost = c.label === 'May 22–28' || c.label === 'May 29–31' || c.label === 'Jun 1–3';
                 return {
                   label: c.label,
                   data: [c.sameDay, c.within1d, c.within3d],
