@@ -62,7 +62,7 @@ const META_FUNNEL = { entered: 58, waitingInfo: 30, sentCheckout: 13, checkedOut
 // These sub-stage breakdowns can't come from daily Supabase data
 // Source: Salesforce "Google Ads 2026" export, June 4, 2026
 // 158 total leads (Apr 57, May 80, Jun 21). Blackout May 11-20 (8 records).
-const GOOGLE_SF_PIPELINE = { sentToTxP: 12, txpApproved: 0, sentCheckout: 30, referredOut: 7, denied: 0, closedLost: 4 };
+const GOOGLE_SF_PIPELINE = { total: 158, waiting: 101, sentToTxP: 12, txpApproved: 0, sentCheckout: 30, checkedOut: 4, referredOut: 7, denied: 0, closedLost: 4 };
 const GOOGLE_REVENUE: number = 7281; // 4 checkouts: $7,281 total
 
 /* ════════════════════════════════════════════
@@ -174,11 +174,11 @@ export default function PaidAds() {
   // Submissions = completed the form (tracked days only)
   const googleSubmissions = gTracked.finished;
   const googleCostPerSubmission = googleSubmissions > 0 ? gTracked.spend / googleSubmissions : 0;
-  const googleCheckouts = gTracked.treatment; // tracked days only
+  const googleCheckouts = GOOGLE_SF_PIPELINE.checkedOut; // from Salesforce — 4 checkouts
   const googleCostPerCheckout = googleCheckouts > 0 ? gTracked.spend / googleCheckouts : 0;
   const googleRevenue = GOOGLE_REVENUE;
   const googleNet = googleRevenue - googleTotalSpend;
-  const googleWaitingInfo = googleTotalLeads - googleSubmissions; // started but not finished (tracked days)
+  const googleWaitingInfo = GOOGLE_SF_PIPELINE.waiting; // from Salesforce pipeline — 101 of 158 leads
 
   // Meta stats
   const metaCampaignMonths = META_MONTHLY.filter((m) => m.spend >= 1000);
