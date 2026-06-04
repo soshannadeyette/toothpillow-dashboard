@@ -163,22 +163,23 @@ export default function PaidAds() {
 
   const blackoutDays = useMemo(() => sorted.filter((e) => isBlackout(e.date)).length, [sorted]);
 
+  // ALL aggregate stats from Salesforce pipeline — NOT from daily Supabase data.
+  // Daily data is for the chart only. SF pipeline is the source of truth for KPIs.
   const googleTotalSpend = gT.spend;
-  const googleTotalLeads = gTracked.started; // tracked days only
+  const googleTotalLeads = GOOGLE_SF_PIPELINE.total; // 158 from Salesforce
   const googleDays = sorted.length || 1;
   const trackedDays = gTracked.days || 1;
   const avgCPC = gT.clicks > 0 ? gT.spend / gT.clicks : 0;
-  // CPL uses tracked-days spend & leads so efficiency isn't distorted
-  const googleCPL = googleTotalLeads > 0 ? gTracked.spend / googleTotalLeads : 0;
+  const googleCPL = googleTotalLeads > 0 ? googleTotalSpend / googleTotalLeads : 0;
 
-  // Submissions = completed the form (tracked days only)
-  const googleSubmissions = gTracked.finished;
-  const googleCostPerSubmission = googleSubmissions > 0 ? gTracked.spend / googleSubmissions : 0;
-  const googleCheckouts = GOOGLE_SF_PIPELINE.checkedOut; // from Salesforce — 4 checkouts
-  const googleCostPerCheckout = googleCheckouts > 0 ? gTracked.spend / googleCheckouts : 0;
-  const googleRevenue = GOOGLE_REVENUE;
+  // Submissions = people who completed the assessment (from SF: submitted = 57)
+  const googleSubmissions = GOOGLE_SF_PIPELINE.sentToTxP + GOOGLE_SF_PIPELINE.txpApproved + GOOGLE_SF_PIPELINE.sentCheckout + GOOGLE_SF_PIPELINE.checkedOut + GOOGLE_SF_PIPELINE.referredOut + GOOGLE_SF_PIPELINE.closedLost; // everyone past waiting = 57
+  const googleCostPerSubmission = googleSubmissions > 0 ? googleTotalSpend / googleSubmissions : 0;
+  const googleCheckouts = GOOGLE_SF_PIPELINE.checkedOut; // 4
+  const googleCostPerCheckout = googleCheckouts > 0 ? googleTotalSpend / googleCheckouts : 0;
+  const googleRevenue = GOOGLE_REVENUE; // $7,281
   const googleNet = googleRevenue - googleTotalSpend;
-  const googleWaitingInfo = GOOGLE_SF_PIPELINE.waiting; // from Salesforce pipeline — 101 of 158 leads
+  const googleWaitingInfo = GOOGLE_SF_PIPELINE.waiting; // 101
 
   // Meta stats
   const metaCampaignMonths = META_MONTHLY.filter((m) => m.spend >= 1000);
