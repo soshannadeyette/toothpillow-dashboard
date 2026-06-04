@@ -261,14 +261,9 @@ const monthlySummaries = [
         conversion_rate: 2.83, usa_conversion_rate: 3.28,
         days_tracked: 31, daily_avg: 36.8,
     },
-    {
-        year: 2026, month: 6, month_name: 'June',
-        goal: 2203, total_submissions: 228,
-        online_submissions: 185, hybrid_submissions: 43, prime_submissions: 0,
-        total_income: 925, total_visitors: 0, usa_visitors: 0,
-        conversion_rate: 0, usa_conversion_rate: 0,
-        days_tracked: 4, daily_avg: 57.0,
-    },
+    // June intentionally excluded from seed — current month is built from
+    // daily_submissions + Save Visitors form on Annual tab. Seeding it here
+    // would overwrite visitor data Sosh enters manually.
 ];
 
 // ===================== SEED FUNCTIONS =====================
