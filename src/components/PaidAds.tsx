@@ -318,9 +318,6 @@ export default function PaidAds() {
 
   return (
     <div style={{ maxWidth: 960, margin: '0 auto' }}>
-      <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8, padding: '14px 18px', fontSize: 13, color: '#92400E', lineHeight: 1.6, marginBottom: 20 }}>
-        <strong>Data may be incomplete.</strong> The Google Ads tracking link was not implemented correctly for a period. Waiting on dev to recover the affected data. Numbers below may undercount actual performance.
-      </div>
       {error && (
         <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', padding: '12px 16px', borderRadius: 8, fontSize: 14, marginBottom: 16 }}>{error}</div>
       )}
