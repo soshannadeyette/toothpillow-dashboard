@@ -151,14 +151,28 @@ export default function AnnualView() {
         if (hasMonth) {
           merged = merged.map(m => {
             if (m.month === thisMonth && m.year === thisYear) {
+              // Use whichever source has higher submission total — monthly_summary (from seed)
+              // may be more accurate than daily tracker if daily entries are stale/incomplete
+              const useMonthly = (m.total_submissions || 0) > totalSubs;
+              const bestOnline = useMonthly ? (m.online_submissions || 0) : totalOnline;
+              const bestHybrid = useMonthly ? (m.hybrid_submissions || 0) : totalHybrid;
+              const bestPrime = useMonthly ? (m.prime_submissions || 0) : totalPrime;
+              const bestTotal = bestOnline + bestHybrid + bestPrime;
               const vis = m.total_visitors || liveSummary.total_visitors;
               const usaVis = m.usa_visitors || liveSummary.usa_visitors;
               return {
+                ...m,
                 ...liveSummary,
+                online_submissions: bestOnline,
+                hybrid_submissions: bestHybrid,
+                prime_submissions: bestPrime,
+                total_submissions: bestTotal,
                 total_visitors: vis,
                 usa_visitors: usaVis,
-                conversion_rate: vis > 0 ? parseFloat(((totalOnline / vis) * 100).toFixed(2)) : 0,
-                usa_conversion_rate: usaVis > 0 ? parseFloat(((totalOnline / usaVis) * 100).toFixed(2)) : 0,
+                days_tracked: useMonthly ? (m.days_tracked || dailyEntries.length) : dailyEntries.length,
+                daily_avg: useMonthly ? (m.daily_avg || liveSummary.daily_avg) : liveSummary.daily_avg,
+                conversion_rate: vis > 0 ? parseFloat(((bestOnline / vis) * 100).toFixed(2)) : 0,
+                usa_conversion_rate: usaVis > 0 ? parseFloat(((bestOnline / usaVis) * 100).toFixed(2)) : 0,
               };
             }
             return m;
