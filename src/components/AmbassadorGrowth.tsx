@@ -52,7 +52,7 @@ const infSubs: Record<string, number> = {
 const newAddsAmb: Record<string, number> = {
   '2024-01':4,'2024-02':7,'2024-03':7,'2024-04':6,'2024-05':3,'2024-06':7,'2024-07':10,'2024-08':2,'2024-09':6,'2024-10':7,'2024-11':7,'2024-12':7,
   '2025-01':7,'2025-02':84,'2025-03':7,'2025-04':6,'2025-05':5,'2025-06':6,'2025-07':1,'2025-08':15,'2025-09':2,'2025-10':1,'2025-11':6,'2025-12':1,
-  '2026-01':5,'2026-02':13,'2026-03':10,'2026-04':28,'2026-05':20,'2026-06':7,
+  '2026-01':5,'2026-02':13,'2026-03':10,'2026-04':28,'2026-05':20,'2026-06':8,
 };
 const newAddsInf: Record<string, number> = {
   '2024-01':1,'2024-02':8,'2024-03':3,'2024-04':4,'2024-05':9,'2024-06':2,'2024-07':7,'2024-08':2,'2024-09':4,'2024-10':6,'2024-11':6,'2024-12':9,
@@ -63,9 +63,9 @@ const newAddsInf: Record<string, number> = {
 const ambSubsYear: Record<number, number> = {2023:465, 2024:435, 2025:566, 2026:274};
 const infSubsYear: Record<number, number> = {2023:1339, 2024:8398, 2025:5583, 2026:1796};
 const combSubsYear: Record<number, number> = {2023:1804, 2024:8833, 2025:6149, 2026:2070};
-const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:83};
+const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:84};
 const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:17}; // Jun 0 inf adds
-const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:101};
+const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:102};
 // Note: adds counts are from ambassador program tracking, not Salesforce referral exports
 
 // Active ambassadors with ≥1 submission per year (from Salesforce)
@@ -87,7 +87,7 @@ const recruit26: {label:string; amb:number; inf:number; accent:string; tag?:stri
   {label:'Mar', amb:10, inf:2, accent:'#3A6EA4'},
   {label:'Apr', amb:28, inf:5, accent:'#FDBE67'},
   {label:'May', amb:20, inf:6, accent:'#B26CA6'},
-  {label:'Jun', amb:7, inf:0, accent:'#DD5759'},
+  {label:'Jun', amb:8, inf:0, accent:'#DD5759'},
 ];
 
 const concRows = [
@@ -161,16 +161,16 @@ const moversData: Record<string, {y25:number; y26:number; type:string}> = {
 // bonusSubs = submissions from window start forward (NOT full YTD).
 // tier: 2 if >=50 ($1,250), 1 if >=25 ($250), 0 otherwise
 const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;winStart:string;winEnd:string;is2026?:boolean;omit?:boolean}[] = [
-  {name:'Soshanna Salsman',bonusSubs:65,tier:2,earned:1250,winStart:'04/01/2026',winEnd:'04/01/2027',omit:true},
-  {name:'Shannon Tripp',bonusSubs:59,tier:2,earned:1250,winStart:'04/01/2026',winEnd:'04/01/2027'},
+  {name:'Soshanna Salsman',bonusSubs:67,tier:2,earned:1250,winStart:'04/01/2026',winEnd:'04/01/2027',omit:true},
+  {name:'Shannon Tripp',bonusSubs:60,tier:2,earned:1250,winStart:'04/01/2026',winEnd:'04/01/2027'},
   {name:'Lauren Johnson NNM',bonusSubs:44,tier:1,earned:250,winStart:'04/01/2026',winEnd:'04/01/2027'},
   {name:'Katelyn Alsop (James)',bonusSubs:40,tier:1,earned:250,winStart:'01/19/2026',winEnd:'01/19/2027',is2026:true},
   {name:'Emily Boazman',bonusSubs:38,tier:1,earned:250,winStart:'04/02/2026',winEnd:'04/02/2027',is2026:true},
-  {name:'Kendra Needham',bonusSubs:36,tier:1,earned:250,winStart:'04/01/2026',winEnd:'04/01/2027'},
+  {name:'Kendra Needham',bonusSubs:37,tier:1,earned:250,winStart:'04/01/2026',winEnd:'04/01/2027'},
   {name:'Jeff Cruz Talia_likeitis',bonusSubs:28,tier:1,earned:250,winStart:'04/01/2026',winEnd:'04/01/2027'},
   {name:'Jasyra Santiago-Hines',bonusSubs:24,tier:0,earned:0,winStart:'04/01/2026',winEnd:'04/01/2027'},
   {name:'Ginny Yurich',bonusSubs:25,tier:1,earned:250,winStart:'04/01/2026',winEnd:'04/01/2027'},
-  {name:'Amy Bernhard',bonusSubs:20,tier:0,earned:0,winStart:'04/01/2026',winEnd:'04/01/2027'},
+  {name:'Amy Bernhard',bonusSubs:26,tier:1,earned:250,winStart:'04/01/2026',winEnd:'04/01/2027'},
   {name:'Carly Brown',bonusSubs:19,tier:0,earned:0,winStart:'04/01/2026',winEnd:'04/01/2027'},
   {name:'Amy Erickson',bonusSubs:16,tier:0,earned:0,winStart:'04/01/2026',winEnd:'04/01/2027'},
   {name:'Hayley Lombard',bonusSubs:16,tier:0,earned:0,winStart:'05/19/2026',winEnd:'05/19/2027',is2026:true},

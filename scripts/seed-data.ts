@@ -191,6 +191,7 @@ const may2026Seed = [
     {date:'2026-06-02',online:62,hybrid:12,prime:0,visitors:1100,income:310},
     {date:'2026-06-03',online:41,hybrid:18,prime:0,visitors:900,income:205},
     {date:'2026-06-04',online:3,hybrid:0,prime:0,visitors:100,income:15},
+    {date:'2026-06-05',online:0,hybrid:0,prime:0,visitors:0,income:0},
 ];
 
 const allDailySubmissions = [
