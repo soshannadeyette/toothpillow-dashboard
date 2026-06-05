@@ -332,18 +332,18 @@ const monthlySummaries = [
 // ===================== SEED FUNCTIONS =====================
 
 async function seedDailySubmissions() {
-    console.log(`Seeding ${allDailySubmissions.length} daily submission rows (insert only, skip existing)...`);
-    // Insert only — DO NOT overwrite data the user has entered via the Daily Tracker form.
-    // onConflict: 'date' with ignoreDuplicates: true means existing rows are kept as-is.
+    console.log(`Seeding ${allDailySubmissions.length} daily submission rows (upsert/overwrite)...`);
+    // Upsert — seed data IS the source of truth. When Sosh provides Salesforce exports,
+    // the corrected numbers are hardcoded here and must overwrite any stale entries.
     for (let i = 0; i < allDailySubmissions.length; i += 50) {
         const batch = allDailySubmissions.slice(i, i + 50);
         const { error } = await supabase
             .from('daily_submissions')
-            .upsert(batch, { onConflict: 'date', ignoreDuplicates: true });
+            .upsert(batch, { onConflict: 'date' });
         if (error) {
             console.error(`  Error at batch ${i}:`, error.message);
         } else {
-            console.log(`  Inserted batch ${i}-${i + batch.length} (skipped existing)`);
+            console.log(`  Upserted batch ${i}-${i + batch.length}`);
         }
     }
 }
