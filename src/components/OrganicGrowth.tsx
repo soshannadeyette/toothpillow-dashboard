@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale, BarElement, LineElement, PointElement,
@@ -8,6 +8,8 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar, Line } from 'react-chartjs-2';
+import { fetchSubmissions } from '@/lib/api';
+import type { DailySubmission } from '@/lib/types';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler, annotationPlugin);
 
@@ -32,24 +34,11 @@ const SEO_START_DATE = '2026-05-19';
 const WEBSITE_LAUNCH_DATE = '2025-12-22';
 
 // Total submissions (online + hybrid + prime) aligned to GSC_MONTHLY months
-// 2025: OnlineTrends.tsx hardcoded actuals. 2026: submission-dashboard.html daily arrays.
-const SUBMISSIONS_BY_MONTH: Record<string, number> = {
-  '2025-02': 1464 + 77 + 20,    // 1,561
-  '2025-03': 1279 + 214 + 19,   // 1,512
-  '2025-04': 1186 + 461 + 18,   // 1,665
-  '2025-05': 1031 + 319 + 9,    // 1,359
-  '2025-06': 787 + 288 + 23,    // 1,098
-  '2025-07': 2386 + 292 + 11,   // 2,689
-  '2025-08': 2178 + 351 + 13,   // 2,542
-  '2025-09': 1180 + 406 + 14,   // 1,600
-  '2025-10': 975 + 526 + 7,     // 1,508
-  '2025-11': 1135 + 460 + 13,   // 1,608
-  '2025-12': 776 + 452 + 25,    // 1,253
-  '2026-01': 1054 + 345 + 20,   // 1,419 (SF Jun 4 export)
-  '2026-02': 1208 + 295 + 18,   // 1,521 (SF Jun 4 export)
-  '2026-03': 1288 + 299 + 22,   // 1,609 (SF Jun 4 export)
-  '2026-04': 967 + 251 + 12,    // 1,230 (SF Jun 4 export)
-  '2026-05': 936 + 191 + 13,    // 1,140 (SF Jun 4 export)
+// 2025: hardcoded historical. 2026: pulled from daily tracker at runtime.
+const SUBMISSIONS_2025: Record<string, number> = {
+  '2025-02': 1561, '2025-03': 1512, '2025-04': 1665, '2025-05': 1359,
+  '2025-06': 1098, '2025-07': 2689, '2025-08': 2542, '2025-09': 1600,
+  '2025-10': 1508, '2025-11': 1608, '2025-12': 1253,
 };
 
 const GSC_MONTHLY = [
@@ -300,6 +289,23 @@ function delta(current: number, previous: number): string {
    ════════════════════════════════════════════ */
 
 export default function OrganicGrowth() {
+  const [subs2026, setSubs2026] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    fetchSubmissions(2026).then((entries: DailySubmission[]) => {
+      const byMonth: Record<string, number> = {};
+      for (const e of entries) {
+        const m = new Date(e.date + 'T12:00:00').getMonth() + 1;
+        const key = `2026-${String(m).padStart(2, '0')}`;
+        byMonth[key] = (byMonth[key] || 0) + (e.online || 0) + (e.hybrid || 0) + (e.prime || 0);
+      }
+      setSubs2026(byMonth);
+    }).catch(() => {});
+  }, []);
+
+  // Merge 2025 hardcoded + 2026 from daily tracker
+  const SUBMISSIONS_BY_MONTH: Record<string, number> = { ...SUBMISSIONS_2025, ...subs2026 };
+
   const mayData = GSC_MONTHLY[GSC_MONTHLY.length - 1];
   const mayDaysReported = 27;
   const mayClickPace = Math.round(mayData.clicks / mayDaysReported * 31);
@@ -421,7 +427,8 @@ export default function OrganicGrowth() {
         borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: TP.blue,
         tension: 0.3, order: 1, yAxisID: 'y1' },
     ],
-  }), []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [subs2026]);
 
   const impressionsOpts = useMemo(() => ({
     responsive: true, maintainAspectRatio: false,

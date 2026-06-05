@@ -18,6 +18,8 @@ import annotationPlugin from 'chartjs-plugin-annotation';
 import { fetchSubmissions } from '@/lib/api';
 import type { DailySubmission } from '@/lib/types';
 
+const BASE = process.env.NEXT_PUBLIC_BASE_URL || '';
+
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler, annotationPlugin);
 
 // ---- Toothpillow palette (matches AnnualView.tsx) ----
@@ -107,7 +109,7 @@ function getSunday(dateStr: string): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-function computeWeeks(entries: DailySubmission[]): WeekData[] {
+function computeWeeks(entries: DailySubmission[], visitors: Record<string, { world: number; usa: number }>): WeekData[] {
   if (entries.length === 0) return [];
 
   // Build a map of date -> entry
@@ -141,7 +143,7 @@ function computeWeeks(entries: DailySubmission[]): WeekData[] {
     const total = online + hybrid + prime;
     const days = weekEntries.length;
 
-    const vis = WEEKLY_VISITORS[current];
+    const vis = visitors[current];
     const vWorld = vis?.world || 0;
     const vUSA = vis?.usa || 0;
 
@@ -209,13 +211,31 @@ function computeDowNorms(entries: DailySubmission[]): { dow: number; name: strin
 export default function WeeklyReport() {
   const [allEntries, setAllEntries] = useState<DailySubmission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [weeklyVisitors, setWeeklyVisitors] = useState<Record<string, { world: number; usa: number }>>({ ...WEEKLY_VISITORS });
+
+  // Form state for adding weekly visitors
+  const [vWeekStart, setVWeekStart] = useState('');
+  const [vWorld, setVWorld] = useState('');
+  const [vUSA, setVUSA] = useState('');
+  const [vSaving, setVSaving] = useState(false);
+  const [vMsg, setVMsg] = useState('');
 
   useEffect(() => {
     async function load() {
       setLoading(true);
       try {
-        const data = await fetchSubmissions(2026);
+        const [data, settingsRes] = await Promise.all([
+          fetchSubmissions(2026),
+          fetch(`${BASE}/api/settings?key=weekly_visitors`).then(r => r.json()),
+        ]);
         setAllEntries(data);
+        // Merge DB visitors over hardcoded
+        if (settingsRes?.[0]?.value) {
+          try {
+            const dbVisitors = JSON.parse(settingsRes[0].value);
+            setWeeklyVisitors(prev => ({ ...prev, ...dbVisitors }));
+          } catch { /* ignore parse errors */ }
+        }
       } catch {
         // silently handle
       } finally {
@@ -225,8 +245,33 @@ export default function WeeklyReport() {
     load();
   }, []);
 
+  async function handleSaveVisitors() {
+    if (!vWeekStart) return;
+    setVSaving(true);
+    setVMsg('');
+    try {
+      const updated = {
+        ...weeklyVisitors,
+        [vWeekStart]: { world: parseInt(vWorld) || 0, usa: parseInt(vUSA) || 0 },
+      };
+      await fetch(`${BASE}/api/settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'weekly_visitors', value: JSON.stringify(updated) }),
+      });
+      setWeeklyVisitors(updated);
+      setVMsg('Saved');
+      setVWorld('');
+      setVUSA('');
+    } catch {
+      setVMsg('Error saving');
+    } finally {
+      setVSaving(false);
+    }
+  }
+
   // All weeks (including partial)
-  const allWeeks = useMemo(() => computeWeeks(allEntries), [allEntries]);
+  const allWeeks = useMemo(() => computeWeeks(allEntries, weeklyVisitors), [allEntries, weeklyVisitors]);
   // Only complete weeks for trend chart
   const completeWeeks = useMemo(() => allWeeks.filter(w => w.complete), [allWeeks]);
 
@@ -631,6 +676,58 @@ export default function WeeklyReport() {
               })}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* ===== ADD WEEKLY VISITORS ===== */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+        <h3 className="text-base font-semibold mb-3" style={{ color: TP.text }}>Add Weekly Visitors</h3>
+        <p className="text-xs text-gray-500 mb-3">Enter GA4 weekly traffic (Sun-Sat). This feeds the Conv % columns above.</p>
+        <div className="flex flex-wrap gap-3 items-end">
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Week Start (Sun)</label>
+            <select
+              className="border border-gray-300 rounded px-3 py-1.5 text-sm"
+              value={vWeekStart}
+              onChange={e => setVWeekStart(e.target.value)}
+            >
+              <option value="">Select week...</option>
+              {allWeeks.slice().reverse().map(w => (
+                <option key={w.weekStart} value={w.weekStart}>
+                  {w.label}{weeklyVisitors[w.weekStart] ? ` (${weeklyVisitors[w.weekStart].world.toLocaleString()})` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">World Visitors</label>
+            <input
+              type="number"
+              className="border border-gray-300 rounded px-3 py-1.5 text-sm w-28"
+              placeholder="e.g. 8500"
+              value={vWorld}
+              onChange={e => setVWorld(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">USA Visitors</label>
+            <input
+              type="number"
+              className="border border-gray-300 rounded px-3 py-1.5 text-sm w-28"
+              placeholder="e.g. 7200"
+              value={vUSA}
+              onChange={e => setVUSA(e.target.value)}
+            />
+          </div>
+          <button
+            className="px-4 py-1.5 rounded text-sm font-medium text-white"
+            style={{ backgroundColor: TP.blue }}
+            onClick={handleSaveVisitors}
+            disabled={vSaving || !vWeekStart}
+          >
+            {vSaving ? 'Saving...' : 'Save'}
+          </button>
+          {vMsg && <span className="text-xs text-green-600">{vMsg}</span>}
         </div>
       </div>
 
