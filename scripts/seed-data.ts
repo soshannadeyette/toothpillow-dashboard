@@ -332,20 +332,38 @@ const monthlySummaries = [
 // ===================== SEED FUNCTIONS =====================
 
 async function seedDailySubmissions() {
-    console.log(`Seeding ${allDailySubmissions.length} daily submission rows (upsert/overwrite)...`);
-    // Upsert — seed data IS the source of truth. When Sosh provides Salesforce exports,
-    // the corrected numbers are hardcoded here and must overwrite any stale entries.
+    console.log(`Seeding ${allDailySubmissions.length} daily submission rows...`);
+
+    // Step 1: Insert new rows (with all data including visitors).
+    // ignoreDuplicates: true means existing rows are untouched.
     for (let i = 0; i < allDailySubmissions.length; i += 50) {
         const batch = allDailySubmissions.slice(i, i + 50);
         const { error } = await supabase
             .from('daily_submissions')
-            .upsert(batch, { onConflict: 'date' });
+            .upsert(batch, { onConflict: 'date', ignoreDuplicates: true });
         if (error) {
-            console.error(`  Error at batch ${i}:`, error.message);
-        } else {
-            console.log(`  Upserted batch ${i}-${i + batch.length}`);
+            console.error(`  Error inserting batch ${i}:`, error.message);
         }
     }
+    console.log('  Inserted new rows (skipped existing)');
+
+    // Step 2: Update ONLY submission columns on existing rows.
+    // This corrects online/hybrid/prime/income from Salesforce without touching
+    // visitor data the user entered via the Daily Tracker form.
+    let updated = 0;
+    for (const entry of allDailySubmissions) {
+        const { error } = await supabase
+            .from('daily_submissions')
+            .update({
+                online: entry.online,
+                hybrid: entry.hybrid,
+                prime: entry.prime,
+                income: entry.income,
+            })
+            .eq('date', entry.date);
+        if (!error) updated++;
+    }
+    console.log(`  Updated submission data for ${updated} rows (visitors preserved)`);
 }
 
 async function seedGoogleAds() {
