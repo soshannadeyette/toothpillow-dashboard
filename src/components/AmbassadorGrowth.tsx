@@ -52,19 +52,19 @@ const infSubs: Record<string, number> = {
 const newAddsAmb: Record<string, number> = {
   '2024-01':4,'2024-02':7,'2024-03':7,'2024-04':6,'2024-05':3,'2024-06':7,'2024-07':10,'2024-08':2,'2024-09':6,'2024-10':7,'2024-11':7,'2024-12':7,
   '2025-01':7,'2025-02':84,'2025-03':7,'2025-04':6,'2025-05':5,'2025-06':6,'2025-07':1,'2025-08':15,'2025-09':2,'2025-10':1,'2025-11':6,'2025-12':1,
-  '2026-01':5,'2026-02':13,'2026-03':10,'2026-04':28,'2026-05':20,'2026-06':8,
+  '2026-01':5,'2026-02':13,'2026-03':10,'2026-04':28,'2026-05':20,'2026-06':6,
 };
 const newAddsInf: Record<string, number> = {
   '2024-01':1,'2024-02':8,'2024-03':3,'2024-04':4,'2024-05':9,'2024-06':2,'2024-07':7,'2024-08':2,'2024-09':4,'2024-10':6,'2024-11':6,'2024-12':9,
   '2025-01':11,'2025-02':3,'2025-03':7,'2025-04':2,'2025-05':0,'2025-06':3,'2025-07':0,'2025-08':1,'2025-09':0,'2025-10':0,'2025-11':1,'2025-12':1,
-  '2026-01':3,'2026-02':1,'2026-03':2,'2026-04':5,'2026-05':6,'2026-06':0,
+  '2026-01':3,'2026-02':1,'2026-03':2,'2026-04':5,'2026-05':6,'2026-06':2,
 };
 
 const ambSubsYear: Record<number, number> = {2023:465, 2024:435, 2025:566, 2026:274};
 const infSubsYear: Record<number, number> = {2023:1339, 2024:8398, 2025:5583, 2026:1796};
 const combSubsYear: Record<number, number> = {2023:1804, 2024:8833, 2025:6149, 2026:2070};
-const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:84};
-const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:17}; // Jun 0 inf adds
+const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:82};
+const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:19};
 const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:102};
 // Note: adds counts are from ambassador program tracking, not Salesforce referral exports
 
@@ -87,7 +87,7 @@ const recruit26: {label:string; amb:number; inf:number; accent:string; tag?:stri
   {label:'Mar', amb:10, inf:2, accent:'#3A6EA4'},
   {label:'Apr', amb:28, inf:5, accent:'#FDBE67'},
   {label:'May', amb:20, inf:6, accent:'#B26CA6'},
-  {label:'Jun', amb:8, inf:0, accent:'#DD5759'},
+  {label:'Jun', amb:6, inf:2, accent:'#DD5759'},
 ];
 
 const concRows = [
@@ -138,7 +138,7 @@ const moversData: Record<string, {y25:number; y26:number; type:string}> = {
   'Brianna Reiser':       {y25:22,   y26:9,   type:'Amb'},
   'Hillary Ha':           {y25:0,    y26:9,   type:'Amb'},
   'Elise Hylden':         {y25:20,   y26:8,   type:'Amb'},
-  'Hilary Fritsch':       {y25:0,    y26:8,   type:'Amb'},
+  'Hilary Fritsch':       {y25:0,    y26:8,   type:'Inf'},
   'Courtland Nall':       {y25:10,   y26:8,   type:'Amb'},
   'Rachel Jayroe':        {y25:0,    y26:7,   type:'Amb'},
   'Tiffany Hubbard':      {y25:11,   y26:6,   type:'Amb'},

@@ -110,14 +110,24 @@ export default function OnlineTrends() {
     const hybrid: Record<number, number> = {};
     const prime: Record<number, number> = {};
 
-    // Completed months from annual summaries
-    for (const s of summaries2026) {
-      online[s.month] = s.online_submissions;
-      hybrid[s.month] = s.hybrid_submissions;
-      prime[s.month] = s.prime_submissions;
+    // Compute ALL months from daily tracker (source of truth)
+    for (const d of dailySubs) {
+      const m = new Date(d.date + 'T12:00:00').getMonth() + 1;
+      online[m] = (online[m] || 0) + (d.online || 0);
+      hybrid[m] = (hybrid[m] || 0) + (d.hybrid || 0);
+      prime[m] = (prime[m] || 0) + (d.prime || 0);
     }
 
-    // Current month from daily submissions
+    // Fallback: use annual summaries for months with no daily data
+    for (const s of summaries2026) {
+      if (!online[s.month] && s.online_submissions > 0) {
+        online[s.month] = s.online_submissions;
+        hybrid[s.month] = s.hybrid_submissions;
+        prime[s.month] = s.prime_submissions;
+      }
+    }
+
+    // Current month projections
     const currentMonthSubs = dailySubs.filter((d) => {
       const dt = new Date(d.date + 'T12:00:00');
       return dt.getMonth() + 1 === currentMonth && dt.getFullYear() === currentYear;
@@ -125,19 +135,15 @@ export default function OnlineTrends() {
 
     let days = currentMonthSubs.length;
     const totalDays = daysInMonth(currentMonth, currentYear);
-    let actOnline = 0, actHybrid = 0, actPrime = 0;
+    let actOnline = online[currentMonth] || 0;
+    let actHybrid = hybrid[currentMonth] || 0;
+    let actPrime = prime[currentMonth] || 0;
     let pOnline = 0, pHybrid = 0, pPrime = 0;
 
     if (days > 0) {
-      actOnline = currentMonthSubs.reduce((s, d) => s + d.online, 0);
-      actHybrid = currentMonthSubs.reduce((s, d) => s + d.hybrid, 0);
-      actPrime = currentMonthSubs.reduce((s, d) => s + d.prime, 0);
       pOnline = Math.round((actOnline / days) * totalDays);
       pHybrid = Math.round((actHybrid / days) * totalDays);
       pPrime = Math.round((actPrime / days) * totalDays);
-      online[currentMonth] = actOnline; // actual MTD (projected used separately)
-      hybrid[currentMonth] = actHybrid;
-      prime[currentMonth] = actPrime;
     }
 
     // Determine last month with any online data
