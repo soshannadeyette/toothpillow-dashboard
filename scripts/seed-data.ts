@@ -277,6 +277,7 @@ const googleAdsDaily = [
     { date: '2026-06-02', spend: 489.53, impressions: 2571, clicks: 137, submit: 23, started: 0, finished: 0, treatment: 0 },
     { date: '2026-06-03', spend: 448.76, impressions: 2074, clicks: 137, submit: 19, started: 2, finished: 2, treatment: 0 },
     { date: '2026-06-04', spend: 211.58, impressions: 1033, clicks: 63, submit: 0, started: 0, finished: 0, treatment: 0 },
+    { date: '2026-06-05', spend: 433.85, impressions: 2121, clicks: 126, submit: 11, started: 0, finished: 0, treatment: 0 },
 ];
 
 // ===================== MONTHLY SUMMARIES =====================
