@@ -183,7 +183,7 @@ const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;w
   {name:'Eryn Carroll NMM',bonusSubs:10,tier:0,earned:0,winStart:'04/01/2026',winEnd:'04/01/2027'},
   {name:'Thuy Improta',bonusSubs:10,tier:0,earned:0,winStart:'04/01/2026',winEnd:'04/01/2027'},
   {name:'Ellen Fisher',bonusSubs:9,tier:0,earned:0,winStart:'04/01/2026',winEnd:'04/01/2027'},
-  {name:'Katelyn Alsop',bonusSubs:9,tier:0,earned:0,winStart:'04/01/2026',winEnd:'04/01/2027'},
+  {name:'Katelyn Alsop',bonusSubs:40,tier:1,earned:250,winStart:'01/19/2026',winEnd:'01/19/2027',is2026:true},
   {name:'Melina Moses',bonusSubs:9,tier:0,earned:0,winStart:'04/01/2026',winEnd:'04/01/2027'},
   {name:'Courtland Nall',bonusSubs:8,tier:0,earned:0,winStart:'04/01/2026',winEnd:'04/01/2027'},
   {name:'Hillary Ha',bonusSubs:7,tier:0,earned:0,winStart:'04/01/2026',winEnd:'04/01/2027'},
