@@ -62,8 +62,8 @@ const META_FUNNEL = { entered: 58, waitingInfo: 30, sentCheckout: 13, checkedOut
 // These sub-stage breakdowns can't come from daily Supabase data
 // Source: Salesforce "Google Ads 2026" export, June 5, 2026 06:16 PST
 // 165 total leads. 4 checkouts, $7,281 revenue.
-const GOOGLE_SF_PIPELINE = { total: 165, waiting: 106, sentToTxP: 13, txpApproved: 0, sentCheckout: 30, checkedOut: 4, referredOut: 8, denied: 0, closedLost: 4 };
-const GOOGLE_REVENUE: number = 7281; // 4 checkouts: $7,281 total
+const GOOGLE_SF_PIPELINE = { total: 170, waiting: 109, sentToTxP: 13, txpApproved: 0, sentCheckout: 31, checkedOut: 4, referredOut: 9, denied: 0, closedLost: 4 };
+const GOOGLE_REVENUE: number = 7281; // 4 checkouts: $7,281 total (none paid yet per export)
 
 /* ════════════════════════════════════════════
    COMPONENT
