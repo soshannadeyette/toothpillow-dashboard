@@ -58,7 +58,7 @@ const GSC_MONTHLY = [
   { month: '2026-03', clicks: 12601, impressions: 74269, ctr: 17.0, position: 26.9 },
   { month: '2026-04', clicks: 11180, impressions: 105758, ctr: 10.6, position: 37.4 },
   { month: '2026-05', clicks: 10082, impressions: 51676, ctr: 19.5, position: 21.5 },
-  { month: '2026-06', clicks: 1768, impressions: 6374, ctr: 27.7, position: 27.8 },
+  { month: '2026-06', clicks: 2673, impressions: 10409, ctr: 25.7, position: 10.2 },
 ];
 
 const GSC_WEEKLY = [
@@ -307,9 +307,9 @@ export default function OrganicGrowth() {
   const SUBMISSIONS_BY_MONTH: Record<string, number> = { ...SUBMISSIONS_2025, ...subs2026 };
 
   const mayData = GSC_MONTHLY[GSC_MONTHLY.length - 1];
-  const mayDaysReported = 27;
-  const mayClickPace = Math.round(mayData.clicks / mayDaysReported * 31);
-  const mayImprPace = Math.round(mayData.impressions / mayDaysReported * 31);
+  const latestDaysReported = 5; // June 1-5 (Jun 6 partial excluded)
+  const mayClickPace = Math.round(mayData.clicks / latestDaysReported * 30);
+  const mayImprPace = Math.round(mayData.impressions / latestDaysReported * 30);
 
   const may2025 = GSC_MONTHLY.find(m => m.month === '2025-05')!;
 
@@ -496,7 +496,7 @@ export default function OrganicGrowth() {
         <div style={cardStyle}>
           <div style={labelStyle}>Organic Clicks</div>
           <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{fmtK(mayClickPace)}</div>
-          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>May pace ({mayDaysReported} days)</div>
+          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>Jun pace ({latestDaysReported} days)</div>
           <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: mayClickPace < may2025.clicks ? TP.red : TP.green }}>
             {mayClickPace >= may2025.clicks ? '▲' : '▼'} {delta(mayClickPace, may2025.clicks)} vs May &apos;25
           </div>
@@ -504,7 +504,7 @@ export default function OrganicGrowth() {
         <div style={cardStyle}>
           <div style={labelStyle}>Impressions</div>
           <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{fmtK(mayImprPace)}</div>
-          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>May pace ({mayDaysReported} days)</div>
+          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>Jun pace ({latestDaysReported} days)</div>
           <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: mayImprPace < may2025.impressions ? TP.red : TP.green }}>
             {mayImprPace >= may2025.impressions ? '▲' : '▼'} {delta(mayImprPace, may2025.impressions)} vs May &apos;25
           </div>
