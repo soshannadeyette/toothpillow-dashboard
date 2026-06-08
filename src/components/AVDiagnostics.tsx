@@ -128,22 +128,23 @@ const COHORT_DATA = [
 //   completed (within 7d + days 8-14 + 15+) | waiting | other
 // These add up to starts. "mature" = every person has had that many days.
 // Weekly cohort aging — March 2026 through current
-// Source: Salesforce export June 2, 2026 19:30 PST
-const COHORT_AGING = [
-  { label: 'Mar 01–07', starts: 516, within7d: 283, d8to14: 14, d15plus: 22, waiting: 193, daysElapsed: 87, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Mar 08–14', starts: 563, within7d: 268, d8to14: 5, d15plus: 17, waiting: 269, daysElapsed: 80, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Mar 15–21', starts: 535, within7d: 281, d8to14: 8, d15plus: 20, waiting: 226, daysElapsed: 73, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Mar 22–28', starts: 453, within7d: 237, d8to14: 5, d15plus: 20, waiting: 189, daysElapsed: 66, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Mar 29–Apr 04', starts: 376, within7d: 199, d8to14: 2, d15plus: 18, waiting: 155, daysElapsed: 59, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Apr 05–11', starts: 344, within7d: 192, d8to14: 2, d15plus: 11, waiting: 139, daysElapsed: 52, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Apr 12–18', starts: 327, within7d: 186, d8to14: 10, d15plus: 11, waiting: 118, daysElapsed: 45, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Apr 19–25', starts: 336, within7d: 199, d8to14: 4, d15plus: 5, waiting: 127, daysElapsed: 38, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Apr 26–May 02', starts: 321, within7d: 172, d8to14: 7, d15plus: 7, waiting: 136, daysElapsed: 31, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'May 03–09', starts: 321, within7d: 164, d8to14: 5, d15plus: 5, waiting: 147, daysElapsed: 24, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'May 10–16', starts: 304, within7d: 164, d8to14: 3, d15plus: 2, waiting: 135, daysElapsed: 17, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'May 17–23', starts: 400, within7d: 175, d8to14: 11, d15plus: 1, waiting: 213, daysElapsed: 10, mature7d: true, mature14d: false, postUpdate: false },
-  { label: 'May 24–30', starts: 458, within7d: 250, d8to14: 1, d15plus: 0, waiting: 207, daysElapsed: 3, mature7d: false, mature14d: false, postUpdate: true },
-  { label: 'May 31–Jun 06', starts: 324, within7d: 210, d8to14: 0, d15plus: 0, waiting: 114, daysElapsed: 0, mature7d: false, mature14d: false, postUpdate: true },
+// Source: Salesforce Waiting on Info Ratios export June 8, 2026
+const COHORT_AGING: {label:string; starts:number; within7d:number; d8to14:number; d15plus:number; waiting:number; daysElapsed:number; mature7d:boolean; mature14d:boolean; postUpdate:boolean; tag?:string}[] = [
+  { label: 'Mar 01–07', starts: 516, within7d: 287, d8to14: 14, d15plus: 23, waiting: 192, daysElapsed: 93, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Mar 08–14', starts: 563, within7d: 273, d8to14: 5, d15plus: 16, waiting: 269, daysElapsed: 86, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Mar 15–21', starts: 535, within7d: 281, d8to14: 8, d15plus: 21, waiting: 225, daysElapsed: 79, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Mar 22–28', starts: 453, within7d: 240, d8to14: 5, d15plus: 20, waiting: 188, daysElapsed: 72, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Mar 29–Apr 04', starts: 376, within7d: 200, d8to14: 2, d15plus: 18, waiting: 156, daysElapsed: 65, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Apr 05–11', starts: 344, within7d: 192, d8to14: 2, d15plus: 11, waiting: 139, daysElapsed: 58, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Apr 12–18', starts: 327, within7d: 189, d8to14: 10, d15plus: 10, waiting: 118, daysElapsed: 51, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Apr 19–25', starts: 336, within7d: 200, d8to14: 4, d15plus: 5, waiting: 127, daysElapsed: 44, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Apr 26–May 02', starts: 321, within7d: 172, d8to14: 7, d15plus: 8, waiting: 134, daysElapsed: 37, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'May 03–09', starts: 321, within7d: 164, d8to14: 5, d15plus: 5, waiting: 147, daysElapsed: 30, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'May 10–16', starts: 304, within7d: 164, d8to14: 3, d15plus: 2, waiting: 135, daysElapsed: 23, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'May 17–23', starts: 398, within7d: 173, d8to14: 11, d15plus: 2, waiting: 212, daysElapsed: 16, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'May 24–30', starts: 456, within7d: 254, d8to14: 6, d15plus: 0, waiting: 196, daysElapsed: 9, mature7d: true, mature14d: false, postUpdate: true, tag: 'Memorial Day' },
+  { label: 'May 31–Jun 06', starts: 510, within7d: 327, d8to14: 0, d15plus: 0, waiting: 183, daysElapsed: 2, mature7d: false, mature14d: false, postUpdate: true },
+  { label: 'Jun 07–08', starts: 76, within7d: 39, d8to14: 0, d15plus: 0, waiting: 37, daysElapsed: 0, mature7d: false, mature14d: false, postUpdate: true },
 ];
 
 // ── Post-update tracking ────────────────────────────────────────────
@@ -435,9 +436,62 @@ export default function AVDiagnostics() {
         </div>
       </div>
 
+      {/* ═══════ WEEKLY COHORT AGING TABLE ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 24 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>Weekly Cohort Completion Tracker</h3>
+        <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px' }}>
+          Each row = patients created that week. Waiting % drops as cohort ages. Mature cohorts (4+ months) reach 88-97% completion.
+        </p>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid #E5E7EB', fontSize: 12, color: '#6B7280', textTransform: 'uppercase' }}>
+                <th style={{ textAlign: 'left', padding: '8px 12px' }}>Week</th>
+                <th style={{ textAlign: 'right', padding: '8px 12px' }}>Started</th>
+                <th style={{ textAlign: 'right', padding: '8px 12px' }}>Within 7d</th>
+                <th style={{ textAlign: 'right', padding: '8px 12px' }}>8-14d</th>
+                <th style={{ textAlign: 'right', padding: '8px 12px' }}>15d+</th>
+                <th style={{ textAlign: 'right', padding: '8px 12px' }}>Waiting</th>
+                <th style={{ textAlign: 'right', padding: '8px 12px' }}>Done %</th>
+                <th style={{ textAlign: 'right', padding: '8px 12px' }}>Age</th>
+              </tr>
+            </thead>
+            <tbody>
+              {COHORT_AGING.map((c) => {
+                const done = c.starts - c.waiting;
+                const donePct = c.starts > 0 ? Math.round((done / c.starts) * 100) : 0;
+                const isYoung = c.daysElapsed < 14;
+                return (
+                  <tr key={c.label} style={{
+                    borderBottom: '1px solid #F3F4F6',
+                    background: c.postUpdate ? '#F0FDF4' : undefined,
+                  }}>
+                    <td style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>
+                      {c.label}
+                      {c.tag && <span style={{ marginLeft: 6, fontSize: 10, padding: '1px 6px', borderRadius: 8, background: '#FEF3C7', color: '#92400E' }}>{c.tag}</span>}
+                      {c.postUpdate && !c.tag && <span style={{ marginLeft: 6, fontSize: 10, padding: '1px 6px', borderRadius: 8, background: '#D1FAE5', color: '#065F46' }}>post-update</span>}
+                    </td>
+                    <td style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 600 }}>{c.starts.toLocaleString()}</td>
+                    <td style={{ textAlign: 'right', padding: '8px 12px', color: TP.green }}>{c.within7d.toLocaleString()}</td>
+                    <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6B7280' }}>{c.d8to14 || '–'}</td>
+                    <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6B7280' }}>{c.d15plus || '–'}</td>
+                    <td style={{ textAlign: 'right', padding: '8px 12px', color: TP.red, fontWeight: 600 }}>{c.waiting.toLocaleString()}</td>
+                    <td style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 700, color: donePct >= 70 ? '#166534' : donePct >= 55 ? '#92400E' : TP.red }}>
+                      {donePct}%{isYoung && <span style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 400 }}> *</span>}
+                    </td>
+                    <td style={{ textAlign: 'right', padding: '8px 12px', color: '#9CA3AF', fontSize: 12 }}>{c.daysElapsed}d</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p style={{ fontSize: 11, color: '#9CA3AF', margin: '8px 0 0' }}>* Young cohorts (&lt;14 days) — completion rate will increase as they age.</p>
+      </div>
+
       {/* ═══════ FOOTER: Source ═══════ */}
       <div style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'center', padding: '8px 0' }}>
-        Source: Salesforce exports, June 4 2026. Cohort data from &quot;Tracking Conversions&quot; and &quot;Waiting on Info Ratios&quot; exports.
+        Source: Salesforce exports, June 8 2026. Cohort data from &quot;Waiting on Info Ratios&quot; export.
       </div>
 
     </div>
