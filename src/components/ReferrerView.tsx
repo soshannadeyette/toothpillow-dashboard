@@ -163,7 +163,7 @@ const TABLE_SOURCES = [
   { key: 'Parent', color: '#7BAFD4', label: 'Parent' },
   { key: 'Facebook', color: '#4267B2', label: 'Facebook' },
   { key: 'TikTok', color: '#333333', label: 'TikTok' },
-  { key: 'Meta Ad', color: TP.amber, label: 'Meta Ad' },
+  { key: 'Meta Ad', color: '#EF9F27', label: 'Meta Ad' },
   { key: 'Unknown Referral', color: '#999999', label: 'Unknown Referral' },
   { key: 'Unknown Professional Referral', color: '#BBBBBB', label: 'Unknown Prof. Referral' },
 ];
@@ -178,7 +178,7 @@ const PER_SOURCE_DEFS = [
   { key: 'Facebook', color: '#4267B2', label: 'Facebook' },
   { key: 'Airway Ambassador', color: '#5BA88C', label: 'Ambassador' },
   { key: 'Parent', color: '#7BAFD4', label: 'Parent' },
-  { key: 'Meta Ad', color: TP.amber, label: 'Meta Ad' },
+  { key: 'Meta Ad', color: '#EF9F27', label: 'Meta Ad' },
   { key: 'TikTok', color: '#333333', label: 'TikTok' },
   { key: 'Unknown Referral', color: '#999999', label: 'Unknown Referral' },
 ];
