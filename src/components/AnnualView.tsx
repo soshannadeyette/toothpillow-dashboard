@@ -139,11 +139,21 @@ export default function AnnualView() {
         const goalObj = (MONTHLY_GOALS_2026 as { month: number; total: number }[]).find(g => g.month === month);
 
         if (entries && entries.length > 0) {
-          const totalOnline = entries.reduce((s, e) => s + (e.online || 0), 0);
-          const totalHybrid = entries.reduce((s, e) => s + (e.hybrid || 0), 0);
-          const totalPrime = entries.reduce((s, e) => s + (e.prime || 0), 0);
-          const totalSubs = totalOnline + totalHybrid + totalPrime;
+          const dailyOnline = entries.reduce((s, e) => s + (e.online || 0), 0);
+          const dailyHybrid = entries.reduce((s, e) => s + (e.hybrid || 0), 0);
+          const dailyPrime = entries.reduce((s, e) => s + (e.prime || 0), 0);
+          const dailyTotal = dailyOnline + dailyHybrid + dailyPrime;
           const dailyVisitors = entries.reduce((s, e) => s + (e.visitors || 0), 0);
+
+          // For completed months, use whichever source has higher totals.
+          // Daily tracker entries may be estimated/incomplete (e.g. Jan missing 138 subs),
+          // while monthly_summary from seed has Salesforce-verified totals.
+          const dbTotal = dbRow ? (dbRow.online_submissions || 0) + (dbRow.hybrid_submissions || 0) + (dbRow.prime_submissions || 0) : 0;
+          const useDb = dbRow && dbTotal > dailyTotal && month < thisMonth;
+          const totalOnline = useDb ? (dbRow!.online_submissions || 0) : dailyOnline;
+          const totalHybrid = useDb ? (dbRow!.hybrid_submissions || 0) : dailyHybrid;
+          const totalPrime = useDb ? (dbRow!.prime_submissions || 0) : dailyPrime;
+          const totalSubs = totalOnline + totalHybrid + totalPrime;
 
           // Visitor data: DB monthly_summary (from Save Visitors) > daily sum > hardcoded
           const vis = dbRow?.total_visitors || dailyVisitors || TRAFFIC_2026[month] || 0;
@@ -163,8 +173,8 @@ export default function AnnualView() {
             usa_visitors: usaVis,
             conversion_rate: vis > 0 ? parseFloat(((totalOnline / vis) * 100).toFixed(2)) : 0,
             usa_conversion_rate: usaVis > 0 ? parseFloat(((totalOnline / usaVis) * 100).toFixed(2)) : 0,
-            days_tracked: entries.length,
-            daily_avg: parseFloat((totalSubs / entries.length).toFixed(1)),
+            days_tracked: useDb ? (dbRow!.days_tracked || entries.length) : entries.length,
+            daily_avg: useDb ? (dbRow!.daily_avg || 0) : parseFloat((totalSubs / entries.length).toFixed(1)),
           });
         } else if (dbRow) {
           // No daily entries — fall back to monthly_summary (shouldn't happen for months with data)
