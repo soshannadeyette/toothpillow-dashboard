@@ -105,8 +105,7 @@ const LAG_DISTRIBUTION = [
   { label: 'Mar',        buckets: [963, 97, 57, 58, 44, 30, 38] },
   { label: 'Apr',        buckets: [685, 55, 39, 31, 21, 35, 101] },
   { label: 'May 1–22',   buckets: [390, 64, 39, 24, 19, 10, 1] },
-  { label: 'May 23–31',  buckets: [260, 25, 8, 2, 2, 0, 0] },
-  { label: 'Jun 1–4',    buckets: [142, 14, 0, 0, 0, 0, 0] },
+  { label: 'May 23–Jun 8', buckets: [551, 49, 26, 17, 7, 0, 0] },
 ];
 
 // ── Weekly cohort completion curves (source of truth) ────────────────
@@ -202,12 +201,12 @@ export default function AVDiagnostics() {
     const within3d = d.buckets[0] + d.buckets[1] + d.buckets[2];
     const sameDayPct = within3d > 0 ? Math.round(d.buckets[0] / within3d * 1000) / 10 : 0;
     const within1dPct = within3d > 0 ? Math.round((d.buckets[0] + d.buckets[1]) / within3d * 1000) / 10 : 0;
-    const isPost = d.label === 'May 23–31' || d.label === 'Jun 1–4';
+    const isPost = d.label === 'May 23–Jun 8';
     return { label: d.label, within3d, sameDayPct, within1dPct, isPost };
   });
-  const fairComp = fairCompAll.filter(d => d.label === 'May 1–22' || d.label === 'May 23–31' || d.label === 'Jun 1–4');
+  const fairComp = fairCompAll.filter(d => d.label === 'May 1–22' || d.label === 'May 23–Jun 8' || d.label === 'Apr');
   const fairPre = fairComp.find(d => d.label === 'May 1–22')!;
-  const fairPost = fairComp.find(d => d.label === 'May 23–31')!;
+  const fairPost = fairCompAll.find(d => d.label === 'May 23–Jun 8')!;
 
   // ── Styles ────────────────────────────────────────────────────────
   const card = (bg: string, border: string): React.CSSProperties => ({
@@ -417,7 +416,7 @@ export default function AVDiagnostics() {
 
         {/* Post-update */}
         <div style={{ background: '#F0FDF4', borderRadius: 12, padding: 20, border: '1.5px solid #BBF7D0' }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#166534', textTransform: 'uppercase', marginBottom: 4 }}>After update (May 23–31)</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#166534', textTransform: 'uppercase', marginBottom: 4 }}>After update (May 23–Jun 8)</div>
           <div style={{ fontSize: 11, color: '#15803D', marginBottom: 10 }}>{fairPost.within3d} patients completed within 3 days</div>
           <div style={{ display: 'grid', gap: 10 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
@@ -433,6 +432,58 @@ export default function AVDiagnostics() {
               <span style={{ fontWeight: 700, color: '#166534' }}>0.2 days</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* ═══════ HORIZONTAL BAR: Waiting % by week ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 24 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>Waiting % by Weekly Cohort</h3>
+        <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px' }}>
+          % of each week's patients still waiting. Lower is better. Young cohorts (&lt;14d) will improve as they age.
+        </p>
+        <div style={{ height: Math.max(COHORT_AGING.length * 32, 300) }}>
+          <Bar
+            data={{
+              labels: COHORT_AGING.map(c => c.label + (c.tag ? ' *' : '')),
+              datasets: [{
+                label: 'Waiting %',
+                data: COHORT_AGING.map(c => c.starts > 0 ? Math.round((c.waiting / c.starts) * 100) : 0),
+                backgroundColor: COHORT_AGING.map(c => {
+                  const pct = c.starts > 0 ? (c.waiting / c.starts) * 100 : 0;
+                  if (c.daysElapsed < 14) return '#D1D5DB'; // gray for young
+                  if (c.tag) return '#FBBF24'; // yellow for Memorial Day
+                  if (pct <= 30) return TP.green;
+                  if (pct <= 42) return TP.amber;
+                  return TP.red;
+                }),
+                borderRadius: 3,
+              }],
+            }}
+            options={{
+              indexAxis: 'y' as const,
+              responsive: true, maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: (ctx: any) => `${ctx.parsed.x}% still waiting (${COHORT_AGING[ctx.dataIndex].waiting} of ${COHORT_AGING[ctx.dataIndex].starts})` } },
+                annotation: {
+                  annotations: {
+                    target: { type: 'line' as const, xMin: 38, xMax: 38, borderColor: '#9CA3AF', borderWidth: 1, borderDash: [4, 4], label: { display: true, content: 'avg 38%', position: 'start' as const, font: { size: 10 }, color: '#9CA3AF', backgroundColor: 'transparent' } },
+                  },
+                },
+              },
+              scales: {
+                x: { min: 0, max: 60, ticks: { callback: (v: number | string) => v + '%' }, grid: { color: '#F3F4F6' } },
+                y: { grid: { display: false }, ticks: { font: { size: 11 } } },
+              },
+            } as any}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: 16, fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: TP.green, marginRight: 4 }} />≤30% (good)</span>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: TP.amber, marginRight: 4 }} />31-42%</span>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: TP.red, marginRight: 4 }} />&gt;42% (high)</span>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#D1D5DB', marginRight: 4 }} />Too young to judge</span>
+          <span>* Memorial Day weekend</span>
         </div>
       </div>
 
@@ -452,7 +503,7 @@ export default function AVDiagnostics() {
                 <th style={{ textAlign: 'right', padding: '8px 12px' }}>8-14d</th>
                 <th style={{ textAlign: 'right', padding: '8px 12px' }}>15d+</th>
                 <th style={{ textAlign: 'right', padding: '8px 12px' }}>Waiting</th>
-                <th style={{ textAlign: 'right', padding: '8px 12px' }}>Done %</th>
+                <th style={{ textAlign: 'right', padding: '8px 12px' }}>Waiting %</th>
                 <th style={{ textAlign: 'right', padding: '8px 12px' }}>Age</th>
               </tr>
             </thead>
@@ -460,6 +511,7 @@ export default function AVDiagnostics() {
               {COHORT_AGING.map((c) => {
                 const done = c.starts - c.waiting;
                 const donePct = c.starts > 0 ? Math.round((done / c.starts) * 100) : 0;
+                const waitPct = c.starts > 0 ? Math.round((c.waiting / c.starts) * 100) : 0;
                 const isYoung = c.daysElapsed < 14;
                 return (
                   <tr key={c.label} style={{
@@ -476,8 +528,8 @@ export default function AVDiagnostics() {
                     <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6B7280' }}>{c.d8to14 || '–'}</td>
                     <td style={{ textAlign: 'right', padding: '8px 12px', color: '#6B7280' }}>{c.d15plus || '–'}</td>
                     <td style={{ textAlign: 'right', padding: '8px 12px', color: TP.red, fontWeight: 600 }}>{c.waiting.toLocaleString()}</td>
-                    <td style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 700, color: donePct >= 70 ? '#166534' : donePct >= 55 ? '#92400E' : TP.red }}>
-                      {donePct}%{isYoung && <span style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 400 }}> *</span>}
+                    <td style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 700, color: waitPct <= 30 ? '#166534' : waitPct <= 42 ? '#92400E' : TP.red }}>
+                      {waitPct}%{isYoung && <span style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 400 }}> *</span>}
                     </td>
                     <td style={{ textAlign: 'right', padding: '8px 12px', color: '#9CA3AF', fontSize: 12 }}>{c.daysElapsed}d</td>
                   </tr>
