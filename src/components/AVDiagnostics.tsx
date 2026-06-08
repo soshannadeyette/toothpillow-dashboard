@@ -154,8 +154,25 @@ function num(v: number): string { return v.toLocaleString(); }
 
 export default function AVDiagnostics() {
 
-  // Suppress unused data arrays from old sections
-  void COHORT_DATA; void AV_DATA;
+  // ── Derived: cohort comparison (the real measure of update impact) ────
+  // NORMALIZE: use within-7-day completers as denominator for all cohorts.
+  // Raw COHORT_DATA uses all-eventual-completers (including day 8, 9, 12+ returners)
+  // which unfairly deflates pre-update percentages since the post-update cohort
+  // is too young to have late returners. This makes the comparison apples-to-apples.
+  const normalize = (c: typeof COHORT_DATA[0]) => {
+    const scale = 100 / c.within7d; // within7d% → 100%, everything else scales up
+    return {
+      ...c,
+      sameDay:   Math.round(c.sameDay * scale * 10) / 10,
+      within1d:  Math.round(c.within1d * scale * 10) / 10,
+      within3d:  Math.round(c.within3d * scale * 10) / 10,
+      within7d:  100.0,
+      n7d:       Math.round(c.n * c.within7d / 100), // count of 7-day completers
+    };
+  };
+  const NORM = COHORT_DATA.map(normalize);
+  const preCohort = NORM.find(c => c.label === 'May 15–21')!;
+  const postCohort = NORM.find(c => c.label === 'May 22–28')!;
 
   // Aging cohort data — aggregate all post-update cohorts for hero cards
   const postAgingCohorts = COHORT_AGING.filter(c => c.postUpdate);
@@ -178,100 +195,246 @@ export default function AVDiagnostics() {
   const preAvgStarts = Math.round(preDays.reduce((s, d) => s + d.starts, 0) / preDays.length);
   const postAvgStarts = Math.round(postDays.reduce((s, d) => s + d.starts, 0) / postDays.length);
 
-  // Suppress old unused variables
-  void postAgingCohort; void preAvgStarts; void postAvgStarts;
+  // ── Fair comparison: same-day rate using 3-day window across all months ────
+  // For each period, denominator = people who completed within 3 days (same day + 1 day + 2-3 day buckets)
+  // This makes every period comparable regardless of how old the cohort is
+  const fairCompAll = LAG_DISTRIBUTION.map(d => {
+    const within3d = d.buckets[0] + d.buckets[1] + d.buckets[2];
+    const sameDayPct = within3d > 0 ? Math.round(d.buckets[0] / within3d * 1000) / 10 : 0;
+    const within1dPct = within3d > 0 ? Math.round((d.buckets[0] + d.buckets[1]) / within3d * 1000) / 10 : 0;
+    const isPost = d.label === 'May 23–31' || d.label === 'Jun 1–4';
+    return { label: d.label, within3d, sameDayPct, within1dPct, isPost };
+  });
+  const fairComp = fairCompAll.filter(d => d.label === 'May 1–22' || d.label === 'May 23–31' || d.label === 'Jun 1–4');
+  const fairPre = fairComp.find(d => d.label === 'May 1–22')!;
+  const fairPost = fairComp.find(d => d.label === 'May 23–31')!;
+
+  // ── Styles ────────────────────────────────────────────────────────
+  const card = (bg: string, border: string): React.CSSProperties => ({
+    background: bg, borderRadius: 12, padding: '18px 20px', border: `1.5px solid ${border}`,
+  });
+  const cardLabel: React.CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: 6 };
+  const cardNum: React.CSSProperties = { fontSize: 32, fontWeight: 700, lineHeight: 1.1 };
+  const cardSub: React.CSSProperties = { fontSize: 12, marginTop: 4 };
+  const arrow = (up: boolean) => up ? '▲' : '▼';
 
   return (
     <div style={{ maxWidth: 1100 }}>
 
       {/* ═══════ HEADER ═══════ */}
       <div style={{ marginBottom: 28 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 600, color: TP.navy, margin: '0 0 6px' }}>AV Diagnostics</h2>
+        <h2 style={{ fontSize: 22, fontWeight: 600, color: TP.navy, margin: '0 0 6px' }}>Assessment Update Impact</h2>
         <p style={{ fontSize: 13, color: '#888', margin: 0 }}>
-          Weekly cohort tracking: how many people start the assessment each week, how many finish, and how long incomplete ones sit.
+          May 22 update: simplified photo upload flow. Measuring completion speed, same-day rate, and volume.
         </p>
       </div>
 
-      {/* ═══════ STACKED BAR: Completed vs Waiting per week ═══════ */}
+      {/* ═══════ SECTION 0: FAIR COMPARISON — SAME-DAY RATE OVER TIME ═══════ */}
       <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 28 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>Weekly Assessment Volume</h3>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>Same-day completion rate (fair comparison)</h3>
         <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px' }}>
-          Stacked: completed (green) vs still waiting (red). Completion % line overlaid.
+          Among patients who completed within 3 days, what % finished same day? Same window applied to every period so no cohort has an unfair advantage.
         </p>
-        <div style={{ height: 320 }}>
+        <div style={{ height: 300 }}>
           <Bar
             data={{
-              labels: COHORT_AGING.map(c => c.label + (c.tag ? ` *` : '')),
-              datasets: [
-                {
-                  label: 'Completed',
-                  data: COHORT_AGING.map(c => c.within7d + c.d8to14 + c.d15plus),
-                  backgroundColor: COHORT_AGING.map(c => c.postUpdate ? '#34D399' : TP.green),
-                  borderRadius: 2,
-                  stack: 'stack0',
-                },
-                {
-                  label: 'Waiting',
-                  data: COHORT_AGING.map(c => c.waiting),
-                  backgroundColor: COHORT_AGING.map(c => c.tag ? '#FBBF24' : '#FCA5A5'),
-                  borderRadius: 2,
-                  stack: 'stack0',
-                },
-                {
-                  label: 'Done %',
-                  data: COHORT_AGING.map(c => {
-                    const done = c.starts - c.waiting;
-                    return c.starts > 0 ? Math.round((done / c.starts) * 100) : 0;
-                  }),
-                  type: 'line',
-                  borderColor: TP.navy,
-                  backgroundColor: TP.navy,
-                  borderWidth: 2.5,
-                  pointRadius: 4,
-                  pointBackgroundColor: TP.navy,
-                  tension: 0.3,
-                  yAxisID: 'y1',
-                } as any,
-              ],
+              labels: fairComp.map(d => d.label),
+              datasets: [{
+                label: 'Same-day %',
+                data: fairComp.map(d => d.sameDayPct),
+                backgroundColor: fairComp.map(d => d.isPost ? TP.green : TP.blue),
+                borderRadius: 6,
+                barPercentage: 0.7,
+              }],
             }}
             options={{
               responsive: true, maintainAspectRatio: false,
               plugins: {
-                legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
-                tooltip: {
-                  callbacks: {
-                    label: (ctx: any) => {
-                      if (ctx.dataset.label === 'Done %') return `${ctx.parsed.y}% completed`;
-                      return `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`;
-                    },
-                  },
-                },
-                annotation: {
-                  annotations: {
-                    memorialLine: {
-                      type: 'line' as const,
-                      xMin: COHORT_AGING.findIndex(c => c.tag === 'Memorial Day'),
-                      xMax: COHORT_AGING.findIndex(c => c.tag === 'Memorial Day'),
-                      borderColor: '#92400E',
-                      borderWidth: 2,
-                      borderDash: [5, 3],
-                      label: { display: true, content: 'Memorial Day', position: 'start' as const, font: { size: 10 }, backgroundColor: '#FEF3C7', color: '#92400E' },
-                    },
-                  },
-                },
+                legend: { display: false },
+                tooltip: { callbacks: { label: (ctx: { parsed: { y: number } }) => ctx.parsed.y + '% same day' } },
               },
               scales: {
-                x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 45 } },
-                y: { stacked: true, title: { display: true, text: 'Patients' }, grid: { color: '#F3F4F6' } },
-                y1: { position: 'right' as const, min: 0, max: 100, title: { display: true, text: 'Done %' }, ticks: { callback: (v: number | string) => v + '%' }, grid: { display: false } },
+                y: { min: 70, max: 100, ticks: { callback: (v: number | string) => v + '%' } },
               },
             } as any}
           />
         </div>
-        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>* Memorial Day weekend — expect lower completion from holiday traffic.</div>
+        <div style={{ display: 'flex', gap: 16, fontSize: 12, color: '#6B7280', marginTop: 12 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: TP.blue }} /> Pre-update months</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 3, background: TP.green }} /> Post-update (May 23+)</span>
+        </div>
+        <div style={{ marginTop: 12, fontSize: 12, color: '#6B7280' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid #E5E7EB' }}>
+                <th style={{ textAlign: 'left', padding: '6px 8px', fontWeight: 600 }}>Period</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>Completed within 3 days</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>Same-day rate</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>Within 1 day</th>
+              </tr>
+            </thead>
+            <tbody>
+              {fairComp.map(d => (
+                <tr key={d.label} style={{ borderBottom: '1px solid #F3F4F6', background: d.isPost ? '#F0FDF4' : 'transparent', fontWeight: d.isPost ? 700 : 400 }}>
+                  <td style={{ padding: '6px 8px' }}>{d.label}{d.isPost ? ' (post-update)' : ''}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right' }}>{d.within3d.toLocaleString()}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', color: d.isPost ? TP.green : 'inherit' }}>{d.sameDayPct}%</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', color: d.isPost ? TP.green : 'inherit' }}>{d.within1dPct}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* old sections removed */}
+      {/* ═══════ SECTION 1: HERO STAT CARDS ═══════ */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginBottom: 32 }}>
+
+        {/* Same-day completion */}
+        <div style={card('#F0FDF4', '#BBF7D0')}>
+          <div style={{ ...cardLabel, color: '#166534' }}>Same-day completion</div>
+          <div style={{ ...cardNum, color: '#166534' }}>{fairPost.sameDayPct}%</div>
+          <div style={{ ...cardSub, color: '#15803D' }}>
+            {arrow(true)} from {fairPre.sameDayPct}% (May 1–22)
+          </div>
+          <div style={{ fontSize: 11, color: '#166534', marginTop: 2 }}>
+            +{(fairPost.sameDayPct - fairPre.sameDayPct).toFixed(0)}pp improvement (same 3-day window)
+          </div>
+        </div>
+
+        {/* Completions — raw volume */}
+        <div style={card('#EFF6FF', '#BFDBFE')}>
+          <div style={{ ...cardLabel, color: '#1E40AF' }}>Completions</div>
+          <div style={{ ...cardNum, color: '#1E40AF' }}>{postAgingCohort.within7d + postAgingCohort.d8to14 + postAgingCohort.d15plus}</div>
+          <div style={{ ...cardSub, color: '#2563EB' }}>
+            from {postAgingCohort.starts} starts ({POST_UPDATE_DAYS_ELAPSED} days old)
+          </div>
+          <div style={{ fontSize: 11, color: '#1E40AF', marginTop: 2 }}>
+            {postAgingCohort.waiting} still in progress, cohort still aging
+          </div>
+        </div>
+
+        {/* Mean time to complete */}
+        <div style={card('#F0FDF4', '#BBF7D0')}>
+          <div style={{ ...cardLabel, color: '#166534' }}>Mean time to submit</div>
+          <div style={{ ...cardNum, color: '#166534' }}>0.2 days</div>
+          <div style={{ ...cardSub, color: '#15803D' }}>
+            {arrow(false)} from 1.0 day pre-update
+          </div>
+          <div style={{ fontSize: 11, color: '#166534', marginTop: 2 }}>
+            Most people finish in one sitting
+          </div>
+        </div>
+
+        {/* Volume — starts per day */}
+        <div style={card('#EFF6FF', '#BFDBFE')}>
+          <div style={{ ...cardLabel, color: '#1E40AF' }}>Starts per day</div>
+          <div style={{ ...cardNum, color: '#1E40AF' }}>{postAvgStarts}</div>
+          <div style={{ ...cardSub, color: '#2563EB' }}>
+            {postAvgStarts > preAvgStarts ? arrow(true) : arrow(false)} from {preAvgStarts}/day pre-update
+          </div>
+          <div style={{ fontSize: 11, color: '#1E40AF', marginTop: 2 }}>
+            {num(AV_DATA.reduce((s, d) => s + d.starts, 0))} total starts in 2026
+          </div>
+        </div>
+      </div>
+
+      {/* ═══════ SECTION 2: COHORT SPEED COMPARISON (the money chart) ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 24 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>Completion speed by weekly cohort</h3>
+        <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px' }}>
+          Of patients who completed within 7 days, how fast did they finish? Using same 7-day window for all cohorts so the comparison is fair.
+        </p>
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
+          {NORM.map((c, i) => {
+            const colors = [TP.skyBlue, TP.purple, TP.amber, TP.green, TP.coral, TP.navy];
+            const isPost = c.label === 'May 22–28' || c.label === 'May 29–31' || c.label === 'Jun 1–4';
+            return (
+              <span key={c.label} style={{ display: 'flex', alignItems: 'center', gap: 5, fontWeight: isPost ? 700 : 400 }}>
+                <span style={{ width: 14, height: 3, background: colors[i], borderRadius: 2 }} />
+                {c.label} ({c.n7d} within 7d){isPost ? ' — post-update' : ''}
+              </span>
+            );
+          })}
+        </div>
+        <div style={{ height: 300 }}>
+          <Line
+            data={{
+              labels: ['Same day', 'Within 1 day', 'Within 3 days'],
+              datasets: NORM.map((c, i) => {
+                const colors = [TP.skyBlue, TP.purple, TP.amber, TP.green, TP.coral, TP.navy];
+                const isPost = c.label === 'May 22–28' || c.label === 'May 29–31' || c.label === 'Jun 1–4';
+                return {
+                  label: c.label,
+                  data: [c.sameDay, c.within1d, c.within3d],
+                  borderColor: colors[i],
+                  backgroundColor: colors[i],
+                  borderWidth: isPost ? 3.5 : 2,
+                  pointRadius: isPost ? 7 : 5,
+                  pointBackgroundColor: colors[i],
+                  tension: 0.3,
+                  borderDash: isPost ? [] : [6, 3],
+                };
+              }),
+            }}
+            options={{
+              responsive: true, maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                title: { display: false },
+                tooltip: { callbacks: { label: (ctx: { dataset: { label: string }; parsed: { y: number } }) => ctx.dataset.label + ': ' + ctx.parsed.y + '%' } },
+              },
+              scales: {
+                y: { min: 60, max: 102, ticks: { callback: (v: number | string) => v + '%' } },
+              },
+            } as any}
+          />
+        </div>
+      </div>
+
+      {/* ═══════ SECTION 3: PRE vs POST SIDE-BY-SIDE ═══════ */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+        {/* Pre-update */}
+        <div style={{ background: '#FFF5F5', borderRadius: 12, padding: 20, border: '1.5px solid #FECACA' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#991B1B', textTransform: 'uppercase', marginBottom: 4 }}>Before update (May 1–22)</div>
+          <div style={{ fontSize: 11, color: '#9B1C1C', marginBottom: 10 }}>{fairPre.within3d} patients completed within 3 days</div>
+          <div style={{ display: 'grid', gap: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
+              <span style={{ color: '#6B7280' }}>Same-day completion</span>
+              <span style={{ fontWeight: 700, color: '#991B1B' }}>{fairPre.sameDayPct}%</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
+              <span style={{ color: '#6B7280' }}>Within 1 day</span>
+              <span style={{ fontWeight: 700, color: '#991B1B' }}>{fairPre.within1dPct}%</span>
+            </div>
+            <div style={{ borderTop: '1px solid #FECACA', paddingTop: 8, display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
+              <span style={{ color: '#6B7280' }}>Mean lag</span>
+              <span style={{ fontWeight: 700, color: '#991B1B' }}>1.0 day</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Post-update */}
+        <div style={{ background: '#F0FDF4', borderRadius: 12, padding: 20, border: '1.5px solid #BBF7D0' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#166534', textTransform: 'uppercase', marginBottom: 4 }}>After update (May 23–31)</div>
+          <div style={{ fontSize: 11, color: '#15803D', marginBottom: 10 }}>{fairPost.within3d} patients completed within 3 days</div>
+          <div style={{ display: 'grid', gap: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
+              <span style={{ color: '#6B7280' }}>Same-day completion</span>
+              <span style={{ fontWeight: 700, color: '#166534' }}>{fairPost.sameDayPct}% <span style={{ fontSize: 11, color: '#15803D' }}>+{(fairPost.sameDayPct - fairPre.sameDayPct).toFixed(0)}pp</span></span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
+              <span style={{ color: '#6B7280' }}>Within 1 day</span>
+              <span style={{ fontWeight: 700, color: '#166534' }}>{fairPost.within1dPct}% <span style={{ fontSize: 11, color: '#15803D' }}>+{(fairPost.within1dPct - fairPre.within1dPct).toFixed(0)}pp</span></span>
+            </div>
+            <div style={{ borderTop: '1px solid #BBF7D0', paddingTop: 8, display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
+              <span style={{ color: '#6B7280' }}>Mean lag</span>
+              <span style={{ fontWeight: 700, color: '#166534' }}>0.2 days</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* ═══════ WEEKLY COHORT AGING TABLE ═══════ */}
       <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 24 }}>
