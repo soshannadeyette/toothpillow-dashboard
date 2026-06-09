@@ -261,10 +261,18 @@ const TOP_QUERIES = [
    HELPERS
    ════════════════════════════════════════════ */
 
-// Suppress unused-variable warnings for data kept for future use
-void GSC_WEEKLY;
-void GSC_DAILY_2026;
+// GSC_DAILY_MAY_2026 kept for backward compat but not rendered
 void GSC_DAILY_MAY_2026;
+
+function weekLabel(w: string): string {
+  const d = new Date(w + 'T12:00:00');
+  const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${names[d.getMonth()]} ${d.getDate()}`;
+}
+
+function weekToIndex(_weekStr: string, target: string): number {
+  return GSC_WEEKLY.findIndex(w => w.week >= target);
+}
 
 function fmtK(n: number): string {
   if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
@@ -288,8 +296,11 @@ function delta(current: number, previous: number): string {
    COMPONENT
    ════════════════════════════════════════════ */
 
+type ViewMode = 'monthly' | 'weekly' | 'daily';
+
 export default function OrganicGrowth() {
   const [subs2026, setSubs2026] = useState<Record<string, number>>({});
+  const [clicksView, setClicksView] = useState<ViewMode>('weekly');
 
   useEffect(() => {
     fetchSubmissions(2026).then((entries: DailySubmission[]) => {
@@ -416,6 +427,97 @@ export default function OrganicGrowth() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [seoMonthIndex]);
 
+  // ── Chart: Weekly Organic Clicks with 4-week MA ──
+  const weeklyClicksData = useMemo(() => {
+    const clickValues = GSC_WEEKLY.map(w => w.clicks);
+    const ma4: (number | null)[] = clickValues.map((_, i) => {
+      if (i < 3) return null;
+      return Math.round((clickValues[i] + clickValues[i - 1] + clickValues[i - 2] + clickValues[i - 3]) / 4);
+    });
+    return {
+      labels: GSC_WEEKLY.map(w => weekLabel(w.week)),
+      datasets: [
+        { label: 'Weekly Clicks', data: clickValues, borderColor: TP.blue, backgroundColor: `${TP.blue}18`, pointRadius: 2.5, pointBackgroundColor: TP.blue, borderWidth: 2, tension: 0.3, fill: true, order: 2 },
+        { label: '4-Week Moving Avg', data: ma4, borderColor: TP.red, backgroundColor: 'transparent', pointRadius: 0, borderWidth: 2.5, tension: 0.35, spanGaps: true, order: 1 },
+      ],
+    };
+  }, []);
+
+  const seoWeekIndex = weekToIndex(GSC_WEEKLY[0]?.week || '', SEO_START_DATE);
+  const websiteWeekIndex = weekToIndex(GSC_WEEKLY[0]?.week || '', WEBSITE_LAUNCH_DATE);
+  const coreUpdateWeekIndex = GSC_WEEKLY.findIndex(w => w.week >= '2025-09-01');
+
+  const weeklyClicksOpts = useMemo(() => ({
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
+      tooltip: { callbacks: { label: (ctx: { datasetIndex: number; parsed: { y: number } }) => ctx.datasetIndex === 0 ? `${ctx.parsed.y.toLocaleString()} clicks` : `${ctx.parsed.y.toLocaleString()} avg` } },
+      annotation: {
+        annotations: {
+          ...(websiteWeekIndex >= 0 ? { websiteLine: { type: 'line' as const, xMin: websiteWeekIndex, xMax: websiteWeekIndex, borderColor: `${TP.blue}B0`, borderWidth: 2, borderDash: [6, 3], label: { display: true, content: 'New Site (Dec 22)', position: 'end' as const, backgroundColor: TP.blue, color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { top: 2, bottom: 2, left: 5, right: 5 }, borderRadius: 3 } } } : {}),
+          ...(coreUpdateWeekIndex >= 0 ? { coreUpdateLine: { type: 'line' as const, xMin: coreUpdateWeekIndex, xMax: coreUpdateWeekIndex, borderColor: `${TP.amber}B0`, borderWidth: 2, borderDash: [6, 3], label: { display: true, content: 'Core Update (Sep)', position: 'end' as const, backgroundColor: TP.amber, color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { top: 2, bottom: 2, left: 5, right: 5 }, borderRadius: 3 } } } : {}),
+          ...(seoWeekIndex >= 0 ? { seoLine: { type: 'line' as const, xMin: seoWeekIndex, xMax: seoWeekIndex, borderColor: `${TP.green}B0`, borderWidth: 2, borderDash: [6, 3], label: { display: true, content: 'SEO Live (May 19)', position: 'end' as const, backgroundColor: TP.green, color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { top: 2, bottom: 2, left: 5, right: 5 }, borderRadius: 3 } } } : {}),
+        },
+      },
+    },
+    scales: {
+      y: { beginAtZero: true, ticks: { callback: (v: number | string) => fmtK(Number(v)) }, grid: { color: '#f0f0f0' } },
+      x: { grid: { display: false }, ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 18, font: { size: 10 } } },
+    },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [seoWeekIndex]);
+
+  // ── Chart: Daily 2026 Clicks with 7-day MA ──
+  const dailyClicksData = useMemo(() => {
+    const allDays: { label: string; clicks: number }[] = [];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May'] as const;
+    const monthNums = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05' };
+    for (const mo of months) {
+      const days = GSC_DAILY_2026[mo];
+      if (!days) continue;
+      for (const [d, clicks] of days) {
+        allDays.push({ label: `${mo} ${d}`, clicks });
+      }
+    }
+    const clickValues = allDays.map(d => d.clicks);
+    const ma7: (number | null)[] = clickValues.map((_, i) => {
+      if (i < 6) return null;
+      let sum = 0;
+      for (let j = 0; j < 7; j++) sum += clickValues[i - j];
+      return Math.round(sum / 7);
+    });
+
+    // Find SEO start index (May 19)
+    const seoIdx = allDays.findIndex(d => d.label === 'May 19');
+
+    return {
+      labels: allDays.map(d => d.label),
+      datasets: [
+        { label: 'Daily Clicks', data: clickValues, borderColor: `${TP.blue}60`, backgroundColor: `${TP.blue}10`, pointRadius: 1, borderWidth: 1.2, tension: 0.2, fill: true, order: 2 },
+        { label: '7-Day Moving Avg', data: ma7, borderColor: TP.red, backgroundColor: 'transparent', pointRadius: 0, borderWidth: 2.5, tension: 0.35, spanGaps: true, order: 1 },
+      ],
+      seoIdx,
+    };
+  }, []);
+
+  const dailyClicksOpts = useMemo(() => ({
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
+      tooltip: { callbacks: { label: (ctx: { datasetIndex: number; parsed: { y: number } }) => ctx.datasetIndex === 0 ? `${ctx.parsed.y.toLocaleString()} clicks` : `${ctx.parsed.y.toLocaleString()} avg` } },
+      annotation: {
+        annotations: {
+          ...(dailyClicksData.seoIdx >= 0 ? { seoLine: { type: 'line' as const, xMin: dailyClicksData.seoIdx, xMax: dailyClicksData.seoIdx, borderColor: `${TP.green}B0`, borderWidth: 2, borderDash: [6, 3], label: { display: true, content: 'SEO Live (May 19)', position: 'end' as const, backgroundColor: TP.green, color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { top: 2, bottom: 2, left: 5, right: 5 }, borderRadius: 3 } } } : {}),
+        },
+      },
+    },
+    scales: {
+      y: { beginAtZero: true, ticks: { callback: (v: number | string) => fmtK(Number(v)) }, grid: { color: '#f0f0f0' } },
+      x: { grid: { display: false }, ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 20, font: { size: 10 } } },
+    },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [dailyClicksData.seoIdx]);
+
   // ── Chart: Monthly Impressions + Submissions overlay ──
   const impressionsData = useMemo(() => ({
     labels: GSC_MONTHLY.map(m => monthLabel(m.month)),
@@ -523,12 +625,92 @@ export default function OrganicGrowth() {
 
       </div>
 
-      {/* ═══════ SECTION 2: MONTHLY ORGANIC CLICKS ═══════ */}
+      {/* ═══════ SECTION 2: ORGANIC CLICKS (Monthly / Weekly / Daily toggle) ═══════ */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12, marginTop: 0 }}>Monthly Organic Clicks</h3>
-        <div style={{ height: 300 }}>
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          <Bar data={monthlyClicksData as any} options={clicksChartOpts as object} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, margin: 0 }}>
+            Organic Clicks {clicksView === 'monthly' ? '(Monthly)' : clicksView === 'weekly' ? '(Weekly)' : '(Daily 2026)'}
+          </h3>
+          <div style={{ display: 'flex', gap: 4, background: '#f3f4f6', borderRadius: 6, padding: 3 }}>
+            {(['monthly', 'weekly', 'daily'] as ViewMode[]).map(v => (
+              <button key={v} onClick={() => setClicksView(v)} style={{
+                padding: '4px 12px', fontSize: 11, fontWeight: 600, borderRadius: 4, border: 'none', cursor: 'pointer',
+                background: clicksView === v ? TP.navy : 'transparent', color: clicksView === v ? '#fff' : '#666',
+                transition: 'all 0.15s',
+              }}>
+                {v === 'monthly' ? 'Monthly' : v === 'weekly' ? 'Weekly' : 'Daily 2026'}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div style={{ fontSize: 11, color: '#888', marginBottom: 8 }}>
+          {clicksView === 'monthly' && 'Feb 2025 to present. Bars = total clicks per month, red line = 3-month moving average.'}
+          {clicksView === 'weekly' && `${GSC_WEEKLY.length} weeks from Feb 2025. Blue area = weekly clicks, red line = 4-week moving average.`}
+          {clicksView === 'daily' && 'Jan 1 – May 27, 2026 (146 days). Gray area = daily clicks, red line = 7-day moving average.'}
+        </div>
+        <div style={{ height: 320 }}>
+          {clicksView === 'monthly' && (
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+            <Bar data={monthlyClicksData as any} options={clicksChartOpts as object} />
+          )}
+          {clicksView === 'weekly' && (
+            <Line data={weeklyClicksData} options={weeklyClicksOpts as object} />
+          )}
+          {clicksView === 'daily' && (
+            <Line data={dailyClicksData} options={dailyClicksOpts as object} />
+          )}
+        </div>
+      </div>
+
+      {/* ═══════ MONTH-OVER-MONTH SUMMARY TABLE ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4, marginTop: 0 }}>Month-over-Month Trend</h3>
+        <p style={{ fontSize: 12, color: '#888', margin: '0 0 12px 0' }}>Each row shows the change from the previous month. Green = improvement, red = decline.</p>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+            <thead>
+              <tr style={{ borderBottom: `2px solid ${TP.navy}` }}>
+                <th style={{ padding: '8px 10px', textAlign: 'left', color: TP.navy }}>Month</th>
+                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Clicks</th>
+                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>MoM</th>
+                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Impressions</th>
+                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>MoM</th>
+                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>CTR</th>
+                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Position</th>
+                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>MoM</th>
+              </tr>
+            </thead>
+            <tbody>
+              {GSC_MONTHLY.map((m, i) => {
+                const prev = i > 0 ? GSC_MONTHLY[i - 1] : null;
+                const clickChg = prev ? ((m.clicks - prev.clicks) / prev.clicks * 100) : null;
+                const imprChg = prev ? ((m.impressions - prev.impressions) / prev.impressions * 100) : null;
+                const posChg = prev ? (prev.position - m.position) : null; // positive = improved (lower position)
+                const isJune = m.month === '2026-06';
+                return (
+                  <tr key={i} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : '#fff' }}>
+                    <td style={{ padding: '7px 10px', fontWeight: 600 }}>
+                      {monthLabel(m.month)}
+                      {isJune && <span style={{ fontSize: 10, color: '#999', marginLeft: 4 }}>(7 days)</span>}
+                    </td>
+                    <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 600 }}>{m.clicks.toLocaleString()}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 600, color: clickChg !== null ? (clickChg >= 0 ? TP.green : TP.red) : '#ccc', fontSize: 11 }}>
+                      {clickChg !== null ? `${clickChg >= 0 ? '+' : ''}${clickChg.toFixed(0)}%` : '--'}
+                    </td>
+                    <td style={{ padding: '7px 10px', textAlign: 'right' }}>{fmtK(m.impressions)}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 600, color: imprChg !== null ? (imprChg >= 0 ? TP.green : TP.red) : '#ccc', fontSize: 11 }}>
+                      {imprChg !== null ? `${imprChg >= 0 ? '+' : ''}${imprChg.toFixed(0)}%` : '--'}
+                    </td>
+                    <td style={{ padding: '7px 10px', textAlign: 'right' }}>{m.ctr}%</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 600, color: m.position <= 10 ? TP.green : m.position <= 20 ? TP.yellow : TP.text }}>{m.position.toFixed(1)}</td>
+                    <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 600, color: posChg !== null ? (posChg >= 0 ? TP.green : TP.red) : '#ccc', fontSize: 11 }}>
+                      {posChg !== null ? `${posChg >= 0 ? '▲' : '▼'} ${Math.abs(posChg).toFixed(1)}` : '--'}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
 
