@@ -191,12 +191,25 @@ const may2026Seed = [
     // Seed would overwrite user entries on every deploy.
 ];
 
+const jun2026Seed = [
+    { date: '2026-06-01', online: 77, hybrid: 13, prime: 0, visitors: 0, income: 385 },
+    { date: '2026-06-02', online: 61, hybrid: 12, prime: 0, visitors: 0, income: 305 },
+    { date: '2026-06-03', online: 42, hybrid: 18, prime: 0, visitors: 0, income: 210 },
+    { date: '2026-06-04', online: 50, hybrid: 8, prime: 0, visitors: 0, income: 250 },
+    { date: '2026-06-05', online: 42, hybrid: 3, prime: 1, visitors: 0, income: 210 },
+    { date: '2026-06-06', online: 43, hybrid: 1, prime: 0, visitors: 0, income: 215 },
+    { date: '2026-06-07', online: 23, hybrid: 0, prime: 0, visitors: 0, income: 115 },
+    { date: '2026-06-08', online: 60, hybrid: 3, prime: 0, visitors: 0, income: 300 },
+    { date: '2026-06-09', online: 5, hybrid: 3, prime: 0, visitors: 0, income: 25 },
+];
+
 const allDailySubmissions = [
     ...jan2026Daily,
     ...feb2026Daily,
     ...mar2026Daily,
     ...apr2026Daily,
     ...may2026Seed,
+    ...jun2026Seed,
 ];
 
 // ===================== GOOGLE ADS DAILY =====================
