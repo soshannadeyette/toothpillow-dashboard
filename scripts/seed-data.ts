@@ -191,16 +191,18 @@ const may2026Seed = [
     // Seed would overwrite user entries on every deploy.
 ];
 
+// Source: Salesforce exports pulled June 10, 2026 12:23 PST
 const jun2026Seed = [
     { date: '2026-06-01', online: 77, hybrid: 13, prime: 0, visitors: 0, income: 385 },
     { date: '2026-06-02', online: 61, hybrid: 12, prime: 0, visitors: 0, income: 305 },
-    { date: '2026-06-03', online: 42, hybrid: 18, prime: 0, visitors: 0, income: 210 },
-    { date: '2026-06-04', online: 50, hybrid: 8, prime: 0, visitors: 0, income: 250 },
-    { date: '2026-06-05', online: 42, hybrid: 3, prime: 1, visitors: 0, income: 210 },
-    { date: '2026-06-06', online: 43, hybrid: 1, prime: 0, visitors: 0, income: 215 },
-    { date: '2026-06-07', online: 23, hybrid: 0, prime: 0, visitors: 0, income: 115 },
-    { date: '2026-06-08', online: 60, hybrid: 3, prime: 0, visitors: 0, income: 300 },
-    { date: '2026-06-09', online: 5, hybrid: 3, prime: 0, visitors: 0, income: 25 },
+    { date: '2026-06-03', online: 44, hybrid: 18, prime: 0, visitors: 0, income: 220 },
+    { date: '2026-06-04', online: 52, hybrid: 8, prime: 0, visitors: 0, income: 260 },
+    { date: '2026-06-05', online: 46, hybrid: 3, prime: 1, visitors: 0, income: 230 },
+    { date: '2026-06-06', online: 45, hybrid: 1, prime: 0, visitors: 0, income: 225 },
+    { date: '2026-06-07', online: 24, hybrid: 0, prime: 0, visitors: 0, income: 120 },
+    { date: '2026-06-08', online: 61, hybrid: 3, prime: 0, visitors: 0, income: 305 },
+    { date: '2026-06-09', online: 64, hybrid: 9, prime: 0, visitors: 0, income: 320 },
+    { date: '2026-06-10', online: 32, hybrid: 12, prime: 0, visitors: 0, income: 160 },
 ];
 
 const allDailySubmissions = [
