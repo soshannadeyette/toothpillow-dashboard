@@ -31,11 +31,7 @@ const TP = {
 };
 
 // ── Hardcoded data (source of truth) ──────────────────────────────────
-// Source: Salesforce "Waiting on Info Ratios" export, pulled June 4, 2026 06:37 PST
-// "starts" = Salesforce Person Account creations (assessment starts)
-// "waiting" = current WAITING stage (needs info / needs photos) — never finished
-// "submitted" = have a Submission Date — completed their assessment
-// Major assessment update shipped May 22 — May split into pre/post
+// Source: Salesforce "Waiting on Info Ratios" export, pulled June 11, 2026
 const AV_DATA = [
   { label: 'Jan 26', month: 1,  year: 2026, traffic: 37320, starts: 1146, waiting: 108, submitted: 1035, partial: false, period: 'full' as const },
   { label: 'Feb 26', month: 2,  year: 2026, traffic: 51480, starts: 2193, waiting: 888, submitted: 1293, partial: false, period: 'full' as const },
@@ -43,7 +39,42 @@ const AV_DATA = [
   { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1431, waiting: 569, submitted: 854,  partial: false, period: 'full' as const },
   { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1037, waiting: 487, submitted: 550, partial: false, period: 'pre-update' as const },
   { label: 'May 23–31', month: 5,  year: 2026, traffic: 11212,  starts: 580,  waiting: 282,  submitted: 298,  partial: false,  period: 'post-update' as const },
-  { label: 'Jun 1–4', month: 6, year: 2026, traffic: 0, starts: 271, waiting: 115, submitted: 156, partial: true, period: 'post-update' as const },
+  { label: 'Jun 1–11', month: 6, year: 2026, traffic: 0, starts: 814, waiting: 294, submitted: 512, partial: true, period: 'post-update' as const },
+];
+
+// ── Same-week completion rate by weekly cohort (source of truth) ──────
+// For each week: of all records created, what % submitted within the same Mon-Sun window.
+// Hard stop — later submissions don't count. Apples-to-apples across all weeks.
+// Source: Salesforce "Waiting on Info Ratios" export, June 11, 2026
+const WEEKLY_COMPLETION: { label: string; total: number; submitted: number; pct: number; paidAds: number }[] = [
+  { label: 'Feb 02', total: 284, submitted: 204, pct: 71.8, paidAds: 0 },
+  { label: 'Feb 09', total: 293, submitted: 183, pct: 62.5, paidAds: 0 },
+  { label: 'Feb 16', total: 691, submitted: 320, pct: 46.3, paidAds: 0 },
+  { label: 'Feb 23', total: 971, submitted: 437, pct: 45.0, paidAds: 0 },
+  { label: 'Mar 02', total: 488, submitted: 255, pct: 52.3, paidAds: 0 },
+  { label: 'Mar 09', total: 588, submitted: 255, pct: 43.4, paidAds: 0 },
+  { label: 'Mar 16', total: 506, submitted: 252, pct: 49.8, paidAds: 0 },
+  { label: 'Mar 23', total: 478, submitted: 232, pct: 48.5, paidAds: 0 },
+  { label: 'Mar 30', total: 330, submitted: 173, pct: 52.4, paidAds: 2 },
+  { label: 'Apr 06', total: 368, submitted: 200, pct: 54.3, paidAds: 12 },
+  { label: 'Apr 13', total: 324, submitted: 165, pct: 50.9, paidAds: 18 },
+  { label: 'Apr 20', total: 328, submitted: 180, pct: 54.9, paidAds: 11 },
+  { label: 'Apr 27', total: 330, submitted: 165, pct: 50.0, paidAds: 21 },
+  { label: 'May 04', total: 312, submitted: 146, pct: 46.8, paidAds: 20 },
+  { label: 'May 11', total: 332, submitted: 143, pct: 43.1, paidAds: 7 },
+  { label: 'May 18', total: 380, submitted: 158, pct: 41.6, paidAds: 10 },
+  { label: 'May 25', total: 467, submitted: 248, pct: 53.1, paidAds: 36 },
+  { label: 'Jun 01', total: 496, submitted: 308, pct: 62.1, paidAds: 44 },
+  { label: 'Jun 08', total: 318, submitted: 182, pct: 57.2, paidAds: 15 },
+];
+
+// ── Event markers for same-week chart ──────────────────────────────────
+const EVENTS: { week: string; label: string; color: string }[] = [
+  { week: 'Feb 23', label: 'Volume spike (2x)', color: '#7F77DD' },
+  { week: 'Mar 30', label: 'Google Ads live', color: '#3A6EA4' },
+  { week: 'Apr 20', label: 'Daily Wire ad read', color: '#D85A30' },
+  { week: 'May 18', label: 'Low point (41.6%)', color: '#E24B4A' },
+  { week: 'May 25', label: 'Assessment update ships', color: '#1D9E75' },
 ];
 
 // ── Full pipeline funnel by month (source of truth) ──────────────────
@@ -126,24 +157,28 @@ const COHORT_DATA = [
 // Tracks each weekly cohort broken into non-overlapping groups:
 //   completed (within 7d + days 8-14 + 15+) | waiting | other
 // These add up to starts. "mature" = every person has had that many days.
-// Weekly cohort aging — March 2026 through current
-// Source: Salesforce Waiting on Info Ratios export June 8, 2026
+// Weekly cohort aging — Feb through current
+// Source: Salesforce Waiting on Info Ratios export June 11, 2026
 const COHORT_AGING: {label:string; starts:number; within7d:number; d8to14:number; d15plus:number; waiting:number; daysElapsed:number; mature7d:boolean; mature14d:boolean; postUpdate:boolean; tag?:string}[] = [
-  { label: 'Mar 01–07', starts: 516, within7d: 287, d8to14: 14, d15plus: 23, waiting: 192, daysElapsed: 93, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Mar 08–14', starts: 563, within7d: 273, d8to14: 5, d15plus: 16, waiting: 269, daysElapsed: 86, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Mar 15–21', starts: 535, within7d: 281, d8to14: 8, d15plus: 21, waiting: 225, daysElapsed: 79, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Mar 22–28', starts: 453, within7d: 240, d8to14: 5, d15plus: 20, waiting: 188, daysElapsed: 72, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Mar 29–Apr 04', starts: 376, within7d: 200, d8to14: 2, d15plus: 18, waiting: 156, daysElapsed: 65, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Apr 05–11', starts: 344, within7d: 192, d8to14: 2, d15plus: 11, waiting: 139, daysElapsed: 58, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Apr 12–18', starts: 327, within7d: 189, d8to14: 10, d15plus: 10, waiting: 118, daysElapsed: 51, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Apr 19–25', starts: 336, within7d: 200, d8to14: 4, d15plus: 5, waiting: 127, daysElapsed: 44, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Apr 26–May 02', starts: 321, within7d: 172, d8to14: 7, d15plus: 8, waiting: 134, daysElapsed: 37, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'May 03–09', starts: 321, within7d: 164, d8to14: 5, d15plus: 5, waiting: 147, daysElapsed: 30, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'May 10–16', starts: 304, within7d: 164, d8to14: 3, d15plus: 2, waiting: 135, daysElapsed: 23, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'May 17–23', starts: 398, within7d: 173, d8to14: 11, d15plus: 2, waiting: 212, daysElapsed: 16, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'May 24–30', starts: 456, within7d: 254, d8to14: 6, d15plus: 0, waiting: 196, daysElapsed: 9, mature7d: true, mature14d: false, postUpdate: true, tag: 'Memorial Day' },
-  { label: 'May 31–Jun 06', starts: 510, within7d: 327, d8to14: 0, d15plus: 0, waiting: 183, daysElapsed: 2, mature7d: false, mature14d: false, postUpdate: true },
-  { label: 'Jun 07–08', starts: 76, within7d: 39, d8to14: 0, d15plus: 0, waiting: 37, daysElapsed: 0, mature7d: false, mature14d: false, postUpdate: true },
+  { label: 'Feb 02–08', starts: 284, within7d: 210, d8to14: 4, d15plus: 10, waiting: 59, daysElapsed: 123, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Feb 09–15', starts: 293, within7d: 197, d8to14: 5, d15plus: 7, waiting: 85, daysElapsed: 116, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Feb 16–22', starts: 691, within7d: 336, d8to14: 14, d15plus: 26, waiting: 307, daysElapsed: 109, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Feb 23–Mar 01', starts: 971, within7d: 460, d8to14: 14, d15plus: 37, waiting: 455, daysElapsed: 102, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Mar 02–08', starts: 488, within7d: 266, d8to14: 15, d15plus: 24, waiting: 178, daysElapsed: 95, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Mar 09–15', starts: 588, within7d: 275, d8to14: 6, d15plus: 22, waiting: 282, daysElapsed: 88, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Mar 16–22', starts: 506, within7d: 267, d8to14: 5, d15plus: 24, waiting: 209, daysElapsed: 81, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Mar 23–29', starts: 478, within7d: 248, d8to14: 5, d15plus: 23, waiting: 200, daysElapsed: 74, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Mar 30–Apr 05', starts: 330, within7d: 184, d8to14: 4, d15plus: 12, waiting: 129, daysElapsed: 67, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Apr 06–12', starts: 368, within7d: 209, d8to14: 1, d15plus: 13, waiting: 145, daysElapsed: 60, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Apr 13–19', starts: 324, within7d: 177, d8to14: 9, d15plus: 10, waiting: 124, daysElapsed: 53, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Apr 20–26', starts: 328, within7d: 193, d8to14: 4, d15plus: 4, waiting: 127, daysElapsed: 46, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Apr 27–May 03', starts: 330, within7d: 177, d8to14: 7, d15plus: 10, waiting: 137, daysElapsed: 39, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'May 04–10', starts: 312, within7d: 159, d8to14: 5, d15plus: 8, waiting: 140, daysElapsed: 32, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'May 11–17', starts: 332, within7d: 171, d8to14: 6, d15plus: 3, waiting: 152, daysElapsed: 25, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'May 18–24', starts: 380, within7d: 167, d8to14: 9, d15plus: 2, waiting: 202, daysElapsed: 18, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'May 25–31', starts: 467, within7d: 266, d8to14: 11, d15plus: 0, waiting: 190, daysElapsed: 11, mature7d: true, mature14d: false, postUpdate: true },
+  { label: 'Jun 01–07', starts: 496, within7d: 330, d8to14: 0, d15plus: 0, waiting: 165, daysElapsed: 4, mature7d: false, mature14d: false, postUpdate: true },
+  { label: 'Jun 08–11', starts: 318, within7d: 182, d8to14: 0, d15plus: 0, waiting: 129, daysElapsed: 0, mature7d: false, mature14d: false, postUpdate: true },
 ];
 
 // ── Post-update tracking ────────────────────────────────────────────
@@ -154,7 +189,7 @@ function num(v: number): string { return v.toLocaleString(); }
 export default function AVDiagnostics() {
 
   // Suppress unused data arrays kept for future reference
-  void COHORT_DATA; void AV_DATA; void FUNNEL_DATA; void MAY_DAILY; void LAG_DISTRIBUTION;
+  void COHORT_DATA; void AV_DATA; void FUNNEL_DATA; void MAY_DAILY; void LAG_DISTRIBUTION; void EVENTS;
 
   // ── Old derived computations (kept to avoid removing data arrays) ────
   const normalize = (c: typeof COHORT_DATA[0]) => {
@@ -227,7 +262,158 @@ export default function AVDiagnostics() {
         </p>
       </div>
 
-{/* ═══════ HORIZONTAL BAR: Waiting % by week ═══════ */}
+{/* ═══════ SAME-WEEK COMPLETION RATE ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 24 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>Same-Week Completion Rate</h3>
+        <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px' }}>
+          Of assessments created each week, what % submitted within the same Mon–Sun window. Hard cutoff — later completions don&apos;t count. Every week measured the same way.
+        </p>
+
+        {/* Hero cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
+          {(() => {
+            const recent3 = WEEKLY_COMPLETION.slice(-3);
+            const prior3 = WEEKLY_COMPLETION.slice(-6, -3);
+            const recentAvg = Math.round(recent3.reduce((s, w) => s + w.pct, 0) / recent3.length * 10) / 10;
+            const priorAvg = Math.round(prior3.reduce((s, w) => s + w.pct, 0) / prior3.length * 10) / 10;
+            const best = WEEKLY_COMPLETION.reduce((a, b) => a.pct > b.pct ? a : b);
+            const worst = WEEKLY_COMPLETION.reduce((a, b) => a.pct < b.pct ? a : b);
+            const totalPaid = WEEKLY_COMPLETION.reduce((s, w) => s + w.paidAds, 0);
+            const totalAll = WEEKLY_COMPLETION.reduce((s, w) => s + w.total, 0);
+            return (<>
+              <div style={card('#F0FDF4', '#BBF7D0')}>
+                <div style={cardLabel}>Last 3 weeks avg</div>
+                <div style={{ ...cardNum, color: TP.green }}>{recentAvg}%</div>
+                <div style={{ ...cardSub, color: recentAvg > priorAvg ? '#166534' : TP.red }}>
+                  {recentAvg > priorAvg ? arrow(true) : arrow(false)} {Math.abs(Math.round((recentAvg - priorAvg) * 10) / 10)}pp vs prior 3wk ({priorAvg}%)
+                </div>
+              </div>
+              <div style={card('#EFF6FF', '#BFDBFE')}>
+                <div style={cardLabel}>Best week</div>
+                <div style={{ ...cardNum, color: TP.blue }}>{best.pct}%</div>
+                <div style={cardSub}>{best.label} (n={best.total})</div>
+              </div>
+              <div style={card('#FEF2F2', '#FECACA')}>
+                <div style={cardLabel}>Worst week</div>
+                <div style={{ ...cardNum, color: TP.red }}>{worst.pct}%</div>
+                <div style={cardSub}>{worst.label} (n={worst.total})</div>
+              </div>
+              <div style={card('#F5F3FF', '#DDD6FE')}>
+                <div style={cardLabel}>Google Ads share</div>
+                <div style={{ ...cardNum, color: TP.purple }}>{Math.round(totalPaid / totalAll * 100)}%</div>
+                <div style={cardSub}>{totalPaid} of {num(totalAll)} records (Apr+)</div>
+              </div>
+            </>);
+          })()}
+        </div>
+
+        {/* Chart */}
+        <div style={{ height: WEEKLY_COMPLETION.length * 42 + 60 }}>
+          <Bar
+            data={{
+              labels: WEEKLY_COMPLETION.map(w => w.label),
+              datasets: [
+                {
+                  label: 'Submitted same week',
+                  data: WEEKLY_COMPLETION.map(w => w.pct),
+                  backgroundColor: WEEKLY_COMPLETION.map(w => {
+                    if (w.pct >= 60) return '#0F6E56';
+                    if (w.pct >= 50) return '#1D9E75';
+                    return '#5DCAA5';
+                  }),
+                  borderRadius: 3,
+                  barPercentage: 0.65,
+                },
+                {
+                  label: 'Did not submit',
+                  data: WEEKLY_COMPLETION.map(w => 100 - w.pct),
+                  backgroundColor: '#E5E7EB',
+                  borderRadius: 3,
+                  barPercentage: 0.65,
+                },
+              ],
+            }}
+            options={{
+              indexAxis: 'y' as const,
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: {
+                  stacked: true,
+                  max: 100,
+                  ticks: { callback: (v: number | string) => v + '%', font: { size: 11 } },
+                  grid: { color: '#F3F4F6' },
+                },
+                y: {
+                  stacked: true,
+                  ticks: { font: { size: 12, weight: 'bold' as const } },
+                  grid: { display: false },
+                },
+              },
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  callbacks: {
+                    title: (items: any[]) => `Week of ${WEEKLY_COMPLETION[items[0].dataIndex].label}`,
+                    label: (ctx: any) => {
+                      const w = WEEKLY_COMPLETION[ctx.dataIndex];
+                      if (ctx.datasetIndex === 0) {
+                        const parts = [`${w.submitted} of ${w.total} submitted same week (${w.pct}%)`];
+                        if (w.paidAds > 0) parts.push(`${w.paidAds} from Google Ads (${Math.round(w.paidAds / w.total * 100)}%)`);
+                        return parts;
+                      }
+                      return `${w.total - w.submitted} did not submit that week`;
+                    },
+                  },
+                },
+                annotation: {
+                  annotations: Object.fromEntries(
+                    EVENTS.map((e, i) => {
+                      const idx = WEEKLY_COMPLETION.findIndex(w => w.label === e.week);
+                      return [`event${i}`, {
+                        type: 'label' as const,
+                        yValue: idx,
+                        xValue: 95,
+                        content: e.label,
+                        font: { size: 9, weight: 'bold' as const },
+                        color: e.color,
+                        backgroundColor: 'rgba(255,255,255,0.85)',
+                        padding: { top: 2, bottom: 2, left: 4, right: 4 },
+                        borderRadius: 3,
+                      }];
+                    })
+                  ),
+                },
+              },
+            } as any}
+          />
+        </div>
+
+        {/* Legend */}
+        <div style={{ display: 'flex', gap: 16, fontSize: 11, color: '#9CA3AF', marginTop: 8, flexWrap: 'wrap' }}>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#0F6E56', marginRight: 4 }} />60%+ (strong)</span>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#1D9E75', marginRight: 4 }} />50–59%</span>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#5DCAA5', marginRight: 4 }} />&lt;50% (needs attention)</span>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#E5E7EB', marginRight: 4 }} />Did not submit that week</span>
+        </div>
+
+        {/* Paid ads volume table */}
+        <details style={{ marginTop: 16 }}>
+          <summary style={{ fontSize: 12, color: '#6B7280', cursor: 'pointer', fontWeight: 600 }}>Google Ads records by week (April+)</summary>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: 6, marginTop: 8 }}>
+            {WEEKLY_COMPLETION.filter(w => w.paidAds > 0).map(w => (
+              <div key={w.label} style={{ fontSize: 11, padding: '4px 8px', background: '#F3F4F6', borderRadius: 6 }}>
+                <span style={{ fontWeight: 600 }}>{w.label}:</span> {w.paidAds} <span style={{ color: '#9CA3AF' }}>({Math.round(w.paidAds / w.total * 100)}%)</span>
+              </div>
+            ))}
+          </div>
+          <p style={{ fontSize: 11, color: '#9CA3AF', margin: '6px 0 0' }}>
+            Source: Salesforce Google Ads 2026 export. For full per-record source breakdown (ambassador vs organic vs paid), need an export with referral type + dates on each row.
+          </p>
+        </details>
+      </div>
+
+      {/* ═══════ HORIZONTAL BAR: Waiting % by week ═══════ */}
       <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, marginBottom: 24 }}>
         <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, margin: '0 0 4px' }}>Waiting % by Weekly Cohort</h3>
         <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px' }}>
@@ -335,14 +521,10 @@ export default function AVDiagnostics() {
 
       {/* ═══════ FOOTER: Source ═══════ */}
       <div style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'center', padding: '8px 0' }}>
-        Source: Salesforce exports, June 8 2026. Cohort data from &quot;Waiting on Info Ratios&quot; export.
+        Source: Salesforce exports, June 11 2026. Cohort data from &quot;Waiting on Info Ratios&quot; export.
       </div>
 
     </div>
   );
 }
-/* REMOVED SECTIONS BELOW — kept data arrays for future use */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-const _UNUSED_PLACEHOLDER = 0;
-void _UNUSED_PLACEHOLDER;
-void MAY_DAILY; void FUNNEL_DATA; void COHORT_AGING;
+/* Data arrays kept for reference — suppressed in component body */
