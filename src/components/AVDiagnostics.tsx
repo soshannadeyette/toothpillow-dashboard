@@ -70,11 +70,7 @@ const WEEKLY_COMPLETION: { label: string; total: number; submitted: number; pct:
 
 // ── Event markers for same-week chart ──────────────────────────────────
 const EVENTS: { week: string; label: string; color: string }[] = [
-  { week: 'Feb 23', label: 'Volume spike (2x)', color: '#7F77DD' },
-  { week: 'Mar 30', label: 'Google Ads live', color: '#3A6EA4' },
-  { week: 'Apr 20', label: 'Daily Wire ad read', color: '#D85A30' },
-  { week: 'May 18', label: 'Low point (41.6%)', color: '#E24B4A' },
-  { week: 'May 25', label: 'Assessment update ships', color: '#1D9E75' },
+  { week: 'May 18', label: 'Photo assessment update ships', color: '#1D9E75' },
 ];
 
 // ── Full pipeline funnel by month (source of truth) ──────────────────
