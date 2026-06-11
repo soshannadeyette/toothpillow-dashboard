@@ -79,7 +79,14 @@ const tenPlusByYear: Record<number, number> = {2023:8, 2024:40, 2025:55, 2026:30
 const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:387};
 const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:1683};
 
-const ANN = 12 / 5; // 5 full months (Jan–May 2026 complete; June partial — not included in annualization)
+// Dynamic annualization: complete months + fractional current month
+const _now = new Date();
+const _isIn2026 = _now.getFullYear() === 2026;
+const _completeMonths = _isIn2026 ? _now.getMonth() : 12; // getMonth() 0-based: June=5 → 5 complete months
+const _daysInMonth = _isIn2026 ? new Date(2026, _now.getMonth() + 1, 0).getDate() : 1;
+const _partialMonth = _isIn2026 ? _now.getDate() / _daysInMonth : 0;
+const _monthsElapsed = Math.max(_completeMonths + _partialMonth, 1);
+const ANN = 12 / _monthsElapsed;
 
 const recruit26: {label:string; amb:number; inf:number; accent:string; tag?:string}[] = [
   {label:'Jan', amb:5, inf:3, accent:'#B6CAE3'},
@@ -400,7 +407,7 @@ export default function AmbassadorGrowth() {
   const ambSubsPace = annualize(ambSubsYear[2026]);
 
   /* ── Movers computation ── */
-  const moverAnnFactor = 12 / 5;
+  const moverAnnFactor = ANN;
   const moversComputed = useMemo(() => {
     const entries = Object.entries(moversData).map(([name, d]) => {
       const pace = Math.round(d.y26 * moverAnnFactor);
@@ -1350,7 +1357,7 @@ export default function AmbassadorGrowth() {
         </div>
 
         <div style={{ fontSize: '0.7rem', color: '#888', marginTop: 8, textAlign: 'center' }}>
-          Annualization factor: 12 / 5 = {moverAnnFactor.toFixed(2)}x. Pace = YTD x {moverAnnFactor.toFixed(2)}. &quot;New&quot; = no 2025 submissions on record.
+          Annualization factor: 12 / {_monthsElapsed.toFixed(1)} = {moverAnnFactor.toFixed(2)}x. Pace = YTD x {moverAnnFactor.toFixed(2)}. &quot;New&quot; = no 2025 submissions on record.
         </div>
       </div>
 
