@@ -466,7 +466,10 @@ export default function AmbassadorGrowth() {
   };
 
   /* ── Chart: New Adds monthly stacked (Jan 2024 – May 2026) ── */
-  const junPaceFactor = 30 / 3; // June 2026: partial month (3 days of data as of June 3)
+  const now = new Date();
+  const isJun26 = now.getFullYear() === 2026 && now.getMonth() === 5;
+  const junDaysElapsed = isJun26 ? Math.max(now.getDate(), 1) : 30;
+  const junPaceFactor = 30 / junDaysElapsed;
   const lastIdx26 = MONTHS_JAN24_MAY26.length - 1;
   const junAmbActual = newAddsAmb['2026-06'] ?? 0;
   const junInfActual = newAddsInf['2026-06'] ?? 0;
