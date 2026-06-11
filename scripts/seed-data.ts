@@ -191,18 +191,19 @@ const may2026Seed = [
     // Seed would overwrite user entries on every deploy.
 ];
 
-// Source: Salesforce exports pulled June 10, 2026 12:23 PST
+// Source: Salesforce exports pulled June 11, 2026 08:51 PST
 const jun2026Seed = [
-    { date: '2026-06-01', online: 77, hybrid: 13, prime: 0, visitors: 0, income: 385 },
-    { date: '2026-06-02', online: 61, hybrid: 12, prime: 0, visitors: 0, income: 305 },
-    { date: '2026-06-03', online: 44, hybrid: 18, prime: 0, visitors: 0, income: 220 },
-    { date: '2026-06-04', online: 52, hybrid: 8, prime: 0, visitors: 0, income: 260 },
-    { date: '2026-06-05', online: 46, hybrid: 3, prime: 1, visitors: 0, income: 230 },
-    { date: '2026-06-06', online: 45, hybrid: 1, prime: 0, visitors: 0, income: 225 },
-    { date: '2026-06-07', online: 24, hybrid: 0, prime: 0, visitors: 0, income: 120 },
-    { date: '2026-06-08', online: 61, hybrid: 3, prime: 0, visitors: 0, income: 305 },
-    { date: '2026-06-09', online: 64, hybrid: 9, prime: 0, visitors: 0, income: 320 },
-    { date: '2026-06-10', online: 32, hybrid: 12, prime: 0, visitors: 0, income: 160 },
+    { date: '2026-06-01', online: 77, hybrid: 13, prime: 0, visitors: 2813, income: 385 },
+    { date: '2026-06-02', online: 61, hybrid: 12, prime: 0, visitors: 2437, income: 305 },
+    { date: '2026-06-03', online: 44, hybrid: 18, prime: 0, visitors: 2205, income: 220 },
+    { date: '2026-06-04', online: 52, hybrid: 8, prime: 0, visitors: 2035, income: 260 },
+    { date: '2026-06-05', online: 46, hybrid: 3, prime: 1, visitors: 1900, income: 230 },
+    { date: '2026-06-06', online: 45, hybrid: 1, prime: 0, visitors: 1649, income: 225 },
+    { date: '2026-06-07', online: 24, hybrid: 0, prime: 0, visitors: 1448, income: 120 },
+    { date: '2026-06-08', online: 61, hybrid: 3, prime: 0, visitors: 2144, income: 305 },
+    { date: '2026-06-09', online: 64, hybrid: 9, prime: 0, visitors: 2264, income: 320 },
+    { date: '2026-06-10', online: 64, hybrid: 12, prime: 1, visitors: 2562, income: 320 },
+    { date: '2026-06-11', online: 8, hybrid: 5, prime: 1, visitors: 261, income: 40 },
 ];
 
 const allDailySubmissions = [
@@ -291,6 +292,11 @@ const googleAdsDaily = [
     { date: '2026-06-04', spend: 481.54, impressions: 2111, clicks: 153, submit: 25, started: 0, finished: 0, treatment: 0 },
     { date: '2026-06-05', spend: 433.85, impressions: 2121, clicks: 126, submit: 11, started: 0, finished: 0, treatment: 0 },
     { date: '2026-06-06', spend: 389.20, impressions: 1649, clicks: 132, submit: 17, started: 0, finished: 0, treatment: 0 },
+    { date: '2026-06-07', spend: 417.28, impressions: 1957, clicks: 141, submit: 0, started: 0, finished: 0, treatment: 0 },
+    { date: '2026-06-08', spend: 508.66, impressions: 2992, clicks: 159, submit: 0, started: 0, finished: 0, treatment: 0 },
+    { date: '2026-06-09', spend: 473.13, impressions: 2324, clicks: 160, submit: 0, started: 0, finished: 0, treatment: 0 },
+    { date: '2026-06-10', spend: 474.53, impressions: 2131, clicks: 149, submit: 0, started: 0, finished: 0, treatment: 0 },
+    { date: '2026-06-11', spend: 140.47, impressions: 686, clicks: 42, submit: 0, started: 0, finished: 0, treatment: 0 },
 ];
 
 // ===================== MONTHLY SUMMARIES =====================
