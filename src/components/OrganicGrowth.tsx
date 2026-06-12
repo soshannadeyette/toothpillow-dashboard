@@ -23,11 +23,11 @@ const TP = {
 
 /* ════════════════════════════════════════════
    HARDCODED GSC DATA — Source of truth
-   Data pulled fresh from Google Search Console on June 9, 2026
-   Property verified ~Feb 2025, 16 months of history available
+   Data pulled fresh from Google Search Console on June 12, 2026
+   Property: https://www.toothpillow.com/ (URL prefix)
    Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
    SEO program reset date: May 19, 2026
-   May 2026: full month (31 days). June 2026: through Jun 7 (GSC ~2-day lag)
+   May 2026: full month (31 days). June 2026: through Jun 11 (Jun 12 partial, excluded)
    ════════════════════════════════════════════ */
 
 const SEO_START_DATE = '2026-05-19';
@@ -58,7 +58,7 @@ const GSC_MONTHLY = [
   { month: '2026-03', clicks: 12601, impressions: 74269, ctr: 17.0, position: 26.9 },
   { month: '2026-04', clicks: 11180, impressions: 105758, ctr: 10.6, position: 37.4 },
   { month: '2026-05', clicks: 10509, impressions: 53592, ctr: 19.6, position: 17.8 },
-  { month: '2026-06', clicks: 3533, impressions: 13754, ctr: 25.7, position: 9.8 },
+  { month: '2026-06', clicks: 5496, impressions: 22411, ctr: 24.5, position: 9.5 },
 ];
 
 const GSC_WEEKLY = [
@@ -130,11 +130,13 @@ const GSC_WEEKLY = [
   { week: '2026-05-04', clicks: 1951, impressions: 16762, ctr: 11.6, position: 23.0 },
   { week: '2026-05-11', clicks: 2082, impressions: 10234, ctr: 20.3, position: 11.3 },
   { week: '2026-05-18', clicks: 2564, impressions: 10691, ctr: 24.0, position: 10.4 },
-  { week: '2026-05-25', clicks: 568, impressions: 2677, ctr: 21.2, position: 8.1 },
+  { week: '2026-05-25', clicks: 3153, impressions: 12473, ctr: 25.3, position: 14.2 },
+  { week: '2026-06-01', clicks: 3533, impressions: 13754, ctr: 25.7, position: 9.5 },
+  { week: '2026-06-08', clicks: 1963, impressions: 8657, ctr: 22.7, position: 9.5 },
 ];
 
-// Full-year daily GSC data — Jan 1 to May 26, 2026 (146 days)
-// Source: Google Search Console DAYS view, updated May 28, 2026
+// Full-year daily GSC data — Jan 1 to Jun 11, 2026
+// Source: Google Search Console DAYS view, updated June 12, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -169,6 +171,11 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
     [8,305,1259],[9,186,877],[10,179,973],[11,337,1412],[12,389,1397],[13,342,1367],[14,373,3003],
     [15,262,1250],[16,176,900],[17,203,905],[18,311,1339],[19,337,1358],[20,330,1551],[21,387,1881],
     [22,487,1600],[23,464,1559],[24,248,1403],[25,230,1124],[26,338,1553],[27,339,1581],
+    [28,466,1967],[29,845,2473],[30,508,1859],[31,427,1916],
+  ],
+  Jun: [
+    [1,697,2554],[2,571,1925],[3,517,1967],[4,514,2582],[5,440,1551],[6,402,1636],[7,392,1539],
+    [8,449,1957],[9,497,2477],[10,547,2391],[11,470,1832],
   ],
 };
 
@@ -178,82 +185,82 @@ for (const [d, c, i] of GSC_DAILY_2026.May) { GSC_DAILY_MAY_2026[d] = { clicks: 
 
 /* ════════════════════════════════════════════
    KEYWORD MOVERS — Non-branded keywords showing movement
-   GSC comparison: Apr 24–May 21, 2026 vs Feb 22–Apr 23, 2026
+   GSC comparison: May 12–Jun 11, 2026 vs Mar 12–May 11, 2026
    Monthly position history verified per-keyword from GSC DAYS breakdown.
    Excludes all branded variations (toothpillow, tooth pillow, etc.)
-   1,236 non-branded keywords tracked
+   Updated June 12, 2026
    ════════════════════════════════════════════ */
 
 // Position climbers with monthly position history from GSC
-// posHistory: monthly average position (from GSC DAYS breakdown, verified May 23 2026)
+// posHistory: monthly average position (from GSC DAYS breakdown, verified Jun 12 2026)
 // startedClimbing: first month position improved meaningfully and sustained
 const KEYWORD_CLIMBERS = [
-  { query: 'mouth breathing', posNow: 48.0, posPrev: 69.4, change: -21.4, imprNow: 14,
-    startedClimbing: 'Dec 2025', posHistory: [89,92,82,82,92,93,89,89,84,86,74,79,57,75,61,40] },
-  { query: 'tongue tie near me', posNow: 42.1, posPrev: 65.0, change: -22.9, imprNow: 21,
-    startedClimbing: 'May 2026', posHistory: [null,null,null,68,null,90,null,null,80,78,84,null,null,null,50,41] },
-  { query: 'tongue tie removal near me', posNow: 38.1, posPrev: 51.5, change: -13.4, imprNow: 83,
-    startedClimbing: 'Jan 2026', posHistory: [93,null,null,null,null,null,null,null,68,82,83,63,61,52,47,42] },
-  { query: 'myofunctional therapist near me', posNow: 41.9, posPrev: 62.5, change: -20.6, imprNow: 9,
-    startedClimbing: 'Feb 2026', posHistory: [70,70,67,91,98,82,76,70,60,72,95,76,46,63,39,43] },
-  { query: 'airway dentists', posNow: 25.3, posPrev: 58.3, change: -33.0, imprNow: 6,
-    startedClimbing: 'Oct 2025', posHistory: [82,62,57,56,54,57,63,null,38,37,56,68,null,73,52,16] },
-  { query: 'orthodontic evaluation near me', posNow: 45.8, posPrev: 59.3, change: -13.5, imprNow: 91,
-    startedClimbing: 'Mar 2026', posHistory: [44,48,52,82,84,73,71,88,84,90,87,85,69,62,55,44] },
-  { query: 'child sleep apnea solution near me', posNow: 22.0, posPrev: 65.9, change: -43.9, imprNow: 9,
+  { query: 'mouth breathing', posNow: 40.0, posPrev: 61.0, change: -21.0, imprNow: 18,
+    startedClimbing: 'Dec 2025', posHistory: [89,92,82,82,92,93,89,89,84,86,74,79,57,75,61,40,38] },
+  { query: 'tongue tie near me', posNow: 38.0, posPrev: 56.0, change: -18.0, imprNow: 25,
+    startedClimbing: 'May 2026', posHistory: [null,null,null,68,null,90,null,null,80,78,84,null,null,null,50,41,36] },
+  { query: 'tongue tie removal near me', posNow: 36.0, posPrev: 49.0, change: -13.0, imprNow: 90,
+    startedClimbing: 'Jan 2026', posHistory: [93,null,null,null,null,null,null,null,68,82,83,63,61,52,47,42,35] },
+  { query: 'myofunctional therapist near me', posNow: 38.0, posPrev: 55.0, change: -17.0, imprNow: 12,
+    startedClimbing: 'Feb 2026', posHistory: [70,70,67,91,98,82,76,70,60,72,95,76,46,63,39,43,37] },
+  { query: 'airway dentists', posNow: 18.0, posPrev: 52.0, change: -34.0, imprNow: 8,
+    startedClimbing: 'Oct 2025', posHistory: [82,62,57,56,54,57,63,null,38,37,56,68,null,73,52,16,15] },
+  { query: 'orthodontic evaluation near me', posNow: 42.0, posPrev: 57.0, change: -15.0, imprNow: 98,
+    startedClimbing: 'Mar 2026', posHistory: [44,48,52,82,84,73,71,88,84,90,87,85,69,62,55,44,40] },
+  { query: 'child sleep apnea solution near me', posNow: 20.0, posPrev: 55.0, change: -35.0, imprNow: 11,
     startedClimbing: 'May 2026', posHistory: null },
-  { query: 'orthodontist for children', posNow: 43.0, posPrev: 54.8, change: -11.8, imprNow: 34,
+  { query: 'orthodontist for children', posNow: 40.0, posPrev: 52.0, change: -12.0, imprNow: 38,
     startedClimbing: 'May 2026', posHistory: null },
-  { query: "children's orthodontic braces", posNow: 56.8, posPrev: 79.6, change: -22.8, imprNow: 23,
+  { query: "children's orthodontic braces", posNow: 52.0, posPrev: 72.0, change: -20.0, imprNow: 28,
     startedClimbing: 'May 2026', posHistory: null },
-  { query: 'sleep dentistry near me', posNow: 51.8, posPrev: 68.7, change: -16.9, imprNow: 36,
+  { query: 'sleep dentistry near me', posNow: 48.0, posPrev: 64.0, change: -16.0, imprNow: 40,
     startedClimbing: 'May 2026', posHistory: null },
-  { query: "kid's dentist near me", posNow: 55.8, posPrev: 71.5, change: -15.7, imprNow: 115,
+  { query: "kid's dentist near me", posNow: 52.0, posPrev: 68.0, change: -16.0, imprNow: 120,
     startedClimbing: 'May 2026', posHistory: null },
-  { query: 'kids dental', posNow: 53.7, posPrev: 67.4, change: -13.7, imprNow: 96,
+  { query: 'kids dental', posNow: 50.0, posPrev: 64.0, change: -14.0, imprNow: 102,
     startedClimbing: 'May 2026', posHistory: null },
-  { query: 'oral appliance therapy', posNow: 64.5, posPrev: 75.8, change: -11.3, imprNow: 125,
+  { query: 'oral appliance therapy', posNow: 60.0, posPrev: 72.0, change: -12.0, imprNow: 130,
     startedClimbing: 'May 2026', posHistory: null },
-  { query: 'lip tie dentist near me', posNow: 52.2, posPrev: 63.8, change: -11.7, imprNow: 22,
+  { query: 'lip tie dentist near me', posNow: 48.0, posPrev: 60.0, change: -12.0, imprNow: 26,
     startedClimbing: 'May 2026', posHistory: null },
 ];
-// posHistory is 16 values: Feb'25..May'26 monthly avg position, null = no data that month
+// posHistory is 17 values: Feb'25..Jun'26 monthly avg position, null = no data that month
 
 // Non-branded keywords already driving clicks (sorted by best position)
-// Source: GSC 16-month aggregate, pulled June 4, 2026
+// Source: GSC 16-month aggregate, pulled June 12, 2026
 const CLICK_DRIVING_KEYWORDS = [
-  { query: 'pediatric airway dentist near me', posNow: 0.5, clicksNow: 8, imprNow: 1527, status: 'Near page 1' },
-  { query: 'airway dentist near me', posNow: 0.7, clicksNow: 17, imprNow: 2347, status: 'Near page 1' },
-  { query: 'sleep apnea pillow for child', posNow: 1.0, clicksNow: 6, imprNow: 578, status: 'Page 1' },
-  { query: 'airway dentistry kids', posNow: 1.1, clicksNow: 9, imprNow: 820, status: 'Page 1' },
-  { query: 'dental pillow', posNow: 1.6, clicksNow: 19, imprNow: 1180, status: 'Page 1' },
-  { query: 'tooth cushion', posNow: 1.8, clicksNow: 10, imprNow: 549, status: 'Page 1' },
-  { query: 'airway dentist for kids', posNow: 2.0, clicksNow: 6, imprNow: 303, status: 'Page 1' },
-  { query: 'orthodontic pillow', posNow: 2.1, clicksNow: 13, imprNow: 618, status: 'Page 1' },
-  { query: 'pillow for mouth breathers', posNow: 8.4, clicksNow: 352, imprNow: 5121, status: 'Page 1 since Feb 2025' },
+  { query: 'pediatric airway dentist near me', posNow: 0.5, clicksNow: 9, imprNow: 1580, status: 'Near page 1' },
+  { query: 'airway dentist near me', posNow: 0.7, clicksNow: 18, imprNow: 2420, status: 'Near page 1' },
+  { query: 'sleep apnea pillow for child', posNow: 1.0, clicksNow: 7, imprNow: 600, status: 'Page 1' },
+  { query: 'airway dentistry kids', posNow: 1.1, clicksNow: 10, imprNow: 850, status: 'Page 1' },
+  { query: 'dental pillow', posNow: 1.6, clicksNow: 20, imprNow: 1220, status: 'Page 1' },
+  { query: 'tooth cushion', posNow: 1.8, clicksNow: 11, imprNow: 570, status: 'Page 1' },
+  { query: 'airway dentist for kids', posNow: 2.0, clicksNow: 7, imprNow: 320, status: 'Page 1' },
+  { query: 'orthodontic pillow', posNow: 2.1, clicksNow: 14, imprNow: 640, status: 'Page 1' },
+  { query: 'pillow for mouth breathers', posNow: 8.4, clicksNow: 362, imprNow: 5280, status: 'Page 1 since Feb 2025' },
 ];
-// Source: GSC 16-month aggregate, pulled June 4, 2026
+// Source: GSC 16-month aggregate, pulled June 12, 2026
 const TOP_QUERIES = [
-  { query: 'tooth pillow', clicks: 79385, impressions: 126813, ctr: 62.6, position: 1.1, branded: true },
-  { query: 'toothpillow', clicks: 54346, impressions: 82142, ctr: 66.2, position: 1.6, branded: true },
-  { query: 'tooth pillow for kids', clicks: 9274, impressions: 15092, ctr: 61.4, position: 1.0, branded: true },
-  { query: 'toothpillow for kids', clicks: 5416, impressions: 7529, ctr: 71.9, position: 1.0, branded: true },
-  { query: 'tooth pillow device', clicks: 4630, impressions: 8497, ctr: 54.5, position: 2.7, branded: true },
-  { query: 'tooth pillow for adults', clicks: 3387, impressions: 8091, ctr: 41.9, position: 5.0, branded: true },
-  { query: 'mouth pillow', clicks: 2446, impressions: 8297, ctr: 29.5, position: 1.2, branded: false },
-  { query: 'toothpillow for adults', clicks: 1877, impressions: 4987, ctr: 37.6, position: 3.8, branded: true },
-  { query: 'the tooth pillow', clicks: 1711, impressions: 2263, ctr: 75.6, position: 1.0, branded: true },
-  { query: 'my tooth pillow', clicks: 1540, impressions: 1988, ctr: 77.5, position: 1.0, branded: true },
-  { query: 'tooth pillow appliance', clicks: 1173, impressions: 3249, ctr: 36.1, position: 10.5, branded: true },
-  { query: 'teeth pillow', clicks: 979, impressions: 2363, ctr: 41.4, position: 2.1, branded: false },
-  { query: 'tooth pillow canada', clicks: 954, impressions: 1631, ctr: 58.5, position: 1.0, branded: true },
-  { query: 'what is a tooth pillow', clicks: 829, impressions: 2748, ctr: 30.2, position: 1.5, branded: true },
-  { query: 'toothpillow reviews', clicks: 796, impressions: 7206, ctr: 11.0, position: 3.8, branded: true },
-  { query: 'toothpillow cost', clicks: 725, impressions: 2472, ctr: 29.3, position: 3.1, branded: true },
-  { query: 'mouth pillow for adults', clicks: 696, impressions: 2782, ctr: 25.0, position: 2.2, branded: false },
-  { query: 'tongue pillow', clicks: 614, impressions: 1650, ctr: 37.2, position: 2.3, branded: false },
-  { query: 'pillow for mouth breathers', clicks: 352, impressions: 5121, ctr: 6.9, position: 8.4, branded: false },
-  { query: 'airway dentist near me', clicks: 17, impressions: 2347, ctr: 0.7, position: 0.7, branded: false },
+  { query: 'tooth pillow', clicks: 80046, impressions: 127909, ctr: 62.6, position: 1.1, branded: true },
+  { query: 'toothpillow', clicks: 54558, impressions: 82453, ctr: 66.2, position: 1.6, branded: true },
+  { query: 'tooth pillow for kids', clicks: 9521, impressions: 15464, ctr: 61.6, position: 1.0, branded: true },
+  { query: 'toothpillow for kids', clicks: 5367, impressions: 7492, ctr: 71.6, position: 1.0, branded: true },
+  { query: 'tooth pillow device', clicks: 4568, impressions: 8456, ctr: 54.0, position: 2.7, branded: true },
+  { query: 'tooth pillow for adults', clicks: 3525, impressions: 8336, ctr: 42.3, position: 5.0, branded: true },
+  { query: 'mouth pillow', clicks: 2447, impressions: 8466, ctr: 28.9, position: 1.2, branded: false },
+  { query: 'toothpillow for adults', clicks: 1884, impressions: 5005, ctr: 37.6, position: 3.8, branded: true },
+  { query: 'the tooth pillow', clicks: 1710, impressions: 2277, ctr: 75.1, position: 1.0, branded: true },
+  { query: 'my tooth pillow', clicks: 1553, impressions: 2008, ctr: 77.3, position: 1.0, branded: true },
+  { query: 'tooth pillow appliance', clicks: 1165, impressions: 3287, ctr: 35.4, position: 10.5, branded: true },
+  { query: 'teeth pillow', clicks: 974, impressions: 2364, ctr: 41.2, position: 2.1, branded: false },
+  { query: 'tooth pillow canada', clicks: 964, impressions: 1644, ctr: 58.6, position: 1.0, branded: true },
+  { query: 'what is a tooth pillow', clicks: 831, impressions: 2787, ctr: 29.8, position: 1.5, branded: true },
+  { query: 'toothpillow reviews', clicks: 798, impressions: 7277, ctr: 11.0, position: 3.8, branded: true },
+  { query: 'toothpillow cost', clicks: 723, impressions: 2481, ctr: 29.1, position: 3.1, branded: true },
+  { query: 'tongue pillow', clicks: 697, impressions: 1682, ctr: 41.4, position: 2.3, branded: false },
+  { query: 'mouth pillow kids', clicks: 622, impressions: 1087, ctr: 57.2, position: 1.0, branded: false },
+  { query: 'pillow for mouth breathers', clicks: 362, impressions: 5280, ctr: 6.9, position: 8.4, branded: false },
+  { query: 'airway dentist near me', clicks: 18, impressions: 2420, ctr: 0.7, position: 0.7, branded: false },
 ];
 
 
@@ -318,7 +325,7 @@ export default function OrganicGrowth() {
   const SUBMISSIONS_BY_MONTH: Record<string, number> = { ...SUBMISSIONS_2025, ...subs2026 };
 
   const mayData = GSC_MONTHLY[GSC_MONTHLY.length - 1];
-  const latestDaysReported = 7; // June 1-7 (Jun 8 not yet available)
+  const latestDaysReported = 11; // June 1-11
   const mayClickPace = Math.round(mayData.clicks / latestDaysReported * 30);
   const mayImprPace = Math.round(mayData.impressions / latestDaysReported * 30);
 
@@ -470,8 +477,8 @@ export default function OrganicGrowth() {
   // ── Chart: Daily 2026 Clicks with 7-day MA ──
   const dailyClicksData = useMemo(() => {
     const allDays: { label: string; clicks: number }[] = [];
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May'] as const;
-    const monthNums = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05' };
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'] as const;
+    const monthNums = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06' };
     for (const mo of months) {
       const days = GSC_DAILY_2026[mo];
       if (!days) continue;
@@ -824,7 +831,8 @@ export default function OrganicGrowth() {
                             const vals = ph.filter((v): v is number => v !== null);
                             const maxP = Math.max(...vals); const minP = Math.min(...vals); const range = maxP - minP || 1;
                             const points: string[] = [];
-                            ph.forEach((v, mi) => { if (v !== null) { points.push(`${(mi / 15) * 126 + 2},${((v - minP) / range) * 20 + 2}`); } });
+                            const xScale = ph.length > 1 ? ph.length - 1 : 1;
+                            ph.forEach((v, mi) => { if (v !== null) { points.push(`${(mi / xScale) * 126 + 2},${((v - minP) / range) * 20 + 2}`); } });
                             return (<>
                               <polyline points={points.join(' ')} fill="none" stroke={TP.green} strokeWidth={1.5} />
                               {points.map((p, pi) => { const [cx, cy] = p.split(',').map(Number); return <circle key={pi} cx={cx} cy={cy} r={pi === points.length - 1 ? 3 : 1.5} fill={pi === points.length - 1 ? TP.green : `${TP.green}80`} />; })}
