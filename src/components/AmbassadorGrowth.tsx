@@ -57,15 +57,15 @@ const newAddsAmb: Record<string, number> = {
 const newAddsInf: Record<string, number> = {
   '2024-01':1,'2024-02':8,'2024-03':3,'2024-04':4,'2024-05':9,'2024-06':2,'2024-07':7,'2024-08':2,'2024-09':4,'2024-10':6,'2024-11':6,'2024-12':9,
   '2025-01':11,'2025-02':3,'2025-03':7,'2025-04':2,'2025-05':0,'2025-06':3,'2025-07':0,'2025-08':1,'2025-09':0,'2025-10':0,'2025-11':1,'2025-12':1,
-  '2026-01':3,'2026-02':1,'2026-03':2,'2026-04':5,'2026-05':6,'2026-06':3,
+  '2026-01':3,'2026-02':1,'2026-03':2,'2026-04':5,'2026-05':6,'2026-06':4,
 };
 
 const ambSubsYear: Record<number, number> = {2023:465, 2024:435, 2025:566, 2026:294};
 const infSubsYear: Record<number, number> = {2023:1339, 2024:8398, 2025:5583, 2026:1931};
 const combSubsYear: Record<number, number> = {2023:1804, 2024:8833, 2025:6149, 2026:2225};
 const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:87};
-const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:20};
-const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:108};
+const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:21};
+const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:109};
 // Note: adds counts are from ambassador program tracking, not Salesforce referral exports
 
 // Active ambassadors with ≥1 submission per year (from Salesforce)
