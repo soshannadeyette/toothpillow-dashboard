@@ -131,11 +131,7 @@ function buildProjected(monthKey: string, daysTracked: number, daysTotal: number
 
 const { actual: currentMonthActual, projected: currentMonthProjected } = buildProjected(CURRENT_MONTH_KEY, CURRENT_MONTH_DAYS_TRACKED, CURRENT_MONTH_DAYS_TOTAL);
 
-// Keep backward compat variable names used throughout render
-const may2026Actual = currentMonthActual;
-const may2026Projected = currentMonthProjected;
-const MAY_2026_SF_DAYS = CURRENT_MONTH_DAYS_TRACKED;
-const MAY_2026_DAYS_IN_MONTH = CURRENT_MONTH_DAYS_TOTAL;
+// Aliases removed — use currentMonthActual / currentMonthProjected directly
 
 const ALL_DATA: Record<string, RefMonth> = { ...REFERRER_DATA };
 
@@ -221,7 +217,7 @@ export default function ReferrerView() {
   /* ──── Top source cards ──── */
   const topSources = useMemo(() => {
     return TABLE_SOURCES
-      .map((s) => ({ ...s, val: latest[s.key] || 0, actual: isProjected ? (may2026Actual[s.key as keyof RefMonth] || 0) : undefined }))
+      .map((s) => ({ ...s, val: latest[s.key] || 0, actual: isProjected ? (currentMonthActual[s.key as keyof RefMonth] || 0) : undefined }))
       .sort((a, b) => b.val - a.val)
       .slice(0, 6);
   }, [latest, isProjected]);
@@ -237,10 +233,10 @@ export default function ReferrerView() {
     tension: 0.4,
     borderWidth: 2,
     fill: false,
-    pointRadius: allMonths.map((m) => m === '2026-05' ? 5 : 3),
-    pointBackgroundColor: allMonths.map((m) => m === '2026-05' ? src.color + '60' : src.color),
-    pointBorderColor: allMonths.map((m) => m === '2026-05' ? src.color : src.color),
-    pointStyle: allMonths.map((m) => m === '2026-05' ? 'rectRot' as const : 'circle' as const),
+    pointRadius: allMonths.map((m) => m === CURRENT_MONTH_KEY ? 5 : 3),
+    pointBackgroundColor: allMonths.map((m) => m === CURRENT_MONTH_KEY ? src.color + '60' : src.color),
+    pointBorderColor: allMonths.map((m) => m === CURRENT_MONTH_KEY ? src.color : src.color),
+    pointStyle: allMonths.map((m) => m === CURRENT_MONTH_KEY ? 'rectRot' as const : 'circle' as const),
     segment: {
       borderDash: (ctx: { p1DataIndex: number }) => ctx.p1DataIndex === allMonths.length - 1 ? [6, 3] : undefined,
       borderColor: (ctx: { p1DataIndex: number }) => ctx.p1DataIndex === allMonths.length - 1 ? src.color + '80' : undefined,
@@ -283,7 +279,7 @@ export default function ReferrerView() {
 
       const lastIdx = trimVals.length - 1;
       const currentVal = trimVals[lastIdx];
-      const actualVal = isProjected ? (may2026Actual[src.key as keyof RefMonth] || 0) : currentVal;
+      const actualVal = isProjected ? (currentMonthActual[src.key as keyof RefMonth] || 0) : currentVal;
 
       // 3-month avg (excluding current)
       let avg3Sum = 0, avg3Count = 0;
@@ -303,7 +299,7 @@ export default function ReferrerView() {
       const peakVal = Math.max(...trimVals);
       const peakIdx = trimVals.indexOf(peakVal);
 
-      const projectedVal = isProjected ? (may2026Projected[src.key as keyof RefMonth] || 0) : currentVal;
+      const projectedVal = isProjected ? (currentMonthProjected[src.key as keyof RefMonth] || 0) : currentVal;
 
       return {
         ...src,
@@ -347,7 +343,7 @@ export default function ReferrerView() {
       {/* Top source cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 24 }}>
         {topSources.map((s) => {
-          const projVal = may2026Projected[s.key as keyof RefMonth] || 0;
+          const projVal = currentMonthProjected[s.key as keyof RefMonth] || 0;
           const subText = isProjected
             ? `${s.val.toLocaleString()} actual → ${Number(projVal).toLocaleString()} projected`
             : `${(latest.total > 0 ? (s.val / latest.total * 100).toFixed(1) : '0')}% of ${latest.total.toLocaleString()} total`;
@@ -362,7 +358,7 @@ export default function ReferrerView() {
 
       {/* Referrer Source Growth Chart + Projected Box */}
       <div style={{ display: 'grid', gridTemplateColumns: isProjected ? '1fr 200px' : '1fr', gap: 14, alignItems: 'start' }}>
-        <ChartCard title="Referrer Source Growth" subtitle={`All sources · 2023--Present${isProjected ? ' · May = actual through day ' + MAY_2026_SF_DAYS : ''}`}>
+        <ChartCard title="Referrer Source Growth" subtitle={`All sources · 2023--Present${isProjected ? ' · ' + fmtMonthFull(CURRENT_MONTH_KEY) + ' = actual through day ' + CURRENT_MONTH_DAYS_TRACKED : ''}`}>
           <div style={{ height: 450 }}>
             <Line
               data={{ labels: lineLabels, datasets: growthDatasets }}
@@ -375,7 +371,7 @@ export default function ReferrerView() {
                     callbacks: {
                       title: (items: { label: string }[]) => {
                         const label = items[0]?.label || '';
-                        return label === fmtMonth('2026-05') ? `${label} (${MAY_2026_SF_DAYS} days)` : label;
+                        return label === fmtMonth(CURRENT_MONTH_KEY) ? `${label} (${CURRENT_MONTH_DAYS_TRACKED} days)` : label;
                       },
                     },
                   },
@@ -396,11 +392,11 @@ export default function ReferrerView() {
               Projected May
             </div>
             <div style={{ fontSize: 11, color: '#888', marginBottom: 10 }}>
-              Based on {MAY_2026_SF_DAYS}-day pace
+              Based on {CURRENT_MONTH_DAYS_TRACKED}-day pace
             </div>
             {CHART_SOURCES.map((src) => {
-              const projVal = getChartVal(may2026Projected, src);
-              const actVal = getChartVal(may2026Actual, src);
+              const projVal = getChartVal(currentMonthProjected, src);
+              const actVal = getChartVal(currentMonthActual, src);
               return (
                 <div key={src.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', borderBottom: '1px solid #f0f0f0' }}>
                   <span style={{ fontSize: 11, color: '#555', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -413,7 +409,7 @@ export default function ReferrerView() {
             })}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0 0', marginTop: 4, borderTop: '2px solid #e2e8f0' }}>
               <span style={{ fontSize: 12, fontWeight: 700, color: TP.text }}>Total</span>
-              <span style={{ fontSize: 13, fontWeight: 700, color: TP.text }}>{may2026Projected.total.toLocaleString()}</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: TP.text }}>{currentMonthProjected.total.toLocaleString()}</span>
             </div>
           </div>
         )}
@@ -424,7 +420,7 @@ export default function ReferrerView() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
         <StatCard label={`${fmtMonthFull(CURRENT_MONTH_KEY)} So Far (${CURRENT_MONTH_DAYS_TRACKED} days)`} color={TP.text}
-          value={`Parent ${may2026Actual.Parent} · Amb ${may2026Actual['Airway Ambassador']}`}
+          value={`Parent ${currentMonthActual.Parent} · Amb ${currentMonthActual['Airway Ambassador']}`}
           sub={`On pace for Parent ${latestGap.parent} · Amb ${latestGap.amb}`}
           isText
         />
@@ -499,7 +495,7 @@ export default function ReferrerView() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
               {isProjected ? (
                 <>
-                  <StatCard label={`Actual (day ${MAY_2026_SF_DAYS})`} color={src.color} value={src.currentVal} sub={`of ${may2026Actual.total.toLocaleString()} total`} />
+                  <StatCard label={`Actual (day ${CURRENT_MONTH_DAYS_TRACKED})`} color={src.color} value={src.currentVal} sub={`of ${currentMonthActual.total.toLocaleString()} total`} />
                   <StatCard label="Projected" color={src.color} value={src.projectedVal} sub="end of month" />
                 </>
               ) : (
@@ -526,7 +522,7 @@ export default function ReferrerView() {
                     datasets: [{
                       label: src.label,
                       data: src.trimVals,
-                      backgroundColor: src.trimMonths.map((m) => m === '2026-05' ? src.color + '40' : src.color),
+                      backgroundColor: src.trimMonths.map((m) => m === CURRENT_MONTH_KEY ? src.color + '40' : src.color),
                       borderColor: src.color,
                       borderWidth: 1,
                       borderRadius: 3,
@@ -556,7 +552,7 @@ export default function ReferrerView() {
                 <th style={{ padding: '8px 10px', textAlign: 'left', color: '#fff', minWidth: 90 }}>Source</th>
                 {allMonths.map((m) => (
                   <th key={m} style={{ padding: '6px 4px', textAlign: 'right', color: '#fff', fontSize: '0.8em', fontWeight: 600, whiteSpace: 'nowrap', minWidth: 46 }}>
-                    {fmtMonth(m)}{m === '2026-05' ? ` (${MAY_2026_SF_DAYS}d)` : ''}
+                    {fmtMonth(m)}{m === CURRENT_MONTH_KEY ? ` (${CURRENT_MONTH_DAYS_TRACKED}d)` : ''}
                   </th>
                 ))}
               </tr>
