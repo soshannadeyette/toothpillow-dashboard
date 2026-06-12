@@ -56,7 +56,8 @@ const WEEKLY_VISITORS: Record<string, { world: number; usa: number }> = {
   '2026-05-10': { world: 6749, usa: 5829 },
   '2026-05-17': { world: 8732, usa: 7766 },
   '2026-05-24': { world: 10343, usa: 8923 },
-  '2026-05-31': { world: 3430, usa: 3046 },
+  '2026-05-31': { world: 9642, usa: 8321 },
+  '2026-06-07': { world: 7042, usa: 6075 },  // partial week (Sat Jun 7 - Wed Jun 11, 5 days); USA estimated at 86.3% ratio
 };
 
 // ---- Types ----
