@@ -558,30 +558,33 @@ export default function AmbassadorGrowth() {
   };
   const baseShadowPlugin: Plugin<'bar'> = useMemo(() => ({
     id: 'baseShadow',
-    beforeDatasetsDraw(chart) {
+    afterDatasetsDraw(chart) {
       const ctx = chart.ctx;
       const yScale = chart.scales.y;
-      const bottom = yScale.getPixelForValue(0);
       const projTotal = basePace + Math.round(mega3ByYear[2026] * ANN);
+      const actualTotal = baseByYear[2026] + mega3ByYear[2026];
+      // Get the 2026 bar position from dataset 0 (index 3 = 4th bar)
       const meta = chart.getDatasetMeta(0);
       const bar = meta.data[3];
       if (!bar) return;
-      const top = yScale.getPixelForValue(projTotal);
       const { x, width } = bar as unknown as { x: number; width: number };
+      const projTop = yScale.getPixelForValue(projTotal);
+      const actualTop = yScale.getPixelForValue(actualTotal);
+      // Draw dashed box only for the projected portion (above actual)
       ctx.save();
-      ctx.fillStyle = TP.navy + '20';
-      ctx.strokeStyle = TP.navy + '60';
+      ctx.fillStyle = TP.navy + '15';
+      ctx.strokeStyle = TP.navy + '50';
       ctx.lineWidth = 2;
       ctx.setLineDash([6, 3]);
       ctx.beginPath();
-      ctx.rect(x - width / 2, top, width, bottom - top);
+      ctx.rect(x - width / 2, projTop, width, actualTop - projTop);
       ctx.fill();
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.fillStyle = TP.navy;
       ctx.font = '700 11px system-ui, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(`Full-year pace: ~${projTotal.toLocaleString()}`, x, top - 6);
+      ctx.fillText(`Full-year pace: ~${projTotal.toLocaleString()}`, x, projTop - 6);
       ctx.restore();
     },
   }), [basePace]);
