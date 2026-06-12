@@ -212,7 +212,8 @@ const allDailySubmissions = [
     ...mar2026Daily,
     ...apr2026Daily,
     ...may2026Seed,
-    ...jun2026Seed,
+    // jun2026Seed intentionally excluded — current month data entered via Daily Tracker form.
+    // Seed's Step 2 would overwrite user entries on every deploy.
 ];
 
 // ===================== GOOGLE ADS DAILY =====================
