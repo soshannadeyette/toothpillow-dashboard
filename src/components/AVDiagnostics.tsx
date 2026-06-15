@@ -31,7 +31,7 @@ const TP = {
 };
 
 // ── Hardcoded data (source of truth) ──────────────────────────────────
-// Source: Salesforce "Waiting on Info Ratios" export, pulled June 12, 2026
+// Source: Salesforce "Waiting on Info Ratios" export, pulled June 15, 2026
 const AV_DATA = [
   { label: 'Jan 26', month: 1,  year: 2026, traffic: 37320, starts: 1146, waiting: 109, submitted: 1037, partial: false, period: 'full' as const },
   { label: 'Feb 26', month: 2,  year: 2026, traffic: 51480, starts: 2191, waiting: 892, submitted: 1299, partial: false, period: 'full' as const },
@@ -39,7 +39,7 @@ const AV_DATA = [
   { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1430, waiting: 559, submitted: 871,  partial: false, period: 'full' as const },
   { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1034, waiting: 481, submitted: 553, partial: false, period: 'pre-update' as const },
   { label: 'May 23–31', month: 5,  year: 2026, traffic: 11212,  starts: 576,  waiting: 257,  submitted: 319,  partial: false,  period: 'post-update' as const },
-  { label: 'Jun 1–12', month: 6, year: 2026, traffic: 0, starts: 846, waiting: 318, submitted: 528, partial: true, period: 'post-update' as const },
+  { label: 'Jun 1–15', month: 6, year: 2026, traffic: 0, starts: 998, waiting: 367, submitted: 631, partial: true, period: 'post-update' as const },
 ];
 
 // ── Same-week completion rate by weekly cohort (source of truth) ──────

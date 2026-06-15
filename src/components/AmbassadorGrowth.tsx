@@ -52,7 +52,7 @@ const infSubs: Record<string, number> = {
 const newAddsAmb: Record<string, number> = {
   '2024-01':4,'2024-02':7,'2024-03':7,'2024-04':6,'2024-05':3,'2024-06':7,'2024-07':10,'2024-08':2,'2024-09':6,'2024-10':7,'2024-11':7,'2024-12':7,
   '2025-01':7,'2025-02':84,'2025-03':7,'2025-04':6,'2025-05':5,'2025-06':6,'2025-07':1,'2025-08':15,'2025-09':2,'2025-10':1,'2025-11':6,'2025-12':1,
-  '2026-01':5,'2026-02':13,'2026-03':10,'2026-04':28,'2026-05':20,'2026-06':11,
+  '2026-01':5,'2026-02':13,'2026-03':10,'2026-04':28,'2026-05':20,'2026-06':12,
 };
 const newAddsInf: Record<string, number> = {
   '2024-01':1,'2024-02':8,'2024-03':3,'2024-04':4,'2024-05':9,'2024-06':2,'2024-07':7,'2024-08':2,'2024-09':4,'2024-10':6,'2024-11':6,'2024-12':9,
@@ -63,9 +63,9 @@ const newAddsInf: Record<string, number> = {
 const ambSubsYear: Record<number, number> = {2023:465, 2024:435, 2025:566, 2026:294};
 const infSubsYear: Record<number, number> = {2023:1339, 2024:8398, 2025:5583, 2026:1931};
 const combSubsYear: Record<number, number> = {2023:1804, 2024:8833, 2025:6149, 2026:2225};
-const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:87};
+const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:88};
 const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:21};
-const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:109};
+const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:110};
 // Note: adds counts are from ambassador program tracking, not Salesforce referral exports
 
 // Active ambassadors with ≥1 submission per year (from Salesforce)
@@ -94,7 +94,7 @@ const recruit26: {label:string; amb:number; inf:number; accent:string; tag?:stri
   {label:'Mar', amb:10, inf:2, accent:'#3A6EA4'},
   {label:'Apr', amb:28, inf:5, accent:'#FDBE67'},
   {label:'May', amb:20, inf:6, accent:'#B26CA6'},
-  {label:'Jun', amb:11, inf:4, accent:'#DD5759'},
+  {label:'Jun', amb:12, inf:4, accent:'#DD5759'},
 ];
 
 const concRows = [
@@ -170,7 +170,7 @@ const moversData: Record<string, {y25:number; y26:number; type:string}> = {
 // Tier computed from window subs: Tier 2 = 50+, Tier 1 = 25-49.
 const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;winStart:string;winEnd:string;is2026?:boolean;omit?:boolean}[] = [
   {name:'Soshanna Salsman',bonusSubs:76,tier:2,earned:1250,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Shannon Tripp',bonusSubs:69,tier:2,earned:1250,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Shannon Tripp',bonusSubs:70,tier:2,earned:1250,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Lauren Johnson NNM',bonusSubs:53,tier:2,earned:1250,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Emily Boazman',bonusSubs:44,tier:1,earned:250,winStart:'04/02/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Kendra Needham',bonusSubs:41,tier:1,earned:250,winStart:'04/01/2026',winEnd:'12/31/2026'},
@@ -178,9 +178,9 @@ const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;w
   {name:'Amy Bernhard',bonusSubs:34,tier:1,earned:250,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Jeff Cruz Talia_likeitis',bonusSubs:32,tier:1,earned:250,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Ginny Yurich',bonusSubs:27,tier:1,earned:250,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Jasyra Santiago-Hines',bonusSubs:25,tier:1,earned:250,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Jasyra Santiago-Hines',bonusSubs:27,tier:1,earned:250,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Carly Brown',bonusSubs:23,tier:0,earned:0,winStart:'04/21/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Melody Brandon',bonusSubs:22,tier:0,earned:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Carly Brown',bonusSubs:20,tier:0,earned:0,winStart:'04/21/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Hayley Lombard',bonusSubs:18,tier:0,earned:0,winStart:'05/19/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Amy Erickson',bonusSubs:17,tier:0,earned:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Lauren Stadler',bonusSubs:15,tier:0,earned:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
@@ -1391,7 +1391,7 @@ export default function AmbassadorGrowth() {
         </div>
 
         <div style={{ fontSize: '0.7rem', color: '#888', marginTop: 8, textAlign: 'center' }}>
-          {launchBonusData.length} ambassadors with ≥1 submission. Source: Salesforce Launch Bonus Tracker, June 11 2026.
+          {launchBonusData.length} ambassadors with ≥1 submission. Source: Salesforce Launch Bonus Tracker, June 15 2026.
         </div>
       </div>
 
