@@ -154,17 +154,17 @@ export const MONTH_NAMES = [
 ];
 
 // GA4 Monthly Unique Users — worldwide (source of truth for conversion rates)
-// Updated May 28, 2026. May is partial (through 5/28).
+// Updated June 15, 2026. June is partial (through 6/14).
 export const TRAFFIC_2025: Record<number, number> = {
   1: 57814, 2: 58901, 3: 57747, 4: 33895, 5: 31621, 6: 31681,
   7: 73193, 8: 37180, 9: 29179, 10: 28271, 11: 54674, 12: 36031,
 };
 
 export const TRAFFIC_2026: Record<number, number> = {
-  1: 37320, 2: 51480, 3: 39218, 4: 30311, 5: 33108,
+  1: 37320, 2: 51480, 3: 39218, 4: 30311, 5: 33108, 6: 17264,
 };
 
 // GA4 Monthly Unique Users — USA only
 export const TRAFFIC_USA_2026: Record<number, number> = {
-  1: 33544, 2: 44756, 3: 33417, 4: 25521, 5: 28559,
+  1: 33544, 2: 44756, 3: 33417, 4: 25521, 5: 28559, 6: 15110,
 };

@@ -65,6 +65,37 @@ const META_FUNNEL = { entered: 58, waitingInfo: 30, sentCheckout: 13, checkedOut
 const GOOGLE_SF_PIPELINE = { total: 217, waiting: 131, sentToTxP: 12, txpApproved: 4, sentCheckout: 42, checkedOut: 4, referredOut: 13, denied: 0, closedLost: 5 };
 const GOOGLE_REVENUE: number = 7281; // 4 checkouts: $7,281 total
 
+// Google Ads daily seed data (source of truth — merged with Supabase on load)
+// June 1-15 from Google Ads Report Editor, June 15, 2026
+// Clicks/impressions distributed proportionally from totals: 1,973 clicks, 30,872 impressions
+const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
+  { date: '2026-06-01', spend: 504.80, clicks: 155, impressions: 2430, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-06-02', spend: 489.53, clicks: 151, impressions: 2357, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-06-03', spend: 448.76, clicks: 138, impressions: 2161, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-06-04', spend: 481.54, clicks: 148, impressions: 2318, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-06-05', spend: 433.85, clicks: 133, impressions: 2089, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-06-06', spend: 389.20, clicks: 120, impressions: 1874, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-06-07', spend: 417.28, clicks: 128, impressions: 2009, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-06-08', spend: 508.66, clicks: 157, impressions: 2449, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-06-09', spend: 473.13, clicks: 146, impressions: 2278, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-06-10', spend: 474.53, clicks: 146, impressions: 2285, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-06-11', spend: 431.53, clicks: 133, impressions: 2078, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-06-12', spend: 415.48, clicks: 128, impressions: 2000, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-06-13', spend: 377.91, clicks: 116, impressions: 1820, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-06-14', spend: 393.04, clicks: 121, impressions: 1892, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-06-15', spend: 172.85, clicks: 53, impressions: 832, submit: 0, started: 0, finished: 0, treatment: 0 },
+];
+
+// Merge seed data with Supabase data (Supabase wins on conflict, seed fills gaps)
+function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
+  const byDate = new Map<string, GoogleAdsDaily>();
+  // Seed first (lower priority)
+  GOOGLE_ADS_SEED.forEach(s => byDate.set(s.date, s));
+  // API data overwrites seed
+  apiData.forEach(a => byDate.set(a.date, a));
+  return Array.from(byDate.values());
+}
+
 /* ════════════════════════════════════════════
    COMPONENT
    ════════════════════════════════════════════ */
@@ -89,8 +120,10 @@ export default function PaidAds() {
     setLoading(true);
     try {
       const data = await fetchGoogleAds(2026);
-      setEntries(data);
+      setEntries(mergeWithSeed(data));
     } catch (e) {
+      // If API fails, use seed data as fallback
+      setEntries(mergeWithSeed([]));
       setError(e instanceof Error ? e.message : 'Failed to load');
     } finally {
       setLoading(false);
