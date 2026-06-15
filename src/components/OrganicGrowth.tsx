@@ -58,7 +58,7 @@ const GSC_MONTHLY = [
   { month: '2026-03', clicks: 12601, impressions: 74269, ctr: 17.0, position: 26.9 },
   { month: '2026-04', clicks: 11180, impressions: 105758, ctr: 10.6, position: 37.4 },
   { month: '2026-05', clicks: 10509, impressions: 53592, ctr: 19.6, position: 17.8 },
-  { month: '2026-06', clicks: 5496, impressions: 22411, ctr: 24.5, position: 9.5 },
+  { month: '2026-06', clicks: 6080, impressions: 25100, ctr: 24.2, position: 9.2 },
 ];
 
 const GSC_WEEKLY = [
@@ -132,11 +132,11 @@ const GSC_WEEKLY = [
   { week: '2026-05-18', clicks: 2564, impressions: 10691, ctr: 24.0, position: 10.4 },
   { week: '2026-05-25', clicks: 3153, impressions: 12473, ctr: 25.3, position: 14.2 },
   { week: '2026-06-01', clicks: 3533, impressions: 13754, ctr: 25.7, position: 9.5 },
-  { week: '2026-06-08', clicks: 1963, impressions: 8657, ctr: 22.7, position: 9.5 },
+  { week: '2026-06-08', clicks: 2549, impressions: 11344, ctr: 22.5, position: 9.2 },
 ];
 
-// Full-year daily GSC data — Jan 1 to Jun 11, 2026
-// Source: Google Search Console DAYS view, updated June 12, 2026
+// Full-year daily GSC data — Jan 1 to Jun 13, 2026
+// Source: Google Search Console DAYS view, updated June 15, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -175,7 +175,7 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   ],
   Jun: [
     [1,697,2554],[2,571,1925],[3,517,1967],[4,514,2582],[5,440,1551],[6,402,1636],[7,392,1539],
-    [8,449,1957],[9,497,2477],[10,547,2391],[11,470,1832],
+    [8,449,1957],[9,497,2477],[10,547,2391],[11,482,1849],[12,343,1431],[13,231,1239],
   ],
 };
 
@@ -188,11 +188,11 @@ for (const [d, c, i] of GSC_DAILY_2026.May) { GSC_DAILY_MAY_2026[d] = { clicks: 
    GSC comparison: May 12–Jun 11, 2026 vs Mar 12–May 11, 2026
    Monthly position history verified per-keyword from GSC DAYS breakdown.
    Excludes all branded variations (toothpillow, tooth pillow, etc.)
-   Updated June 12, 2026
+   Updated June 15, 2026
    ════════════════════════════════════════════ */
 
 // Position climbers with monthly position history from GSC
-// posHistory: monthly average position (from GSC DAYS breakdown, verified Jun 12 2026)
+// posHistory: monthly average position (from GSC DAYS breakdown, verified Jun 15 2026)
 // startedClimbing: first month position improved meaningfully and sustained
 const KEYWORD_CLIMBERS = [
   { query: 'mouth breathing', posNow: 40.0, posPrev: 61.0, change: -21.0, imprNow: 18,
@@ -653,7 +653,7 @@ export default function OrganicGrowth() {
         <div style={{ fontSize: 11, color: '#888', marginBottom: 8 }}>
           {clicksView === 'monthly' && 'Feb 2025 to present. Bars = total clicks per month, red line = 3-month moving average.'}
           {clicksView === 'weekly' && `${GSC_WEEKLY.length} weeks from Feb 2025. Blue area = weekly clicks, red line = 4-week moving average.`}
-          {clicksView === 'daily' && 'Jan 1 – May 27, 2026 (146 days). Gray area = daily clicks, red line = 7-day moving average.'}
+          {clicksView === 'daily' && 'Jan 1 – Jun 13, 2026 (164 days). Gray area = daily clicks, red line = 7-day moving average.'}
         </div>
         <div style={{ height: 320 }}>
           {clicksView === 'monthly' && (
