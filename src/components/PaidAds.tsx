@@ -60,9 +60,9 @@ const META_FUNNEL = { entered: 58, waitingInfo: 30, sentCheckout: 13, checkedOut
 
 // Salesforce pipeline detail (update when new SF export is loaded)
 // These sub-stage breakdowns can't come from daily Supabase data
-// Source: Salesforce "Google Ads 2026" export, June 12, 2026 09:37 PST
-// 199 total leads. 4 checkouts, $7,281 revenue.
-const GOOGLE_SF_PIPELINE = { total: 217, waiting: 131, sentToTxP: 12, txpApproved: 4, sentCheckout: 42, checkedOut: 4, referredOut: 13, denied: 0, closedLost: 5 };
+// Source: Salesforce "Google Ads 2026" export, June 17, 2026 07:03 PST
+// 226 total leads. 4 checkouts, $7,281 revenue.
+const GOOGLE_SF_PIPELINE = { total: 226, waiting: 138, sentToTxP: 14, txpApproved: 2, sentCheckout: 47, checkedOut: 4, referredOut: 14, denied: 0, closedLost: 6, waitingTxPAssign: 1 };
 const GOOGLE_REVENUE: number = 7281; // 4 checkouts: $7,281 total
 
 // Google Ads daily seed data (source of truth — merged with Supabase on load)
