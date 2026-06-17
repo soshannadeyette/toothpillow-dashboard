@@ -179,17 +179,17 @@ const LAUNCH_BONUS_PAYOUTS: {month:string; payouts:{name:string;amount:number;ti
   ]},
 ];
 
-const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;paid:number;winStart:string;winEnd:string;is2026?:boolean;omit?:boolean}[] = [
-  {name:'Soshanna Salsman',bonusSubs:76,tier:2,earned:1250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Shannon Tripp',bonusSubs:72,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Lauren Johnson NNM',bonusSubs:56,tier:2,earned:1250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Emily Boazman',bonusSubs:44,tier:1,earned:250,paid:250,winStart:'04/02/2026',winEnd:'12/31/2026',is2026:true},
-  {name:'Kendra Needham',bonusSubs:42,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Katelyn Alsop (James)',bonusSubs:40,tier:1,earned:250,paid:250,winStart:'01/19/2026',winEnd:'12/31/2026',is2026:true},
-  {name:'Amy Bernhard',bonusSubs:35,tier:1,earned:250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Jeff Cruz Talia_likeitis',bonusSubs:32,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Ginny Yurich',bonusSubs:28,tier:1,earned:250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Jasyra Santiago-Hines',bonusSubs:27,tier:1,earned:250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
+const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;paid:number;winStart:string;winEnd:string;tier1Date?:string;tier2Date?:string;is2026?:boolean;omit?:boolean}[] = [
+  {name:'Soshanna Salsman',bonusSubs:76,tier:2,earned:1250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/25',tier2Date:'05/28',omit:true},
+  {name:'Shannon Tripp',bonusSubs:72,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/21',tier2Date:'05/26'},
+  {name:'Lauren Johnson NNM',bonusSubs:56,tier:2,earned:1250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/27',tier2Date:'06/10'},
+  {name:'Emily Boazman',bonusSubs:44,tier:1,earned:250,paid:250,winStart:'04/02/2026',winEnd:'12/31/2026',is2026:true,tier1Date:'05/24'},
+  {name:'Kendra Needham',bonusSubs:42,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'05/22'},
+  {name:'Katelyn Alsop (James)',bonusSubs:40,tier:1,earned:250,paid:250,winStart:'01/19/2026',winEnd:'12/31/2026',is2026:true,tier1Date:'02/21'},
+  {name:'Amy Bernhard',bonusSubs:35,tier:1,earned:250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/04'},
+  {name:'Jeff Cruz Talia_likeitis',bonusSubs:32,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'05/19'},
+  {name:'Ginny Yurich',bonusSubs:28,tier:1,earned:250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/02'},
+  {name:'Jasyra Santiago-Hines',bonusSubs:27,tier:1,earned:250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/10'},
   {name:'Carly Brown',bonusSubs:23,tier:0,earned:0,paid:0,winStart:'04/21/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Melody Brandon',bonusSubs:22,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Amy Erickson',bonusSubs:19,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
@@ -373,8 +373,8 @@ export default function AmbassadorGrowth() {
   const tier1Count = launchBonusData.filter(d => d.tier >= 1).length;
   const tier2Count = launchBonusData.filter(d => d.tier >= 2).length;
   const approachingTier1 = launchBonusData.filter(d => d.tier === 0 && d.bonusSubs >= 15).length;
-  const totalEarned = launchBonusData.reduce((s, d) => s + d.earned, 0);
-  const totalPaid = launchBonusData.reduce((s, d) => s + d.paid, 0);
+  const totalEarned = launchBonusData.filter(d => !d.omit).reduce((s, d) => s + d.earned, 0);
+  const totalPaid = launchBonusData.filter(d => !d.omit).reduce((s, d) => s + d.paid, 0);
   const totalUnpaid = totalEarned - totalPaid;
   void LAUNCH_BONUS_PAYOUTS; // used for audit trail, referenced in CLAUDE.md
 
@@ -1356,6 +1356,8 @@ export default function AmbassadorGrowth() {
                 <th style={{ textAlign: 'left', padding: '10px 12px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>Ambassador</th>
                 <th style={{ textAlign: 'center', padding: '10px 8px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>Subs</th>
                 <th style={{ textAlign: 'center', padding: '10px 8px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: 0.5, minWidth: 100 }}>Progress</th>
+                <th style={{ textAlign: 'center', padding: '10px 8px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>Tier 1</th>
+                <th style={{ textAlign: 'center', padding: '10px 8px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>Tier 2</th>
                 <th style={{ textAlign: 'center', padding: '10px 8px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>Earned</th>
                 <th style={{ textAlign: 'center', padding: '10px 8px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>Paid</th>
                 <th style={{ textAlign: 'right', padding: '10px 12px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>Remaining</th>
@@ -1391,6 +1393,12 @@ export default function AmbassadorGrowth() {
                         </div>
                         <span style={{ fontSize: '0.7rem', color: '#888', whiteSpace: 'nowrap' }}>{row.bonusSubs}/{nextTarget}{nextTierText ? '' : ' ✓'}</span>
                       </div>
+                    </td>
+                    <td style={{ textAlign: 'center', padding: '10px 8px', fontSize: '0.78rem', color: row.tier1Date ? TP.navy : '#ddd' }}>
+                      {row.tier1Date || '—'}
+                    </td>
+                    <td style={{ textAlign: 'center', padding: '10px 8px', fontSize: '0.78rem', color: row.tier2Date ? TP.navy : '#ddd' }}>
+                      {row.tier2Date || '—'}
                     </td>
                     <td style={{ textAlign: 'center', padding: '10px 8px', fontSize: '0.82rem' }}>
                       {row.earned > 0
