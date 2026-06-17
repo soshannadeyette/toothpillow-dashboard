@@ -10,11 +10,12 @@ const BASE = '';
 
 // ---- Daily Submissions ----
 
-// Hardcoded seed data (source of truth — merged with Supabase on every load)
-// Supabase wins on date conflict, seed fills gaps.
+// Hardcoded seed data (SOURCE OF TRUTH for online/hybrid — from Salesforce exports)
+// Seed wins for online/hybrid on dates it covers. Supabase provides prime/visitors.
+// For dates NOT in seed, Supabase is authoritative (manual entries via form).
 // Source: Salesforce "New Online Patients THIS MONTH" + "Hybrid Screenings" exports, June 17, 2026
 const DAILY_SUBMISSIONS_SEED: DailySubmission[] = [
-  // June 2026 (online from New Online Patients, hybrid from Hybrid Screenings, income = online * 5)
+  // June 2026
   {date:'2026-06-01',online:77,hybrid:13,prime:0,visitors:0,income:385},
   {date:'2026-06-02',online:61,hybrid:12,prime:0,visitors:0,income:305},
   {date:'2026-06-03',online:46,hybrid:18,prime:0,visitors:0,income:230},
@@ -29,8 +30,9 @@ const DAILY_SUBMISSIONS_SEED: DailySubmission[] = [
   {date:'2026-06-12',online:46,hybrid:8,prime:0,visitors:0,income:230},
   {date:'2026-06-13',online:29,hybrid:0,prime:0,visitors:0,income:145},
   {date:'2026-06-14',online:27,hybrid:0,prime:0,visitors:0,income:135},
-  {date:'2026-06-15',online:37,hybrid:12,prime:0,visitors:0,income:185},
+  {date:'2026-06-15',online:38,hybrid:12,prime:0,visitors:0,income:190},
   {date:'2026-06-16',online:34,hybrid:10,prime:0,visitors:0,income:170},
+  {date:'2026-06-17',online:8,hybrid:6,prime:0,visitors:0,income:40},
 ];
 
 function filterSeedByYearMonth(year?: number, month?: number): DailySubmission[] {
@@ -44,10 +46,29 @@ function filterSeedByYearMonth(year?: number, month?: number): DailySubmission[]
 
 function mergeSubmissionsWithSeed(apiData: DailySubmission[], year?: number, month?: number): DailySubmission[] {
   const byDate = new Map<string, DailySubmission>();
-  // Seed first (lower priority), filtered to requested year/month
-  filterSeedByYearMonth(year, month).forEach(s => byDate.set(s.date, s));
-  // API data overwrites seed on date conflict
-  apiData.forEach(a => byDate.set(a.date, a));
+  const seedDates = new Set<string>();
+  // Seed is authoritative for online/hybrid (Salesforce export data)
+  filterSeedByYearMonth(year, month).forEach(s => {
+    seedDates.add(s.date);
+    byDate.set(s.date, s);
+  });
+  apiData.forEach(a => {
+    if (seedDates.has(a.date)) {
+      // Seed date: keep seed online/hybrid, take prime/visitors from API
+      const seed = byDate.get(a.date)!;
+      byDate.set(a.date, {
+        date: seed.date,
+        online: seed.online,
+        hybrid: seed.hybrid,
+        prime: a.prime || seed.prime,
+        visitors: a.visitors || seed.visitors,
+        income: seed.online * 5,
+      });
+    } else {
+      // Non-seed date: API is authoritative
+      byDate.set(a.date, a);
+    }
+  });
   return Array.from(byDate.values()).sort((a, b) => a.date.localeCompare(b.date));
 }
 
