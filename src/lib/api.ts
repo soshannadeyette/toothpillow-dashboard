@@ -10,81 +10,13 @@ const BASE = '';
 
 // ---- Daily Submissions ----
 
-// Hardcoded seed data (SOURCE OF TRUTH for online/hybrid — from Salesforce exports)
-// Seed wins for online/hybrid on dates it covers. Supabase provides prime/visitors.
-// For dates NOT in seed, Supabase is authoritative (manual entries via form).
-// Source: Salesforce "New Online Patients THIS MONTH" + "Hybrid Screenings" exports, June 17, 2026
-const DAILY_SUBMISSIONS_SEED: DailySubmission[] = [
-  // June 2026
-  {date:'2026-06-01',online:77,hybrid:13,prime:0,visitors:0,income:385},
-  {date:'2026-06-02',online:61,hybrid:12,prime:0,visitors:0,income:305},
-  {date:'2026-06-03',online:46,hybrid:18,prime:0,visitors:0,income:230},
-  {date:'2026-06-04',online:52,hybrid:8,prime:0,visitors:0,income:260},
-  {date:'2026-06-05',online:46,hybrid:3,prime:0,visitors:0,income:230},
-  {date:'2026-06-06',online:45,hybrid:1,prime:0,visitors:0,income:225},
-  {date:'2026-06-07',online:24,hybrid:0,prime:0,visitors:0,income:120},
-  {date:'2026-06-08',online:61,hybrid:3,prime:0,visitors:0,income:305},
-  {date:'2026-06-09',online:64,hybrid:9,prime:0,visitors:0,income:320},
-  {date:'2026-06-10',online:66,hybrid:12,prime:0,visitors:0,income:330},
-  {date:'2026-06-11',online:63,hybrid:12,prime:0,visitors:0,income:315},
-  {date:'2026-06-12',online:46,hybrid:8,prime:0,visitors:0,income:230},
-  {date:'2026-06-13',online:29,hybrid:0,prime:0,visitors:0,income:145},
-  {date:'2026-06-14',online:27,hybrid:0,prime:0,visitors:0,income:135},
-  {date:'2026-06-15',online:38,hybrid:12,prime:0,visitors:0,income:190},
-  {date:'2026-06-16',online:34,hybrid:10,prime:0,visitors:0,income:170},
-  {date:'2026-06-17',online:8,hybrid:6,prime:0,visitors:0,income:40},
-];
-
-function filterSeedByYearMonth(year?: number, month?: number): DailySubmission[] {
-  return DAILY_SUBMISSIONS_SEED.filter(s => {
-    const [y, m] = s.date.split('-').map(Number);
-    if (year && y !== year) return false;
-    if (month && m !== month) return false;
-    return true;
-  });
-}
-
-function mergeSubmissionsWithSeed(apiData: DailySubmission[], year?: number, month?: number): DailySubmission[] {
-  const byDate = new Map<string, DailySubmission>();
-  const seedDates = new Set<string>();
-  // Seed is authoritative for online/hybrid (Salesforce export data)
-  filterSeedByYearMonth(year, month).forEach(s => {
-    seedDates.add(s.date);
-    byDate.set(s.date, s);
-  });
-  apiData.forEach(a => {
-    if (seedDates.has(a.date)) {
-      // Seed date: keep seed online/hybrid, take prime/visitors from API
-      const seed = byDate.get(a.date)!;
-      byDate.set(a.date, {
-        date: seed.date,
-        online: seed.online,
-        hybrid: seed.hybrid,
-        prime: a.prime || seed.prime,
-        visitors: a.visitors || seed.visitors,
-        income: seed.online * 5,
-      });
-    } else {
-      // Non-seed date: API is authoritative
-      byDate.set(a.date, a);
-    }
-  });
-  return Array.from(byDate.values()).sort((a, b) => a.date.localeCompare(b.date));
-}
-
 export async function fetchSubmissions(year?: number, month?: number): Promise<DailySubmission[]> {
     const params = new URLSearchParams();
     if (year) params.set('year', String(year));
     if (month) params.set('month', String(month));
-    try {
-        const res = await fetch(`${BASE}/api/submissions?${params}`);
-        if (!res.ok) throw new Error(await res.text());
-        const apiData: DailySubmission[] = await res.json();
-        return mergeSubmissionsWithSeed(apiData, year, month);
-    } catch {
-        // API unreachable — return seed data only so dashboard still works
-        return filterSeedByYearMonth(year, month);
-    }
+    const res = await fetch(`${BASE}/api/submissions?${params}`);
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
 }
 
 export async function upsertSubmission(entry: Partial<DailySubmission>): Promise<DailySubmission[]> {
