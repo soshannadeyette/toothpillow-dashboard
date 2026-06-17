@@ -10,18 +10,18 @@ const SUBMISSIONS_SEED = [
   {date:'2026-06-02',online:61,hybrid:12,prime:0,visitors:0,income:305},
   {date:'2026-06-03',online:46,hybrid:18,prime:0,visitors:0,income:230},
   {date:'2026-06-04',online:52,hybrid:8,prime:0,visitors:0,income:260},
-  {date:'2026-06-05',online:46,hybrid:3,prime:0,visitors:0,income:230},
+  {date:'2026-06-05',online:46,hybrid:3,prime:1,visitors:0,income:230},
   {date:'2026-06-06',online:45,hybrid:1,prime:0,visitors:0,income:225},
   {date:'2026-06-07',online:24,hybrid:0,prime:0,visitors:0,income:120},
   {date:'2026-06-08',online:61,hybrid:3,prime:0,visitors:0,income:305},
   {date:'2026-06-09',online:64,hybrid:9,prime:0,visitors:0,income:320},
-  {date:'2026-06-10',online:66,hybrid:12,prime:0,visitors:0,income:330},
-  {date:'2026-06-11',online:63,hybrid:12,prime:0,visitors:0,income:315},
+  {date:'2026-06-10',online:66,hybrid:12,prime:1,visitors:0,income:330},
+  {date:'2026-06-11',online:63,hybrid:12,prime:1,visitors:0,income:315},
   {date:'2026-06-12',online:46,hybrid:8,prime:0,visitors:0,income:230},
   {date:'2026-06-13',online:29,hybrid:0,prime:0,visitors:0,income:145},
   {date:'2026-06-14',online:27,hybrid:0,prime:0,visitors:0,income:135},
   {date:'2026-06-15',online:38,hybrid:12,prime:0,visitors:0,income:190},
-  {date:'2026-06-16',online:34,hybrid:10,prime:0,visitors:0,income:170},
+  {date:'2026-06-16',online:34,hybrid:10,prime:1,visitors:0,income:170},
 ];
 
 function centralToday(): string {
