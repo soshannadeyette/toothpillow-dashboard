@@ -37,10 +37,32 @@ async function seedPastDates() {
   const today = centralToday();
   const pastSeed = SUBMISSIONS_SEED.filter(s => s.date < today);
   if (pastSeed.length === 0) return;
-  // Upsert is idempotent — same data = no-op, corrects stale entries
+
+  // Fetch existing rows so we preserve prime/visitors
+  const dates = pastSeed.map(s => s.date);
+  const { data: existing } = await supabase
+    .from('daily_submissions')
+    .select('*')
+    .in('date', dates);
+
+  const existingByDate = new Map((existing || []).map(r => [r.date, r]));
+
+  // Merge: seed provides online/hybrid/income, existing keeps prime/visitors
+  const merged = pastSeed.map(s => {
+    const ex = existingByDate.get(s.date);
+    return {
+      date: s.date,
+      online: s.online,
+      hybrid: s.hybrid,
+      prime: ex?.prime ?? s.prime,
+      visitors: ex?.visitors ?? s.visitors,
+      income: s.income,
+    };
+  });
+
   await supabase
     .from('daily_submissions')
-    .upsert(pastSeed, { onConflict: 'date' });
+    .upsert(merged, { onConflict: 'date' });
 }
 
 // GET /api/submissions — fetch daily submissions, optionally filtered by year/month
