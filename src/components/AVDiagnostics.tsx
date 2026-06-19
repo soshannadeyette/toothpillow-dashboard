@@ -31,7 +31,7 @@ const TP = {
 };
 
 // ── Hardcoded data (source of truth) ──────────────────────────────────
-// Source: Salesforce "Waiting on Info Ratios" export, pulled June 17, 2026 07:03 PST
+// Source: Salesforce "Waiting on Info Ratios" export, pulled June 19, 2026
 const AV_DATA = [
   { label: 'Jan 26', month: 1,  year: 2026, traffic: 37320, starts: 1146, waiting: 109, submitted: 1037, partial: false, period: 'full' as const },
   { label: 'Feb 26', month: 2,  year: 2026, traffic: 51480, starts: 2191, waiting: 879, submitted: 1300, partial: false, period: 'full' as const },
@@ -39,13 +39,13 @@ const AV_DATA = [
   { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1429, waiting: 552, submitted: 872,  partial: false, period: 'full' as const },
   { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1033, waiting: 478, submitted: 555, partial: false, period: 'pre-update' as const },
   { label: 'May 23–31', month: 5,  year: 2026, traffic: 11212,  starts: 574,  waiting: 256,  submitted: 318,  partial: false,  period: 'post-update' as const },
-  { label: 'Jun 1–16', month: 6, year: 2026, traffic: 0, starts: 1075, waiting: 380, submitted: 693, partial: true, period: 'post-update' as const },
+  { label: 'Jun 1–19', month: 6, year: 2026, traffic: 0, starts: 1197, waiting: 380, submitted: 693, partial: true, period: 'post-update' as const },
 ];
 
 // ── Same-week completion rate by weekly cohort (source of truth) ──────
 // For each week: of all records created, what % submitted within the same Mon-Sun window.
 // Hard stop — later submissions don't count. Apples-to-apples across all weeks.
-// Source: Salesforce "Waiting on Info Ratios" export, June 17, 2026
+// Source: Salesforce "Waiting on Info Ratios" export, June 19, 2026
 const WEEKLY_COMPLETION: { label: string; total: number; submitted: number; pct: number; paidAds: number }[] = [
   { label: 'Feb 02', total: 284, submitted: 204, pct: 71.8, paidAds: 0 },
   { label: 'Feb 09', total: 293, submitted: 184, pct: 62.8, paidAds: 0 },
@@ -66,7 +66,7 @@ const WEEKLY_COMPLETION: { label: string; total: number; submitted: number; pct:
   { label: 'May 25', total: 465, submitted: 246, pct: 52.9, paidAds: 36 },
   { label: 'Jun 01', total: 496, submitted: 309, pct: 62.3, paidAds: 44 },
   { label: 'Jun 08', total: 486, submitted: 294, pct: 60.5, paidAds: 15 },
-  { label: 'Jun 15', total: 98, submitted: 50, pct: 51.0, paidAds: 0 },
+  { label: 'Jun 15', total: 215, submitted: 50, pct: 23.3, paidAds: 0 },
 ];
 
 // ── Event markers for same-week chart ──────────────────────────────────
@@ -87,7 +87,7 @@ const FUNNEL_DATA = [
   { label: 'May 26', waiting: 734, inReview: 86, checkout: 538, checkedOut: 130, closed: 101, onHold: 18 },
   { label: 'Jun 1–7', waiting: 158, inReview: 134, checkout: 149, checkedOut: 17, closed: 31, onHold: 7 },
   { label: 'Jun 8–14', waiting: 179, inReview: 181, checkout: 102, checkedOut: 7, closed: 9, onHold: 8 },
-  { label: 'Jun 15–16', waiting: 43, inReview: 49, checkout: 1, checkedOut: 0, closed: 0, onHold: 0 },
+  { label: 'Jun 15–19', waiting: 43, inReview: 49, checkout: 1, checkedOut: 0, closed: 0, onHold: 0 },
 ];
 
 // ── May daily data (source of truth) ─────────────────────────────────
@@ -158,7 +158,7 @@ const COHORT_DATA = [
 //   completed (within 7d + days 8-14 + 15+) | waiting | other
 // These add up to starts. "mature" = every person has had that many days.
 // Weekly cohort aging — Feb through current
-// Source: Salesforce Waiting on Info Ratios export June 17, 2026
+// Source: Salesforce Waiting on Info Ratios export June 19, 2026
 const COHORT_AGING: {label:string; starts:number; within7d:number; d8to14:number; d15plus:number; waiting:number; daysElapsed:number; mature7d:boolean; mature14d:boolean; postUpdate:boolean; tag?:string}[] = [
   { label: 'Feb 02–08', starts: 284, within7d: 210, d8to14: 4, d15plus: 11, waiting: 58, daysElapsed: 129, mature7d: true, mature14d: true, postUpdate: false },
   { label: 'Feb 09–15', starts: 293, within7d: 197, d8to14: 5, d15plus: 7, waiting: 85, daysElapsed: 122, mature7d: true, mature14d: true, postUpdate: false },
@@ -179,11 +179,11 @@ const COHORT_AGING: {label:string; starts:number; within7d:number; d8to14:number
   { label: 'May 25–31', starts: 465, within7d: 263, d8to14: 12, d15plus: 2, waiting: 188, daysElapsed: 17, mature7d: true, mature14d: true, postUpdate: true },
   { label: 'Jun 01–07', starts: 496, within7d: 332, d8to14: 6, d15plus: 0, waiting: 158, daysElapsed: 10, mature7d: true, mature14d: false, postUpdate: true },
   { label: 'Jun 08–14', starts: 486, within7d: 304, d8to14: 1, d15plus: 0, waiting: 179, daysElapsed: 3, mature7d: false, mature14d: false, postUpdate: true },
-  { label: 'Jun 15–16', starts: 93, within7d: 50, d8to14: 0, d15plus: 0, waiting: 43, daysElapsed: 1, mature7d: false, mature14d: false, postUpdate: true },
+  { label: 'Jun 15–19', starts: 215, within7d: 50, d8to14: 0, d15plus: 0, waiting: 43, daysElapsed: 1, mature7d: false, mature14d: false, postUpdate: true },
 ];
 
 // ── Post-update tracking ────────────────────────────────────────────
-const POST_UPDATE_DAYS_ELAPSED = 25; // May 23 – Jun 17 = 25 days post-update
+const POST_UPDATE_DAYS_ELAPSED = 27; // May 23 – Jun 19 = 27 days post-update
 
 function num(v: number): string { return v.toLocaleString(); }
 
