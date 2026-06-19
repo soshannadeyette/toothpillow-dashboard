@@ -39,7 +39,7 @@ const AV_DATA = [
   { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1429, waiting: 552, submitted: 872,  partial: false, period: 'full' as const },
   { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1033, waiting: 478, submitted: 555, partial: false, period: 'pre-update' as const },
   { label: 'May 23–31', month: 5,  year: 2026, traffic: 11212,  starts: 574,  waiting: 256,  submitted: 318,  partial: false,  period: 'post-update' as const },
-  { label: 'Jun 1–19', month: 6, year: 2026, traffic: 0, starts: 1197, waiting: 380, submitted: 693, partial: true, period: 'post-update' as const },
+  { label: 'Jun 1–19', month: 6, year: 2026, traffic: 0, starts: 1197, waiting: 418, submitted: 779, partial: true, period: 'post-update' as const },
 ];
 
 // ── Same-week completion rate by weekly cohort (source of truth) ──────
@@ -65,8 +65,8 @@ const WEEKLY_COMPLETION: { label: string; total: number; submitted: number; pct:
   { label: 'May 18', total: 380, submitted: 158, pct: 41.6, paidAds: 10 },
   { label: 'May 25', total: 465, submitted: 246, pct: 52.9, paidAds: 36 },
   { label: 'Jun 01', total: 496, submitted: 309, pct: 62.3, paidAds: 44 },
-  { label: 'Jun 08', total: 486, submitted: 294, pct: 60.5, paidAds: 15 },
-  { label: 'Jun 15', total: 215, submitted: 50, pct: 23.3, paidAds: 0 },
+  { label: 'Jun 08', total: 486, submitted: 292, pct: 60.1, paidAds: 15 },
+  { label: 'Jun 15', total: 215, submitted: 124, pct: 57.7, paidAds: 0 },
 ];
 
 // ── Event markers for same-week chart ──────────────────────────────────
@@ -80,14 +80,14 @@ const EVENTS: { week: string; label: string; color: string }[] = [
 // Checkout (Sent Checkout Link), Checked Out (CHECKED OUT + Consult Complete + Myo Only),
 // Closed (Referred Out, Denied, Closed Lost, etc.), On Hold
 const FUNNEL_DATA = [
-  { label: 'Jan 26', waiting: 109, inReview:  0, checkout:  25, checkedOut: 314, closed: 680, onHold: 18 },
-  { label: 'Feb 26', waiting: 879, inReview: 12, checkout: 213, checkedOut: 334, closed: 725, onHold: 28 },
-  { label: 'Mar 26', waiting: 943, inReview: 15, checkout: 487, checkedOut: 384, closed: 405, onHold: 27 },
-  { label: 'Apr 26', waiting: 552, inReview: 21, checkout: 370, checkedOut: 227, closed: 241, onHold: 18 },
-  { label: 'May 26', waiting: 734, inReview: 86, checkout: 538, checkedOut: 130, closed: 101, onHold: 18 },
-  { label: 'Jun 1–7', waiting: 158, inReview: 134, checkout: 149, checkedOut: 17, closed: 31, onHold: 7 },
-  { label: 'Jun 8–14', waiting: 179, inReview: 181, checkout: 102, checkedOut: 7, closed: 9, onHold: 8 },
-  { label: 'Jun 15–19', waiting: 43, inReview: 49, checkout: 1, checkedOut: 0, closed: 0, onHold: 0 },
+  { label: 'Jan 26', waiting: 107, inReview:  0, checkout:  25, checkedOut: 314, closed: 682, onHold: 18 },
+  { label: 'Feb 26', waiting: 875, inReview:  7, checkout: 215, checkedOut: 336, closed: 728, onHold: 29 },
+  { label: 'Mar 26', waiting: 941, inReview:  8, checkout: 485, checkedOut: 390, closed: 409, onHold: 27 },
+  { label: 'Apr 26', waiting: 551, inReview: 12, checkout: 375, checkedOut: 228, closed: 245, onHold: 18 },
+  { label: 'May 26', waiting: 733, inReview: 36, checkout: 558, checkedOut: 145, closed: 117, onHold: 18 },
+  { label: 'Jun 1–7', waiting: 157, inReview: 64, checkout: 207, checkedOut: 26, closed: 35, onHold: 7 },
+  { label: 'Jun 8–14', waiting: 168, inReview: 136, checkout: 145, checkedOut: 14, closed: 15, onHold: 8 },
+  { label: 'Jun 15–19', waiting: 89, inReview: 100, checkout: 18, checkedOut: 2, closed: 4, onHold: 2 },
 ];
 
 // ── May daily data (source of truth) ─────────────────────────────────
@@ -175,11 +175,11 @@ const COHORT_AGING: {label:string; starts:number; within7d:number; d8to14:number
   { label: 'Apr 27–May 03', starts: 330, within7d: 177, d8to14: 7, d15plus: 10, waiting: 136, daysElapsed: 45, mature7d: true, mature14d: true, postUpdate: false },
   { label: 'May 04–10', starts: 312, within7d: 159, d8to14: 5, d15plus: 8, waiting: 140, daysElapsed: 38, mature7d: true, mature14d: true, postUpdate: false },
   { label: 'May 11–17', starts: 331, within7d: 170, d8to14: 6, d15plus: 7, waiting: 148, daysElapsed: 31, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'May 18–24', starts: 380, within7d: 167, d8to14: 9, d15plus: 2, waiting: 202, daysElapsed: 24, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'May 25–31', starts: 465, within7d: 263, d8to14: 12, d15plus: 2, waiting: 188, daysElapsed: 17, mature7d: true, mature14d: true, postUpdate: true },
-  { label: 'Jun 01–07', starts: 496, within7d: 332, d8to14: 6, d15plus: 0, waiting: 158, daysElapsed: 10, mature7d: true, mature14d: false, postUpdate: true },
-  { label: 'Jun 08–14', starts: 486, within7d: 304, d8to14: 1, d15plus: 0, waiting: 179, daysElapsed: 3, mature7d: false, mature14d: false, postUpdate: true },
-  { label: 'Jun 15–19', starts: 215, within7d: 50, d8to14: 0, d15plus: 0, waiting: 43, daysElapsed: 1, mature7d: false, mature14d: false, postUpdate: true },
+  { label: 'May 18–24', starts: 380, within7d: 167, d8to14: 9, d15plus: 2, waiting: 202, daysElapsed: 26, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'May 25–31', starts: 465, within7d: 263, d8to14: 12, d15plus: 2, waiting: 188, daysElapsed: 19, mature7d: true, mature14d: true, postUpdate: true },
+  { label: 'Jun 01–07', starts: 496, within7d: 333, d8to14: 6, d15plus: 0, waiting: 157, daysElapsed: 12, mature7d: true, mature14d: false, postUpdate: true },
+  { label: 'Jun 08–14', starts: 486, within7d: 313, d8to14: 3, d15plus: 0, waiting: 170, daysElapsed: 5, mature7d: true, mature14d: false, postUpdate: true },
+  { label: 'Jun 15–19', starts: 215, within7d: 124, d8to14: 0, d15plus: 0, waiting: 91, daysElapsed: 0, mature7d: false, mature14d: false, postUpdate: true },
 ];
 
 // ── Post-update tracking ────────────────────────────────────────────
