@@ -1,28 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-// Hardcoded seed — Salesforce export data (source of truth for completed days).
-// Auto-upserted into Supabase on GET for past dates only. Today is excluded
-// so manual form entries work normally.
-// Source: Salesforce exports, June 17, 2026
-const SUBMISSIONS_SEED = [
-  {date:'2026-06-01',online:77,hybrid:13,prime:0,visitors:0,income:385},
-  {date:'2026-06-02',online:61,hybrid:12,prime:0,visitors:0,income:305},
-  {date:'2026-06-03',online:46,hybrid:18,prime:0,visitors:0,income:230},
-  {date:'2026-06-04',online:52,hybrid:8,prime:0,visitors:0,income:260},
-  {date:'2026-06-05',online:46,hybrid:3,prime:1,visitors:0,income:230},
-  {date:'2026-06-06',online:45,hybrid:1,prime:0,visitors:0,income:225},
-  {date:'2026-06-07',online:24,hybrid:0,prime:0,visitors:0,income:120},
-  {date:'2026-06-08',online:61,hybrid:3,prime:0,visitors:0,income:305},
-  {date:'2026-06-09',online:64,hybrid:9,prime:0,visitors:0,income:320},
-  {date:'2026-06-10',online:66,hybrid:12,prime:1,visitors:0,income:330},
-  {date:'2026-06-11',online:63,hybrid:12,prime:1,visitors:0,income:315},
-  {date:'2026-06-12',online:46,hybrid:8,prime:0,visitors:0,income:230},
-  {date:'2026-06-13',online:29,hybrid:0,prime:0,visitors:0,income:145},
-  {date:'2026-06-14',online:27,hybrid:0,prime:0,visitors:0,income:135},
-  {date:'2026-06-15',online:38,hybrid:12,prime:0,visitors:0,income:190},
-  {date:'2026-06-16',online:34,hybrid:10,prime:1,visitors:0,income:170},
-];
+// June 1-16 seed data already in Supabase — cleared to stop overwriting manual entries.
+// If a future batch needs seeding, add rows here temporarily, then clear after confirmed in Supabase.
+const SUBMISSIONS_SEED: {date:string;online:number;hybrid:number;prime:number;visitors:number;income:number}[] = [];
 
 function centralToday(): string {
   const parts = new Intl.DateTimeFormat('en-US', {
