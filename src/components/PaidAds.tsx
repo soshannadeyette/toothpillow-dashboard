@@ -96,13 +96,13 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-06-20', spend: 212.39, clicks: 66, impressions: 915, submit: 3, started: 3, finished: 2, treatment: 0 },
 ];
 
-// Merge seed data with Supabase data (Supabase wins on conflict, seed fills gaps)
+// Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)
 function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
   const byDate = new Map<string, GoogleAdsDaily>();
-  // Seed first (lower priority)
-  GOOGLE_ADS_SEED.forEach(s => byDate.set(s.date, s));
-  // API data overwrites seed
+  // API first (lower priority — fills in dates not in seed)
   apiData.forEach(a => byDate.set(a.date, a));
+  // Seed overwrites API (source of truth per CLAUDE.md)
+  GOOGLE_ADS_SEED.forEach(s => byDate.set(s.date, s));
   return Array.from(byDate.values());
 }
 
