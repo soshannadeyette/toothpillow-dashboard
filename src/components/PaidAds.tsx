@@ -60,30 +60,30 @@ const META_FUNNEL = { entered: 58, waitingInfo: 30, sentCheckout: 13, checkedOut
 
 // Salesforce pipeline detail (update when new SF export is loaded)
 // These sub-stage breakdowns can't come from daily Supabase data
-// Source: Salesforce "Google Ads 2026" export, June 19, 2026
-// 226 total leads. 5 checkouts, $9,077 revenue.
-const GOOGLE_SF_PIPELINE = { total: 226, waiting: 128, sentToTxP: 19, txpApproved: 0, sentCheckout: 53, checkedOut: 5, referredOut: 14, denied: 0, closedLost: 6, waitingTxPAssign: 1 };
+// Source: Salesforce "Google Ads 2026" export, June 20, 2026
+// 249 total leads. 5 checkouts, $9,077 revenue.
+const GOOGLE_SF_PIPELINE = { total: 249, waiting: 148, sentToTxP: 23, txpApproved: 0, sentCheckout: 52, checkedOut: 5, referredOut: 14, denied: 0, closedLost: 7, waitingTxPAssign: 1 };
 const GOOGLE_REVENUE: number = 9077; // 5 checkouts: $9,077 total
 
 // Google Ads daily seed data (source of truth — merged with Supabase on load)
-// June 1-15 from Google Ads Report Editor, June 15, 2026
-// Clicks/impressions distributed proportionally from totals: 1,973 clicks, 30,872 impressions
+// June 1-15 spend/clicks/impressions from Google Ads Report Editor, June 15, 2026
+// started = daily Salesforce lead count (Created Date) from Google Ads 2026 export, June 20, 2026
 const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
-  { date: '2026-06-01', spend: 504.80, clicks: 155, impressions: 2430, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-06-02', spend: 489.53, clicks: 151, impressions: 2357, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-06-03', spend: 448.76, clicks: 138, impressions: 2161, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-06-04', spend: 481.54, clicks: 148, impressions: 2318, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-06-05', spend: 433.85, clicks: 133, impressions: 2089, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-06-06', spend: 389.20, clicks: 120, impressions: 1874, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-06-07', spend: 417.28, clicks: 128, impressions: 2009, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-06-08', spend: 508.66, clicks: 157, impressions: 2449, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-06-09', spend: 473.13, clicks: 146, impressions: 2278, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-06-10', spend: 474.53, clicks: 146, impressions: 2285, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-06-11', spend: 431.53, clicks: 133, impressions: 2078, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-06-12', spend: 415.48, clicks: 128, impressions: 2000, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-06-13', spend: 377.91, clicks: 116, impressions: 1820, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-06-14', spend: 393.04, clicks: 121, impressions: 1892, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-06-15', spend: 172.85, clicks: 53, impressions: 832, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-06-01', spend: 504.80, clicks: 155, impressions: 2430, submit: 0, started: 7, finished: 7, treatment: 0 },
+  { date: '2026-06-02', spend: 489.53, clicks: 151, impressions: 2357, submit: 0, started: 9, finished: 0, treatment: 0 },
+  { date: '2026-06-03', spend: 448.76, clicks: 138, impressions: 2161, submit: 0, started: 5, finished: 3, treatment: 0 },
+  { date: '2026-06-04', spend: 481.54, clicks: 148, impressions: 2318, submit: 0, started: 7, finished: 4, treatment: 0 },
+  { date: '2026-06-05', spend: 433.85, clicks: 133, impressions: 2089, submit: 0, started: 4, finished: 2, treatment: 0 },
+  { date: '2026-06-06', spend: 389.20, clicks: 120, impressions: 1874, submit: 0, started: 8, finished: 3, treatment: 0 },
+  { date: '2026-06-07', spend: 417.28, clicks: 128, impressions: 2009, submit: 0, started: 4, finished: 1, treatment: 0 },
+  { date: '2026-06-08', spend: 508.66, clicks: 157, impressions: 2449, submit: 0, started: 7, finished: 3, treatment: 0 },
+  { date: '2026-06-09', spend: 473.13, clicks: 146, impressions: 2278, submit: 0, started: 4, finished: 2, treatment: 0 },
+  { date: '2026-06-10', spend: 474.53, clicks: 146, impressions: 2285, submit: 0, started: 4, finished: 3, treatment: 0 },
+  { date: '2026-06-11', spend: 431.53, clicks: 133, impressions: 2078, submit: 0, started: 2, finished: 1, treatment: 0 },
+  { date: '2026-06-12', spend: 415.48, clicks: 128, impressions: 2000, submit: 0, started: 7, finished: 4, treatment: 0 },
+  { date: '2026-06-13', spend: 377.91, clicks: 116, impressions: 1820, submit: 0, started: 7, finished: 3, treatment: 0 },
+  { date: '2026-06-14', spend: 393.04, clicks: 121, impressions: 1892, submit: 0, started: 5, finished: 2, treatment: 0 },
+  { date: '2026-06-15', spend: 172.85, clicks: 53, impressions: 832, submit: 0, started: 3, finished: 0, treatment: 0 },
 ];
 
 // Merge seed data with Supabase data (Supabase wins on conflict, seed fills gaps)
@@ -283,23 +283,23 @@ export default function PaidAds() {
     },
   }), []);
 
-  /* ──── CPL over time data (excludes blackout days from running totals) ──── */
+  /* ──── CPL over time — 7-day rolling average (excludes blackout days) ──── */
   const cplChartData = useMemo(() => {
-    let runSpend = 0, runLeads = 0;
     const labels: string[] = [];
     const data: (number | null)[] = [];
-    sorted.forEach((e) => {
-      if (isBlackout(e.date)) {
-        // Still show the label but null the data point
-        labels.push(e.date.substring(5).replace('-', '/'));
-        data.push(null);
-        return;
-      }
-      runSpend += e.spend || 0;
-      runLeads += e.started || 0;
-      if (runLeads === 0) return;
+    sorted.forEach((e, i) => {
       labels.push(e.date.substring(5).replace('-', '/'));
-      data.push(parseFloat((runSpend / runLeads).toFixed(2)));
+      if (isBlackout(e.date)) { data.push(null); return; }
+      // Look back up to 7 non-blackout days
+      let windowSpend = 0, windowLeads = 0;
+      for (let j = i; j >= Math.max(0, i - 6); j--) {
+        const d = sorted[j];
+        if (isBlackout(d.date)) continue;
+        windowSpend += d.spend || 0;
+        windowLeads += d.started || 0;
+      }
+      if (windowLeads === 0) { data.push(null); return; }
+      data.push(parseFloat((windowSpend / windowLeads).toFixed(2)));
     });
     return { labels, data };
   }, [sorted]);
@@ -475,8 +475,8 @@ export default function PaidAds() {
           </div>
         </ChartCard>
 
-        {/* Chart 4: Cost per Lead Over Time */}
-        <ChartLabel>Cost per Lead Over Time</ChartLabel>
+        {/* Chart 4: Cost per Lead — 7-day Rolling Average */}
+        <ChartLabel>Cost per Lead (7-day Rolling Avg)</ChartLabel>
         <ChartCard>
           <div style={{ height: 260 }}>
             {cplChartData.data.length > 1 ? (
