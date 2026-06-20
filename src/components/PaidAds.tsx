@@ -68,28 +68,32 @@ const GOOGLE_REVENUE: number = 9077; // 5 checkouts: $9,077 total
 // Google Ads daily seed data (source of truth — merged with Supabase on load)
 // June 1-15 spend/clicks/impressions from Google Ads Report Editor, June 15, 2026
 // June 16-20 spend/clicks/impressions from Google Ads Report Editor, June 20, 2026
-// started = daily Salesforce lead count (Created Date) from Google Ads 2026 export, June 20, 2026
+// All lead metrics from Salesforce "Google Ads 2026" export, June 20, 2026:
+//   submit  = Created Date count (lead entered system / opened form)
+//   started = Date: Submission count (assessment submitted)
+//   finished = Date: Sent to TxProvider count (sent for review)
+//   treatment = Date: Checkout count (patient checked out)
 const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
-  { date: '2026-06-01', spend: 504.80, clicks: 155, impressions: 2430, submit: 0, started: 7, finished: 7, treatment: 0 },
-  { date: '2026-06-02', spend: 489.53, clicks: 151, impressions: 2357, submit: 0, started: 9, finished: 0, treatment: 0 },
-  { date: '2026-06-03', spend: 448.76, clicks: 138, impressions: 2161, submit: 0, started: 5, finished: 3, treatment: 0 },
-  { date: '2026-06-04', spend: 481.54, clicks: 148, impressions: 2318, submit: 0, started: 7, finished: 4, treatment: 0 },
-  { date: '2026-06-05', spend: 433.85, clicks: 133, impressions: 2089, submit: 0, started: 4, finished: 2, treatment: 0 },
-  { date: '2026-06-06', spend: 389.20, clicks: 120, impressions: 1874, submit: 0, started: 8, finished: 3, treatment: 0 },
-  { date: '2026-06-07', spend: 417.28, clicks: 128, impressions: 2009, submit: 0, started: 4, finished: 1, treatment: 0 },
-  { date: '2026-06-08', spend: 508.66, clicks: 157, impressions: 2449, submit: 0, started: 7, finished: 3, treatment: 0 },
-  { date: '2026-06-09', spend: 473.13, clicks: 146, impressions: 2278, submit: 0, started: 4, finished: 2, treatment: 0 },
-  { date: '2026-06-10', spend: 474.53, clicks: 146, impressions: 2285, submit: 0, started: 4, finished: 3, treatment: 0 },
-  { date: '2026-06-11', spend: 431.53, clicks: 133, impressions: 2078, submit: 0, started: 2, finished: 1, treatment: 0 },
-  { date: '2026-06-12', spend: 415.48, clicks: 128, impressions: 2000, submit: 0, started: 7, finished: 4, treatment: 0 },
-  { date: '2026-06-13', spend: 377.91, clicks: 116, impressions: 1820, submit: 0, started: 7, finished: 3, treatment: 0 },
-  { date: '2026-06-14', spend: 393.04, clicks: 121, impressions: 1892, submit: 0, started: 5, finished: 2, treatment: 0 },
-  { date: '2026-06-15', spend: 172.85, clicks: 53, impressions: 832, submit: 0, started: 3, finished: 0, treatment: 0 },
-  { date: '2026-06-16', spend: 430.72, clicks: 137, impressions: 2028, submit: 0, started: 6, finished: 2, treatment: 0 },
-  { date: '2026-06-17', spend: 421.76, clicks: 135, impressions: 2020, submit: 0, started: 7, finished: 4, treatment: 0 },
-  { date: '2026-06-18', spend: 406.56, clicks: 125, impressions: 1816, submit: 0, started: 6, finished: 2, treatment: 0 },
-  { date: '2026-06-19', spend: 402.58, clicks: 114, impressions: 1597, submit: 0, started: 7, finished: 4, treatment: 0 },
-  { date: '2026-06-20', spend: 212.39, clicks: 66, impressions: 915, submit: 0, started: 3, finished: 3, treatment: 0 },
+  { date: '2026-06-01', spend: 504.80, clicks: 155, impressions: 2430, submit: 7, started: 7, finished: 7, treatment: 0 },
+  { date: '2026-06-02', spend: 489.53, clicks: 151, impressions: 2357, submit: 9, started: 0, finished: 0, treatment: 1 },
+  { date: '2026-06-03', spend: 448.76, clicks: 138, impressions: 2161, submit: 5, started: 2, finished: 1, treatment: 0 },
+  { date: '2026-06-04', spend: 481.54, clicks: 148, impressions: 2318, submit: 7, started: 4, finished: 3, treatment: 0 },
+  { date: '2026-06-05', spend: 433.85, clicks: 133, impressions: 2089, submit: 4, started: 1, finished: 2, treatment: 0 },
+  { date: '2026-06-06', spend: 389.20, clicks: 120, impressions: 1874, submit: 8, started: 3, finished: 2, treatment: 0 },
+  { date: '2026-06-07', spend: 417.28, clicks: 128, impressions: 2009, submit: 4, started: 1, finished: 0, treatment: 0 },
+  { date: '2026-06-08', spend: 508.66, clicks: 157, impressions: 2449, submit: 7, started: 2, finished: 5, treatment: 0 },
+  { date: '2026-06-09', spend: 473.13, clicks: 146, impressions: 2278, submit: 4, started: 3, finished: 3, treatment: 0 },
+  { date: '2026-06-10', spend: 474.53, clicks: 146, impressions: 2285, submit: 4, started: 4, finished: 3, treatment: 0 },
+  { date: '2026-06-11', spend: 431.53, clicks: 133, impressions: 2078, submit: 2, started: 1, finished: 2, treatment: 0 },
+  { date: '2026-06-12', spend: 415.48, clicks: 128, impressions: 2000, submit: 7, started: 3, finished: 1, treatment: 0 },
+  { date: '2026-06-13', spend: 377.91, clicks: 116, impressions: 1820, submit: 7, started: 3, finished: 1, treatment: 0 },
+  { date: '2026-06-14', spend: 393.04, clicks: 121, impressions: 1892, submit: 5, started: 3, finished: 1, treatment: 0 },
+  { date: '2026-06-15', spend: 172.85, clicks: 53, impressions: 832, submit: 3, started: 1, finished: 1, treatment: 0 },
+  { date: '2026-06-16', spend: 430.72, clicks: 137, impressions: 2028, submit: 6, started: 2, finished: 6, treatment: 0 },
+  { date: '2026-06-17', spend: 421.76, clicks: 135, impressions: 2020, submit: 7, started: 4, finished: 6, treatment: 0 },
+  { date: '2026-06-18', spend: 406.56, clicks: 125, impressions: 1816, submit: 6, started: 3, finished: 3, treatment: 0 },
+  { date: '2026-06-19', spend: 402.58, clicks: 114, impressions: 1597, submit: 7, started: 4, finished: 4, treatment: 1 },
+  { date: '2026-06-20', spend: 212.39, clicks: 66, impressions: 915, submit: 3, started: 3, finished: 2, treatment: 0 },
 ];
 
 // Merge seed data with Supabase data (Supabase wins on conflict, seed fills gaps)
