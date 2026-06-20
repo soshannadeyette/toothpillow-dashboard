@@ -67,6 +67,7 @@ const GOOGLE_REVENUE: number = 9077; // 5 checkouts: $9,077 total
 
 // Google Ads daily seed data (source of truth — merged with Supabase on load)
 // June 1-15 spend/clicks/impressions from Google Ads Report Editor, June 15, 2026
+// June 16-20 spend/clicks/impressions from Google Ads Report Editor, June 20, 2026
 // started = daily Salesforce lead count (Created Date) from Google Ads 2026 export, June 20, 2026
 const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-06-01', spend: 504.80, clicks: 155, impressions: 2430, submit: 0, started: 7, finished: 7, treatment: 0 },
@@ -84,6 +85,11 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-06-13', spend: 377.91, clicks: 116, impressions: 1820, submit: 0, started: 7, finished: 3, treatment: 0 },
   { date: '2026-06-14', spend: 393.04, clicks: 121, impressions: 1892, submit: 0, started: 5, finished: 2, treatment: 0 },
   { date: '2026-06-15', spend: 172.85, clicks: 53, impressions: 832, submit: 0, started: 3, finished: 0, treatment: 0 },
+  { date: '2026-06-16', spend: 430.72, clicks: 137, impressions: 2028, submit: 0, started: 6, finished: 2, treatment: 0 },
+  { date: '2026-06-17', spend: 421.76, clicks: 135, impressions: 2020, submit: 0, started: 7, finished: 4, treatment: 0 },
+  { date: '2026-06-18', spend: 406.56, clicks: 125, impressions: 1816, submit: 0, started: 6, finished: 2, treatment: 0 },
+  { date: '2026-06-19', spend: 402.58, clicks: 114, impressions: 1597, submit: 0, started: 7, finished: 4, treatment: 0 },
+  { date: '2026-06-20', spend: 212.39, clicks: 66, impressions: 915, submit: 0, started: 3, finished: 3, treatment: 0 },
 ];
 
 // Merge seed data with Supabase data (Supabase wins on conflict, seed fills gaps)
