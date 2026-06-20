@@ -132,11 +132,12 @@ const GSC_WEEKLY = [
   { week: '2026-05-18', clicks: 2564, impressions: 10691, ctr: 24.0, position: 10.4 },
   { week: '2026-05-25', clicks: 3153, impressions: 12473, ctr: 25.3, position: 14.2 },
   { week: '2026-06-01', clicks: 3533, impressions: 13754, ctr: 25.7, position: 9.5 },
-  { week: '2026-06-08', clicks: 2549, impressions: 11344, ctr: 22.5, position: 9.2 },
+  { week: '2026-06-08', clicks: 2789, impressions: 12777, ctr: 21.8, position: 9.3 },
+  { week: '2026-06-15', clicks: 1474, impressions: 7768, ctr: 19.0, position: 9.3 },
 ];
 
-// Full-year daily GSC data — Jan 1 to Jun 13, 2026
-// Source: Google Search Console DAYS view, updated June 15, 2026
+// Full-year daily GSC data — Jan 1 to Jun 18, 2026
+// Source: Google Search Console DAYS view, updated June 20, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -176,6 +177,7 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jun: [
     [1,697,2554],[2,571,1925],[3,517,1967],[4,514,2582],[5,440,1551],[6,402,1636],[7,392,1539],
     [8,449,1957],[9,497,2477],[10,547,2391],[11,482,1849],[12,343,1431],[13,231,1239],
+    [14,240,1433],[15,366,1988],[16,380,1846],[17,391,2264],[18,337,1670],
   ],
 };
 
