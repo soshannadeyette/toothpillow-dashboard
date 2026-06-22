@@ -251,9 +251,13 @@ export default function WeeklyReport() {
     setVSaving(true);
     setVMsg('');
     try {
+      const existing = weeklyVisitors[vWeekStart] || { world: 0, usa: 0 };
       const updated = {
         ...weeklyVisitors,
-        [vWeekStart]: { world: parseInt(vWorld) || 0, usa: parseInt(vUSA) || 0 },
+        [vWeekStart]: {
+          world: vWorld.trim() !== '' ? parseInt(vWorld) || 0 : existing.world,
+          usa: vUSA.trim() !== '' ? parseInt(vUSA) || 0 : existing.usa,
+        },
       };
       await fetch(`${BASE}/api/settings`, {
         method: 'POST',
