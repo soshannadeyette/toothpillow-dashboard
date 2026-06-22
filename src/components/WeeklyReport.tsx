@@ -626,6 +626,7 @@ export default function WeeklyReport() {
                 <th className="px-4 py-2 font-medium text-right">Hybrid</th>
                 <th className="px-4 py-2 font-medium text-right">Prime</th>
                 <th className="px-4 py-2 font-medium text-right">Avg/Day</th>
+                <th className="px-4 py-2 font-medium text-right">Traffic</th>
                 <th className="px-4 py-2 font-medium text-right">Conv %</th>
                 <th className="px-4 py-2 font-medium text-right">USA Conv %</th>
                 <th className="px-4 py-2 font-medium text-right">WoW %</th>
@@ -661,6 +662,9 @@ export default function WeeklyReport() {
                     <td className="px-4 py-2 border-t border-gray-100 text-right text-amber-600">{w.hybrid.toLocaleString()}</td>
                     <td className="px-4 py-2 border-t border-gray-100 text-right text-red-600">{w.prime.toLocaleString()}</td>
                     <td className="px-4 py-2 border-t border-gray-100 text-right">{w.dailyAvg}</td>
+                    <td className={`px-4 py-2 border-t border-gray-100 text-right ${w.visitorsWorld > 0 ? 'text-teal-600' : 'text-red-400 font-medium'}`}>
+                      {w.visitorsWorld > 0 ? w.visitorsWorld.toLocaleString() : 'missing'}
+                    </td>
                     <td className="px-4 py-2 border-t border-gray-100 text-right text-purple-600">
                       {w.convWorld !== null ? `${w.convWorld}%` : <span className="text-gray-300">--</span>}
                     </td>
