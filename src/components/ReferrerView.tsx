@@ -91,7 +91,7 @@ const REFERRER_DATA: Record<string, RefMonth> = {
   "2026-03": {total:1603, Parent:75, "Dental Office":319, "Airway Ambassador":64, Influencer:462, Podcast:164, Instagram:74, TikTok:1, Facebook:11, "Meta Ad":2, "Online Search":339, "Unknown Referral":59, "Unknown Professional Referral":21, Other:0, MYO:6, "Health Care Professional":6},
   "2026-04": {total:1228, Parent:76, "Dental Office":259, "Airway Ambassador":64, Influencer:233, Podcast:130, Instagram:39, TikTok:1, Facebook:10, "Meta Ad":0, "Online Search":298, "Unknown Referral":69, "Unknown Professional Referral":25, Other:0, "Google Ad":20, MYO:3, "Health Care Professional":1},
   "2026-05": {total:1125, Parent:49, "Dental Office":213, "Airway Ambassador":50, Influencer:268, Podcast:126, Instagram:55, TikTok:4, Facebook:13, "Meta Ad":1, "Online Search":251, "Unknown Referral":51, "Unknown Professional Referral":10, Other:0, "Google Ad":28, MYO:3, "Health Care Professional":3},
-  "2026-06": {total:1016, Parent:45, "Dental Office":151, "Airway Ambassador":24, Influencer:215, Podcast:213, Instagram:39, TikTok:0, Facebook:2, "Meta Ad":0, "Online Search":210, "Unknown Referral":57, "Unknown Professional Referral":8, Other:0, "Google Ad":50, MYO:2},
+  "2026-06": {total:1064, Parent:50, "Dental Office":155, "Airway Ambassador":25, Influencer:221, Podcast:225, Instagram:42, TikTok:0, Facebook:3, "Meta Ad":0, "Online Search":220, "Unknown Referral":58, "Unknown Professional Referral":8, Other:0, "Google Ad":55, MYO:2},
 };
 
 /* ────── Current month projection ────── */

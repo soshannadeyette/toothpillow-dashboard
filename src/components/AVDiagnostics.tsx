@@ -31,15 +31,15 @@ const TP = {
 };
 
 // ── Hardcoded data (source of truth) ──────────────────────────────────
-// Source: Salesforce "Waiting on Info Ratios" export, pulled June 19, 2026
+// Source: Salesforce "Waiting on Info Ratios" export, pulled June 22, 2026
 const AV_DATA = [
   { label: 'Jan 26', month: 1,  year: 2026, traffic: 37320, starts: 1146, waiting: 109, submitted: 1037, partial: false, period: 'full' as const },
-  { label: 'Feb 26', month: 2,  year: 2026, traffic: 51480, starts: 2191, waiting: 879, submitted: 1300, partial: false, period: 'full' as const },
-  { label: 'Mar 26', month: 3,  year: 2026, traffic: 39218, starts: 2261, waiting: 943, submitted: 1306, partial: false, period: 'full' as const },
-  { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1429, waiting: 552, submitted: 872,  partial: false, period: 'full' as const },
+  { label: 'Feb 26', month: 2,  year: 2026, traffic: 51480, starts: 2190, waiting: 889, submitted: 1301, partial: false, period: 'full' as const },
+  { label: 'Mar 26', month: 3,  year: 2026, traffic: 39218, starts: 2260, waiting: 953, submitted: 1307, partial: false, period: 'full' as const },
+  { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1429, waiting: 554, submitted: 875,  partial: false, period: 'full' as const },
   { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1033, waiting: 478, submitted: 555, partial: false, period: 'pre-update' as const },
-  { label: 'May 23–31', month: 5,  year: 2026, traffic: 11212,  starts: 574,  waiting: 256,  submitted: 318,  partial: false,  period: 'post-update' as const },
-  { label: 'Jun 1–19', month: 6, year: 2026, traffic: 0, starts: 1197, waiting: 418, submitted: 779, partial: true, period: 'post-update' as const },
+  { label: 'May 23–31', month: 5,  year: 2026, traffic: 11212,  starts: 574,  waiting: 251,  submitted: 323,  partial: false,  period: 'post-update' as const },
+  { label: 'Jun 1–22', month: 6, year: 2026, traffic: 0, starts: 1274, waiting: 452, submitted: 822, partial: true, period: 'post-update' as const },
 ];
 
 // ── Same-week completion rate by weekly cohort (source of truth) ──────
