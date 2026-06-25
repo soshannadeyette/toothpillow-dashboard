@@ -31,7 +31,7 @@ const TP = {
 };
 
 // ── Hardcoded data (source of truth) ──────────────────────────────────
-// Source: Salesforce "Waiting on Info Ratios" export, pulled June 23, 2026
+// Source: Salesforce "Waiting on Info Ratios" export, pulled June 25, 2026
 const AV_DATA = [
   { label: 'Jan 26', month: 1,  year: 2026, traffic: 37320, starts: 1146, waiting: 109, submitted: 1037, partial: false, period: 'full' as const },
   { label: 'Feb 26', month: 2,  year: 2026, traffic: 51480, starts: 2190, waiting: 888, submitted: 1302, partial: false, period: 'full' as const },
