@@ -39,13 +39,13 @@ const AV_DATA = [
   { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1429, waiting: 552, submitted: 877,  partial: false, period: 'full' as const },
   { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1033, waiting: 476, submitted: 557, partial: false, period: 'pre-update' as const },
   { label: 'May 23–31', month: 5,  year: 2026, traffic: 11212,  starts: 574,  waiting: 251,  submitted: 323,  partial: false,  period: 'post-update' as const },
-  { label: 'Jun 1–23', month: 6, year: 2026, traffic: 0, starts: 1355, waiting: 474, submitted: 881, partial: true, period: 'post-update' as const },
+  { label: 'Jun 1–25', month: 6, year: 2026, traffic: 0, starts: 1496, waiting: 524, submitted: 972, partial: true, period: 'post-update' as const },
 ];
 
 // ── Same-week completion rate by weekly cohort (source of truth) ──────
 // For each week: of all records created, what % submitted within the same Mon-Sun window.
 // Hard stop — later submissions don't count. Apples-to-apples across all weeks.
-// Source: Salesforce "Waiting on Info Ratios" export, June 23, 2026
+// Source: Salesforce "Waiting on Info Ratios" export, June 25, 2026
 const WEEKLY_COMPLETION: { label: string; total: number; submitted: number; pct: number; paidAds: number }[] = [
   { label: 'Feb 02', total: 284, submitted: 204, pct: 71.8, paidAds: 0 },
   { label: 'Feb 09', total: 293, submitted: 184, pct: 62.8, paidAds: 0 },
@@ -64,10 +64,10 @@ const WEEKLY_COMPLETION: { label: string; total: number; submitted: number; pct:
   { label: 'May 11', total: 331, submitted: 145, pct: 43.8, paidAds: 7 },
   { label: 'May 18', total: 380, submitted: 158, pct: 41.6, paidAds: 10 },
   { label: 'May 25', total: 465, submitted: 246, pct: 52.9, paidAds: 36 },
-  { label: 'Jun 01', total: 496, submitted: 310, pct: 62.5, paidAds: 44 },
-  { label: 'Jun 08', total: 486, submitted: 294, pct: 60.5, paidAds: 15 },
-  { label: 'Jun 15', total: 275, submitted: 152, pct: 55.3, paidAds: 0 },
-  { label: 'Jun 22', total: 98, submitted: 56, pct: 57.1, paidAds: 0 },
+  { label: 'Jun 01', total: 496, submitted: 342, pct: 69.0, paidAds: 44 },
+  { label: 'Jun 08', total: 486, submitted: 321, pct: 66.0, paidAds: 15 },
+  { label: 'Jun 15', total: 273, submitted: 170, pct: 62.3, paidAds: 0 },
+  { label: 'Jun 22', total: 241, submitted: 139, pct: 57.7, paidAds: 0 },
 ];
 
 // ── Event markers for same-week chart ──────────────────────────────────
@@ -86,7 +86,7 @@ const FUNNEL_DATA = [
   { label: 'Mar 26', waiting: 941, inReview:  8, checkout: 483, checkedOut: 390, closed: 411, onHold: 27 },
   { label: 'Apr 26', waiting: 547, inReview: 14, checkout: 373, checkedOut: 231, closed: 246, onHold: 18 },
   { label: 'May 26', waiting: 726, inReview: 35, checkout: 553, checkedOut: 150, closed: 125, onHold: 18 },
-  { label: 'Jun 26', waiting: 469, inReview: 347, checkout: 398, checkedOut: 58, closed: 64, onHold: 19 },
+  { label: 'Jun 26', waiting: 520, inReview: 350, checkout: 460, checkedOut: 74, closed: 72, onHold: 20 },
 ];
 
 // ── May daily data (source of truth) ─────────────────────────────────
@@ -145,8 +145,9 @@ const COHORT_DATA = [
   { label: 'May 15–21', n: 326, sameDay: 36.5, within1d: 41.7, within3d: 47.2, within7d: 49.4 },
   { label: 'May 22–28', n: 433, sameDay: 39.5, within1d: 44.6, within3d: 46.4, within7d: 47.6 },
   { label: 'May 29–31', n: 217, sameDay: 48.8, within1d: 52.1, within3d: 55.3, within7d: 57.6 },
-  { label: 'Jun 1–7',   n: 496, sameDay: 54.6, within1d: 60.1, within3d: 62.5, within7d: 66.9 },
-  { label: 'Jun 8–14',  n: 486, sameDay: 53.5, within1d: 58.8, within3d: 61.5, within7d: 62.6 },
+  { label: 'Jun 1–7',   n: 496, sameDay: 54.8, within1d: 60.3, within3d: 62.7, within7d: 67.1 },
+  { label: 'Jun 8–14',  n: 486, sameDay: 53.5, within1d: 58.8, within3d: 61.7, within7d: 64.4 },
+  { label: 'Jun 15–21', n: 273, sameDay: 50.9, within1d: 54.2, within3d: 57.5, within7d: 61.5 },
 ];
 
 // ── Daily cohorts archived ──────────────────────────────────────────
@@ -157,7 +158,7 @@ const COHORT_DATA = [
 //   completed (within 7d + days 8-14 + 15+) | waiting | other
 // These add up to starts. "mature" = every person has had that many days.
 // Weekly cohort aging — Feb through current
-// Source: Salesforce Waiting on Info Ratios export June 23, 2026
+// Source: Salesforce Waiting on Info Ratios export June 25, 2026
 const COHORT_AGING: {label:string; starts:number; within7d:number; d8to14:number; d15plus:number; waiting:number; daysElapsed:number; mature7d:boolean; mature14d:boolean; postUpdate:boolean; tag?:string}[] = [
   { label: 'Feb 02–08', starts: 284, within7d: 210, d8to14: 4, d15plus: 11, waiting: 59, daysElapsed: 141, mature7d: true, mature14d: true, postUpdate: false },
   { label: 'Feb 09–15', starts: 293, within7d: 197, d8to14: 5, d15plus: 7, waiting: 84, daysElapsed: 134, mature7d: true, mature14d: true, postUpdate: false },
@@ -175,15 +176,15 @@ const COHORT_AGING: {label:string; starts:number; within7d:number; d8to14:number
   { label: 'May 04–10', starts: 312, within7d: 159, d8to14: 5, d15plus: 9, waiting: 139, daysElapsed: 50, mature7d: true, mature14d: true, postUpdate: false },
   { label: 'May 11–17', starts: 331, within7d: 170, d8to14: 6, d15plus: 8, waiting: 147, daysElapsed: 43, mature7d: true, mature14d: true, postUpdate: false },
   { label: 'May 18–24', starts: 380, within7d: 167, d8to14: 9, d15plus: 4, waiting: 200, daysElapsed: 36, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'May 25–31', starts: 465, within7d: 263, d8to14: 12, d15plus: 5, waiting: 185, daysElapsed: 29, mature7d: true, mature14d: true, postUpdate: true },
-  { label: 'Jun 01–07', starts: 496, within7d: 333, d8to14: 6, d15plus: 1, waiting: 156, daysElapsed: 22, mature7d: true, mature14d: true, postUpdate: true },
-  { label: 'Jun 08–14', starts: 486, within7d: 313, d8to14: 8, d15plus: 0, waiting: 165, daysElapsed: 15, mature7d: true, mature14d: false, postUpdate: true },
-  { label: 'Jun 15–21', starts: 275, within7d: 164, d8to14: 0, d15plus: 0, waiting: 111, daysElapsed: 8, mature7d: true, mature14d: false, postUpdate: true },
-  { label: 'Jun 22–23', starts: 98, within7d: 56, d8to14: 0, d15plus: 0, waiting: 42, daysElapsed: 1, mature7d: false, mature14d: false, postUpdate: true },
+  { label: 'May 25–31', starts: 464, within7d: 262, d8to14: 12, d15plus: 5, waiting: 185, daysElapsed: 31, mature7d: true, mature14d: true, postUpdate: true },
+  { label: 'Jun 01–07', starts: 496, within7d: 333, d8to14: 6, d15plus: 3, waiting: 154, daysElapsed: 24, mature7d: true, mature14d: true, postUpdate: true },
+  { label: 'Jun 08–14', starts: 486, within7d: 313, d8to14: 8, d15plus: 0, waiting: 165, daysElapsed: 17, mature7d: true, mature14d: true, postUpdate: true },
+  { label: 'Jun 15–21', starts: 273, within7d: 168, d8to14: 2, d15plus: 0, waiting: 103, daysElapsed: 10, mature7d: true, mature14d: false, postUpdate: true },
+  { label: 'Jun 22–25', starts: 241, within7d: 139, d8to14: 0, d15plus: 0, waiting: 102, daysElapsed: 3, mature7d: false, mature14d: false, postUpdate: true },
 ];
 
 // ── Post-update tracking ────────────────────────────────────────────
-const POST_UPDATE_DAYS_ELAPSED = 31; // May 23 – Jun 23 = 31 days post-update
+const POST_UPDATE_DAYS_ELAPSED = 33; // May 23 – Jun 25 = 33 days post-update
 
 function num(v: number): string { return v.toLocaleString(); }
 
@@ -522,7 +523,7 @@ export default function AVDiagnostics() {
 
       {/* ═══════ FOOTER: Source ═══════ */}
       <div style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'center', padding: '8px 0' }}>
-        Source: Salesforce exports, June 23 2026. Cohort data from &quot;Waiting on Info Ratios&quot; export.
+        Source: Salesforce exports, June 25 2026. Cohort data from &quot;Waiting on Info Ratios&quot; export.
       </div>
 
     </div>
