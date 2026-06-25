@@ -91,13 +91,13 @@ const REFERRER_DATA: Record<string, RefMonth> = {
   "2026-03": {total:1603, Parent:75, "Dental Office":319, "Airway Ambassador":64, Influencer:462, Podcast:164, Instagram:74, TikTok:1, Facebook:11, "Meta Ad":2, "Online Search":339, "Unknown Referral":59, "Unknown Professional Referral":21, Other:0, MYO:6, "Health Care Professional":6},
   "2026-04": {total:1228, Parent:76, "Dental Office":259, "Airway Ambassador":64, Influencer:233, Podcast:130, Instagram:39, TikTok:1, Facebook:10, "Meta Ad":0, "Online Search":298, "Unknown Referral":69, "Unknown Professional Referral":25, Other:0, "Google Ad":20, MYO:3, "Health Care Professional":1},
   "2026-05": {total:1125, Parent:49, "Dental Office":213, "Airway Ambassador":50, Influencer:268, Podcast:126, Instagram:55, TikTok:4, Facebook:13, "Meta Ad":1, "Online Search":251, "Unknown Referral":51, "Unknown Professional Referral":10, Other:0, "Google Ad":28, MYO:3, "Health Care Professional":3},
-  "2026-06": {total:1117, Parent:54, "Dental Office":162, "Airway Ambassador":29, Influencer:233, Podcast:233, Instagram:43, TikTok:0, Facebook:3, "Meta Ad":0, "Online Search":236, "Unknown Referral":58, "Unknown Professional Referral":8, Other:0, "Google Ad":56, MYO:2},
+  "2026-06": {total:1230, Parent:56, "Dental Office":190, "Airway Ambassador":33, Influencer:249, Podcast:243, Instagram:47, TikTok:1, Facebook:3, "Meta Ad":0, "Online Search":260, "Unknown Referral":64, "Unknown Professional Referral":13, Other:0, "Google Ad":67, MYO:4},
 };
 
 /* ────── Current month projection ────── */
 // Update these when changing the current partial month
 const CURRENT_MONTH_KEY = '2026-06';
-const CURRENT_MONTH_DAYS_TRACKED = 22;
+const CURRENT_MONTH_DAYS_TRACKED = 24;
 const CURRENT_MONTH_DAYS_TOTAL = 30;
 
 function buildProjected(monthKey: string, daysTracked: number, daysTotal: number): { actual: RefMonth; projected: RefMonth } {

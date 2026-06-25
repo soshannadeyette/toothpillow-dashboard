@@ -60,10 +60,10 @@ const META_FUNNEL = { entered: 58, waitingInfo: 30, sentCheckout: 13, checkedOut
 
 // Salesforce pipeline detail (update when new SF export is loaded)
 // These sub-stage breakdowns can't come from daily Supabase data
-// Source: Salesforce "Google Ads 2026" export, June 24, 2026
-// 267 total leads. 7 checkouts, $10,623 revenue.
-const GOOGLE_SF_PIPELINE = { total: 267, waiting: 157, sentToTxP: 10, txpApproved: 6, sentCheckout: 57, checkedOut: 7, referredOut: 17, denied: 0, closedLost: 7, waitingTxPAssign: 6 };
-const GOOGLE_REVENUE: number = 10623; // 7 checkouts: $10,623 total
+// Source: Salesforce "Google Ads 2026" export, June 24, 2026 (evening)
+// 274 total leads. 7 checkouts, $12,218 revenue.
+const GOOGLE_SF_PIPELINE = { total: 274, waiting: 159, sentToTxP: 19, txpApproved: 6, sentCheckout: 57, checkedOut: 7, referredOut: 17, denied: 0, closedLost: 7, waitingTxPAssign: 2 };
+const GOOGLE_REVENUE: number = 12218; // 7 checkouts: $12,218 total
 
 // Google Ads daily seed data (source of truth — merged with Supabase on load)
 // June 1-15 spend/clicks/impressions from Google Ads Report Editor, June 15, 2026
@@ -98,7 +98,7 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-06-21', spend: 381.71, clicks: 117, impressions: 1419, submit: 3, started: 1, finished: 2, treatment: 0 },
   { date: '2026-06-22', spend: 225.90, clicks: 53, impressions: 746, submit: 5, started: 2, finished: 2, treatment: 0 },
   { date: '2026-06-23', spend: 411.89, clicks: 141, impressions: 1425, submit: 4, started: 4, finished: 1, treatment: 2 },
-  { date: '2026-06-24', spend: 187.55, clicks: 60, impressions: 793, submit: 4, started: 1, finished: 0, treatment: 0 },
+  { date: '2026-06-24', spend: 187.55, clicks: 60, impressions: 793, submit: 11, started: 6, finished: 9, treatment: 1 },
 ];
 
 // Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)
