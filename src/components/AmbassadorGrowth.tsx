@@ -76,8 +76,8 @@ const activeTotalByYear: Record<number, number> = {2023:30, 2024:145, 2025:209, 
 const halfCarriedBy: Record<number, number> = {2023:1, 2024:2, 2025:5, 2026:8};
 const tenPlusByYear: Record<number, number> = {2023:8, 2024:40, 2025:55, 2026:34};
 // Mega-3 = Lauren Johnson + Kendra Needham + Ginny Yurich (top recruited-ambassador producers)
-const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:406};
-const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:1866};
+const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:420};
+const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:1944};
 
 // Dynamic annualization: complete months + fractional current month
 const _now = new Date();
