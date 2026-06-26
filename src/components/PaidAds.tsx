@@ -215,20 +215,26 @@ export default function PaidAds() {
   // ALL aggregate stats from Salesforce pipeline — NOT from daily Supabase data.
   // Daily data is for the chart only. SF pipeline is the source of truth for KPIs.
   const googleTotalSpend = gT.spend;
-  const googleTotalLeads = GOOGLE_SF_PIPELINE.total; // 158 from Salesforce
+  const googleTrackedSpend = gTracked.spend; // excludes blackout days
+  const googleTotalLeads = GOOGLE_SF_PIPELINE.total;
   const googleDays = sorted.length || 1;
   const trackedDays = gTracked.days || 1;
   const avgCPC = gT.clicks > 0 ? gT.spend / gT.clicks : 0;
   const googleCPL = googleTotalLeads > 0 ? googleTotalSpend / googleTotalLeads : 0;
+  const googleCPLTracked = googleTotalLeads > 0 ? googleTrackedSpend / googleTotalLeads : 0;
 
-  // Submissions = people who completed the assessment (from SF: submitted = 57)
-  const googleSubmissions = GOOGLE_SF_PIPELINE.sentToTxP + GOOGLE_SF_PIPELINE.txpApproved + GOOGLE_SF_PIPELINE.sentCheckout + GOOGLE_SF_PIPELINE.checkedOut + GOOGLE_SF_PIPELINE.referredOut + GOOGLE_SF_PIPELINE.closedLost; // everyone past waiting = 57
+  // Submissions = people who completed the assessment
+  const googleSubmissions = GOOGLE_SF_PIPELINE.sentToTxP + GOOGLE_SF_PIPELINE.txpApproved + GOOGLE_SF_PIPELINE.sentCheckout + GOOGLE_SF_PIPELINE.checkedOut + GOOGLE_SF_PIPELINE.referredOut + GOOGLE_SF_PIPELINE.closedLost;
   const googleCostPerSubmission = googleSubmissions > 0 ? googleTotalSpend / googleSubmissions : 0;
-  const googleCheckouts = GOOGLE_SF_PIPELINE.checkedOut; // 4
+  const googleCostPerSubmissionTracked = googleSubmissions > 0 ? googleTrackedSpend / googleSubmissions : 0;
+  const googleCheckouts = GOOGLE_SF_PIPELINE.checkedOut;
   const googleCostPerCheckout = googleCheckouts > 0 ? googleTotalSpend / googleCheckouts : 0;
-  const googleRevenue = GOOGLE_REVENUE; // $7,281
+  const googleCostPerCheckoutTracked = googleCheckouts > 0 ? googleTrackedSpend / googleCheckouts : 0;
+  const googleRevenue = GOOGLE_REVENUE;
   const googleNet = googleRevenue - googleTotalSpend;
-  const googleWaitingInfo = GOOGLE_SF_PIPELINE.waiting; // 101
+  const googleNetTracked = googleRevenue - googleTrackedSpend;
+  const googleWaitingInfo = GOOGLE_SF_PIPELINE.waiting;
+  const blackoutSpend = googleTotalSpend - googleTrackedSpend;
 
   // Meta stats
   const metaCampaignMonths = META_MONTHLY.filter((m) => m.spend >= 1000);
@@ -379,11 +385,11 @@ export default function PaidAds() {
 
         {/* Google KPI cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, marginBottom: 20 }}>
-          <KPICard color="#E57373" label="Total Spend" value={`$${gT.spend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} sub={`${sorted.length} days (${blackoutDays} blackout)`} />
+          <KPICard color="#E57373" label="Total Spend" value={`$${gT.spend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} sub={<>{sorted.length} days ({blackoutDays} blackout){blackoutDays > 0 && <><br/><span style={{ color: '#2e7d32' }}>Excl. blackout: ${googleTrackedSpend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></>}</>} />
           <KPICard color={TP.yellow} label="Cost per Click" value={`$${avgCPC.toFixed(2)}`} sub={`${gT.clicks.toLocaleString()} clicks total`} />
-          <KPICard color={TP.blue} label="Cost per Lead" value={`$${Math.round(googleCPL)}`} sub={`${googleTotalLeads} leads (${trackedDays}d tracked)`} />
-          <KPICard color={TP.darkPurple} label="Cost per Submission" value={`$${Math.round(googleCostPerSubmission)}`} sub={`${googleSubmissions} submitted (${trackedDays}d tracked)`} />
-          <KPICard color="#00C853" label="Cost per Checkout" value={googleCheckouts > 0 ? `$${Math.round(googleCostPerCheckout).toLocaleString()}` : '--'} sub={`${googleCheckouts} checkout${googleCheckouts !== 1 ? 's' : ''} ($${googleRevenue.toLocaleString()} revenue)`} />
+          <KPICard color={TP.blue} label="Cost per Lead" value={`$${Math.round(googleCPL)}`} sub={<>{googleTotalLeads} leads ({trackedDays}d tracked){blackoutDays > 0 && <><br/><span style={{ color: '#2e7d32' }}>Excl. blackout: ${Math.round(googleCPLTracked)}</span></>}</>} />
+          <KPICard color={TP.darkPurple} label="Cost per Submission" value={`$${Math.round(googleCostPerSubmission)}`} sub={<>{googleSubmissions} submitted ({trackedDays}d tracked){blackoutDays > 0 && <><br/><span style={{ color: '#2e7d32' }}>Excl. blackout: ${Math.round(googleCostPerSubmissionTracked)}</span></>}</>} />
+          <KPICard color="#00C853" label="Cost per Checkout" value={googleCheckouts > 0 ? `$${Math.round(googleCostPerCheckout).toLocaleString()}` : '--'} sub={<>{googleCheckouts} checkout{googleCheckouts !== 1 ? 's' : ''} (${googleRevenue.toLocaleString()} rev){blackoutDays > 0 && googleCheckouts > 0 && <><br/><span style={{ color: '#2e7d32' }}>Excl. blackout: ${Math.round(googleCostPerCheckoutTracked).toLocaleString()}</span></>}</>} />
         </div>
 
         {/* Chart 1: Clicks, CPC & Spend */}
@@ -570,6 +576,24 @@ export default function PaidAds() {
               </div>
             </div>
           </div>
+          {blackoutDays > 0 && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, textAlign: 'center', marginTop: 12, paddingTop: 12, borderTop: '1px dashed #c8d8c0' }}>
+              <div>
+                <div style={{ fontSize: '0.65em', color: '#2e7d32', textTransform: 'uppercase', marginBottom: 4 }}>Excl. Blackout Spend</div>
+                <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#2e7d32' }}>${googleTrackedSpend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.65em', color: '#888', textTransform: 'uppercase', marginBottom: 4 }}>Blackout Spend</div>
+                <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#999' }}>${blackoutSpend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.65em', color: '#2e7d32', textTransform: 'uppercase', marginBottom: 4 }}>Net (Excl. Blackout)</div>
+                <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: googleNetTracked >= 0 ? '#00C853' : '#E57373' }}>
+                  {`${googleNetTracked >= 0 ? '+' : ''}$${Math.abs(googleNetTracked).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                </div>
+              </div>
+            </div>
+          )}
           <div style={{ fontSize: '0.78em', color: '#888', marginTop: 10 }}>
             {googleCheckouts} checkout{googleCheckouts !== 1 ? 's' : ''} totaling ${googleRevenue.toLocaleString()}. {GOOGLE_SF_PIPELINE.sentCheckout} more at Sent Checkout stage.
           </div>
@@ -712,7 +736,7 @@ const inputStyle: React.CSSProperties = {
   padding: '5px 8px', border: '1px solid #ddd', borderRadius: 6, fontSize: '0.85em',
 };
 
-function KPICard({ color, label, value, sub }: { color: string; label: string; value: string; sub: string }) {
+function KPICard({ color, label, value, sub }: { color: string; label: string; value: string; sub: React.ReactNode }) {
   return (
     <div style={{ background: '#fff', borderRadius: 10, padding: '14px 12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', borderTop: `3px solid ${color}` }}>
       <div style={{ fontSize: '0.65em', color: '#666', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: 4 }}>{label}</div>
