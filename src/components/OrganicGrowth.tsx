@@ -23,11 +23,11 @@ const TP = {
 
 /* ════════════════════════════════════════════
    HARDCODED GSC DATA — Source of truth
-   Data pulled fresh from Google Search Console on June 12, 2026
+   Data pulled fresh from Google Search Console on June 26, 2026
    Property: https://www.toothpillow.com/ (URL prefix)
    Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
    SEO program reset date: May 19, 2026
-   May 2026: full month (31 days). June 2026: through Jun 11 (Jun 12 partial, excluded)
+   May 2026: full month (31 days). June 2026: through Jun 24 (Jun 25-26 not yet available)
    ════════════════════════════════════════════ */
 
 const SEO_START_DATE = '2026-05-19';
@@ -58,7 +58,7 @@ const GSC_MONTHLY = [
   { month: '2026-03', clicks: 12601, impressions: 74269, ctr: 17.0, position: 26.9 },
   { month: '2026-04', clicks: 11180, impressions: 105758, ctr: 10.6, position: 37.4 },
   { month: '2026-05', clicks: 10509, impressions: 53592, ctr: 19.6, position: 17.8 },
-  { month: '2026-06', clicks: 6080, impressions: 25100, ctr: 24.2, position: 9.2 },
+  { month: '2026-06', clicks: 9680, impressions: 44700, ctr: 21.6, position: 10.5 },
 ];
 
 const GSC_WEEKLY = [
@@ -133,11 +133,12 @@ const GSC_WEEKLY = [
   { week: '2026-05-25', clicks: 3153, impressions: 12473, ctr: 25.3, position: 14.2 },
   { week: '2026-06-01', clicks: 3533, impressions: 13754, ctr: 25.7, position: 9.5 },
   { week: '2026-06-08', clicks: 2789, impressions: 12777, ctr: 21.8, position: 9.3 },
-  { week: '2026-06-15', clicks: 1474, impressions: 7768, ctr: 19.0, position: 9.3 },
+  { week: '2026-06-15', clicks: 2182, impressions: 12279, ctr: 17.8, position: 13.0 },
+  { week: '2026-06-22', clicks: 1173, impressions: 5918, ctr: 19.8, position: 10.8 },
 ];
 
-// Full-year daily GSC data — Jan 1 to Jun 18, 2026
-// Source: Google Search Console DAYS view, updated June 20, 2026
+// Full-year daily GSC data — Jan 1 to Jun 24, 2026
+// Source: Google Search Console DAYS view, updated June 26, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -178,6 +179,7 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
     [1,697,2554],[2,571,1925],[3,517,1967],[4,514,2582],[5,440,1551],[6,402,1636],[7,392,1539],
     [8,449,1957],[9,497,2477],[10,547,2391],[11,482,1849],[12,343,1431],[13,231,1239],
     [14,240,1433],[15,366,1988],[16,380,1846],[17,391,2264],[18,337,1670],
+    [19,309,1471],[20,202,1391],[21,197,1649],[22,319,1765],[23,384,1737],[24,470,2416],
   ],
 };
 
