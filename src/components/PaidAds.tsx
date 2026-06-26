@@ -60,15 +60,15 @@ const META_FUNNEL = { entered: 58, waitingInfo: 30, sentCheckout: 13, checkedOut
 
 // Salesforce pipeline detail (update when new SF export is loaded)
 // These sub-stage breakdowns can't come from daily Supabase data
-// Source: Salesforce "Google Ads 2026" export, June 25, 2026
-// 278 total leads. 8 checkouts, $13,764 revenue.
-const GOOGLE_SF_PIPELINE = { total: 278, waiting: 162, sentToTxP: 19, txpApproved: 4, sentCheckout: 58, checkedOut: 8, referredOut: 17, denied: 0, closedLost: 7, waitingTxPAssign: 3 };
-const GOOGLE_REVENUE: number = 13764; // 8 checkouts: $13,764 total
+// Source: Salesforce "Google Ads 2026" export, June 25 evening, 2026
+// 281 total leads. 11 checkouts, $18,359 revenue (includes ~$3K estimate for 2 checkouts missing Amount Paid).
+const GOOGLE_SF_PIPELINE = { total: 281, waiting: 163, sentToTxP: 21, txpApproved: 5, sentCheckout: 54, checkedOut: 11, referredOut: 18, denied: 0, closedLost: 8, waitingTxPAssign: 1 };
+const GOOGLE_REVENUE: number = 18359; // 11 checkouts: $15,359 recorded + ~$3,000 estimated
 
 // Google Ads daily seed data (source of truth — merged with Supabase on load)
 // June 1-15 spend/clicks/impressions from Google Ads Report Editor, June 15, 2026
 // June 16-22 spend/clicks/impressions from Google Ads Report Editor, June 22, 2026
-// June 23-25 spend/clicks/impressions from Google Ads Report Editor, June 25, 2026
+// June 23-25 spend/clicks/impressions from Google Ads Campaigns view, June 25, 2026
 // All lead metrics from Salesforce "Google Ads 2026" export, June 25, 2026:
 //   submit  = Created Date count (lead entered system / opened form)
 //   started = Date: Submission count (assessment submitted)
@@ -99,7 +99,7 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-06-22', spend: 225.90, clicks: 53, impressions: 746, submit: 5, started: 2, finished: 2, treatment: 0 },
   { date: '2026-06-23', spend: 411.89, clicks: 141, impressions: 1425, submit: 4, started: 4, finished: 1, treatment: 2 },
   { date: '2026-06-24', spend: 411.56, clicks: 134, impressions: 1573, submit: 12, started: 6, finished: 9, treatment: 1 },
-  { date: '2026-06-25', spend: 164.98, clicks: 47, impressions: 869, submit: 3, started: 1, finished: 0, treatment: 0 },
+  { date: '2026-06-25', spend: 520.28, clicks: 139, impressions: 2190, submit: 3, started: 1, finished: 0, treatment: 0 },
 ];
 
 // Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)
