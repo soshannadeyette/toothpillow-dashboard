@@ -329,7 +329,7 @@ export default function OrganicGrowth() {
   const SUBMISSIONS_BY_MONTH: Record<string, number> = { ...SUBMISSIONS_2025, ...subs2026 };
 
   const mayData = GSC_MONTHLY[GSC_MONTHLY.length - 1];
-  const latestDaysReported = 11; // June 1-11
+  const latestDaysReported = 24; // June 1-24
   const mayClickPace = Math.round(mayData.clicks / latestDaysReported * 30);
   const mayImprPace = Math.round(mayData.impressions / latestDaysReported * 30);
 
