@@ -60,16 +60,16 @@ const META_FUNNEL = { entered: 58, waitingInfo: 30, sentCheckout: 13, checkedOut
 
 // Salesforce pipeline detail (update when new SF export is loaded)
 // These sub-stage breakdowns can't come from daily Supabase data
-// Source: Salesforce "Google Ads 2026" export, June 26, 2026
-// 283 total leads. 11 checkouts, $18,450 revenue.
-const GOOGLE_SF_PIPELINE = { total: 283, waiting: 164, sentToTxP: 16, txpApproved: 8, sentCheckout: 55, checkedOut: 11, referredOut: 19, denied: 0, closedLost: 8, waitingTxPAssign: 2 };
+// Source: Salesforce "Google Ads 2026" export, June 29, 2026
+// 306 total leads. 11 checkouts, $18,450 revenue.
+const GOOGLE_SF_PIPELINE = { total: 306, waiting: 180, sentToTxP: 20, txpApproved: 0, sentCheckout: 66, checkedOut: 11, referredOut: 19, denied: 0, closedLost: 9, waitingTxPAssign: 1 };
 const GOOGLE_REVENUE: number = 18450; // 11 checkouts, $18,450 subtotal from Salesforce
 
 // Google Ads daily seed data (source of truth — merged with Supabase on load)
 // June 1-15 spend/clicks/impressions from Google Ads Report Editor, June 15, 2026
 // June 16-22 spend/clicks/impressions from Google Ads Report Editor, June 22, 2026
 // June 23-25 spend/clicks/impressions from Google Ads Campaigns view, June 25, 2026
-// All lead metrics from Salesforce "Google Ads 2026" export, June 26, 2026:
+// All lead metrics from Salesforce "Google Ads 2026" export, June 29, 2026:
 //   submit  = Created Date count (lead entered system / opened form)
 //   started = Date: Submission count (assessment submitted)
 //   finished = Date: Sent to TxProvider count (sent for review)
