@@ -135,7 +135,6 @@ const GSC_WEEKLY = [
   { week: '2026-06-08', clicks: 2789, impressions: 12777, ctr: 21.8, position: 9.3 },
   { week: '2026-06-15', clicks: 2182, impressions: 12279, ctr: 17.8, position: 13.0 },
   { week: '2026-06-22', clicks: 2396, impressions: 12319, ctr: 19.4, position: 9.7 },
-  { week: '2026-06-29', clicks: 309, impressions: 1627, ctr: 19.0, position: 6.5 },
 ];
 
 // Full-year daily GSC data — Jan 1 to Jun 29, 2026
