@@ -23,11 +23,11 @@ const TP = {
 
 /* ════════════════════════════════════════════
    HARDCODED GSC DATA — Source of truth
-   Data pulled fresh from Google Search Console on June 26, 2026
+   Data pulled fresh from Google Search Console on July 1, 2026
    Property: https://www.toothpillow.com/ (URL prefix)
    Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
    SEO program reset date: May 19, 2026
-   May 2026: full month (31 days). June 2026: through Jun 24 (Jun 25-26 not yet available)
+   May 2026: full month (31 days). June 2026: through Jun 29 (Jun 30 not yet available)
    ════════════════════════════════════════════ */
 
 const SEO_START_DATE = '2026-05-19';
@@ -58,7 +58,7 @@ const GSC_MONTHLY = [
   { month: '2026-03', clicks: 12601, impressions: 74269, ctr: 17.0, position: 26.9 },
   { month: '2026-04', clicks: 11180, impressions: 105758, ctr: 10.6, position: 37.4 },
   { month: '2026-05', clicks: 10509, impressions: 53592, ctr: 19.6, position: 17.8 },
-  { month: '2026-06', clicks: 9680, impressions: 44700, ctr: 21.6, position: 10.5 },
+  { month: '2026-06', clicks: 11209, impressions: 52756, ctr: 21.2, position: 10.1 },
 ];
 
 const GSC_WEEKLY = [
@@ -134,11 +134,12 @@ const GSC_WEEKLY = [
   { week: '2026-06-01', clicks: 3533, impressions: 13754, ctr: 25.7, position: 9.5 },
   { week: '2026-06-08', clicks: 2789, impressions: 12777, ctr: 21.8, position: 9.3 },
   { week: '2026-06-15', clicks: 2182, impressions: 12279, ctr: 17.8, position: 13.0 },
-  { week: '2026-06-22', clicks: 1173, impressions: 5918, ctr: 19.8, position: 10.8 },
+  { week: '2026-06-22', clicks: 2396, impressions: 12319, ctr: 19.4, position: 9.7 },
+  { week: '2026-06-29', clicks: 309, impressions: 1627, ctr: 19.0, position: 6.5 },
 ];
 
-// Full-year daily GSC data — Jan 1 to Jun 24, 2026
-// Source: Google Search Console DAYS view, updated June 26, 2026
+// Full-year daily GSC data — Jan 1 to Jun 29, 2026
+// Source: Google Search Console DAYS view, updated July 1, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -180,6 +181,7 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
     [8,449,1957],[9,497,2477],[10,547,2391],[11,482,1849],[12,343,1431],[13,231,1239],
     [14,240,1433],[15,366,1988],[16,380,1846],[17,391,2264],[18,337,1670],
     [19,309,1471],[20,202,1391],[21,197,1649],[22,319,1765],[23,384,1737],[24,470,2416],
+    [25,440,1945],[26,290,1676],[27,246,1450],[28,247,1330],[29,309,1627],
   ],
 };
 
@@ -328,12 +330,12 @@ export default function OrganicGrowth() {
   // Merge 2025 hardcoded + 2026 from daily tracker
   const SUBMISSIONS_BY_MONTH: Record<string, number> = { ...SUBMISSIONS_2025, ...subs2026 };
 
-  const mayData = GSC_MONTHLY[GSC_MONTHLY.length - 1];
-  const latestDaysReported = 24; // June 1-24
-  const mayClickPace = Math.round(mayData.clicks / latestDaysReported * 30);
-  const mayImprPace = Math.round(mayData.impressions / latestDaysReported * 30);
+  const latestMonth = GSC_MONTHLY[GSC_MONTHLY.length - 1];
+  const latestDaysReported = 29; // June 1-29
+  const junClickPace = Math.round(latestMonth.clicks / latestDaysReported * 30);
+  const junImprPace = Math.round(latestMonth.impressions / latestDaysReported * 30);
 
-  const may2025 = GSC_MONTHLY.find(m => m.month === '2025-05')!;
+  const jun2025 = GSC_MONTHLY.find(m => m.month === '2025-06')!;
 
 
   // Annotation indices for chart markers
@@ -608,28 +610,28 @@ export default function OrganicGrowth() {
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
         <div style={cardStyle}>
           <div style={labelStyle}>Organic Clicks</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{fmtK(mayClickPace)}</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{fmtK(junClickPace)}</div>
           <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>Jun pace ({latestDaysReported} days)</div>
-          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: mayClickPace < may2025.clicks ? TP.red : TP.green }}>
-            {mayClickPace >= may2025.clicks ? '▲' : '▼'} {delta(mayClickPace, may2025.clicks)} vs May &apos;25
+          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: junClickPace < jun2025.clicks ? TP.red : TP.green }}>
+            {junClickPace >= jun2025.clicks ? '▲' : '▼'} {delta(junClickPace, jun2025.clicks)} vs Jun &apos;25
           </div>
         </div>
         <div style={cardStyle}>
           <div style={labelStyle}>Impressions</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{fmtK(mayImprPace)}</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{fmtK(junImprPace)}</div>
           <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>Jun pace ({latestDaysReported} days)</div>
-          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: mayImprPace < may2025.impressions ? TP.red : TP.green }}>
-            {mayImprPace >= may2025.impressions ? '▲' : '▼'} {delta(mayImprPace, may2025.impressions)} vs May &apos;25
+          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: junImprPace < jun2025.impressions ? TP.red : TP.green }}>
+            {junImprPace >= jun2025.impressions ? '▲' : '▼'} {delta(junImprPace, jun2025.impressions)} vs Jun &apos;25
           </div>
         </div>
         <div style={cardStyle}>
           <div style={labelStyle}>Avg Position</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{mayData.position}</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{latestMonth.position}</div>
           <div style={{ fontSize: 11, color: TP.green, fontWeight: 600, marginTop: 2 }}>
-            {mayData.position <= 10 ? 'Page 1' : mayData.position <= 20 ? 'Page 2' : `Page ${Math.ceil(mayData.position / 10)}`}
+            {latestMonth.position <= 10 ? 'Page 1' : latestMonth.position <= 20 ? 'Page 2' : `Page ${Math.ceil(latestMonth.position / 10)}`}
           </div>
-          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: mayData.position < may2025.position ? TP.green : TP.red }}>
-            {mayData.position < may2025.position ? '▲' : '▼'} from {may2025.position} (Pg {Math.ceil(may2025.position / 10)}) in May &apos;25
+          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: latestMonth.position < jun2025.position ? TP.green : TP.red }}>
+            {latestMonth.position < jun2025.position ? '▲' : '▼'} from {jun2025.position} (Pg {Math.ceil(jun2025.position / 10)}) in Jun &apos;25
           </div>
         </div>
 
@@ -657,7 +659,7 @@ export default function OrganicGrowth() {
         <div style={{ fontSize: 11, color: '#888', marginBottom: 8 }}>
           {clicksView === 'monthly' && 'Feb 2025 to present. Bars = total clicks per month, red line = 3-month moving average.'}
           {clicksView === 'weekly' && `${GSC_WEEKLY.length} weeks from Feb 2025. Blue area = weekly clicks, red line = 4-week moving average.`}
-          {clicksView === 'daily' && 'Jan 1 – Jun 24, 2026 (175 days). Gray area = daily clicks, red line = 7-day moving average.'}
+          {clicksView === 'daily' && 'Jan 1 – Jun 29, 2026 (180 days). Gray area = daily clicks, red line = 7-day moving average.'}
         </div>
         <div style={{ height: 320 }}>
           {clicksView === 'monthly' && (
@@ -702,7 +704,7 @@ export default function OrganicGrowth() {
                   <tr key={i} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : '#fff' }}>
                     <td style={{ padding: '7px 10px', fontWeight: 600 }}>
                       {monthLabel(m.month)}
-                      {isJune && <span style={{ fontSize: 10, color: '#999', marginLeft: 4 }}>(24 days)</span>}
+                      {isJune && <span style={{ fontSize: 10, color: '#999', marginLeft: 4 }}>(29 days)</span>}
                     </td>
                     <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 600 }}>{m.clicks.toLocaleString()}</td>
                     <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 600, color: clickChg !== null ? (clickChg >= 0 ? TP.green : TP.red) : '#ccc', fontSize: 11 }}>
