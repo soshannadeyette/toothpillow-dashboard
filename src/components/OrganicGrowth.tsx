@@ -657,7 +657,7 @@ export default function OrganicGrowth() {
         <div style={{ fontSize: 11, color: '#888', marginBottom: 8 }}>
           {clicksView === 'monthly' && 'Feb 2025 to present. Bars = total clicks per month, red line = 3-month moving average.'}
           {clicksView === 'weekly' && `${GSC_WEEKLY.length} weeks from Feb 2025. Blue area = weekly clicks, red line = 4-week moving average.`}
-          {clicksView === 'daily' && 'Jan 1 – Jun 13, 2026 (164 days). Gray area = daily clicks, red line = 7-day moving average.'}
+          {clicksView === 'daily' && 'Jan 1 – Jun 24, 2026 (175 days). Gray area = daily clicks, red line = 7-day moving average.'}
         </div>
         <div style={{ height: 320 }}>
           {clicksView === 'monthly' && (
@@ -702,7 +702,7 @@ export default function OrganicGrowth() {
                   <tr key={i} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : '#fff' }}>
                     <td style={{ padding: '7px 10px', fontWeight: 600 }}>
                       {monthLabel(m.month)}
-                      {isJune && <span style={{ fontSize: 10, color: '#999', marginLeft: 4 }}>(7 days)</span>}
+                      {isJune && <span style={{ fontSize: 10, color: '#999', marginLeft: 4 }}>(24 days)</span>}
                     </td>
                     <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 600 }}>{m.clicks.toLocaleString()}</td>
                     <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 600, color: clickChg !== null ? (clickChg >= 0 ? TP.green : TP.red) : '#ccc', fontSize: 11 }}>
