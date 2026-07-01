@@ -132,23 +132,25 @@ export default function AnnualView() {
       }
 
       // Build monthly data:
-      // - Completed months (before current): use monthly_summary (Salesforce-verified totals)
-      //   with visitor data from Save Visitors form. Daily tracker entries are approximate.
-      // - Current month: compute from daily tracker (what user enters daily).
+      // Daily tracker entries are source of truth for submission counts.
+      // Monthly summary (from Save Visitors form) provides visitor data fallback.
+      // This works for both the current month and completed months — no more
+      // breakage when the calendar flips and a month goes from "current" to "past".
       const merged: MonthlySummary[] = [];
       for (let month = 1; month <= 12; month++) {
         const entries = dailyByMonth.get(month);
         const dbRow = dbByMonth.get(month);
         const goalObj = (MONTHLY_GOALS_2026 as { month: number; total: number }[]).find(g => g.month === month);
 
-        if (month === thisMonth && entries && entries.length > 0) {
-          // Current month: daily tracker is source of truth
+        if (entries && entries.length > 0) {
+          // Daily tracker is source of truth for submissions
           const totalOnline = entries.reduce((s, e) => s + (e.online || 0), 0);
           const totalHybrid = entries.reduce((s, e) => s + (e.hybrid || 0), 0);
           const totalPrime = entries.reduce((s, e) => s + (e.prime || 0), 0);
           const totalSubs = totalOnline + totalHybrid + totalPrime;
           const dailyVisitors = entries.reduce((s, e) => s + (e.visitors || 0), 0);
-          const vis = dbRow?.total_visitors || dailyVisitors || TRAFFIC_2026[month] || 0;
+          // Visitor data: prefer monthly_summary (Save Visitors form) → hardcoded GA4 → daily sum
+          const vis = dbRow?.total_visitors || TRAFFIC_2026[month] || dailyVisitors || 0;
           const usaVis = dbRow?.usa_visitors || TRAFFIC_USA_2026[month] || 0;
 
           merged.push({
@@ -165,28 +167,8 @@ export default function AnnualView() {
             daily_avg: parseFloat((totalSubs / entries.length).toFixed(1)),
           });
         } else if (dbRow) {
-          // Completed month: monthly_summary has Salesforce-verified totals
+          // No daily entries — fall back to monthly_summary
           merged.push(dbRow);
-        } else if (entries && entries.length > 0) {
-          // No monthly_summary but have daily entries (shouldn't happen for seeded months)
-          const totalOnline = entries.reduce((s, e) => s + (e.online || 0), 0);
-          const totalHybrid = entries.reduce((s, e) => s + (e.hybrid || 0), 0);
-          const totalPrime = entries.reduce((s, e) => s + (e.prime || 0), 0);
-          const totalSubs = totalOnline + totalHybrid + totalPrime;
-          const dailyVisitors = entries.reduce((s, e) => s + (e.visitors || 0), 0);
-          const vis = TRAFFIC_2026[month] || dailyVisitors || 0;
-          const usaVis = TRAFFIC_USA_2026[month] || 0;
-          merged.push({
-            year: thisYear, month, month_name: MN[month] || '',
-            goal: goalObj?.total || 0,
-            total_submissions: totalSubs,
-            online_submissions: totalOnline, hybrid_submissions: totalHybrid, prime_submissions: totalPrime,
-            total_income: 0, total_visitors: vis, usa_visitors: usaVis,
-            conversion_rate: vis > 0 ? parseFloat(((totalOnline / vis) * 100).toFixed(2)) : 0,
-            usa_conversion_rate: usaVis > 0 ? parseFloat(((totalOnline / usaVis) * 100).toFixed(2)) : 0,
-            days_tracked: entries.length,
-            daily_avg: parseFloat((totalSubs / entries.length).toFixed(1)),
-          });
         }
       }
 
