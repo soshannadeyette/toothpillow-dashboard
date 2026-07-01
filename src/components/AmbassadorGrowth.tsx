@@ -40,32 +40,32 @@ const ambSubs: Record<string, number> = {
   '2023-01':9,'2023-02':20,'2023-03':10,'2023-04':16,'2023-05':14,'2023-06':219,'2023-07':81,'2023-08':15,'2023-09':22,'2023-10':17,'2023-11':22,'2023-12':20,
   '2024-01':14,'2024-02':16,'2024-03':29,'2024-04':31,'2024-05':32,'2024-06':24,'2024-07':36,'2024-08':47,'2024-09':71,'2024-10':32,'2024-11':40,'2024-12':63,
   '2025-01':60,'2025-02':69,'2025-03':64,'2025-04':59,'2025-05':47,'2025-06':45,'2025-07':28,'2025-08':47,'2025-09':39,'2025-10':40,'2025-11':39,'2025-12':29,
-  '2026-01':52,'2026-02':57,'2026-03':63,'2026-04':64,'2026-05':50,'2026-06':41,
+  '2026-01':52,'2026-02':57,'2026-03':63,'2026-04':64,'2026-05':50,'2026-06':42,'2026-07':0,
 };
 const infSubs: Record<string, number> = {
   '2023-10':6,'2023-11':294,'2023-12':1039,
   '2024-01':431,'2024-02':315,'2024-03':1593,'2024-04':569,'2024-05':654,'2024-06':1253,'2024-07':485,'2024-08':594,'2024-09':1124,'2024-10':498,'2024-11':367,'2024-12':515,
   '2025-01':521,'2025-02':605,'2025-03':521,'2025-04':511,'2025-05':428,'2025-06':330,'2025-07':906,'2025-08':440,'2025-09':290,'2025-10':273,'2025-11':485,'2025-12':273,
-  '2026-01':311,'2026-02':511,'2026-03':462,'2026-04':232,'2026-05':268,'2026-06':271,
+  '2026-01':311,'2026-02':511,'2026-03':462,'2026-04':232,'2026-05':268,'2026-06':299,'2026-07':0,
 };
 
 const newAddsAmb: Record<string, number> = {
   '2024-01':4,'2024-02':7,'2024-03':7,'2024-04':6,'2024-05':3,'2024-06':7,'2024-07':10,'2024-08':2,'2024-09':6,'2024-10':7,'2024-11':7,'2024-12':7,
   '2025-01':7,'2025-02':84,'2025-03':7,'2025-04':6,'2025-05':5,'2025-06':6,'2025-07':1,'2025-08':15,'2025-09':2,'2025-10':1,'2025-11':6,'2025-12':1,
-  '2026-01':5,'2026-02':13,'2026-03':10,'2026-04':28,'2026-05':20,'2026-06':24,
+  '2026-01':5,'2026-02':13,'2026-03':10,'2026-04':28,'2026-05':20,'2026-06':28,'2026-07':0,
 };
 const newAddsInf: Record<string, number> = {
   '2024-01':1,'2024-02':8,'2024-03':3,'2024-04':4,'2024-05':9,'2024-06':2,'2024-07':7,'2024-08':2,'2024-09':4,'2024-10':6,'2024-11':6,'2024-12':9,
   '2025-01':11,'2025-02':3,'2025-03':7,'2025-04':2,'2025-05':0,'2025-06':3,'2025-07':0,'2025-08':1,'2025-09':0,'2025-10':0,'2025-11':1,'2025-12':1,
-  '2026-01':3,'2026-02':1,'2026-03':2,'2026-04':5,'2026-05':6,'2026-06':4,
+  '2026-01':3,'2026-02':1,'2026-03':2,'2026-04':5,'2026-05':6,'2026-06':4,'2026-07':0,
 };
 
-const ambSubsYear: Record<number, number> = {2023:465, 2024:435, 2025:566, 2026:327};
-const infSubsYear: Record<number, number> = {2023:1339, 2024:8398, 2025:5583, 2026:2055};
-const combSubsYear: Record<number, number> = {2023:1804, 2024:8833, 2025:6149, 2026:2382};
-const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:100};
+const ambSubsYear: Record<number, number> = {2023:465, 2024:435, 2025:566, 2026:328};
+const infSubsYear: Record<number, number> = {2023:1339, 2024:8398, 2025:5583, 2026:2083};
+const combSubsYear: Record<number, number> = {2023:1804, 2024:8833, 2025:6149, 2026:2411};
+const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:104};
 const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:21};
-const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:122};
+const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:126};
 // Note: adds counts are from ambassador program tracking, not Salesforce referral exports
 
 // Active ambassadors with ≥1 submission per year (from Salesforce)
@@ -304,15 +304,15 @@ const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;p
 const years = [2023, 2024, 2025, 2026] as const;
 const MONTHS_JAN24_MAY26: string[] = [];
 for (let y = 2024; y <= 2026; y++) {
-  const end = y === 2026 ? 6 : 12;
+  const end = y === 2026 ? 7 : 12;
   for (let m = 1; m <= end; m++) {
     MONTHS_JAN24_MAY26.push(`${y}-${String(m).padStart(2, '0')}`);
   }
 }
-// Full history month keys — Jan 2023 through May 2026
+// Full history month keys — Jan 2023 through current 2026
 const ALL_MONTHS: string[] = [];
 for (let y = 2023; y <= 2026; y++) {
-  const end = y === 2026 ? 6 : 12;
+  const end = y === 2026 ? 7 : 12;
   for (let m = 1; m <= end; m++) {
     ALL_MONTHS.push(`${y}-${String(m).padStart(2, '0')}`);
   }
@@ -419,23 +419,25 @@ export default function AmbassadorGrowth() {
     },
   };
 
-  /* ── Chart: New Adds monthly stacked (Jan 2024 – May 2026) ── */
+  /* ── Chart: New Adds monthly stacked (Jan 2024 – Jul 2026) ── */
   const now = new Date();
-  const isJun26 = now.getFullYear() === 2026 && now.getMonth() === 5;
-  const junDaysElapsed = isJun26 ? Math.max(now.getDate(), 1) : 30;
-  const junPaceFactor = 30 / junDaysElapsed;
+  const currentMonthKey = `2026-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const isCurrentPartial = now.getFullYear() === 2026;
+  const daysInCurrentMonth = isCurrentPartial ? new Date(2026, now.getMonth() + 1, 0).getDate() : 31;
+  const daysElapsed = isCurrentPartial ? Math.max(now.getDate(), 1) : daysInCurrentMonth;
+  const paceFactor = daysInCurrentMonth / daysElapsed;
   const lastIdx26 = MONTHS_JAN24_MAY26.length - 1;
-  const junAmbActual = newAddsAmb['2026-06'] ?? 0;
-  const junInfActual = newAddsInf['2026-06'] ?? 0;
-  const junAmbProj = Math.round(junAmbActual * junPaceFactor);
-  const junInfProj = Math.round(junInfActual * junPaceFactor);
+  const curAmbActual = newAddsAmb[currentMonthKey] ?? 0;
+  const curInfActual = newAddsInf[currentMonthKey] ?? 0;
+  const curAmbProj = Math.round(curAmbActual * paceFactor);
+  const curInfProj = Math.round(curInfActual * paceFactor);
 
   const newAddsChartData: ChartData<'bar'> = {
     labels: MONTHS_JAN24_MAY26.map(fmtMonthLabel),
     datasets: [
       {
         label: 'Projected',
-        data: MONTHS_JAN24_MAY26.map((_, i) => i === lastIdx26 ? junAmbProj + junInfProj : 0),
+        data: MONTHS_JAN24_MAY26.map((_, i) => i === lastIdx26 ? curAmbProj + curInfProj : 0),
         backgroundColor: MONTHS_JAN24_MAY26.map((_, i) => i === lastIdx26 ? TP.blue + '20' : 'transparent'),
         borderColor: MONTHS_JAN24_MAY26.map((_, i) => i === lastIdx26 ? TP.blue + '40' : 'transparent'),
         borderWidth: 1,
@@ -479,7 +481,7 @@ export default function AmbassadorGrowth() {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           afterBody: (items: any[]) => {
             if (items[0]?.dataIndex === lastIdx26) {
-              return `Projected full month: ${junAmbProj + junInfProj} (${junAmbProj} amb + ${junInfProj} inf)`;
+              return `Projected full month: ${curAmbProj + curInfProj} (${curAmbProj} amb + ${curInfProj} inf)`;
             }
             return '';
           },
@@ -1031,7 +1033,7 @@ export default function AmbassadorGrowth() {
       {/* ════════ SECTION 5c: Active Ambassadors Per Year ════════ */}
       <div>
         <h3 style={sectionHeader}>Active Ambassadors Per Year</h3>
-        <p style={sectionSub}>Ambassadors with at least 1 submission in the given year. 2026 is YTD through early June.</p>
+        <p style={sectionSub}>Ambassadors with at least 1 submission in the given year. 2026 is YTD through June.</p>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.875rem', marginBottom: '1rem' }}>
           {([2023, 2024, 2025, 2026] as const).map((y) => {
@@ -1436,7 +1438,7 @@ export default function AmbassadorGrowth() {
         </div>
 
         <div style={{ fontSize: '0.7rem', color: '#888', marginTop: 8, textAlign: 'center' }}>
-          {launchBonusData.length} ambassadors with ≥1 submission. Source: Salesforce Launch Bonus Tracker, June 26 2026.
+          {launchBonusData.length} ambassadors with ≥1 submission. Source: Salesforce Launch Bonus Tracker, July 1 2026.
         </div>
       </div>
 
