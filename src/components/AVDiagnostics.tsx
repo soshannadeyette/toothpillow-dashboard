@@ -39,7 +39,7 @@ const AV_DATA = [
   { label: 'Apr 26', month: 4,  year: 2026, traffic: 30311, starts: 1429, waiting: 552, submitted: 877,  partial: false, period: 'full' as const },
   { label: 'May 1–22', month: 5, year: 2026, traffic: 21819, starts: 1033, waiting: 476, submitted: 557, partial: false, period: 'pre-update' as const },
   { label: 'May 23–31', month: 5,  year: 2026, traffic: 11212,  starts: 574,  waiting: 251,  submitted: 323,  partial: false,  period: 'post-update' as const },
-  { label: 'Jun 1–29', month: 6, year: 2026, traffic: 0, starts: 1690, waiting: 598, submitted: 1092, partial: true, period: 'post-update' as const },
+  { label: 'Jun 26', month: 6, year: 2026, traffic: 36468, starts: 1761, waiting: 621, submitted: 1140, partial: false, period: 'post-update' as const },
 ];
 
 // ── Same-week completion rate by weekly cohort (source of truth) ──────
@@ -184,7 +184,7 @@ const COHORT_AGING: {label:string; starts:number; within7d:number; d8to14:number
 ];
 
 // ── Post-update tracking ────────────────────────────────────────────
-const POST_UPDATE_DAYS_ELAPSED = 37; // May 23 – Jun 29 = 37 days post-update
+const POST_UPDATE_DAYS_ELAPSED = 38; // May 23 – Jun 30 = 38 days post-update
 
 function num(v: number): string { return v.toLocaleString(); }
 
