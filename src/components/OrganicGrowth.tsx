@@ -757,111 +757,137 @@ export default function OrganicGrowth() {
         </div>
       </div>
 
-      {/* ═══════ SECTION 5: TOP QUERIES ═══════ */}
+      {/* ═══════ SECTION 5: BRANDED vs NON-BRANDED ═══════ */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4, marginTop: 0 }}>Top Search Queries (16-Month Aggregate)</h3>
-        <p style={{ fontSize: 12, color: '#888', margin: '0 0 12px 0' }}>
-          {Math.round(brandedClicks / totalTopClicks * 100)}% of top-query clicks are branded. Non-branded discovery is where SEO gains compound.
-        </p>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-            <thead>
-              <tr style={{ borderBottom: `2px solid ${TP.navy}` }}>
-                <th style={{ padding: '8px 10px', textAlign: 'left', color: TP.navy }}>Query</th>
-                <th style={{ padding: '8px 10px', textAlign: 'left', color: TP.navy }}>Type</th>
-                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Clicks</th>
-                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Impressions</th>
-                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>CTR</th>
-                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Position</th>
-              </tr>
-            </thead>
-            <tbody>
-              {TOP_QUERIES.map((q, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : '#fff' }}>
-                  <td style={{ padding: '7px 10px', fontWeight: 500 }}>{q.query}</td>
-                  <td style={{ padding: '7px 10px' }}>
-                    <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 3,
-                      background: q.branded ? `${TP.blue}15` : `${TP.green}15`,
-                      color: q.branded ? TP.blue : TP.green }}>
-                      {q.branded ? 'Branded' : 'Non-branded'}
-                    </span>
-                  </td>
-                  <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 600 }}>{q.clicks.toLocaleString()}</td>
-                  <td style={{ padding: '7px 10px', textAlign: 'right' }}>{q.impressions.toLocaleString()}</td>
-                  <td style={{ padding: '7px 10px', textAlign: 'right' }}>{q.ctr}%</td>
-                  <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 600, color: q.position <= 10 ? TP.green : q.position <= 30 ? TP.yellow : TP.text }}>{q.position}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12, marginTop: 0 }}>Where Search Clicks Come From</h3>
+        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 16 }}>
+          <div style={{ flex: 1, minWidth: 200, background: `${TP.blue}08`, borderRadius: 8, padding: 16, border: `1px solid ${TP.blue}20` }}>
+            <div style={{ fontSize: 11, color: '#888', marginBottom: 4 }}>Branded (people who know you)</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: TP.blue }}>{Math.round(brandedClicks / totalTopClicks * 100)}%</div>
+            <div style={{ fontSize: 12, color: TP.text }}>{fmtK(brandedClicks)} clicks</div>
+          </div>
+          <div style={{ flex: 1, minWidth: 200, background: `${TP.green}08`, borderRadius: 8, padding: 16, border: `1px solid ${TP.green}20` }}>
+            <div style={{ fontSize: 11, color: '#888', marginBottom: 4 }}>Non-branded (new discovery)</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>{Math.round(nonBrandedClicks / totalTopClicks * 100)}%</div>
+            <div style={{ fontSize: 12, color: TP.text }}>{fmtK(nonBrandedClicks)} clicks</div>
+          </div>
+        </div>
+        <div style={{ fontSize: 12, color: '#888', marginBottom: 10 }}>Top non-branded queries people use to find Toothpillow (16-month total)</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {TOP_QUERIES.filter(q => !q.branded).map((q, i) => {
+            const maxNB = Math.max(...TOP_QUERIES.filter(x => !x.branded).map(x => x.clicks));
+            return (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 200, fontSize: 12, fontWeight: 500, flexShrink: 0 }}>{q.query}</div>
+                <div style={{ flex: 1, height: 20, background: '#f5f5f5', borderRadius: 4, position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${(q.clicks / maxNB) * 100}%`, background: TP.green, borderRadius: 4, transition: 'width 0.3s' }} />
+                </div>
+                <div style={{ width: 55, fontSize: 11, fontWeight: 600, textAlign: 'right', flexShrink: 0 }}>{q.clicks.toLocaleString()}</div>
+                <div style={{ width: 40, fontSize: 10, color: q.position <= 10 ? TP.green : TP.yellow, fontWeight: 600, textAlign: 'right', flexShrink: 0 }}>#{q.position.toFixed(0)}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* ═══════ SECTION 6: KEYWORD MOVEMENT ═══════ */}
+      {/* ═══════ SECTION 6: KEYWORD POSITION TRACKER ═══════ */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12, marginTop: 0 }}>Non-Branded Keywords Moving Toward Page 1</h3>
-        <div style={{ overflowX: 'auto', marginBottom: 24 }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-            <thead>
-              <tr style={{ borderBottom: `2px solid ${TP.green}` }}>
-                <th style={{ padding: '8px 10px', textAlign: 'left', color: TP.navy }}>Keyword</th>
-                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Position</th>
-                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Moved</th>
-                <th style={{ padding: '8px 10px', textAlign: 'center', color: TP.navy, minWidth: 130 }}>Trend</th>
-              </tr>
-            </thead>
-            <tbody>
-              {KEYWORD_CLIMBERS.map((k, i) => {
-                const spots = Math.abs(k.change);
-                const ph = k.posHistory;
-                return (
-                  <tr key={i} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : '#fff' }}>
-                    <td style={{ padding: '7px 10px', fontWeight: 500 }}>{k.query}</td>
-                    <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 600, color: k.posNow <= 20 ? TP.green : k.posNow <= 40 ? TP.yellow : TP.text }}>{k.posNow.toFixed(1)}</td>
-                    <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 700, color: TP.green }}>▲ {spots.toFixed(0)}</td>
-                    <td style={{ padding: '4px 10px', textAlign: 'center' }}>
-                      {ph ? (
-                        <svg width={130} height={28} viewBox="0 0 130 28">
-                          {(() => {
-                            const vals = ph.filter((v): v is number => v !== null);
-                            const maxP = Math.max(...vals); const minP = Math.min(...vals); const range = maxP - minP || 1;
-                            const points: string[] = [];
-                            const xScale = ph.length > 1 ? ph.length - 1 : 1;
-                            ph.forEach((v, mi) => { if (v !== null) { points.push(`${(mi / xScale) * 126 + 2},${((v - minP) / range) * 20 + 2}`); } });
-                            return (<>
-                              <polyline points={points.join(' ')} fill="none" stroke={TP.green} strokeWidth={1.5} />
-                              {points.map((p, pi) => { const [cx, cy] = p.split(',').map(Number); return <circle key={pi} cx={cx} cy={cy} r={pi === points.length - 1 ? 3 : 1.5} fill={pi === points.length - 1 ? TP.green : `${TP.green}80`} />; })}
-                            </>);
-                          })()}
-                        </svg>
-                      ) : <span style={{ fontSize: 10, color: '#ccc' }}>--</span>}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4, marginTop: 0 }}>Non-Branded Keyword Positions: Then vs Now</h3>
+        <p style={{ fontSize: 12, color: '#888', margin: '0 0 16px 0' }}>
+          Gray = previous position (Mar–May avg). Green = current position (Jun 2–29). Shorter bar = better ranking. Red line = Page 1 cutoff.
+        </p>
+        <div style={{ height: Math.max(250, KEYWORD_CLIMBERS.length * 50 + 60) }}>
+          <Bar
+            data={{
+              labels: KEYWORD_CLIMBERS.map(k => k.query),
+              datasets: [
+                {
+                  label: 'Previous (Mar–May)',
+                  data: KEYWORD_CLIMBERS.map(k => k.posPrev),
+                  backgroundColor: '#D1D5DB',
+                  borderRadius: 3,
+                  barPercentage: 0.7,
+                  categoryPercentage: 0.8,
+                },
+                {
+                  label: 'Current (Jun)',
+                  data: KEYWORD_CLIMBERS.map(k => k.posNow),
+                  backgroundColor: TP.green,
+                  borderRadius: 3,
+                  barPercentage: 0.7,
+                  categoryPercentage: 0.8,
+                },
+              ],
+            }}
+            options={{
+              indexAxis: 'y' as const,
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: {
+                  min: 0,
+                  max: Math.max(70, ...KEYWORD_CLIMBERS.map(k => Math.max(k.posNow, k.posPrev))) + 5,
+                  title: { display: true, text: 'Google Position (lower = better)', font: { size: 11 } },
+                  grid: { color: '#f0f0f0' },
+                },
+                y: {
+                  ticks: { font: { size: 11 }, color: TP.navy },
+                  grid: { display: false },
+                },
+              },
+              plugins: {
+                legend: { position: 'top' as const, labels: { font: { size: 11 }, usePointStyle: true, pointStyle: 'rectRounded' } },
+                tooltip: {
+                  callbacks: {
+                    label: (ctx: { dataset: { label?: string }; raw: unknown }) => `${ctx.dataset.label}: position ${ctx.raw}`,
+                  },
+                },
+                annotation: {
+                  annotations: {
+                    page1Line: {
+                      type: 'line' as const,
+                      xMin: 10,
+                      xMax: 10,
+                      borderColor: TP.red,
+                      borderWidth: 2,
+                      borderDash: [5, 3],
+                      label: {
+                        display: true,
+                        content: 'Page 1',
+                        position: 'start' as const,
+                        font: { size: 10, weight: 'bold' as const },
+                        backgroundColor: TP.red,
+                        color: '#fff',
+                        padding: 3,
+                      },
+                    },
+                  },
+                },
+              },
+            } as object}
+          />
         </div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: TP.navy, marginBottom: 8 }}>Already Driving Clicks</div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-            <thead>
-              <tr style={{ borderBottom: `2px solid ${TP.blue}` }}>
-                <th style={{ padding: '8px 10px', textAlign: 'left', color: TP.navy }}>Keyword</th>
-                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Position</th>
-                <th style={{ padding: '8px 10px', textAlign: 'right', color: TP.navy }}>Clicks</th>
-              </tr>
-            </thead>
-            <tbody>
-              {CLICK_DRIVING_KEYWORDS.map((k, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : '#fff' }}>
-                  <td style={{ padding: '7px 10px', fontWeight: 500 }}>{k.query}</td>
-                  <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 600, color: k.posNow <= 10 ? TP.green : k.posNow <= 30 ? TP.yellow : TP.text }}>{k.posNow.toFixed(1)}</td>
-                  <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 700, color: TP.blue }}>{k.clicksNow}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      </div>
+
+      {/* ═══════ SECTION 6B: CLICKS FROM NON-BRANDED KEYWORDS ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4, marginTop: 0 }}>Non-Branded Clicks This Month</h3>
+        <p style={{ fontSize: 12, color: '#888', margin: '0 0 12px 0' }}>
+          Keywords where people found Toothpillow without searching for it by name (Jun 2–29, 2026)
+        </p>
+        {CLICK_DRIVING_KEYWORDS.filter(k => k.clicksNow > 0).map((k, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #f5f5f5' }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+              background: k.posNow <= 10 ? TP.green : k.posNow <= 30 ? TP.yellow : '#ccc' }} />
+            <div style={{ flex: 1, fontSize: 13, fontWeight: 500 }}>{k.query}</div>
+            <div style={{ fontSize: 11, color: '#888', flexShrink: 0 }}>pos {k.posNow.toFixed(0)}</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: TP.blue, width: 50, textAlign: 'right', flexShrink: 0 }}>
+              {k.clicksNow} {k.clicksNow === 1 ? 'click' : 'clicks'}
+            </div>
+          </div>
+        ))}
+        <div style={{ fontSize: 11, color: '#aaa', marginTop: 10 }}>
+          Green dot = page 1 (position 1–10). Yellow dot = page 2–3.
         </div>
       </div>
 
