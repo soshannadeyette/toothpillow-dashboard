@@ -258,6 +258,21 @@ const TOP_QUERIES = [
   { query: 'virtual airway dentist', clicks: 32, impressions: 184, ctr: 17.4, position: 1.2, branded: false },
 ];
 
+/* ════════════════════════════════════════════
+   YEAR-OVER-YEAR NON-BRANDED COMPARISON — June 2025 vs June 2026
+   Total clicks from GSC_MONTHLY. Non-branded breakdown from JS extraction
+   of GSC query tables (top 1000 queries). Non-branded counts are accurate
+   because they appear fully within the 1000-query cap; truncated long-tail
+   queries are almost exclusively branded variations.
+   Product NB = pillow-related searches (mouth pillow, tongue pillow, etc.)
+   Discovery NB = problem/treatment searches (airway dentist, mouth breathing treatment, etc.)
+   Updated July 1, 2026
+   ════════════════════════════════════════════ */
+const YOY_JUNE = {
+  jun25: { total: 14288, nonBranded: 313, productNB: 281, discoveryNB: 32, days: 30 },
+  jun26: { total: 11209, nonBranded: 335, productNB: 278, discoveryNB: 57, days: 29 },
+};
+
 
 /* ════════════════════════════════════════════
    HELPERS
@@ -336,6 +351,13 @@ export default function OrganicGrowth() {
   const brandedClicks = TOP_QUERIES.filter(q => q.branded).reduce((s, q) => s + q.clicks, 0);
   const nonBrandedClicks = TOP_QUERIES.filter(q => !q.branded).reduce((s, q) => s + q.clicks, 0);
   const totalTopClicks = brandedClicks + nonBrandedClicks;
+
+  // YoY non-branded metrics
+  const yoyNbPctChg = ((YOY_JUNE.jun26.nonBranded - YOY_JUNE.jun25.nonBranded) / YOY_JUNE.jun25.nonBranded * 100);
+  const yoyDiscChg = ((YOY_JUNE.jun26.discoveryNB - YOY_JUNE.jun25.discoveryNB) / YOY_JUNE.jun25.discoveryNB * 100);
+  const yoyNbShare25 = (YOY_JUNE.jun25.nonBranded / YOY_JUNE.jun25.total * 100);
+  const yoyNbShare26 = (YOY_JUNE.jun26.nonBranded / YOY_JUNE.jun26.total * 100);
+  const yoyShareChg = ((yoyNbShare26 - yoyNbShare25) / yoyNbShare25 * 100);
 
   // Annotation configs reused across all charts
   // Position lines proportionally within the month (Dec 22 = 71% through, May 19 = 61% through)
@@ -584,6 +606,43 @@ export default function OrganicGrowth() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [seoMonthIndex]);
 
+  // ── Chart: YoY Non-Branded Breakdown ──
+  const yoyChartData = useMemo(() => ({
+    labels: ['Product keywords', 'Discovery keywords'],
+    datasets: [
+      {
+        label: "Jun '25",
+        data: [YOY_JUNE.jun25.productNB, YOY_JUNE.jun25.discoveryNB],
+        backgroundColor: '#D1D5DB',
+        borderRadius: 3,
+        barPercentage: 0.65,
+        categoryPercentage: 0.7,
+      },
+      {
+        label: "Jun '26",
+        data: [YOY_JUNE.jun26.productNB, YOY_JUNE.jun26.discoveryNB],
+        backgroundColor: TP.green,
+        borderRadius: 3,
+        barPercentage: 0.65,
+        categoryPercentage: 0.7,
+      },
+    ],
+  }), []);
+
+  const yoyChartOpts = useMemo(() => ({
+    indexAxis: 'y' as const,
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: { beginAtZero: true, title: { display: true, text: 'Clicks (June)', font: { size: 11 } }, grid: { color: '#f0f0f0' } },
+      y: { ticks: { font: { size: 11 }, color: TP.navy }, grid: { display: false } },
+    },
+    plugins: {
+      legend: { position: 'top' as const, labels: { font: { size: 11 }, usePointStyle: true, pointStyle: 'rectRounded' } },
+      tooltip: { callbacks: { label: (ctx: { dataset: { label?: string }; raw: unknown }) => `${ctx.dataset.label}: ${ctx.raw} clicks` } },
+    },
+  }), []);
+
   const cardStyle = { background: '#fff', borderRadius: 10, padding: '16px 20px', border: '1px solid #e5e7eb', flex: '1 1 0', minWidth: 150 } as const;
   const labelStyle = { fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: 0.5, marginBottom: 6 } as const;
 
@@ -754,6 +813,65 @@ export default function OrganicGrowth() {
         <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 12, marginTop: 0 }}>Average Search Position</h3>
         <div style={{ height: 300 }}>
           <Line data={positionData} options={positionOpts as object} />
+        </div>
+      </div>
+
+      {/* ═══════ SECTION 4B: YoY NON-BRANDED TRACTION ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4, marginTop: 0 }}>
+          Year-over-Year: Non-Branded Search Traction
+        </h3>
+        <p style={{ fontSize: 12, color: '#888', margin: '0 0 16px 0' }}>
+          June 2025 ({YOY_JUNE.jun25.days}d) vs June 2026 ({YOY_JUNE.jun26.days}d). Non-branded = searches by people who didn&apos;t know Toothpillow by name.
+        </p>
+
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
+          <div style={cardStyle}>
+            <div style={labelStyle}>Non-Branded Clicks</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>{YOY_JUNE.jun26.nonBranded}</div>
+            <div style={{ fontSize: 12, color: '#888' }}>vs {YOY_JUNE.jun25.nonBranded} last year</div>
+            <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4, color: TP.green }}>
+              ▲ +{yoyNbPctChg.toFixed(0)}%
+            </div>
+          </div>
+          <div style={cardStyle}>
+            <div style={labelStyle}>Discovery Keywords</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>{YOY_JUNE.jun26.discoveryNB}</div>
+            <div style={{ fontSize: 12, color: '#888' }}>vs {YOY_JUNE.jun25.discoveryNB} last year</div>
+            <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4, color: TP.green }}>
+              ▲ +{yoyDiscChg.toFixed(0)}%
+            </div>
+          </div>
+          <div style={cardStyle}>
+            <div style={labelStyle}>Non-Branded Share</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>{yoyNbShare26.toFixed(1)}%</div>
+            <div style={{ fontSize: 12, color: '#888' }}>vs {yoyNbShare25.toFixed(1)}% last year</div>
+            <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4, color: TP.green }}>
+              ▲ +{yoyShareChg.toFixed(0)}%
+            </div>
+          </div>
+          <div style={cardStyle}>
+            <div style={labelStyle}>Total Clicks (All)</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: TP.navy }}>{fmtK(YOY_JUNE.jun26.total)}</div>
+            <div style={{ fontSize: 12, color: '#888' }}>vs {fmtK(YOY_JUNE.jun25.total)} last year</div>
+            <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4, color: TP.red }}>
+              ▼ {delta(YOY_JUNE.jun26.total, YOY_JUNE.jun25.total)}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>
+          Product = pillow/device searches. Discovery = treatment, airway, and condition searches.
+        </div>
+        <div style={{ height: 160 }}>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <Bar data={yoyChartData as any} options={yoyChartOpts as object} />
+        </div>
+
+        <div style={{ marginTop: 16, padding: '12px 16px', background: `${TP.green}08`, borderRadius: 8, border: `1px solid ${TP.green}20`, fontSize: 12, color: '#555', lineHeight: 1.7 }}>
+          Product keywords held flat — people searching for &quot;mouth pillow&quot; or &quot;tongue pillow&quot; were already finding Toothpillow a year ago.
+          The growth came from discovery keywords: searches like &quot;mouth breathing treatment kids&quot; and &quot;airway dentist near me&quot;
+          by parents who didn&apos;t know Toothpillow existed. These grew {yoyDiscChg.toFixed(0)}% year-over-year, and this is the category SEO is designed to expand.
         </div>
       </div>
 
@@ -967,7 +1085,7 @@ export default function OrganicGrowth() {
 
       {/* Data source */}
       <div style={{ fontSize: 11, color: '#aaa', textAlign: 'center', padding: '8px 0' }}>
-        Google Search Console (16 months). Data pulled June 4, 2026. SEO implemented May 19, 2026.
+        Google Search Console (17 months). Data pulled July 1, 2026. SEO implemented May 19, 2026.
       </div>
     </div>
   );
