@@ -23,11 +23,11 @@ const TP = {
 
 /* ════════════════════════════════════════════
    HARDCODED GSC DATA — Source of truth
-   Data pulled fresh from Google Search Console on July 1, 2026
+   Data pulled fresh from Google Search Console on July 6, 2026
    Property: https://www.toothpillow.com/ (URL prefix)
    Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
    SEO program reset date: May 19, 2026
-   May 2026: full month (31 days). June 2026: through Jun 29 (Jun 30 not yet available)
+   May 2026: full month (31 days). June 2026: full month (30 days). July 2026: through Jul 4.
    ════════════════════════════════════════════ */
 
 const SEO_START_DATE = '2026-05-19';
@@ -58,7 +58,7 @@ const GSC_MONTHLY = [
   { month: '2026-03', clicks: 12601, impressions: 74269, ctr: 17.0, position: 26.9 },
   { month: '2026-04', clicks: 11180, impressions: 105758, ctr: 10.6, position: 37.4 },
   { month: '2026-05', clicks: 10509, impressions: 53592, ctr: 19.6, position: 17.8 },
-  { month: '2026-06', clicks: 11209, impressions: 52756, ctr: 21.2, position: 10.1 },
+  { month: '2026-06', clicks: 11550, impressions: 54729, ctr: 21.1, position: 10.1 },
 ];
 
 const GSC_WEEKLY = [
@@ -137,8 +137,8 @@ const GSC_WEEKLY = [
   { week: '2026-06-22', clicks: 2396, impressions: 12319, ctr: 19.4, position: 9.7 },
 ];
 
-// Full-year daily GSC data — Jan 1 to Jun 29, 2026
-// Source: Google Search Console DAYS view, updated July 1, 2026
+// Full-year daily GSC data — Jan 1 to Jul 4, 2026
+// Source: Google Search Console DAYS view, updated July 6, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -180,7 +180,10 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
     [8,449,1957],[9,497,2477],[10,547,2391],[11,482,1849],[12,343,1431],[13,231,1239],
     [14,240,1433],[15,366,1988],[16,380,1846],[17,391,2264],[18,337,1670],
     [19,309,1471],[20,202,1391],[21,197,1649],[22,319,1765],[23,384,1737],[24,470,2416],
-    [25,440,1945],[26,290,1676],[27,246,1450],[28,247,1330],[29,309,1627],
+    [25,440,1945],[26,290,1676],[27,246,1450],[28,247,1330],[29,309,1627],[30,341,1973],
+  ],
+  Jul: [
+    [1,353,1618],[2,288,1627],[3,176,956],[4,148,965],
   ],
 };
 
@@ -190,14 +193,14 @@ for (const [d, c, i] of GSC_DAILY_2026.May) { GSC_DAILY_MAY_2026[d] = { clicks: 
 
 /* ════════════════════════════════════════════
    KEYWORD MOVERS — Non-branded keywords showing movement
-   GSC comparison: Jun 2–Jun 29, 2026 (28d) vs Mar 30–May 29, 2026 (prev 60d)
+   GSC comparison: Jun 7–Jul 4, 2026 (28d) vs Mar 30–May 29, 2026 (prev 60d)
    Only keywords verified as appearing in recent GSC data are included.
    Excludes all branded variations (toothpillow, tooth pillow, etc.)
-   Updated July 1, 2026
+   Updated July 6, 2026
    ════════════════════════════════════════════ */
 
 // Position climbers with monthly position history from GSC
-// posHistory: monthly average position (from GSC DAYS breakdown, verified Jul 1 2026)
+// posHistory: monthly average position (from GSC DAYS breakdown, verified Jul 6 2026)
 // startedClimbing: first month position improved meaningfully and sustained
 const KEYWORD_CLIMBERS = [
   { query: 'mouth breathing', posNow: 34.0, posPrev: 61.0, change: -27.0, imprNow: 10,
@@ -220,21 +223,21 @@ const KEYWORD_CLIMBERS = [
 // posHistory is 17 values: Feb'25..Jun'26 monthly avg position, null = no data that month
 
 // Non-branded keywords already driving clicks (sorted by clicks, last 28 days)
-// Source: GSC 28-day data (Jun 2–29, 2026), pulled July 1, 2026
+// Source: GSC 28-day data (Jun 7–Jul 4, 2026), pulled July 6, 2026
 const CLICK_DRIVING_KEYWORDS = [
-  { query: 'kids pillow for mouth breathing', posNow: 1.5, clicksNow: 30, imprNow: 120, status: 'Page 1' },
-  { query: 'tongue pillow', posNow: 4.2, clicksNow: 19, imprNow: 85, status: 'Page 1' },
-  { query: 'mouth breathing pillow', posNow: 1.7, clicksNow: 12, imprNow: 77, status: 'Page 1' },
-  { query: 'pillow for mouth breathers', posNow: 8.8, clicksNow: 7, imprNow: 117, status: 'Near page 1' },
-  { query: 'recovery kids pillow mouth breathing', posNow: 1.5, clicksNow: 7, imprNow: 31, status: 'Page 1' },
-  { query: 'kids mouth breathing treatment', posNow: 3.1, clicksNow: 3, imprNow: 7, status: 'Page 1' },
-  { query: 'mouth breathing', posNow: 33.9, clicksNow: 2, imprNow: 10, status: 'Climbing' },
-  { query: 'airway window kids', posNow: 5.0, clicksNow: 2, imprNow: 19, status: 'Page 1' },
-  { query: 'mouth breathing device for kids', posNow: 6.9, clicksNow: 1, imprNow: 18, status: 'Page 1' },
-  { query: 'how to avoid braces', posNow: 5.1, clicksNow: 1, imprNow: 32, status: 'Page 1' },
-  { query: 'myofunctional mouthguard', posNow: 8.7, clicksNow: 1, imprNow: 14, status: 'Near page 1' },
+  { query: 'kids pillow for mouth breathing', posNow: 1.5, clicksNow: 32, imprNow: 141, status: 'Page 1' },
+  { query: 'tongue pillow', posNow: 8.3, clicksNow: 15, imprNow: 88, status: 'Near page 1' },
+  { query: 'mouth pillow for adults', posNow: 6.5, clicksNow: 14, imprNow: 133, status: 'Page 1' },
+  { query: 'recovery kids pillow mouth breathing', posNow: 1.5, clicksNow: 12, imprNow: 38, status: 'Page 1' },
+  { query: 'mouth breathing pillow', posNow: 1.7, clicksNow: 11, imprNow: 81, status: 'Page 1' },
+  { query: 'pillow for mouth breathers', posNow: 8.5, clicksNow: 9, imprNow: 128, status: 'Near page 1' },
+  { query: 'kids mouth breathing pillow', posNow: 1.4, clicksNow: 8, imprNow: 54, status: 'Page 1' },
+  { query: 'best kids pillow for mouth breathing', posNow: 2.8, clicksNow: 6, imprNow: 41, status: 'Page 1' },
+  { query: 'pillow for mouth breathers kids', posNow: 1.4, clicksNow: 5, imprNow: 30, status: 'Page 1' },
+  { query: 'tongue pillow for kids', posNow: 1.0, clicksNow: 4, imprNow: 19, status: 'Page 1' },
+  { query: 'kids airway pillow', posNow: 1.2, clicksNow: 4, imprNow: 14, status: 'Page 1' },
 ];
-// Source: GSC 16-month aggregate (Feb 8 2025 – Jun 29 2026), pulled July 1, 2026
+// Source: GSC 16-month aggregate (Feb 8 2025 – Jul 4 2026), pulled July 6, 2026
 const TOP_QUERIES = [
   { query: 'tooth pillow', clicks: 80283, impressions: 128750, ctr: 62.4, position: 1.1, branded: true },
   { query: 'toothpillow', clicks: 54410, impressions: 82428, ctr: 66.0, position: 1.6, branded: true },
@@ -266,11 +269,11 @@ const TOP_QUERIES = [
    queries are almost exclusively branded variations.
    Product NB = pillow-related searches (mouth pillow, tongue pillow, etc.)
    Discovery NB = problem/treatment searches (airway dentist, mouth breathing treatment, etc.)
-   Updated July 1, 2026
+   Updated July 6, 2026
    ════════════════════════════════════════════ */
 const YOY_JUNE = {
   jun25: { total: 14288, nonBranded: 313, productNB: 281, discoveryNB: 32, days: 30 },
-  jun26: { total: 11209, nonBranded: 335, productNB: 278, discoveryNB: 57, days: 29 },
+  jun26: { total: 11550, nonBranded: 335, productNB: 278, discoveryNB: 57, days: 30 },
 };
 
 
@@ -335,7 +338,7 @@ export default function OrganicGrowth() {
   const SUBMISSIONS_BY_MONTH: Record<string, number> = { ...SUBMISSIONS_2025, ...subs2026 };
 
   const latestMonth = GSC_MONTHLY[GSC_MONTHLY.length - 1];
-  const latestDaysReported = 29; // June 1-29
+  const latestDaysReported = 30; // June 1-30 (complete month)
   const junClickPace = Math.round(latestMonth.clicks / latestDaysReported * 30);
   const junImprPace = Math.round(latestMonth.impressions / latestDaysReported * 30);
 
@@ -707,7 +710,7 @@ export default function OrganicGrowth() {
         <div style={{ fontSize: 11, color: '#888', marginBottom: 8 }}>
           {clicksView === 'monthly' && 'Feb 2025 to present. Bars = total clicks per month, red line = 3-month moving average.'}
           {clicksView === 'weekly' && `${GSC_WEEKLY.length} weeks from Feb 2025. Blue area = weekly clicks, red line = 4-week moving average.`}
-          {clicksView === 'daily' && 'Jan 1 – Jun 29, 2026 (180 days). Gray area = daily clicks, red line = 7-day moving average.'}
+          {clicksView === 'daily' && 'Jan 1 – Jul 4, 2026 (185 days). Gray area = daily clicks, red line = 7-day moving average.'}
         </div>
         <div style={{ height: 320 }}>
           {clicksView === 'monthly' && (
@@ -912,7 +915,7 @@ export default function OrganicGrowth() {
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
         <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4, marginTop: 0 }}>Non-Branded Keyword Positions: Then vs Now</h3>
         <p style={{ fontSize: 12, color: '#888', margin: '0 0 16px 0' }}>
-          Gray = previous position (Mar–May avg). Green = current position (Jun 2–29). Shorter bar = better ranking. Red line = Page 1 cutoff.
+          Gray = previous position (Mar–May avg). Green = current position (Jun 7–Jul 4). Shorter bar = better ranking. Red line = Page 1 cutoff.
         </p>
         <div style={{ height: Math.max(250, KEYWORD_CLIMBERS.length * 50 + 60) }}>
           <Bar
@@ -991,7 +994,7 @@ export default function OrganicGrowth() {
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
         <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4, marginTop: 0 }}>Non-Branded Clicks This Month</h3>
         <p style={{ fontSize: 12, color: '#888', margin: '0 0 12px 0' }}>
-          Keywords where people found Toothpillow without searching for it by name (Jun 2–29, 2026)
+          Keywords where people found Toothpillow without searching for it by name (Jun 7–Jul 4, 2026)
         </p>
         {CLICK_DRIVING_KEYWORDS.filter(k => k.clicksNow > 0).map((k, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #f5f5f5' }}>
@@ -1085,7 +1088,7 @@ export default function OrganicGrowth() {
 
       {/* Data source */}
       <div style={{ fontSize: 11, color: '#aaa', textAlign: 'center', padding: '8px 0' }}>
-        Google Search Console (17 months). Data pulled July 1, 2026. SEO implemented May 19, 2026.
+        Google Search Console (17 months). Data pulled July 6, 2026. SEO implemented May 19, 2026.
       </div>
     </div>
   );
