@@ -70,6 +70,7 @@ const GOOGLE_REVENUE: number = 21494; // 13 checkouts, $21,494 subtotal from Sal
 // June 16-22 spend/clicks/impressions from Google Ads Report Editor, June 22, 2026
 // June 23-25 spend/clicks/impressions from Google Ads Campaigns view, June 25, 2026
 // June 26-29 spend/clicks/impressions from Google Ads Campaigns view, June 30, 2026
+// June 30-Jul 5 spend/clicks/impressions from Google Ads Report Editor, July 6, 2026
 // All lead metrics from Salesforce "Google Ads 2026" export, July 6, 2026:
 //   submit  = Created Date count (lead entered system / opened form)
 //   started = Date: Submission count (assessment submitted)
@@ -105,13 +106,13 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-06-27', spend: 593.07, clicks: 145, impressions: 2860, submit: 9, started: 2, finished: 1, treatment: 0 },
   { date: '2026-06-28', spend: 620.15, clicks: 171, impressions: 2382, submit: 8, started: 3, finished: 1, treatment: 0 },
   { date: '2026-06-29', spend: 467.99, clicks: 120, impressions: 2654, submit: 2, started: 1, finished: 5, treatment: 0 },
-  // June 30 - July 6: lead metrics from Salesforce July 6 export. Spend/clicks/impressions TBD from Google Ads.
-  { date: '2026-06-30', spend: 0, clicks: 0, impressions: 0, submit: 6, started: 3, finished: 3, treatment: 1 },
-  { date: '2026-07-01', spend: 0, clicks: 0, impressions: 0, submit: 6, started: 1, finished: 2, treatment: 0 },
-  { date: '2026-07-02', spend: 0, clicks: 0, impressions: 0, submit: 4, started: 1, finished: 1, treatment: 1 },
-  { date: '2026-07-03', spend: 0, clicks: 0, impressions: 0, submit: 3, started: 3, finished: 1, treatment: 0 },
-  { date: '2026-07-04', spend: 0, clicks: 0, impressions: 0, submit: 3, started: 1, finished: 2, treatment: 0 },
-  { date: '2026-07-05', spend: 0, clicks: 0, impressions: 0, submit: 5, started: 5, finished: 1, treatment: 0 },
+  // June 30 - July 6: lead metrics from Salesforce July 6 export. Spend/clicks/impressions from Google Ads report (Jul 6 partial — today).
+  { date: '2026-06-30', spend: 544.72, clicks: 142, impressions: 3010, submit: 6, started: 3, finished: 3, treatment: 1 },
+  { date: '2026-07-01', spend: 586.05, clicks: 156, impressions: 2952, submit: 6, started: 1, finished: 2, treatment: 0 },
+  { date: '2026-07-02', spend: 517.02, clicks: 143, impressions: 2812, submit: 4, started: 1, finished: 1, treatment: 1 },
+  { date: '2026-07-03', spend: 440.25, clicks: 119, impressions: 2260, submit: 3, started: 3, finished: 1, treatment: 0 },
+  { date: '2026-07-04', spend: 345.97, clicks: 111, impressions: 1992, submit: 3, started: 1, finished: 2, treatment: 0 },
+  { date: '2026-07-05', spend: 751.95, clicks: 204, impressions: 3610, submit: 5, started: 5, finished: 1, treatment: 0 },
   { date: '2026-07-06', spend: 0, clicks: 0, impressions: 0, submit: 8, started: 5, finished: 6, treatment: 0 },
 ];
 
