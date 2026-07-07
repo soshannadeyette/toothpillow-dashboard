@@ -195,7 +195,7 @@ const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;p
   {name:'Melody Brandon',bonusSubs:29,tier:1,earned:250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/08'},
   {name:'Carly Brown',bonusSubs:28,tier:1,earned:250,paid:0,winStart:'04/21/2026',winEnd:'12/31/2026',is2026:true,tier1Date:'06/24'},
   {name:'Hayley Lombard',bonusSubs:23,tier:0,earned:0,paid:0,winStart:'05/19/2026',winEnd:'12/31/2026',is2026:true},
-  {name:'Amy Erickson',bonusSubs:22,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Amy Erickson',bonusSubs:23,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Hilary Fritsch*',bonusSubs:19,tier:0,earned:0,paid:0,winStart:'05/08/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Lauren Stadler',bonusSubs:17,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Taylor Kulik',bonusSubs:18,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
