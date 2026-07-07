@@ -261,6 +261,9 @@ export default function PaidAds() {
 
   /* ──── Chart labels ──── */
 
+  // For Clicks/CPC/Spend chart: exclude dates with no Google Ads data (spend=0)
+  const sortedWithSpend = useMemo(() => sorted.filter(e => e.spend > 0), [sorted]);
+  const spendLabels = sortedWithSpend.map((e) => e.date.substring(5).replace('-', '/'));
   const trendLabels = sorted.map((e) => e.date.substring(5).replace('-', '/'));
 
   // Annotation plugin ref for charts
@@ -318,17 +321,17 @@ export default function PaidAds() {
     },
   }), []);
 
-  /* ──── CPL over time — 7-day rolling average (excludes blackout days) ──── */
+  /* ──── CPL over time — 7-day rolling average (excludes blackout days and days without spend data) ──── */
   const cplChartData = useMemo(() => {
     const labels: string[] = [];
     const data: (number | null)[] = [];
-    sorted.forEach((e, i) => {
+    sortedWithSpend.forEach((e, i) => {
       labels.push(e.date.substring(5).replace('-', '/'));
       if (isBlackout(e.date)) { data.push(null); return; }
       // Look back up to 7 non-blackout days
       let windowSpend = 0, windowLeads = 0;
       for (let j = i; j >= Math.max(0, i - 6); j--) {
-        const d = sorted[j];
+        const d = sortedWithSpend[j];
         if (isBlackout(d.date)) continue;
         windowSpend += d.spend || 0;
         windowLeads += d.started || 0;
@@ -337,10 +340,10 @@ export default function PaidAds() {
       data.push(parseFloat((windowSpend / windowLeads).toFixed(2)));
     });
     return { labels, data };
-  }, [sorted]);
+  }, [sortedWithSpend]);
 
   /* ──── CPC data ──── */
-  const cpcData = sorted.map((e) =>
+  const cpcData = sortedWithSpend.map((e) =>
     e.clicks > 0 ? parseFloat(((e.spend || 0) / e.clicks).toFixed(2)) : null
   );
 
@@ -409,13 +412,13 @@ export default function PaidAds() {
         <ChartLabel>Clicks, CPC &amp; Spend</ChartLabel>
         <ChartCard>
           <div style={{ height: 350 }}>
-            {sorted.length > 1 ? (
+            {sortedWithSpend.length > 1 ? (
               <Line
                 data={{
-                  labels: trendLabels,
+                  labels: spendLabels,
                   datasets: [
-                    { label: 'Clicks', data: sorted.map((e) => e.clicks || 0), borderColor: '#E57373', borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 4, pointBackgroundColor: '#E57373', yAxisID: 'y' },
-                    { label: 'Spend ($)', data: sorted.map((e) => e.spend || 0), borderColor: TP.blue, borderWidth: 2, borderDash: [4, 2], tension: 0.3, fill: false, pointRadius: 3, pointBackgroundColor: TP.blue, yAxisID: 'y1' },
+                    { label: 'Clicks', data: sortedWithSpend.map((e) => e.clicks || 0), borderColor: '#E57373', borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 4, pointBackgroundColor: '#E57373', yAxisID: 'y' },
+                    { label: 'Spend ($)', data: sortedWithSpend.map((e) => e.spend || 0), borderColor: TP.blue, borderWidth: 2, borderDash: [4, 2], tension: 0.3, fill: false, pointRadius: 3, pointBackgroundColor: TP.blue, yAxisID: 'y1' },
                     { label: 'CPC ($)', data: cpcData, borderColor: TP.yellow, borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 5, pointBackgroundColor: TP.yellow, yAxisID: 'y2', spanGaps: true },
                   ],
                 }}
