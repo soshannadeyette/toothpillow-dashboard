@@ -60,10 +60,11 @@ const META_FUNNEL = { entered: 58, waitingInfo: 30, sentCheckout: 13, checkedOut
 
 // Salesforce pipeline detail (update when new SF export is loaded)
 // These sub-stage breakdowns can't come from daily Supabase data
-// Source: Salesforce "Google Ads 2026" export, July 6, 2026
-// 342 total leads. 13 checkouts, $21,494 revenue.
-const GOOGLE_SF_PIPELINE = { total: 342, waiting: 197, sentToTxP: 19, txpApproved: 1, sentCheckout: 76, checkedOut: 13, referredOut: 21, denied: 0, closedLost: 9, waitingTxPAssign: 5, tempHold: 1 };
-const GOOGLE_REVENUE: number = 21494; // 13 checkouts, $21,494 subtotal from Salesforce
+// Source: Salesforce "Google Ads 2026" export, July 8, 2026
+// Note: export filter now includes "Google Ads,Meta Ads". Closed Lost - DNC (357) excluded as Meta Ads historical.
+// 354 Google Ads leads. 14 checkouts, $23,290 revenue.
+const GOOGLE_SF_PIPELINE = { total: 354, waiting: 208, sentToTxP: 21, txpApproved: 1, sentCheckout: 79, checkedOut: 14, referredOut: 22, denied: 0, closedLost: 6, waitingTxPAssign: 2, tempHold: 1 };
+const GOOGLE_REVENUE: number = 23290; // 14 checkouts, $23,290 subtotal from Salesforce
 
 // Google Ads daily seed data (source of truth — merged with Supabase on load)
 // June 1-15 spend/clicks/impressions from Google Ads Report Editor, June 15, 2026
@@ -113,7 +114,10 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-07-03', spend: 440.25, clicks: 119, impressions: 2260, submit: 3, started: 3, finished: 1, treatment: 0 },
   { date: '2026-07-04', spend: 345.97, clicks: 111, impressions: 1992, submit: 3, started: 1, finished: 2, treatment: 0 },
   { date: '2026-07-05', spend: 751.95, clicks: 204, impressions: 3610, submit: 5, started: 5, finished: 1, treatment: 0 },
-  { date: '2026-07-06', spend: 0, clicks: 0, impressions: 0, submit: 8, started: 5, finished: 6, treatment: 0 },
+  { date: '2026-07-06', spend: 0, clicks: 0, impressions: 0, submit: 11, started: 5, finished: 10, treatment: 1 },
+  // July 7-8: lead metrics from Salesforce July 8 export. Spend/clicks/impressions TBD from Google Ads.
+  { date: '2026-07-07', spend: 0, clicks: 0, impressions: 0, submit: 8, started: 1, finished: 2, treatment: 0 },
+  { date: '2026-07-08', spend: 0, clicks: 0, impressions: 0, submit: 4, started: 3, finished: 2, treatment: 0 },
 ];
 
 // Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)

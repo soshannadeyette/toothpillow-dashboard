@@ -91,16 +91,16 @@ const REFERRER_DATA: Record<string, RefMonth> = {
   "2026-03": {total:1603, Parent:75, "Dental Office":319, "Airway Ambassador":64, Influencer:462, Podcast:164, Instagram:74, TikTok:1, Facebook:11, "Meta Ad":2, "Online Search":339, "Unknown Referral":59, "Unknown Professional Referral":21, Other:0, MYO:6, "Health Care Professional":6},
   "2026-04": {total:1228, Parent:76, "Dental Office":259, "Airway Ambassador":64, Influencer:233, Podcast:130, Instagram:39, TikTok:1, Facebook:10, "Meta Ad":0, "Online Search":298, "Unknown Referral":69, "Unknown Professional Referral":25, Other:0, "Google Ad":20, MYO:3, "Health Care Professional":1},
   "2026-05": {total:1125, Parent:49, "Dental Office":213, "Airway Ambassador":50, Influencer:268, Podcast:126, Instagram:55, TikTok:4, Facebook:13, "Meta Ad":1, "Online Search":251, "Unknown Referral":51, "Unknown Professional Referral":10, Other:0, "Google Ad":28, MYO:3, "Health Care Professional":3},
-  // Source: Salesforce "Monthly Submissions by Referral Type" export, July 7, 2026
-  "2026-06": {total:1475, Parent:76, "Dental Office":231, "Airway Ambassador":42, Influencer:300, Podcast:276, Instagram:54, TikTok:1, Facebook:3, "Meta Ad":0, "Online Search":323, "Unknown Referral":67, "Unknown Professional Referral":14, Other:0, "Google Ad":81, MYO:5, "Health Care Professional":2},
-  // Source: Salesforce "Monthly Submissions by Referral Type" export, July 7, 2026
-  "2026-07": {total:166, Parent:16, "Dental Office":35, "Airway Ambassador":15, Influencer:26, Podcast:14, Instagram:2, TikTok:0, Facebook:2, "Meta Ad":0, "Online Search":36, "Unknown Referral":3, "Unknown Professional Referral":1, Other:0, "Google Ad":16, MYO:0, "Health Care Professional":0},
+  // Source: Salesforce "Monthly Submissions by Referral Type" export, July 8, 2026
+  "2026-06": {total:1478, Parent:85, "Dental Office":231, "Airway Ambassador":45, Influencer:304, Podcast:280, Instagram:54, TikTok:1, Facebook:3, "Meta Ad":0, "Online Search":328, "Unknown Referral":45, "Unknown Professional Referral":14, Other:0, "Google Ad":81, MYO:5, "Health Care Professional":2},
+  // Source: Salesforce "Monthly Submissions by Referral Type" export, July 8, 2026
+  "2026-07": {total:249, Parent:21, "Dental Office":60, "Airway Ambassador":16, Influencer:41, Podcast:23, Instagram:8, TikTok:0, Facebook:2, "Meta Ad":0, "Online Search":53, "Unknown Referral":3, "Unknown Professional Referral":1, Other:0, "Google Ad":20, MYO:0, "Health Care Professional":1},
 };
 
 /* ────── Current month projection ────── */
 // Update these when changing the current partial month
 const CURRENT_MONTH_KEY = '2026-07';
-const CURRENT_MONTH_DAYS_TRACKED = 7;
+const CURRENT_MONTH_DAYS_TRACKED = 8;
 const CURRENT_MONTH_DAYS_TOTAL = 31;
 
 function buildProjected(monthKey: string, daysTracked: number, daysTotal: number): { actual: RefMonth; projected: RefMonth } {
