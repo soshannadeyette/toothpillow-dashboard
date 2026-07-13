@@ -94,13 +94,13 @@ const REFERRER_DATA: Record<string, RefMonth> = {
   // Source: Salesforce "Monthly Submissions by Referral Type" export, July 8, 2026
   "2026-06": {total:1478, Parent:85, "Dental Office":231, "Airway Ambassador":45, Influencer:304, Podcast:280, Instagram:54, TikTok:1, Facebook:3, "Meta Ad":0, "Online Search":328, "Unknown Referral":45, "Unknown Professional Referral":14, Other:0, "Google Ad":81, MYO:5, "Health Care Professional":2},
   // Source: Salesforce "Monthly Submissions by Referral Type" export, July 8, 2026
-  "2026-07": {total:249, Parent:21, "Dental Office":60, "Airway Ambassador":16, Influencer:41, Podcast:23, Instagram:8, TikTok:0, Facebook:2, "Meta Ad":0, "Online Search":53, "Unknown Referral":3, "Unknown Professional Referral":1, Other:0, "Google Ad":20, MYO:0, "Health Care Professional":1},
+  "2026-07": {total:438, Parent:41, "Dental Office":86, "Airway Ambassador":25, Influencer:79, Podcast:49, Instagram:18, TikTok:0, Facebook:5, "Meta Ad":0, "Online Search":88, "Unknown Referral":8, "Unknown Professional Referral":2, Other:0, "Google Ad":35, MYO:1, "Health Care Professional":1},
 };
 
 /* ────── Current month projection ────── */
 // Update these when changing the current partial month
 const CURRENT_MONTH_KEY = '2026-07';
-const CURRENT_MONTH_DAYS_TRACKED = 8;
+const CURRENT_MONTH_DAYS_TRACKED = 13;
 const CURRENT_MONTH_DAYS_TOTAL = 31;
 
 function buildProjected(monthKey: string, daysTracked: number, daysTotal: number): { actual: RefMonth; projected: RefMonth } {

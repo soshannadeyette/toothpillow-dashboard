@@ -40,13 +40,13 @@ const ambSubs: Record<string, number> = {
   '2023-01':9,'2023-02':20,'2023-03':10,'2023-04':16,'2023-05':14,'2023-06':219,'2023-07':81,'2023-08':15,'2023-09':22,'2023-10':17,'2023-11':22,'2023-12':20,
   '2024-01':14,'2024-02':16,'2024-03':29,'2024-04':31,'2024-05':32,'2024-06':24,'2024-07':36,'2024-08':47,'2024-09':71,'2024-10':32,'2024-11':40,'2024-12':63,
   '2025-01':60,'2025-02':69,'2025-03':64,'2025-04':59,'2025-05':47,'2025-06':45,'2025-07':28,'2025-08':47,'2025-09':39,'2025-10':40,'2025-11':39,'2025-12':29,
-  '2026-01':52,'2026-02':57,'2026-03':63,'2026-04':64,'2026-05':50,'2026-06':45,'2026-07':16,
+  '2026-01':52,'2026-02':57,'2026-03':63,'2026-04':64,'2026-05':50,'2026-06':45,'2026-07':25,
 };
 const infSubs: Record<string, number> = {
   '2023-10':6,'2023-11':294,'2023-12':1039,
   '2024-01':431,'2024-02':315,'2024-03':1593,'2024-04':569,'2024-05':654,'2024-06':1253,'2024-07':485,'2024-08':594,'2024-09':1124,'2024-10':498,'2024-11':367,'2024-12':515,
   '2025-01':521,'2025-02':605,'2025-03':521,'2025-04':511,'2025-05':428,'2025-06':330,'2025-07':906,'2025-08':440,'2025-09':290,'2025-10':273,'2025-11':485,'2025-12':273,
-  '2026-01':311,'2026-02':511,'2026-03':462,'2026-04':232,'2026-05':268,'2026-06':304,'2026-07':41,
+  '2026-01':311,'2026-02':511,'2026-03':462,'2026-04':232,'2026-05':268,'2026-06':304,'2026-07':79,
 };
 
 const newAddsAmb: Record<string, number> = {
@@ -60,9 +60,9 @@ const newAddsInf: Record<string, number> = {
   '2026-01':3,'2026-02':1,'2026-03':2,'2026-04':5,'2026-05':6,'2026-06':4,'2026-07':1,
 };
 
-const ambSubsYear: Record<number, number> = {2023:465, 2024:435, 2025:566, 2026:347};
-const infSubsYear: Record<number, number> = {2023:1339, 2024:8398, 2025:5583, 2026:2129};
-const combSubsYear: Record<number, number> = {2023:1804, 2024:8833, 2025:6149, 2026:2476};
+const ambSubsYear: Record<number, number> = {2023:465, 2024:435, 2025:566, 2026:367};
+const infSubsYear: Record<number, number> = {2023:1339, 2024:8398, 2025:5583, 2026:2163};
+const combSubsYear: Record<number, number> = {2023:1804, 2024:8833, 2025:6149, 2026:2530};
 const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:112};
 const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:22};
 const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:135};
@@ -105,31 +105,31 @@ const concRows = [
   {y:'2026', n:8, color:'#8CD1C8', names:'Shannon, Sosh, Lauren, Kendra, Jeff, Amy B., Ginny, Melody'},
 ];
 
-// Updated from Salesforce Launch Bonus Tracker export 2026-07-08
+// Updated from Salesforce Launch Bonus Tracker export 2026-07-13
 const moversData: Record<string, {y25:number; y26:number; type:string}> = {
-  'Shannon Tripp':        {y25:866,  y26:294, type:'Inf'},
-  'Soshanna Salsman':     {y25:914,  y26:215, type:'Inf'},
-  'Lauren Johnson NNM':   {y25:831,  y26:178, type:'Inf'},
-  'Kendra Needham':       {y25:386,  y26:158, type:'Inf'},
+  'Shannon Tripp':        {y25:866,  y26:297, type:'Inf'},
+  'Soshanna Salsman':     {y25:914,  y26:216, type:'Inf'},
+  'Lauren Johnson NNM':   {y25:831,  y26:189, type:'Inf'},
+  'Kendra Needham':       {y25:386,  y26:159, type:'Inf'},
   'Jeff Cruz':            {y25:84,   y26:126, type:'Inf'},
-  'Amy Bernhard':         {y25:112,  y26:125, type:'Inf'},
+  'Amy Bernhard':         {y25:112,  y26:127, type:'Inf'},
   'Melody Brandon':       {y25:123,  y26:94,  type:'Inf'},
-  'Ginny Yurich':         {y25:291,  y26:94,  type:'Inf'},
+  'Ginny Yurich':         {y25:291,  y26:97,  type:'Inf'},
   'Jasyra Santiago-Hines':{y25:57,   y26:83,  type:'Inf'},
-  'Ellen Fisher':         {y25:53,   y26:66,  type:'Inf'},
-  'Taylor Kulik':         {y25:103,  y26:54,  type:'Inf'},
+  'Ellen Fisher':         {y25:53,   y26:67,  type:'Inf'},
+  'Taylor Kulik':         {y25:103,  y26:55,  type:'Inf'},
   'Emily Boazman':        {y25:0,    y26:53,  type:'Inf'},
-  'Eden Lee':             {y25:185,  y26:51,  type:'Inf'},
+  'Eden Lee':             {y25:185,  y26:58,  type:'Inf'},
   'Amy Erickson':         {y25:51,   y26:44,  type:'Inf'},
   'Katelyn Alsop':        {y25:0,    y26:40,  type:'Inf'},
   'Lauren Stadler':       {y25:93,   y26:40,  type:'Inf'},
   'Thuy Improta':         {y25:245,  y26:31,  type:'Inf'},
-  'Carly Brown':          {y25:0,    y26:31,  type:'Inf'},
+  'Carly Brown':          {y25:0,    y26:33,  type:'Inf'},
   'Jennie Hoglund':       {y25:29,   y26:25,  type:'Inf'},
-  'Eryn Carroll NMM':     {y25:104,  y26:24,  type:'Inf'},
+  'Eryn Carroll NMM':     {y25:104,  y26:25,  type:'Inf'},
   'Ashley Turner':        {y25:39,   y26:23,  type:'Inf'},
-  'Hayley Lombard':       {y25:0,    y26:23,  type:'Inf'},
-  'Hilary Fritsch':       {y25:0,    y26:21,  type:'Inf'},
+  'Hayley Lombard':       {y25:0,    y26:24,  type:'Inf'},
+  'Hilary Fritsch':       {y25:0,    y26:23,  type:'Inf'},
   'Taylor Moran':         {y25:62,   y26:20,  type:'Inf'},
   'Taylor Weimar':        {y25:0,    y26:17,  type:'Inf'},
   'Erin Wilkins':         {y25:111,  y26:16,  type:'Inf'},
@@ -164,8 +164,8 @@ const moversData: Record<string, {y25:number; y26:number; type:string}> = {
   'Cy Tidwell':           {y25:0,    y26:5,   type:'Amb'},
 };
 
-// Launch Bonus Tracker — updated from Salesforce export 2026-07-08
-// 129 ambassadors with ≥1 WINDOW submission (counted from window start, not YTD).
+// Launch Bonus Tracker — updated from Salesforce export 2026-07-13
+// 130 ambassadors with ≥1 WINDOW submission (counted from window start, not YTD).
 // Pre-2026 onboards: window starts 04/01/2026. 2026 onboards: window starts at onboard date.
 // Tier computed from window subs: Tier 2 = 50+, Tier 1 = 25-49.
 // paid = cumulative amount paid out so far. Payouts happen on 1st of each month for prior month earnings.
@@ -192,37 +192,37 @@ const LAUNCH_BONUS_PAYOUTS: {month:string; payouts:{name:string;amount:number;ti
 ];
 
 const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;paid:number;winStart:string;winEnd:string;tier1Date?:string;tier2Date?:string;is2026?:boolean;omit?:boolean}[] = [
-  {name:'Soshanna Salsman',bonusSubs:94,tier:2,earned:1250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/25',tier2Date:'05/28',omit:true},
-  {name:'Shannon Tripp',bonusSubs:87,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/21',tier2Date:'05/26'},
-  {name:'Lauren Johnson NNM',bonusSubs:63,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/27',tier2Date:'06/11'},
+  {name:'Soshanna Salsman',bonusSubs:95,tier:2,earned:1250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/25',tier2Date:'05/28',omit:true},
+  {name:'Shannon Tripp',bonusSubs:90,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/21',tier2Date:'05/26'},
+  {name:'Lauren Johnson NNM',bonusSubs:74,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/27',tier2Date:'06/11'},
   {name:'Emily Boazman',bonusSubs:50,tier:2,earned:1250,paid:1250,winStart:'04/02/2026',winEnd:'12/31/2026',is2026:true,tier1Date:'05/24',tier2Date:'06/29'},
-  {name:'Kendra Needham',bonusSubs:47,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'05/22'},
+  {name:'Kendra Needham',bonusSubs:48,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'05/22'},
   {name:'Katelyn Alsop (James)',bonusSubs:40,tier:1,earned:250,paid:250,winStart:'01/19/2026',winEnd:'12/31/2026',is2026:true,tier1Date:'02/21'},
-  {name:'Amy Bernhard',bonusSubs:44,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/04'},
+  {name:'Amy Bernhard',bonusSubs:46,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/04'},
   {name:'Jeff Cruz Talia_likeitis',bonusSubs:41,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'05/19'},
-  {name:'Ginny Yurich',bonusSubs:36,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/02'},
+  {name:'Ginny Yurich',bonusSubs:39,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/02'},
   {name:'Jasyra Santiago-Hines',bonusSubs:31,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/10'},
   {name:'Melody Brandon',bonusSubs:29,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/08'},
-  {name:'Carly Brown',bonusSubs:30,tier:1,earned:250,paid:250,winStart:'04/21/2026',winEnd:'12/31/2026',is2026:true,tier1Date:'06/24'},
+  {name:'Carly Brown',bonusSubs:32,tier:1,earned:250,paid:250,winStart:'04/21/2026',winEnd:'12/31/2026',is2026:true,tier1Date:'06/24'},
+  {name:'Eden Lee loverlees',bonusSubs:27,tier:1,earned:250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'07/10'},
   {name:'Amy Erickson',bonusSubs:23,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Hayley Lombard',bonusSubs:23,tier:0,earned:0,paid:0,winStart:'05/19/2026',winEnd:'12/31/2026',is2026:true},
-  {name:'Eden Lee loverlees',bonusSubs:20,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Hilary Fritsch*',bonusSubs:19,tier:0,earned:0,paid:0,winStart:'05/08/2026',winEnd:'12/31/2026',is2026:true},
-  {name:'Taylor Kulik',bonusSubs:18,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Hayley Lombard',bonusSubs:24,tier:0,earned:0,paid:0,winStart:'05/19/2026',winEnd:'12/31/2026',is2026:true},
+  {name:'Hilary Fritsch*',bonusSubs:21,tier:0,earned:0,paid:0,winStart:'05/08/2026',winEnd:'12/31/2026',is2026:true},
+  {name:'Taylor Kulik',bonusSubs:19,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Lauren Stadler',bonusSubs:17,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Ellen Fisher',bonusSubs:16,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Ellen Fisher',bonusSubs:17,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Thuy Improta *ministry*',bonusSubs:16,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Eryn Carroll (natural minded momma)',bonusSubs:15,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Eryn Carroll (natural minded momma)',bonusSubs:16,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Courtland Nall',bonusSubs:11,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Melina Moses',bonusSubs:12,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Wendy Ostapuk toxinfreeish',bonusSubs:11,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Carly Hartwig',bonusSubs:8,tier:0,earned:0,paid:0,winStart:'04/06/2026',winEnd:'12/31/2026',is2026:true},
+  {name:'Carly Hartwig',bonusSubs:9,tier:0,earned:0,paid:0,winStart:'04/06/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Hillary Ha',bonusSubs:8,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Lexi Fitzgerald',bonusSubs:8,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Mary Catherine Oechslin momnp',bonusSubs:8,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Rachel Jayroe',bonusSubs:8,tier:0,earned:0,paid:0,winStart:'02/06/2026',winEnd:'12/31/2026',is2026:true},
-  {name:'Erin Wilkins essentiallyerin',bonusSubs:7,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Jessi Meeks',bonusSubs:7,tier:0,earned:0,paid:0,winStart:'04/22/2026',winEnd:'12/31/2026',is2026:true},
+  {name:'Erin Wilkins essentiallyerin',bonusSubs:8,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Jessi Meeks',bonusSubs:8,tier:0,earned:0,paid:0,winStart:'04/22/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Kelsey Sem (holisticmumma)',bonusSubs:6,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Kelsey Tweeton',bonusSubs:6,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Taylor Weimar',bonusSubs:6,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
