@@ -62,9 +62,9 @@ const META_FUNNEL = { entered: 58, waitingInfo: 30, sentCheckout: 13, checkedOut
 // These sub-stage breakdowns can't come from daily Supabase data
 // Source: Salesforce "Google Ads 2026" export, July 13, 2026
 // Note: export filter now includes "Google Ads,Meta Ads". Closed Lost - DNC excluded as Meta Ads historical.
-// 376 Google Ads leads. 16 checkouts, $23,290 revenue (2 newest checkouts pending Amount Paid).
-const GOOGLE_SF_PIPELINE = { total: 376, waiting: 215, sentToTxP: 23, txpApproved: 4, sentCheckout: 87, checkedOut: 16, referredOut: 22, denied: 0, closedLost: 6, waitingTxPAssign: 1, tempHold: 2 };
-const GOOGLE_REVENUE: number = 23290; // 16 checkouts, $23,290 subtotal from Salesforce (2 pending)
+// 379 Google Ads leads (excl DNC). 16 checkouts, $27,382 revenue (all amounts populated).
+const GOOGLE_SF_PIPELINE = { total: 379, waiting: 216, sentToTxP: 26, txpApproved: 0, sentCheckout: 91, checkedOut: 16, referredOut: 22, denied: 0, closedLost: 6, waitingTxPAssign: 0, tempHold: 2 };
+const GOOGLE_REVENUE: number = 27382; // 16 checkouts, $27,382 subtotal from Salesforce
 
 // Google Ads daily seed data (source of truth — merged with Supabase on load)
 // June 1-15 spend/clicks/impressions from Google Ads Report Editor, June 15, 2026
