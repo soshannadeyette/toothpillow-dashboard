@@ -128,28 +128,27 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
    Source: Salesforce "Google Ads 2026" export, July 14, 2026.
    ════════════════════════════════════════════ */
 
-// Salesforce pipeline totals — from Fable 5 cohort analysis, July 14, 2026.
-// 395 total leads created in SF (386 with dates + 9 without). 17 checkouts (16 with dates + 1 without).
+// Salesforce pipeline totals — parsed directly from July 14, 2026 export.
+// 386 leads total. 16 checkouts. closedLost includes 3 "Do Not Contact".
 const GOOGLE_SF_PIPELINE = {
-  total: 395,           // leads created (started form)
-  completed: 174,       // all stages except Waiting-Info (44% of started)
-  waitingInfo: 221,     // incomplete submissions
-  sentCheckout: 109,    // Sent Checkout Link + Checked Out (63% of completed)
+  total: 386,           // leads created (started form)
+  completed: 166,       // all stages except Waiting-Info (43% of started)
+  waitingInfo: 220,     // incomplete submissions
+  sentCheckout: 107,    // Sent Checkout Link (91) + Checked Out (16)
   sentToTxP: 26,
-  checkedOut: 17,       // 16% of links sent, 4.3% of all leads
-  referredOut: 23,      // 13% of completed — spend that cannot convert
-  closedLost: 6,
+  checkedOut: 16,       // 15% of links sent, 4.1% of all leads
+  referredOut: 22,      // 13% of completed — spend that cannot convert
+  closedLost: 9,        // 6 Closed Lost + 3 Closed Lost - Do Not Contact
   tempHold: 2,
   formOpens: 1436,      // Google Ads conversions (form opens, Google-only)
 };
 
-// 17 checkouts, $27,382 subtotal from Salesforce (avg $1,611/checkout)
+// 16 checkouts, $27,382 subtotal from Salesforce (avg $1,711/checkout)
 const GOOGLE_REVENUE: number = 27382;
 
-// Weekly cohort data — from Fable 5 cohort analysis (Salesforce + Google Ads), July 14, 2026.
+// Weekly cohort data — from Salesforce + Google Ads, July 14, 2026.
 // Spend is actual weekly Google Ads spend (not computed/pro-rated).
 // Leads = Salesforce leads created that week. Completed = past Waiting-Info stage.
-// 9 SF rows with no Created Date excluded from weekly rows; funnel totals on Summary include them.
 const SF_WEEKLY_COHORT_DATA: {
   week: string; spend: number; clicks: number; formOpens: number;
   leads: number; completed: number; sentCheckout: number;
