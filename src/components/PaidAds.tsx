@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -29,42 +29,23 @@ const TP = {
 
 /* ════════════════════════════════════════════
    TRACKING BLACKOUT — go.toothpillow link was
-   broken May 11-20, so conversion data (opened,
-   started, completed, treatment) is unreliable.
-   Spend/impressions/clicks from Google are fine.
+   broken May 11-20, so lead/conversion fields
+   captured in Google Ads daily data during this
+   window are unreliable. Spend/impressions/clicks
+   from Google are unaffected and always accurate.
    ════════════════════════════════════════════ */
 const BLACKOUT_START = '2026-05-11';
 const BLACKOUT_END   = '2026-05-20';
 const isBlackout = (date: string) => date >= BLACKOUT_START && date <= BLACKOUT_END;
 
 /* ════════════════════════════════════════════
-   HARDCODED DATA (source of truth from HTML)
+   DATA SOURCE 1: GOOGLE ADS DAILY (Supabase + seed)
+   Use ONLY for spend, clicks, impressions.
+   Do NOT derive leads/checkouts/conversions from this data —
+   the submit/started/finished/treatment fields captured here
+   do not reconcile with Salesforce and should only be used
+   for the Add/Update Day entry form.
    ════════════════════════════════════════════ */
-
-const META_MONTHLY = [
-  { month: 'Mar 2025', spend: 838.67, leads: 0 },
-  { month: 'Apr 2025', spend: 170.97, leads: 0 },
-  { month: 'May 2025', spend: 45.49, leads: 0 },
-  { month: 'Aug 2025', spend: 1065.00, leads: 0 },
-  { month: 'Sep 2025', spend: 2830.42, leads: 1 },
-  { month: 'Oct 2025', spend: 3082.34, leads: 0 },
-  { month: 'Nov 2025', spend: 5602.58, leads: 0 },
-  { month: 'Dec 2025', spend: 3340.87, leads: 17 },
-  { month: 'Jan 2026', spend: 5138.82, leads: 24 },
-  { month: 'Feb 2026', spend: 2444.53, leads: 9 },
-  { month: 'Mar 2026', spend: 1024.00, leads: 7 },
-  { month: 'Apr 2026', spend: 72.42, leads: 0 },
-];
-
-const META_FUNNEL = { entered: 58, waitingInfo: 30, sentCheckout: 13, checkedOut: 0, amountReceived: 0, denied: 7, closedLost: 8 };
-
-// Salesforce pipeline detail (update when new SF export is loaded)
-// These sub-stage breakdowns can't come from daily Supabase data
-// Source: Salesforce "Google Ads 2026" export, July 13, 2026
-// Note: export filter now includes "Google Ads,Meta Ads". Closed Lost - DNC excluded as Meta Ads historical.
-// 379 Google Ads leads (excl DNC). 16 checkouts, $27,382 revenue (all amounts populated).
-const GOOGLE_SF_PIPELINE = { total: 379, waiting: 216, sentToTxP: 26, txpApproved: 0, sentCheckout: 91, checkedOut: 16, referredOut: 22, denied: 0, closedLost: 6, waitingTxPAssign: 0, tempHold: 2 };
-const GOOGLE_REVENUE: number = 27382; // 16 checkouts, $27,382 subtotal from Salesforce
 
 // Google Ads daily seed data (source of truth — merged with Supabase on load)
 // June 1-15 spend/clicks/impressions from Google Ads Report Editor, June 15, 2026
@@ -72,11 +53,9 @@ const GOOGLE_REVENUE: number = 27382; // 16 checkouts, $27,382 subtotal from Sal
 // June 23-25 spend/clicks/impressions from Google Ads Campaigns view, June 25, 2026
 // June 26-29 spend/clicks/impressions from Google Ads Campaigns view, June 30, 2026
 // June 30-Jul 5 spend/clicks/impressions from Google Ads Report Editor, July 6, 2026
-// All lead metrics from Salesforce "Google Ads 2026" export, July 6, 2026:
-//   submit  = Created Date count (lead entered system / opened form)
-//   started = Date: Submission count (assessment submitted)
-//   finished = Date: Sent to TxProvider count (sent for review)
-//   treatment = Date: Checkout count (patient checked out)
+// July 6-13 spend/clicks/impressions from Google Ads Report Editor, July 13, 2026
+// submit/started/finished/treatment fields retained for the entry form only —
+// NOT used anywhere in this page's analysis (see Salesforce constants below instead).
 const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-06-01', spend: 504.80, clicks: 155, impressions: 2273, submit: 7, started: 7, finished: 6, treatment: 0 },
   { date: '2026-06-02', spend: 489.53, clicks: 137, impressions: 2571, submit: 9, started: 0, finished: 0, treatment: 1 },
@@ -107,7 +86,6 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-06-27', spend: 593.07, clicks: 145, impressions: 2860, submit: 9, started: 2, finished: 1, treatment: 0 },
   { date: '2026-06-28', spend: 620.15, clicks: 171, impressions: 2382, submit: 8, started: 3, finished: 1, treatment: 0 },
   { date: '2026-06-29', spend: 467.99, clicks: 120, impressions: 2654, submit: 2, started: 1, finished: 5, treatment: 0 },
-  // June 30 - July 6: lead metrics from Salesforce July 6 export. Spend/clicks/impressions from Google Ads report (Jul 6 partial — today).
   { date: '2026-06-30', spend: 544.72, clicks: 142, impressions: 3010, submit: 6, started: 3, finished: 3, treatment: 1 },
   { date: '2026-07-01', spend: 586.05, clicks: 156, impressions: 2952, submit: 6, started: 1, finished: 2, treatment: 0 },
   { date: '2026-07-02', spend: 517.02, clicks: 143, impressions: 2812, submit: 4, started: 1, finished: 1, treatment: 1 },
@@ -115,7 +93,6 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-07-04', spend: 345.97, clicks: 111, impressions: 1992, submit: 3, started: 1, finished: 2, treatment: 0 },
   { date: '2026-07-05', spend: 751.95, clicks: 204, impressions: 3610, submit: 5, started: 5, finished: 1, treatment: 0 },
   { date: '2026-07-06', spend: 938.87, clicks: 207, impressions: 4891, submit: 11, started: 5, finished: 9, treatment: 1 },
-  // July 6-13: lead metrics from Salesforce July 13 16:50 export. Spend/clicks/impressions from Google Ads Jul 13.
   { date: '2026-07-07', spend: 986.45, clicks: 213, impressions: 4440, submit: 8, started: 1, finished: 2, treatment: 0 },
   { date: '2026-07-08', spend: 775.19, clicks: 196, impressions: 4154, submit: 6, started: 6, finished: 6, treatment: 0 },
   { date: '2026-07-09', spend: 742.87, clicks: 206, impressions: 3797, submit: 7, started: 4, finished: 2, treatment: 0 },
@@ -124,6 +101,55 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-07-12', spend: 656.37, clicks: 172, impressions: 3544, submit: 6, started: 2, finished: 2, treatment: 0 },
   { date: '2026-07-13', spend: 493.87, clicks: 130, impressions: 2689, submit: 4, started: 4, finished: 8, treatment: 0 },
 ];
+
+// Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)
+function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
+  const byDate = new Map<string, GoogleAdsDaily>();
+  // API first (lower priority — fills in dates not in seed)
+  apiData.forEach(a => byDate.set(a.date, a));
+  // Seed overwrites API (source of truth per CLAUDE.md)
+  GOOGLE_ADS_SEED.forEach(s => byDate.set(s.date, s));
+  return Array.from(byDate.values());
+}
+
+/* ════════════════════════════════════════════
+   DATA SOURCE 2: SALESFORCE (hardcoded constants)
+   Use for leads, pipeline stages, checkouts, revenue,
+   conversion timing, and cohort analysis.
+   Source: Salesforce "Google Ads 2026" export, July 13, 2026 (16:50).
+   ════════════════════════════════════════════ */
+
+const GOOGLE_SF_PIPELINE = {
+  total: 383,
+  waitingInfo: 220,
+  sentCheckout: 91,
+  sentToTxP: 26,
+  checkedOut: 16,
+  referredOut: 22,
+  closedLost: 6,
+  tempHold: 2,
+};
+
+// 16 checkouts, $27,382 subtotal from Salesforce
+const GOOGLE_REVENUE: number = 27382;
+
+// Cohort maturity input — leads/checkouts/revenue by month, from Salesforce.
+// Spend is joined in from Google Ads daily data at render time.
+const SF_COHORT_DATA: { month: string; leads: number; checkouts: number; revenue: number; avgDaysToCheckout: number | null }[] = [
+  { month: 'Apr 2026', leads: 57, checkouts: 2, revenue: 3291, avgDaysToCheckout: 18 },
+  { month: 'May 2026', leads: 80, checkouts: 4, revenue: 7081, avgDaysToCheckout: 19 },
+  { month: 'Jun 2026', leads: 173, checkouts: 10, revenue: 17010, avgDaysToCheckout: 16 },
+  { month: 'Jul 2026', leads: 73, checkouts: 0, revenue: 0, avgDaysToCheckout: null },
+];
+
+// Lead → checkout timing, computed from the 16 Salesforce checkouts to date.
+const CONVERSION_TIMING = {
+  median: 14,
+  average: 17,
+  min: 6,
+  max: 32,
+  count: 16,
+};
 
 /* ════════════════════════════════════════════
    COHORT MATURITY CURVE (Kenny P's framework, Jul 2026)
@@ -168,15 +194,26 @@ interface CohortRow {
   adjCAC: number | null;
 }
 
-// Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)
-function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
-  const byDate = new Map<string, GoogleAdsDaily>();
-  // API first (lower priority — fills in dates not in seed)
-  apiData.forEach(a => byDate.set(a.date, a));
-  // Seed overwrites API (source of truth per CLAUDE.md)
-  GOOGLE_ADS_SEED.forEach(s => byDate.set(s.date, s));
-  return Array.from(byDate.values());
-}
+/* ════════════════════════════════════════════
+   META ADS (Paused — Historical)
+   ════════════════════════════════════════════ */
+
+const META_MONTHLY = [
+  { month: 'Mar 2025', spend: 838.67, leads: 0 },
+  { month: 'Apr 2025', spend: 170.97, leads: 0 },
+  { month: 'May 2025', spend: 45.49, leads: 0 },
+  { month: 'Aug 2025', spend: 1065.00, leads: 0 },
+  { month: 'Sep 2025', spend: 2830.42, leads: 1 },
+  { month: 'Oct 2025', spend: 3082.34, leads: 0 },
+  { month: 'Nov 2025', spend: 5602.58, leads: 0 },
+  { month: 'Dec 2025', spend: 3340.87, leads: 17 },
+  { month: 'Jan 2026', spend: 5138.82, leads: 24 },
+  { month: 'Feb 2026', spend: 2444.53, leads: 9 },
+  { month: 'Mar 2026', spend: 1024.00, leads: 7 },
+  { month: 'Apr 2026', spend: 72.42, leads: 0 },
+];
+
+const META_FUNNEL = { entered: 58, waitingInfo: 30, sentCheckout: 13, checkedOut: 0, amountReceived: 0, denied: 7, closedLost: 8 };
 
 /* ════════════════════════════════════════════
    COMPONENT
@@ -188,6 +225,7 @@ export default function PaidAds() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showMaturityRef, setShowMaturityRef] = useState(false);
+  const [showMeta, setShowMeta] = useState(false);
 
   // Form state
   const [formDate, setFormDate] = useState(todayStr());
@@ -251,96 +289,67 @@ export default function PaidAds() {
     setFormTreatment(String(e.treatment));
   };
 
-  /* ──── Computed stats ──── */
+  /* ──── Google Ads daily aggregates (spend/clicks/impressions ONLY) ──── */
 
   const sorted = useMemo(() => [...entries].sort((a, b) => a.date.localeCompare(b.date)), [entries]);
 
-  // All-days totals (spend/clicks/impressions are always valid)
   const gT = useMemo(() => {
-    const t = { spend: 0, impressions: 0, clicks: 0, submit: 0, started: 0, finished: 0, treatment: 0 };
+    const t = { spend: 0, impressions: 0, clicks: 0 };
     sorted.forEach((e) => {
-      t.spend += e.spend; t.impressions += e.impressions; t.clicks += e.clicks;
-      t.submit += e.submit; t.started += e.started; t.finished += e.finished; t.treatment += e.treatment;
+      t.spend += e.spend || 0;
+      t.impressions += e.impressions || 0;
+      t.clicks += e.clicks || 0;
     });
     return t;
   }, [sorted]);
 
-  // Tracked-only totals (excludes blackout days for conversion metrics)
-  const gTracked = useMemo(() => {
-    const t = { spend: 0, clicks: 0, submit: 0, started: 0, finished: 0, treatment: 0, days: 0 };
-    sorted.forEach((e) => {
-      if (isBlackout(e.date)) return;
-      t.spend += e.spend; t.clicks += e.clicks;
-      t.submit += e.submit; t.started += e.started; t.finished += e.finished; t.treatment += e.treatment;
-      t.days += 1;
-    });
-    return t;
-  }, [sorted]);
-
-  const blackoutDays = useMemo(() => sorted.filter((e) => isBlackout(e.date)).length, [sorted]);
-
-  // ALL aggregate stats from Salesforce pipeline — NOT from daily Supabase data.
-  // Daily data is for the chart only. SF pipeline is the source of truth for KPIs.
   const googleTotalSpend = gT.spend;
-  const googleTrackedSpend = gTracked.spend; // excludes blackout days
-  const googleTotalLeads = GOOGLE_SF_PIPELINE.total;
   const googleDays = sorted.length || 1;
-  const trackedDays = gTracked.days || 1;
-  const avgCPC = gT.clicks > 0 ? gT.spend / gT.clicks : 0;
-  const googleCPL = googleTotalLeads > 0 ? googleTotalSpend / googleTotalLeads : 0;
-  const googleCPLTracked = googleTotalLeads > 0 ? googleTrackedSpend / googleTotalLeads : 0;
 
-  // Submissions = people who completed the assessment
-  const googleSubmissions = GOOGLE_SF_PIPELINE.sentToTxP + GOOGLE_SF_PIPELINE.txpApproved + GOOGLE_SF_PIPELINE.sentCheckout + GOOGLE_SF_PIPELINE.checkedOut + GOOGLE_SF_PIPELINE.referredOut + GOOGLE_SF_PIPELINE.closedLost;
-  const googleCostPerSubmission = googleSubmissions > 0 ? googleTotalSpend / googleSubmissions : 0;
-  const googleCostPerSubmissionTracked = googleSubmissions > 0 ? googleTrackedSpend / googleSubmissions : 0;
-  const googleCheckouts = GOOGLE_SF_PIPELINE.checkedOut;
-  const googleCostPerCheckout = googleCheckouts > 0 ? googleTotalSpend / googleCheckouts : 0;
-  const googleCostPerCheckoutTracked = googleCheckouts > 0 ? googleTrackedSpend / googleCheckouts : 0;
-  const googleRevenue = GOOGLE_REVENUE;
-  const googleNet = googleRevenue - googleTotalSpend;
-  const googleNetTracked = googleRevenue - googleTrackedSpend;
-  const googleWaitingInfo = GOOGLE_SF_PIPELINE.waiting;
-  const blackoutSpend = googleTotalSpend - googleTrackedSpend;
+  /* ──── KPIs (Salesforce for leads/checkouts/revenue, Google Ads for spend) ──── */
 
-  /* ──── Cohort maturity analysis ──── */
+  const totalLeads = GOOGLE_SF_PIPELINE.total;
+  const totalCheckouts = GOOGLE_SF_PIPELINE.checkedOut;
+  const cpl = totalLeads > 0 ? googleTotalSpend / totalLeads : 0;
+  const cac = totalCheckouts > 0 ? googleTotalSpend / totalCheckouts : 0;
+  const leadToCheckoutRate = totalLeads > 0 ? (totalCheckouts / totalLeads) * 100 : 0;
+
+  /* ──── Salesforce pipeline funnel bar ──── */
+  const pipelineBar = useMemo(() => ([
+    { label: 'Waiting Info', val: GOOGLE_SF_PIPELINE.waitingInfo, color: '#999' },
+    { label: 'Sent Checkout Link', val: GOOGLE_SF_PIPELINE.sentCheckout, color: TP.yellow },
+    { label: 'Sent to TxP', val: GOOGLE_SF_PIPELINE.sentToTxP, color: TP.darkPurple },
+    { label: 'Checked Out', val: GOOGLE_SF_PIPELINE.checkedOut, color: '#00C853' },
+    { label: 'Referred Out', val: GOOGLE_SF_PIPELINE.referredOut, color: TP.blue },
+    { label: 'Closed Lost', val: GOOGLE_SF_PIPELINE.closedLost, color: TP.red },
+    { label: 'Temp Hold', val: GOOGLE_SF_PIPELINE.tempHold, color: TP.skyBlue },
+  ]), []);
+
+  /* ──── Cohort maturity analysis (Salesforce leads/checkouts + Google Ads spend) ──── */
   const cohortData = useMemo((): CohortRow[] => {
-    const byMonth = new Map<string, { spend: number; leads: number; checkouts: number; month: number; year: number }>();
-
-    sorted.forEach(e => {
-      const parts = e.date.split('-');
-      const y = parseInt(parts[0], 10);
-      const m = parseInt(parts[1], 10);
-      const key = `${y}-${String(m).padStart(2, '0')}`;
-      if (!byMonth.has(key)) {
-        byMonth.set(key, { spend: 0, leads: 0, checkouts: 0, month: m, year: y });
-      }
-      const bucket = byMonth.get(key)!;
-      bucket.spend += e.spend || 0;
-      bucket.leads += e.submit || 0;
-      // Exclude blackout days from checkout counts only
-      if (!isBlackout(e.date)) {
-        bucket.checkouts += e.treatment || 0;
-      }
-    });
-
     const now = new Date();
-    const keys = Array.from(byMonth.keys()).sort();
 
-    return keys.map(key => {
-      const val = byMonth.get(key)!;
-      const midpoint = new Date(val.year, val.month - 1, 15);
+    return SF_COHORT_DATA.map((c) => {
+      const monthIdx = MONTH_SHORT.indexOf(c.month.split(' ')[0]);
+      const year = parseInt(c.month.split(' ')[1], 10);
+
+      const spend = sorted.reduce((s, e) => {
+        const [y, m] = e.date.split('-').map(Number);
+        return (y === year && m === monthIdx) ? s + (e.spend || 0) : s;
+      }, 0);
+
+      const midpoint = new Date(year, monthIdx - 1, 15);
       const ageDays = Math.floor((now.getTime() - midpoint.getTime()) / (1000 * 60 * 60 * 24));
       const maturity = getMaturity(ageDays);
-      const projectedFinal = (maturity > 0.05 && val.checkouts > 0) ? val.checkouts / maturity : 0;
-      const rawCAC = val.checkouts > 0 ? val.spend / val.checkouts : null;
-      const adjCAC = projectedFinal > 0 ? val.spend / projectedFinal : null;
+      const projectedFinal = (maturity > 0.05 && c.checkouts > 0) ? c.checkouts / maturity : 0;
+      const rawCAC = c.checkouts > 0 ? spend / c.checkouts : null;
+      const adjCAC = projectedFinal > 0 ? spend / projectedFinal : null;
 
       return {
-        label: `${MONTH_SHORT[val.month]} ${val.year}`,
-        spend: val.spend,
-        leads: val.leads,
-        checkouts: val.checkouts,
+        label: c.month,
+        spend,
+        leads: c.leads,
+        checkouts: c.checkouts,
         ageDays,
         maturity,
         projectedFinal,
@@ -352,150 +361,85 @@ export default function PaidAds() {
 
   const cohortTotals = useMemo(() => {
     const totalSpend = cohortData.reduce((s, c) => s + c.spend, 0);
-    const totalCheckouts = cohortData.reduce((s, c) => s + c.checkouts, 0);
+    const totalCheckoutsC = cohortData.reduce((s, c) => s + c.checkouts, 0);
     const totalProjected = cohortData.reduce((s, c) => s + c.projectedFinal, 0);
-    const totalLeads = cohortData.reduce((s, c) => s + c.leads, 0);
+    const totalLeadsC = cohortData.reduce((s, c) => s + c.leads, 0);
     return {
       totalSpend,
-      totalCheckouts,
-      totalLeads,
+      totalCheckouts: totalCheckoutsC,
+      totalLeads: totalLeadsC,
       totalProjected,
-      overallRawCAC: totalCheckouts > 0 ? totalSpend / totalCheckouts : null,
+      overallRawCAC: totalCheckoutsC > 0 ? totalSpend / totalCheckoutsC : null,
       overallAdjCAC: totalProjected > 0 ? totalSpend / totalProjected : null,
     };
   }, [cohortData]);
 
-  // Meta stats
-  const metaCampaignMonths = META_MONTHLY.filter((m) => m.spend >= 1000);
-  const metaCampaignMonthCount = metaCampaignMonths.length;
-  const metaTotalSpend = META_MONTHLY.reduce((s, m) => s + m.spend, 0);
-  const metaTotalLeads = META_MONTHLY.reduce((s, m) => s + m.leads, 0);
-  const metaCPL = metaTotalLeads > 0 ? metaTotalSpend / metaTotalLeads : 0;
-  const metaSubmissions = (META_FUNNEL.entered || 0) - (META_FUNNEL.waitingInfo || 0) - (META_FUNNEL.denied || 0) - (META_FUNNEL.closedLost || 0);
-  const metaCostPerSubmission = metaSubmissions > 0 ? metaTotalSpend / metaSubmissions : 0;
-  const metaCostPerCheckout = META_FUNNEL.checkedOut > 0 ? metaTotalSpend / META_FUNNEL.checkedOut : 0;
+  /* ──── Daily spend trend + 7-day moving average ──── */
+  const spendTrend = useMemo(() => {
+    const labels = sorted.map((e) => e.date.substring(5).replace('-', '/'));
+    const spendVals = sorted.map((e) => e.spend || 0);
+    const movingAvg: (number | null)[] = sorted.map((_, i) => {
+      const start = Math.max(0, i - 6);
+      const window = spendVals.slice(start, i + 1);
+      const sum = window.reduce((s, v) => s + v, 0);
+      return parseFloat((sum / window.length).toFixed(2));
+    });
+    return { labels, spendVals, movingAvg };
+  }, [sorted]);
 
-  /* ──── Chart labels ──── */
-
-  // For Clicks/CPC/Spend chart: exclude dates with no Google Ads data (spend=0)
-  const sortedWithSpend = useMemo(() => sorted.filter(e => e.spend > 0), [sorted]);
-  const spendLabels = sortedWithSpend.map((e) => e.date.substring(5).replace('-', '/'));
-  const trendLabels = sorted.map((e) => e.date.substring(5).replace('-', '/'));
-
-  // Annotation plugin ref for charts
-  const sortedRef = useRef(sorted);
-  sortedRef.current = sorted;
-
-  const annotationPlugin = useMemo(() => ({
-    id: 'padsAnnotation',
+  const blackoutAnnotation = useMemo(() => ({
+    id: 'blackoutAnnotation',
     afterDraw(chart: ChartJS) {
       const xScale = chart.scales.x;
       const yScale = chart.scales.y;
       const ctx = chart.ctx;
       const chartLabels = (chart.data.labels || []) as string[];
-
-      const draw = (label: string, text1: string, text2: string, color: string) => {
-        const idx = chartLabels.indexOf(label);
-        if (idx < 0) return;
-        const x = xScale.getPixelForValue(idx);
-        ctx.save();
-        ctx.beginPath();
-        ctx.setLineDash([6, 4]);
-        ctx.moveTo(x, yScale.top);
-        ctx.lineTo(x, yScale.bottom);
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = color;
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.fillStyle = color;
-        ctx.font = 'bold 10px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(text1, x, yScale.top + 12);
-        ctx.fillText(text2, x, yScale.top + 23);
-        ctx.restore();
-      };
-
-      draw('04/17', 'Switched to', 'Conversions', TP.navy);
-      draw('05/01', 'Campaign Split', '50/50 New Build', TP.darkPurple);
-      draw('05/13', 'Budget Increase', '$150/campaign', '#00C853');
-
-      // Draw blackout shaded region
       const blStart = chartLabels.indexOf('05/11');
       const blEnd = chartLabels.indexOf('05/20');
       if (blStart >= 0 && blEnd >= 0) {
-        const x0 = xScale.getPixelForValue(blStart) - (xScale.getPixelForValue(1) - xScale.getPixelForValue(0)) / 2;
-        const x1 = xScale.getPixelForValue(blEnd) + (xScale.getPixelForValue(1) - xScale.getPixelForValue(0)) / 2;
+        const half = (xScale.getPixelForValue(1) - xScale.getPixelForValue(0)) / 2;
+        const x0 = xScale.getPixelForValue(blStart) - half;
+        const x1 = xScale.getPixelForValue(blEnd) + half;
         ctx.save();
         ctx.fillStyle = 'rgba(221,87,89,0.08)';
         ctx.fillRect(x0, yScale.top, x1 - x0, yScale.bottom - yScale.top);
         ctx.fillStyle = TP.red;
         ctx.font = 'bold 9px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('Tracking Blackout', (x0 + x1) / 2, yScale.bottom - 6);
+        ctx.fillText('Tracking Blackout', (x0 + x1) / 2, yScale.top + 12);
         ctx.restore();
       }
     },
   }), []);
 
-  /* ──── CPL over time — 7-day rolling average (excludes blackout days and days without spend data) ──── */
-  const cplChartData = useMemo(() => {
-    const labels: string[] = [];
-    const data: (number | null)[] = [];
-    sortedWithSpend.forEach((e, i) => {
-      labels.push(e.date.substring(5).replace('-', '/'));
-      if (isBlackout(e.date)) { data.push(null); return; }
-      // Look back up to 7 non-blackout days
-      let windowSpend = 0, windowLeads = 0;
-      for (let j = i; j >= Math.max(0, i - 6); j--) {
-        const d = sortedWithSpend[j];
-        if (isBlackout(d.date)) continue;
-        windowSpend += d.spend || 0;
-        windowLeads += d.started || 0;
-      }
-      if (windowLeads === 0) { data.push(null); return; }
-      data.push(parseFloat((windowSpend / windowLeads).toFixed(2)));
+  const blackoutDays = useMemo(() => sorted.filter((e) => isBlackout(e.date)).length, [sorted]);
+
+  /* ──── Monthly spend summary table ──── */
+  const monthlySpend = useMemo(() => {
+    const byMonth = new Map<string, { spend: number; clicks: number; impressions: number }>();
+    sorted.forEach((e) => {
+      const [y, m] = e.date.split('-');
+      const key = `${MONTH_SHORT[parseInt(m, 10)]} ${y}`;
+      if (!byMonth.has(key)) byMonth.set(key, { spend: 0, clicks: 0, impressions: 0 });
+      const bucket = byMonth.get(key)!;
+      bucket.spend += e.spend || 0;
+      bucket.clicks += e.clicks || 0;
+      bucket.impressions += e.impressions || 0;
     });
-    return { labels, data };
-  }, [sortedWithSpend]);
+    return Array.from(byMonth.entries()).map(([label, v]) => ({
+      label,
+      spend: v.spend,
+      clicks: v.clicks,
+      impressions: v.impressions,
+      cpc: v.clicks > 0 ? v.spend / v.clicks : 0,
+      ctr: v.impressions > 0 ? (v.clicks / v.impressions) * 100 : 0,
+    }));
+  }, [sorted]);
 
-  /* ──── CPC data ──── */
-  const cpcData = sortedWithSpend.map((e) =>
-    e.clicks > 0 ? parseFloat(((e.spend || 0) / e.clicks).toFixed(2)) : null
-  );
-
-  /* ──── Funnel bar data (tracked days only for conversion metrics) ──── */
-  const funnelBarData = useMemo(() => {
-    const tracked = sorted.filter((e) => !isBlackout(e.date));
-    const totalClicks = tracked.reduce((s, e) => s + (e.clicks || 0), 0);
-    const totalOpened = tracked.reduce((s, e) => s + (e.submit || 0), 0);
-    const totalStarted = tracked.reduce((s, e) => s + (e.started || 0), 0);
-    const totalCompleted = tracked.reduce((s, e) => s + (e.finished || 0), 0);
-    const totalTx = tracked.reduce((s, e) => s + (e.treatment || 0), 0);
-    return {
-      labels: [`Clicks (${trackedDays}d)`, 'Opened Form', 'Started Entry', 'Completed', 'Started Tx'],
-      values: [totalClicks, totalOpened, totalStarted, totalCompleted, totalTx],
-      colors: ['#E57373', TP.darkPurple, TP.blue, '#2e7d32', '#00C853'],
-      totalClicks,
-    };
-  }, [sorted, trackedDays]);
-
-  /* ──── Google vs Meta comparison rows ──── */
-  const compareRows = useMemo(() => [
-    { label: 'Time Active', meta: `${metaCampaignMonthCount} months`, google: `${googleDays} days (${trackedDays} tracked)` },
-    { label: 'Total Spend', meta: `$${Math.round(metaTotalSpend).toLocaleString()}`, google: `$${Math.round(googleTotalSpend).toLocaleString()}` },
-    { label: 'Total Leads', meta: `${metaTotalLeads}`, google: `${googleTotalLeads}` },
-    { label: 'Waiting on Info', meta: `${META_FUNNEL.waitingInfo} of ${META_FUNNEL.entered} (${META_FUNNEL.entered > 0 ? (META_FUNNEL.waitingInfo / META_FUNNEL.entered * 100).toFixed(0) : 0}%)`, google: `${googleWaitingInfo} of ${googleTotalLeads} (${googleTotalLeads > 0 ? (googleWaitingInfo / googleTotalLeads * 100).toFixed(0) : 0}%)` },
-    { label: 'Cost per Lead', meta: metaCPL > 0 ? `$${Math.round(metaCPL).toLocaleString()}` : 'No leads', google: googleCPL > 0 ? `$${Math.round(googleCPL).toLocaleString()}` : '--', highlight: true },
-    { label: 'Submissions (past waiting)', meta: `${metaSubmissions} of ${META_FUNNEL.entered} (${META_FUNNEL.entered > 0 ? (metaSubmissions / META_FUNNEL.entered * 100).toFixed(0) : 0}%)`, google: `${googleSubmissions} of ${googleTotalLeads} (${googleTotalLeads > 0 ? (googleSubmissions / googleTotalLeads * 100).toFixed(0) : 0}%)` },
-    { label: 'Cost per Submission', meta: metaCostPerSubmission > 0 ? `$${Math.round(metaCostPerSubmission).toLocaleString()}` : '--', google: googleCostPerSubmission > 0 ? `$${Math.round(googleCostPerSubmission).toLocaleString()}` : '--', highlight: true },
-    { label: 'Cost per Checkout', meta: metaCostPerCheckout > 0 ? `$${Math.round(metaCostPerCheckout).toLocaleString()}` : '--', google: googleCostPerCheckout > 0 ? `$${Math.round(googleCostPerCheckout).toLocaleString()}` : '--', highlight: true },
-    { label: 'Leads per Day', meta: metaTotalLeads > 0 ? (metaTotalLeads / (metaCampaignMonthCount * 30)).toFixed(2) : '0', google: googleTotalLeads > 0 ? `${(googleTotalLeads / trackedDays).toFixed(2)} (${trackedDays}d tracked)` : '0', highlight: true },
-    { label: 'Sent Checkout Link', meta: `${META_FUNNEL.sentCheckout} of ${META_FUNNEL.entered} (${META_FUNNEL.entered > 0 ? (META_FUNNEL.sentCheckout / META_FUNNEL.entered * 100).toFixed(0) : 0}%)`, google: `${GOOGLE_SF_PIPELINE.sentCheckout} of ${googleTotalLeads} (${googleTotalLeads > 0 ? (GOOGLE_SF_PIPELINE.sentCheckout / googleTotalLeads * 100).toFixed(0) : 0}%)` },
-    { label: 'Checked Out', meta: `${META_FUNNEL.checkedOut} -- $${(META_FUNNEL.amountReceived || 0).toLocaleString()}`, google: `${googleCheckouts} -- $${googleRevenue.toLocaleString()}`, highlight: true },
-    { label: 'Denied / Closed Lost', meta: `${META_FUNNEL.denied + META_FUNNEL.closedLost} (${META_FUNNEL.entered > 0 ? ((META_FUNNEL.denied + META_FUNNEL.closedLost) / META_FUNNEL.entered * 100).toFixed(0) : 0}%)`, google: `${GOOGLE_SF_PIPELINE.denied + GOOGLE_SF_PIPELINE.closedLost} (${googleTotalLeads > 0 ? ((GOOGLE_SF_PIPELINE.denied + GOOGLE_SF_PIPELINE.closedLost) / googleTotalLeads * 100).toFixed(0) : 0}%)` },
-  ], [googleTotalSpend, googleTotalLeads, googleDays, trackedDays, googleCPL, googleSubmissions, googleCostPerSubmission, googleCostPerCheckout, googleCheckouts, googleRevenue, googleWaitingInfo, metaCPL, metaSubmissions, metaCostPerSubmission, metaCostPerCheckout, metaTotalSpend, metaTotalLeads, metaCampaignMonthCount]);
-
-  const advantage = metaCPL > 0 && googleCPL > 0 ? Math.round(metaCPL / googleCPL) : 0;
+  /* ──── Meta historical stats ──── */
+  const metaTotalSpend = META_MONTHLY.reduce((s, m) => s + m.spend, 0);
+  const metaTotalLeads = META_MONTHLY.reduce((s, m) => s + m.leads, 0);
+  const metaCPL = metaTotalLeads > 0 ? metaTotalSpend / metaTotalLeads : 0;
 
   /* ──── RENDER ──── */
 
@@ -509,431 +453,314 @@ export default function PaidAds() {
         <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', padding: '12px 16px', borderRadius: 8, fontSize: 14, marginBottom: 16 }}>{error}</div>
       )}
 
-      {/* ═══════ SECTION 1: Google Ads — Current Performance ═══════ */}
-      <div style={{ marginBottom: 32 }}>
-        <div style={{ fontSize: 16, fontWeight: 700, color: '#E57373', borderBottom: '2px solid #E57373', paddingBottom: 8, marginBottom: 16 }}>
-          Google Ads -- Current Performance
-        </div>
-
-        {/* Google KPI cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, marginBottom: 20 }}>
-          <KPICard color="#E57373" label="Total Spend" value={`$${gT.spend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} sub={<>{sorted.length} days ({blackoutDays} blackout){blackoutDays > 0 && <><br/><span style={{ color: '#2e7d32' }}>Excl. blackout: ${googleTrackedSpend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></>}</>} />
-          <KPICard color={TP.yellow} label="Cost per Click" value={`$${avgCPC.toFixed(2)}`} sub={`${gT.clicks.toLocaleString()} clicks total`} />
-          <KPICard color={TP.blue} label="Cost per Lead" value={`$${Math.round(googleCPL)}`} sub={<>{googleTotalLeads} leads ({trackedDays}d tracked){blackoutDays > 0 && <><br/><span style={{ color: '#2e7d32' }}>Excl. blackout: ${Math.round(googleCPLTracked)}</span></>}</>} />
-          <KPICard color={TP.darkPurple} label="Cost per Submission" value={`$${Math.round(googleCostPerSubmission)}`} sub={<>{googleSubmissions} submitted ({trackedDays}d tracked){blackoutDays > 0 && <><br/><span style={{ color: '#2e7d32' }}>Excl. blackout: ${Math.round(googleCostPerSubmissionTracked)}</span></>}</>} />
-          <KPICard color="#00C853" label="Cost per Checkout" value={googleCheckouts > 0 ? `$${Math.round(googleCostPerCheckout).toLocaleString()}` : '--'} sub={<>{googleCheckouts} checkout{googleCheckouts !== 1 ? 's' : ''}{blackoutDays > 0 && googleCheckouts > 0 && <><br/><span style={{ color: '#2e7d32' }}>Excl. blackout: ${Math.round(googleCostPerCheckoutTracked).toLocaleString()}</span></>}</>} />
-        </div>
-
-        {/* Chart 1: Clicks, CPC & Spend */}
-        <ChartLabel>Clicks, CPC &amp; Spend</ChartLabel>
-        <ChartCard>
-          <div style={{ height: 350 }}>
-            {sortedWithSpend.length > 1 ? (
-              <Line
-                data={{
-                  labels: spendLabels,
-                  datasets: [
-                    { label: 'Clicks', data: sortedWithSpend.map((e) => e.clicks || 0), borderColor: '#E57373', borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 4, pointBackgroundColor: '#E57373', yAxisID: 'y' },
-                    { label: 'Spend ($)', data: sortedWithSpend.map((e) => e.spend || 0), borderColor: TP.blue, borderWidth: 2, borderDash: [4, 2], tension: 0.3, fill: false, pointRadius: 3, pointBackgroundColor: TP.blue, yAxisID: 'y1' },
-                    { label: 'CPC ($)', data: cpcData, borderColor: TP.yellow, borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 5, pointBackgroundColor: TP.yellow, yAxisID: 'y2', spanGaps: true },
-                  ],
-                }}
-                options={{
-                  responsive: true, maintainAspectRatio: false,
-                  layout: { padding: { top: 30 } },
-                  plugins: {
-                    legend: { position: 'top', labels: { usePointStyle: true, padding: 16, font: { size: 11 } } },
-                    tooltip: { mode: 'index' as const, intersect: false, callbacks: { label: (ctx) => ctx.datasetIndex >= 1 ? `${ctx.dataset.label}: $${ctx.parsed.y !== null ? ctx.parsed.y.toFixed(2) : '--'}` : `${ctx.dataset.label}: ${ctx.parsed.y}` } },
-                  },
-                  scales: {
-                    y: { beginAtZero: true, position: 'left', ticks: { stepSize: 10 }, title: { display: true, text: 'Clicks', font: { size: 10 } } },
-                    y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: (v) => `$${Number(v).toFixed(0)}` }, title: { display: true, text: 'Spend', font: { size: 10 }, color: TP.blue } },
-                    y2: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: (v) => `$${Number(v).toFixed(0)}`, color: TP.yellow }, title: { display: true, text: 'CPC', font: { size: 10 }, color: TP.yellow }, suggestedMax: 10 },
-                  },
-                  interaction: { mode: 'nearest' as const, axis: 'x' as const, intersect: false },
-                }}
-                plugins={[annotationPlugin as never]}
-              />
-            ) : <NoData />}
-          </div>
-        </ChartCard>
-
-        {/* Chart 2: Daily Funnel Flow */}
-        <ChartLabel>Daily Funnel Flow</ChartLabel>
-        <ChartCard>
-          <div style={{ height: 280 }}>
-            {sorted.length > 1 ? (
-              <Line
-                data={{
-                  labels: trendLabels,
-                  datasets: [
-                    { label: 'Opened Form', data: sorted.map((e) => isBlackout(e.date) ? null : (e.submit || 0)), borderColor: TP.darkPurple, borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 3, pointBackgroundColor: TP.darkPurple, spanGaps: false },
-                    { label: 'Started Entry', data: sorted.map((e) => isBlackout(e.date) ? null : (e.started || 0)), borderColor: TP.blue, borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 3, pointBackgroundColor: TP.blue, spanGaps: false },
-                    { label: 'Completed', data: sorted.map((e) => isBlackout(e.date) ? null : (e.finished || 0)), borderColor: '#2e7d32', borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 3, pointBackgroundColor: '#2e7d32', spanGaps: false },
-                    { label: 'Started Tx', data: sorted.map((e) => isBlackout(e.date) ? null : (e.treatment || 0)), borderColor: '#00C853', borderWidth: 2, tension: 0.3, fill: false, pointRadius: 4, pointBackgroundColor: '#00C853', borderDash: [4, 2], spanGaps: false },
-                  ],
-                }}
-                options={{
-                  responsive: true, maintainAspectRatio: false,
-                  layout: { padding: { top: 10 } },
-                  plugins: {
-                    legend: { position: 'top', labels: { usePointStyle: true, padding: 14, font: { size: 11 } } },
-                    tooltip: { mode: 'index' as const, intersect: false },
-                  },
-                  scales: { y: { beginAtZero: true, ticks: { stepSize: 5 }, title: { display: true, text: 'Count', font: { size: 10 } } } },
-                  interaction: { mode: 'nearest' as const, axis: 'x' as const, intersect: false },
-                }}
-                plugins={[annotationPlugin as never]}
-              />
-            ) : <NoData />}
-          </div>
-        </ChartCard>
-
-        {/* Chart 3: Assessment Funnel (horizontal bar, tracked days only) */}
-        <ChartLabel>Assessment Funnel ({trackedDays} Tracked Days)</ChartLabel>
-        <ChartCard>
-          <div style={{ height: 250 }}>
-            <Bar
-              data={{
-                labels: funnelBarData.labels,
-                datasets: [{
-                  data: funnelBarData.values,
-                  backgroundColor: funnelBarData.colors,
-                  borderColor: funnelBarData.colors,
-                  borderWidth: 1,
-                  borderRadius: 6,
-                  barPercentage: 0.7,
-                }],
-              }}
-              options={{
-                indexAxis: 'y' as const,
-                responsive: true, maintainAspectRatio: false,
-                plugins: {
-                  legend: { display: false },
-                  tooltip: {
-                    callbacks: {
-                      label: (ctx) => {
-                        const val = ctx.parsed.x ?? 0;
-                        const pct = funnelBarData.totalClicks > 0 ? (val / funnelBarData.totalClicks * 100).toFixed(1) : '0';
-                        return `${val} (${pct}% of clicks)`;
-                      },
-                    },
-                  },
-                },
-                scales: {
-                  x: { beginAtZero: true, title: { display: true, text: 'Count', font: { size: 10 } } },
-                  y: { ticks: { font: { size: 12, weight: 'bold' } } },
-                },
-              }}
-            />
-          </div>
-        </ChartCard>
-
-        {/* Chart 4: Cost per Lead — 7-day Rolling Average */}
-        <ChartLabel>Cost per Lead (7-day Rolling Avg)</ChartLabel>
-        <ChartCard>
-          <div style={{ height: 260 }}>
-            {cplChartData.data.length > 1 ? (
-              <Line
-                data={{
-                  labels: cplChartData.labels,
-                  datasets: [{
-                    label: 'Cost per Lead',
-                    data: cplChartData.data,
-                    borderColor: '#E57373', borderWidth: 2.5, tension: 0.3,
-                    fill: true, backgroundColor: '#E5737320',
-                    pointRadius: 4, pointBackgroundColor: '#E57373', spanGaps: true,
-                  }],
-                }}
-                options={{
-                  responsive: true, maintainAspectRatio: false,
-                  layout: { padding: { top: 25 } },
-                  plugins: {
-                    legend: { position: 'top', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } },
-                    tooltip: { callbacks: { label: (ctx) => `CPL: $${ctx.parsed.y !== null ? ctx.parsed.y.toFixed(2) : '--'}` } },
-                  },
-                  scales: {
-                    y: { beginAtZero: false, ticks: { callback: (v) => `$${Number(v).toFixed(0)}` }, title: { display: true, text: 'Cost per Lead', font: { size: 10 } } },
-                  },
-                  interaction: { mode: 'nearest' as const, axis: 'x' as const, intersect: false },
-                }}
-                plugins={[annotationPlugin as never]}
-              />
-            ) : <NoData />}
-          </div>
-        </ChartCard>
-
-        {/* Salesforce Pipeline */}
-        <ChartLabel>Salesforce Pipeline</ChartLabel>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10, marginBottom: 12 }}>
-          {[
-            { label: 'Waiting on Info', val: googleWaitingInfo, color: '#999' },
-            { label: 'Sent to TxP', val: GOOGLE_SF_PIPELINE.sentToTxP, color: TP.darkPurple },
-            { label: 'TxP Approved', val: GOOGLE_SF_PIPELINE.txpApproved, color: TP.blue },
-            { label: 'Sent Checkout', val: GOOGLE_SF_PIPELINE.sentCheckout, color: TP.yellow },
-            { label: 'Checked Out', val: googleCheckouts, color: '#00C853' },
-          ].map((s) => (
-            <div key={s.label} style={{
-              background: '#fff', borderRadius: 10, padding: '14px 10px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)', textAlign: 'center',
-              borderTop: `3px solid ${s.color}`,
-            }}>
-              <div style={{ fontSize: '0.65em', color: '#666', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: 4 }}>{s.label}</div>
-              <div style={{ fontSize: '1.5em', fontWeight: 'bold', color: TP.navy }}>{s.val}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Revenue vs Spend */}
-        <div style={{
-          background: 'linear-gradient(135deg, #f8faf8, #f0f7ed)',
-          borderRadius: 12, padding: '20px 24px', marginBottom: 16, border: '1px solid #e0e8d8',
-        }}>
-          <div style={{ fontWeight: 700, color: TP.navy, fontSize: '0.95em', marginBottom: 12 }}>Revenue vs Spend</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, textAlign: 'center' }}>
-            <div>
-              <div style={{ fontSize: '0.7em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Total Spend</div>
-              <div style={{ fontSize: '1.6em', fontWeight: 'bold', color: '#E57373' }}>${googleTotalSpend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.7em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Revenue (Checkouts)</div>
-              <div style={{ fontSize: '1.6em', fontWeight: 'bold', color: googleRevenue > 0 ? '#00C853' : '#999' }}>
-                {googleRevenue > 0 ? `$${googleRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0'}{googleRevenue === 0 && <span style={{ fontSize: '0.5em', fontWeight: 400 }}> pending</span>}
-              </div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.7em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Net</div>
-              <div style={{ fontSize: '1.6em', fontWeight: 'bold', color: googleRevenue > 0 ? (googleNet >= 0 ? '#00C853' : '#E57373') : '#999' }}>
-                {googleRevenue > 0 ? `${googleNet >= 0 ? '+' : ''}$${Math.abs(googleNet).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '--'}
-              </div>
-            </div>
-          </div>
-          {blackoutDays > 0 && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, textAlign: 'center', marginTop: 12, paddingTop: 12, borderTop: '1px dashed #c8d8c0' }}>
-              <div>
-                <div style={{ fontSize: '0.65em', color: '#2e7d32', textTransform: 'uppercase', marginBottom: 4 }}>Excl. Blackout Spend</div>
-                <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#2e7d32' }}>${googleTrackedSpend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.65em', color: '#888', textTransform: 'uppercase', marginBottom: 4 }}>Blackout Spend</div>
-                <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#999' }}>${blackoutSpend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.65em', color: '#2e7d32', textTransform: 'uppercase', marginBottom: 4 }}>Net (Excl. Blackout)</div>
-                <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: googleNetTracked >= 0 ? '#00C853' : '#E57373' }}>
-                  {`${googleNetTracked >= 0 ? '+' : ''}$${Math.abs(googleNetTracked).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                </div>
-              </div>
-            </div>
-          )}
-          <div style={{ fontSize: '0.78em', color: '#888', marginTop: 10 }}>
-            {googleCheckouts} checkout{googleCheckouts !== 1 ? 's' : ''} totaling ${googleRevenue.toLocaleString()}. {GOOGLE_SF_PIPELINE.sentCheckout} more at Sent Checkout stage.
-          </div>
-          <div style={{ fontSize: '0.72em', color: '#aaa', marginTop: 6, fontStyle: 'italic' }}>
-            Revenue reflects initial checkout amounts only. Does not include lifetime value, refunds, or cancellations.
-          </div>
-        </div>
-
-        {/* ──── Cohort Maturity Analysis ──── */}
-        <div style={{ fontSize: 16, fontWeight: 700, color: '#E57373', borderBottom: `2px solid ${TP.navy}`, paddingBottom: 8, marginBottom: 16, marginTop: 32 }}>
-          Cohort Maturity Analysis
-        </div>
-
-        <div style={{ fontSize: '0.85em', color: '#555', marginBottom: 12, lineHeight: 1.6 }}>
-          CAC = spend / checkouts. Recent cohorts have not fully matured. Adjusted CAC projects forward using Kenny{"'"}s checkout maturity curve.
-        </div>
-
-        {/* Maturity curve reference toggle */}
-        <div style={{ marginBottom: 16 }}>
-          <button
-            onClick={() => setShowMaturityRef(!showMaturityRef)}
-            style={{
-              background: 'none', border: 'none', color: TP.blue, cursor: 'pointer',
-              fontSize: '0.82em', fontWeight: 600, padding: 0, textDecoration: 'underline',
-            }}
-          >
-            {showMaturityRef ? 'Hide' : 'Show'} maturity curve reference
-          </button>
-          {showMaturityRef && (
-            <div style={{
-              background: '#f8f9fa', borderRadius: 8, padding: '12px 16px', marginTop: 8,
-              fontSize: '0.82em', color: '#555', border: '1px solid #e8e8e8',
-            }}>
-              <div style={{ fontWeight: 600, marginBottom: 6, color: TP.navy }}>Checkout Maturity Curve</div>
-              <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-                {MATURITY_CURVE.filter(p => p.days > 0).map(p => (
-                  <span key={p.days}>{p.days}d = {Math.round(p.pct * 100)}%</span>
-                ))}
-              </div>
-              <div style={{ marginTop: 6, color: '#888', fontSize: '0.9em' }}>
-                Percentage of eventual checkouts that have occurred by cohort age.
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Cohort table */}
-        <div style={{ overflowX: 'auto', marginBottom: 20 }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
-            <thead>
-              <tr style={{ background: TP.navy }}>
-                {['Cohort', 'Google Spend', 'Leads', 'Checkouts', 'Age', '~Maturity', 'Projected Final', 'Raw CAC', 'Adj CAC'].map(h => (
-                  <th key={h} style={{ padding: '8px 10px', textAlign: h === 'Cohort' ? 'left' : 'right', color: '#fff', whiteSpace: 'nowrap' }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {cohortData.map((c, idx) => (
-                <tr key={c.label} style={{
-                  background: idx % 2 === 0 ? '#f9f9f9' : '#fff',
-                  opacity: c.maturity < 0.40 ? 0.6 : 1,
-                }}>
-                  <td style={{ padding: '6px 10px', fontWeight: 600 }}>{c.label}</td>
-                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>${Math.round(c.spend).toLocaleString()}</td>
-                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>{c.leads}</td>
-                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>{c.checkouts}</td>
-                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>{c.ageDays}d</td>
-                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>{Math.round(c.maturity * 100)}%</td>
-                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>{c.projectedFinal > 0 ? c.projectedFinal.toFixed(1) : '—'}</td>
-                  <td style={{ padding: '6px 10px', textAlign: 'right', color: '#888' }}>{c.rawCAC !== null ? `$${Math.round(c.rawCAC).toLocaleString()}` : '—'}</td>
-                  <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 600, color: c.adjCAC !== null && c.adjCAC <= 500 ? '#00C853' : (c.adjCAC !== null ? '#E57373' : '#888') }}>
-                    {c.adjCAC !== null ? `$${Math.round(c.adjCAC).toLocaleString()}` : '—'}
-                  </td>
-                </tr>
-              ))}
-              {/* Totals row */}
-              <tr style={{ background: TP.navy, color: '#fff', fontWeight: 700 }}>
-                <td style={{ padding: '8px 10px' }}>Total</td>
-                <td style={{ padding: '8px 10px', textAlign: 'right' }}>${Math.round(cohortTotals.totalSpend).toLocaleString()}</td>
-                <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.totalLeads}</td>
-                <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.totalCheckouts}</td>
-                <td style={{ padding: '8px 10px', textAlign: 'right' }}></td>
-                <td style={{ padding: '8px 10px', textAlign: 'right' }}></td>
-                <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.totalProjected > 0 ? cohortTotals.totalProjected.toFixed(1) : '—'}</td>
-                <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.overallRawCAC !== null ? `$${Math.round(cohortTotals.overallRawCAC).toLocaleString()}` : '—'}</td>
-                <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.overallAdjCAC !== null ? `$${Math.round(cohortTotals.overallAdjCAC).toLocaleString()}` : '—'}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* CAC Trend Chart */}
-        <ChartLabel>CAC Trend by Cohort</ChartLabel>
-        <ChartCard>
-          <div style={{ height: 300 }}>
-            {cohortData.length > 0 ? (
-              <Bar
-                data={{
-                  labels: cohortData.map(c => c.label),
-                  datasets: [
-                    {
-                      label: 'Raw CAC',
-                      data: cohortData.map(c => c.rawCAC),
-                      backgroundColor: '#ccc',
-                      borderColor: '#aaa',
-                      borderWidth: 1,
-                      borderRadius: 4,
-                      barPercentage: 0.7,
-                      categoryPercentage: 0.8,
-                    },
-                    {
-                      label: 'Maturity-Adj CAC',
-                      data: cohortData.map(c => c.adjCAC),
-                      backgroundColor: TP.blue,
-                      borderColor: TP.navy,
-                      borderWidth: 1,
-                      borderRadius: 4,
-                      barPercentage: 0.7,
-                      categoryPercentage: 0.8,
-                    },
-                    {
-                      label: '$500 Target',
-                      data: cohortData.map(() => 500),
-                      type: 'line',
-                      borderColor: TP.red,
-                      borderWidth: 2,
-                      borderDash: [8, 4],
-                      pointRadius: 0,
-                      fill: false,
-                    } as never,
-                  ],
-                }}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: { position: 'top', labels: { usePointStyle: true, padding: 14, font: { size: 11 } } },
-                    tooltip: {
-                      callbacks: {
-                        label: (ctx) => {
-                          if (ctx.dataset.label === '$500 Target') return '$500 Target';
-                          const val = ctx.parsed.y;
-                          return val !== null ? `${ctx.dataset.label}: $${Math.round(val).toLocaleString()}` : `${ctx.dataset.label}: --`;
-                        },
-                      },
-                    },
-                  },
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      ticks: { callback: (v) => `$${Number(v).toLocaleString()}` },
-                      title: { display: true, text: 'Cost per Checkout', font: { size: 10 } },
-                    },
-                  },
-                }}
-              />
-            ) : <NoData />}
-          </div>
-        </ChartCard>
+      {/* ═══════ KPI CARDS ═══════ */}
+      <div style={{ fontSize: 16, fontWeight: 700, color: '#E57373', borderBottom: '2px solid #E57373', paddingBottom: 8, marginBottom: 16 }}>
+        Google Ads — Overview
       </div>
 
-      {/* ═══════ SECTION 2: Google vs Meta — Platform Comparison ═══════ */}
-      <div style={{ marginBottom: 32 }}>
-        <div style={{ fontSize: 16, fontWeight: 700, color: TP.navy, borderBottom: `2px solid ${TP.navy}`, paddingBottom: 8, marginBottom: 16 }}>
-          Google vs Meta -- Platform Comparison
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 12, marginBottom: 8 }}>
+        <KPICard color="#E57373" label="Total Spend" value={`$${googleTotalSpend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} sub="Source: Google Ads" />
+        <KPICard color={TP.darkPurple} label="Leads (SF)" value={`${totalLeads}`} sub="Source: Salesforce" />
+        <KPICard color={TP.yellow} label="CPL" value={`$${Math.round(cpl).toLocaleString()}`} sub="Spend ÷ SF leads" />
+        <KPICard color={TP.blue} label="Checkouts" value={`${totalCheckouts}`} sub="Source: Salesforce" />
+        <KPICard color="#00C853" label="CAC" value={totalCheckouts > 0 ? `$${Math.round(cac).toLocaleString()}` : '—'} sub="Spend ÷ SF checkouts" />
+        <KPICard color={TP.green} label="Revenue" value={`$${GOOGLE_REVENUE.toLocaleString()}`} sub="Source: Salesforce" />
+      </div>
+      <div style={{ fontSize: '0.78em', color: '#888', marginBottom: 28, fontStyle: 'italic' }}>
+        Lead and checkout counts from Salesforce. Spend from Google Ads.
+      </div>
 
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
-            <thead>
-              <tr style={{ background: TP.navy }}>
-                <th style={{ padding: '12px 16px', textAlign: 'left', color: '#fff', width: '40%' }}>Metric</th>
-                <th style={{ padding: '12px 16px', textAlign: 'center', color: '#999', width: '30%' }}>Meta Ads</th>
-                <th style={{ padding: '12px 16px', textAlign: 'center', color: TP.green, width: '30%' }}>Google Ads</th>
-              </tr>
-            </thead>
-            <tbody>
-              {compareRows.map((row, idx) => (
-                <tr key={row.label} style={{
-                  background: row.highlight ? '#f0f7ed' : (idx % 2 === 0 ? '#f9f9f9' : '#fff'),
-                  fontWeight: row.highlight ? 600 : 400,
-                }}>
-                  <td style={{ padding: '10px 16px' }}>{row.label}</td>
-                  <td style={{ padding: '10px 16px', textAlign: 'center', color: '#999' }}>{row.meta}</td>
-                  <td style={{ padding: '10px 16px', textAlign: 'center', color: TP.navy, fontWeight: 600 }}>{row.google}</td>
-                </tr>
+      {/* ═══════ SALESFORCE PIPELINE ═══════ */}
+      <div style={{ fontSize: 16, fontWeight: 700, color: TP.navy, borderBottom: `2px solid ${TP.navy}`, paddingBottom: 8, marginBottom: 16 }}>
+        Salesforce Pipeline
+      </div>
+      <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>Source: Salesforce</div>
+
+      <ChartCard>
+        <div style={{ height: 260 }}>
+          <Bar
+            data={{
+              labels: pipelineBar.map(s => s.label),
+              datasets: [{
+                data: pipelineBar.map(s => s.val),
+                backgroundColor: pipelineBar.map(s => s.color),
+                borderColor: pipelineBar.map(s => s.color),
+                borderWidth: 1,
+                borderRadius: 6,
+                barPercentage: 0.7,
+              }],
+            }}
+            options={{
+              indexAxis: 'y' as const,
+              responsive: true, maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  callbacks: {
+                    label: (ctx) => {
+                      const val = ctx.parsed.x ?? 0;
+                      const pct = totalLeads > 0 ? (val / totalLeads * 100).toFixed(1) : '0';
+                      return `${val} (${pct}% of leads)`;
+                    },
+                  },
+                },
+              },
+              scales: {
+                x: { beginAtZero: true, title: { display: true, text: 'Count', font: { size: 10 } } },
+                y: { ticks: { font: { size: 12, weight: 'bold' } } },
+              },
+            }}
+          />
+        </div>
+      </ChartCard>
+
+      <div style={{ background: '#f0f7ed', borderLeft: '4px solid #5BA88C', borderRadius: 8, padding: '14px 18px', marginBottom: 32 }}>
+        <div style={{ fontWeight: 700, color: TP.navy }}>
+          {totalLeads} leads → {totalCheckouts} checkouts = {leadToCheckoutRate.toFixed(1)}% conversion rate.
+        </div>
+      </div>
+
+      {/* ═══════ COHORT MATURITY ANALYSIS ═══════ */}
+      <div style={{ fontSize: 16, fontWeight: 700, color: TP.navy, borderBottom: `2px solid ${TP.navy}`, paddingBottom: 8, marginBottom: 16 }}>
+        Cohort Maturity Analysis
+      </div>
+      <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 8 }}>Source: Salesforce (leads/checkouts) + Google Ads (spend)</div>
+
+      <div style={{ fontSize: '0.85em', color: '#555', marginBottom: 12, lineHeight: 1.6 }}>
+        CAC = spend / checkouts. Recent cohorts have not fully matured. Adjusted CAC projects forward using Kenny{"'"}s checkout maturity curve.
+      </div>
+
+      <div style={{ marginBottom: 16 }}>
+        <button
+          onClick={() => setShowMaturityRef(!showMaturityRef)}
+          style={{
+            background: 'none', border: 'none', color: TP.blue, cursor: 'pointer',
+            fontSize: '0.82em', fontWeight: 600, padding: 0, textDecoration: 'underline',
+          }}
+        >
+          {showMaturityRef ? 'Hide' : 'Show'} maturity curve reference
+        </button>
+        {showMaturityRef && (
+          <div style={{
+            background: '#f8f9fa', borderRadius: 8, padding: '12px 16px', marginTop: 8,
+            fontSize: '0.82em', color: '#555', border: '1px solid #e8e8e8',
+          }}>
+            <div style={{ fontWeight: 600, marginBottom: 6, color: TP.navy }}>Checkout Maturity Curve</div>
+            <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+              {MATURITY_CURVE.filter(p => p.days > 0).map(p => (
+                <span key={p.days}>{p.days}d = {Math.round(p.pct * 100)}%</span>
               ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Cost advantage callout */}
-        {advantage > 0 && (
-          <div style={{ background: '#f0f7ed', borderLeft: '4px solid #5BA88C', borderRadius: 8, padding: '16px 20px', marginTop: 16 }}>
-            <div style={{ fontSize: '1.1em', fontWeight: 700, color: TP.navy }}>Google leads cost {advantage}x less per lead than Meta.</div>
-            <div style={{ fontSize: '0.88em', color: '#555', marginTop: 6 }}>
-              Meta spent ${Math.round(metaTotalSpend).toLocaleString()} over {metaCampaignMonthCount} months for {metaTotalLeads} leads (${Math.round(metaCPL)} each). Google has spent ${Math.round(googleTotalSpend).toLocaleString()} in {googleDays} days for {googleTotalLeads} leads (${Math.round(googleCPL)} each).
+            </div>
+            <div style={{ marginTop: 6, color: '#888', fontSize: '0.9em' }}>
+              Percentage of eventual checkouts that have occurred by cohort age.
             </div>
           </div>
         )}
       </div>
 
-      {/* ═══════ SECTION 3: Google Ads — Daily Tracking ═══════ */}
-      <div style={{ fontSize: 16, fontWeight: 700, color: '#E57373', borderBottom: '2px solid #E57373', paddingBottom: 8, marginBottom: 16 }}>
-        Google Ads -- Daily Tracking
+      <div style={{ overflowX: 'auto', marginBottom: 20 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
+          <thead>
+            <tr style={{ background: TP.navy }}>
+              {['Cohort', 'Google Spend', 'SF Leads', 'SF Checkouts', 'Age', '~Maturity', 'Projected Final', 'Raw CAC', 'Adj CAC'].map(h => (
+                <th key={h} style={{ padding: '8px 10px', textAlign: h === 'Cohort' ? 'left' : 'right', color: '#fff', whiteSpace: 'nowrap' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {cohortData.map((c, idx) => (
+              <tr key={c.label} style={{
+                background: idx % 2 === 0 ? '#f9f9f9' : '#fff',
+                opacity: c.maturity < 0.40 ? 0.6 : 1,
+              }}>
+                <td style={{ padding: '6px 10px', fontWeight: 600 }}>{c.label}</td>
+                <td style={{ padding: '6px 10px', textAlign: 'right' }}>${Math.round(c.spend).toLocaleString()}</td>
+                <td style={{ padding: '6px 10px', textAlign: 'right' }}>{c.leads}</td>
+                <td style={{ padding: '6px 10px', textAlign: 'right' }}>{c.checkouts}</td>
+                <td style={{ padding: '6px 10px', textAlign: 'right' }}>{c.ageDays}d</td>
+                <td style={{ padding: '6px 10px', textAlign: 'right' }}>{Math.round(c.maturity * 100)}%</td>
+                <td style={{ padding: '6px 10px', textAlign: 'right' }}>{c.projectedFinal > 0 ? c.projectedFinal.toFixed(1) : '—'}</td>
+                <td style={{ padding: '6px 10px', textAlign: 'right', color: '#888' }}>{c.rawCAC !== null ? `$${Math.round(c.rawCAC).toLocaleString()}` : '—'}</td>
+                <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 600, color: c.adjCAC !== null && c.adjCAC <= 500 ? '#00C853' : (c.adjCAC !== null ? '#E57373' : '#888') }}>
+                  {c.adjCAC !== null ? `$${Math.round(c.adjCAC).toLocaleString()}` : '—'}
+                </td>
+              </tr>
+            ))}
+            <tr style={{ background: TP.navy, color: '#fff', fontWeight: 700 }}>
+              <td style={{ padding: '8px 10px' }}>Total</td>
+              <td style={{ padding: '8px 10px', textAlign: 'right' }}>${Math.round(cohortTotals.totalSpend).toLocaleString()}</td>
+              <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.totalLeads}</td>
+              <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.totalCheckouts}</td>
+              <td style={{ padding: '8px 10px', textAlign: 'right' }}></td>
+              <td style={{ padding: '8px 10px', textAlign: 'right' }}></td>
+              <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.totalProjected > 0 ? cohortTotals.totalProjected.toFixed(1) : '—'}</td>
+              <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.overallRawCAC !== null ? `$${Math.round(cohortTotals.overallRawCAC).toLocaleString()}` : '—'}</td>
+              <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.overallAdjCAC !== null ? `$${Math.round(cohortTotals.overallAdjCAC).toLocaleString()}` : '—'}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      {/* Entry form */}
+      <ChartLabel>CAC Trend by Cohort</ChartLabel>
+      <ChartCard>
+        <div style={{ height: 300 }}>
+          {cohortData.length > 0 ? (
+            <Bar
+              data={{
+                labels: cohortData.map(c => c.label),
+                datasets: [
+                  {
+                    label: 'Raw CAC',
+                    data: cohortData.map(c => c.rawCAC),
+                    backgroundColor: '#ccc',
+                    borderColor: '#aaa',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.8,
+                  },
+                  {
+                    label: 'Maturity-Adj CAC',
+                    data: cohortData.map(c => c.adjCAC),
+                    backgroundColor: TP.blue,
+                    borderColor: TP.navy,
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.8,
+                  },
+                  {
+                    label: '$500 Target',
+                    data: cohortData.map(() => 500),
+                    type: 'line',
+                    borderColor: TP.red,
+                    borderWidth: 2,
+                    borderDash: [8, 4],
+                    pointRadius: 0,
+                    fill: false,
+                  } as never,
+                ],
+              }}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { position: 'top', labels: { usePointStyle: true, padding: 14, font: { size: 11 } } },
+                  tooltip: {
+                    callbacks: {
+                      label: (ctx) => {
+                        if (ctx.dataset.label === '$500 Target') return '$500 Target';
+                        const val = ctx.parsed.y;
+                        return val !== null ? `${ctx.dataset.label}: $${Math.round(val).toLocaleString()}` : `${ctx.dataset.label}: --`;
+                      },
+                    },
+                  },
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: { callback: (v) => `$${Number(v).toLocaleString()}` },
+                    title: { display: true, text: 'Cost per Checkout', font: { size: 10 } },
+                  },
+                },
+              }}
+            />
+          ) : <NoData />}
+        </div>
+      </ChartCard>
+
+      {/* ═══════ CONVERSION TIMING ═══════ */}
+      <div style={{ fontSize: 16, fontWeight: 700, color: TP.navy, borderBottom: `2px solid ${TP.navy}`, paddingBottom: 8, marginBottom: 16 }}>
+        Conversion Timing
+      </div>
+      <div style={{
+        background: '#fff', borderRadius: 12, padding: '20px 24px', marginBottom: 32,
+        boxShadow: '0 4px 15px rgba(0,0,0,0.08)', borderTop: `3px solid ${TP.blue}`,
+      }}>
+        <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: TP.navy, marginBottom: 6 }}>
+          Median {CONVERSION_TIMING.median} days from lead to checkout
+        </div>
+        <div style={{ fontSize: '0.9em', color: '#666' }}>
+          Range: {CONVERSION_TIMING.min}–{CONVERSION_TIMING.max} days (average {CONVERSION_TIMING.average} days), n={CONVERSION_TIMING.count}
+        </div>
+        <div style={{ fontSize: '0.75em', color: '#aaa', marginTop: 8 }}>Source: Salesforce</div>
+      </div>
+
+      {/* ═══════ DAILY SPEND TREND ═══════ */}
+      <div style={{ fontSize: 16, fontWeight: 700, color: '#E57373', borderBottom: '2px solid #E57373', paddingBottom: 8, marginBottom: 16 }}>
+        Daily Spend Trend
+      </div>
+      <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>Source: Google Ads</div>
+
+      <ChartCard>
+        <div style={{ height: 320 }}>
+          {sorted.length > 1 ? (
+            <Line
+              data={{
+                labels: spendTrend.labels,
+                datasets: [
+                  { label: 'Daily Spend ($)', data: spendTrend.spendVals, borderColor: '#E57373', borderWidth: 2, tension: 0.3, fill: false, pointRadius: 2, pointBackgroundColor: '#E57373' },
+                  { label: '7-Day Avg', data: spendTrend.movingAvg, borderColor: TP.blue, borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 0, borderDash: [5, 3] },
+                ],
+              }}
+              options={{
+                responsive: true, maintainAspectRatio: false,
+                layout: { padding: { top: 24 } },
+                plugins: {
+                  legend: { position: 'top', labels: { usePointStyle: true, padding: 16, font: { size: 11 } } },
+                  tooltip: { mode: 'index' as const, intersect: false, callbacks: { label: (ctx) => `${ctx.dataset.label}: $${ctx.parsed.y !== null ? ctx.parsed.y.toFixed(2) : '--'}` } },
+                },
+                scales: {
+                  y: { beginAtZero: true, ticks: { callback: (v) => `$${Number(v).toFixed(0)}` }, title: { display: true, text: 'Spend', font: { size: 10 } } },
+                },
+                interaction: { mode: 'nearest' as const, axis: 'x' as const, intersect: false },
+              }}
+              plugins={[blackoutAnnotation as never]}
+            />
+          ) : <NoData />}
+        </div>
+      </ChartCard>
+      {blackoutDays > 0 && (
+        <div style={{ fontSize: '0.78em', color: '#888', marginTop: -16, marginBottom: 32, fontStyle: 'italic' }}>
+          May 11–20 shaded above: the go.toothpillow tracking link was broken during this window. Spend shown here is unaffected.
+        </div>
+      )}
+
+      {/* ═══════ MONTHLY SPEND SUMMARY ═══════ */}
+      <div style={{ fontSize: 16, fontWeight: 700, color: TP.navy, borderBottom: `2px solid ${TP.navy}`, paddingBottom: 8, marginBottom: 16 }}>
+        Monthly Spend Summary
+      </div>
+      <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>Source: Google Ads</div>
+
+      <div style={{ overflowX: 'auto', marginBottom: 32 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
+          <thead>
+            <tr style={{ background: TP.navy }}>
+              {['Month', 'Spend', 'Clicks', 'Impressions', 'CPC', 'CTR'].map(h => (
+                <th key={h} style={{ padding: '10px 14px', textAlign: h === 'Month' ? 'left' : 'right', color: '#fff' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {monthlySpend.map((m, idx) => (
+              <tr key={m.label} style={{ background: idx % 2 === 0 ? '#f9f9f9' : '#fff' }}>
+                <td style={{ padding: '8px 14px', fontWeight: 600 }}>{m.label}</td>
+                <td style={{ padding: '8px 14px', textAlign: 'right' }}>${m.spend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                <td style={{ padding: '8px 14px', textAlign: 'right' }}>{m.clicks.toLocaleString()}</td>
+                <td style={{ padding: '8px 14px', textAlign: 'right' }}>{m.impressions.toLocaleString()}</td>
+                <td style={{ padding: '8px 14px', textAlign: 'right' }}>${m.cpc.toFixed(2)}</td>
+                <td style={{ padding: '8px 14px', textAlign: 'right' }}>{m.ctr.toFixed(2)}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* ═══════ ADD / UPDATE DAY ═══════ */}
+      <div style={{ fontSize: 16, fontWeight: 700, color: '#E57373', borderBottom: '2px solid #E57373', paddingBottom: 8, marginBottom: 16 }}>
+        Google Ads — Daily Entry
+      </div>
+
       <div style={{ background: '#fff', borderRadius: 12, padding: '16px 20px', boxShadow: '0 4px 15px rgba(0,0,0,0.08)', marginBottom: 16 }}>
         <div style={{ fontWeight: 600, color: TP.navy, marginBottom: 12, fontSize: 14 }}>Add / Update Day</div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'end' }}>
@@ -952,64 +779,81 @@ export default function PaidAds() {
             {saving ? 'Saving...' : 'Add'}
           </button>
         </div>
+        <div style={{ fontSize: '0.72em', color: '#aaa', marginTop: 10 }}>
+          Opened/Started/Completed/Tx are recorded here for reference only — they are not used in any calculation on this page. Leads and checkouts come from Salesforce.
+        </div>
       </div>
 
-      {/* Daily table */}
+      {/* Recent entries, click to edit */}
       <div style={{ overflowX: 'auto', marginBottom: 24 }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
           <thead>
             <tr style={{ background: TP.navy }}>
-              {['Date', 'Spend', 'Imp', 'Clicks', 'Opened', 'Started', 'Completed', 'Tx'].map((h) => (
+              {['Date', 'Spend', 'Impressions', 'Clicks'].map((h) => (
                 <th key={h} style={{ padding: '8px 10px', textAlign: h === 'Date' ? 'left' : 'right', color: '#fff' }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {[...sorted].reverse().map((e, idx) => {
-              const bo = isBlackout(e.date);
-              return (
-                <tr key={e.date} onClick={() => handleRowClick(e)} style={{
-                  background: bo ? '#fff3f3' : (idx % 2 === 0 ? '#f9f9f9' : '#fff'),
-                  cursor: 'pointer',
-                  opacity: bo ? 0.7 : 1,
-                }}>
-                  <td style={{ padding: '6px 10px', whiteSpace: 'nowrap' }}>
-                    {e.date}{bo && <span style={{ color: TP.red, fontSize: '0.7em', marginLeft: 4 }}>*</span>}
-                  </td>
-                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>${(e.spend || 0).toFixed(2)}</td>
-                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>{(e.impressions || 0).toLocaleString()}</td>
-                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>{e.clicks || 0}</td>
-                  <td style={{ padding: '6px 10px', textAlign: 'right', color: bo ? '#ccc' : 'inherit' }}>{bo ? '--' : (e.submit || 0)}</td>
-                  <td style={{ padding: '6px 10px', textAlign: 'right', color: bo ? '#ccc' : 'inherit' }}>{bo ? '--' : (e.started || 0)}</td>
-                  <td style={{ padding: '6px 10px', textAlign: 'right', color: bo ? '#ccc' : 'inherit' }}>{bo ? '--' : (e.finished || 0)}</td>
-                  <td style={{ padding: '6px 10px', textAlign: 'right', color: bo ? '#ccc' : 'inherit' }}>{bo ? '--' : (e.treatment || 0)}</td>
-                </tr>
-              );
-            })}
+            {[...sorted].reverse().slice(0, 10).map((e, idx) => (
+              <tr key={e.date} onClick={() => handleRowClick(e)} style={{
+                background: idx % 2 === 0 ? '#f9f9f9' : '#fff', cursor: 'pointer',
+              }}>
+                <td style={{ padding: '6px 10px', whiteSpace: 'nowrap' }}>{e.date}</td>
+                <td style={{ padding: '6px 10px', textAlign: 'right' }}>${(e.spend || 0).toFixed(2)}</td>
+                <td style={{ padding: '6px 10px', textAlign: 'right' }}>{(e.impressions || 0).toLocaleString()}</td>
+                <td style={{ padding: '6px 10px', textAlign: 'right' }}>{e.clicks || 0}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
+        <div style={{ fontSize: '0.75em', color: '#aaa', marginTop: 6 }}>Showing most recent 10 days. Click a row to edit it above.</div>
       </div>
 
-      {/* Blackout note */}
-      {blackoutDays > 0 && (
-        <div style={{ background: '#fff3f3', borderLeft: `4px solid ${TP.red}`, borderRadius: 8, padding: '12px 16px', marginBottom: 16, fontSize: 13, color: '#555', lineHeight: 1.6 }}>
-          <strong style={{ color: TP.red }}>* Tracking Blackout (May 11--20):</strong> The go.toothpillow tracking link was broken during this period. Spend, impressions, and clicks are accurate (from Google Ads), but conversion data (Opened, Started, Completed, Tx) is unreliable. These {blackoutDays} days are excluded from all conversion-based averages (CPL, Cost per Submission, Cost per Checkout, Assessment Funnel, Leads per Day).
-        </div>
-      )}
-
-      {/* Timeline callout */}
-      <div style={{ background: '#F8F5F0', borderLeft: `4px solid ${TP.yellow}`, borderRadius: 8, padding: '16px 20px', marginTop: 24 }}>
-        <div style={{ fontWeight: 600, color: TP.navy, marginBottom: 10, fontSize: 14 }}>Timeline</div>
-        <div style={{ fontSize: 13, color: '#555', lineHeight: 1.7 }}>
-          <strong>Mar 2025:</strong> Meta Ads launched<br />
-          <strong>Mar 2025--Mar 2026:</strong> Meta spent $25.6K total, 54 leads ($475/lead)<br />
-          <strong>Late Mar 2026:</strong> Google Ads launched, Meta budget redirected<br />
-          <strong>Apr 1:</strong> Meta paused (only $72 residual)<br />
-          <strong>Apr 17:</strong> Google switched from &quot;optimize for clicks&quot; to &quot;optimize for conversions&quot;<br />
-          <strong>May 1:</strong> Campaign split 50/50 new build<br />
-          <strong>May 11--20:</strong> go.toothpillow tracking link broken — conversion data missing<br />
-          <strong>May 12:</strong> Budget increased to $150/campaign ($300/day total)
-        </div>
+      {/* ═══════ META ADS (PAUSED — HISTORICAL) ═══════ */}
+      <div style={{ marginTop: 32 }}>
+        <button
+          onClick={() => setShowMeta(!showMeta)}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+            fontSize: 16, fontWeight: 700, color: '#999', borderBottom: '2px solid #ccc',
+            paddingBottom: 8, marginBottom: 12, width: '100%', textAlign: 'left',
+          }}
+        >
+          {showMeta ? '▾' : '▸'} Meta Ads (Paused — Historical)
+        </button>
+        {showMeta && (
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
+              <KPICard color="#999" label="Total Spend" value={`$${Math.round(metaTotalSpend).toLocaleString()}`} sub="Mar 2025–Apr 2026" />
+              <KPICard color="#999" label="Total Leads" value={`${metaTotalLeads}`} sub="Mar 2025–Apr 2026" />
+              <KPICard color="#999" label="Cost per Lead" value={metaCPL > 0 ? `$${Math.round(metaCPL).toLocaleString()}` : '—'} sub="Historical" />
+            </div>
+            <div style={{ overflowX: 'auto', marginBottom: 16 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
+                <thead>
+                  <tr style={{ background: '#999' }}>
+                    <th style={{ padding: '8px 12px', textAlign: 'left', color: '#fff' }}>Month</th>
+                    <th style={{ padding: '8px 12px', textAlign: 'right', color: '#fff' }}>Spend</th>
+                    <th style={{ padding: '8px 12px', textAlign: 'right', color: '#fff' }}>Leads</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {META_MONTHLY.map((m, idx) => (
+                    <tr key={m.month} style={{ background: idx % 2 === 0 ? '#f9f9f9' : '#fff' }}>
+                      <td style={{ padding: '6px 12px' }}>{m.month}</td>
+                      <td style={{ padding: '6px 12px', textAlign: 'right' }}>${m.spend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                      <td style={{ padding: '6px 12px', textAlign: 'right' }}>{m.leads}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div style={{ fontSize: '0.82em', color: '#888' }}>
+              Final funnel snapshot: {META_FUNNEL.entered} entered, {META_FUNNEL.waitingInfo} waiting on info, {META_FUNNEL.sentCheckout} sent checkout, {META_FUNNEL.checkedOut} checked out, {META_FUNNEL.denied} denied, {META_FUNNEL.closedLost} closed lost. Campaigns paused — budget moved to Google Ads.
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
