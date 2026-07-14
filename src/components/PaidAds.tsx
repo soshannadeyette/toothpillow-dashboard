@@ -47,6 +47,15 @@ const isBlackout = (date: string) => date >= BLACKOUT_START && date <= BLACKOUT_
    for the Add/Update Day entry form.
    ════════════════════════════════════════════ */
 
+// Monthly aggregates for months before June (no daily data available).
+// Pulled from Google Ads Campaigns view, All Time, Segment: Month — July 14, 2026.
+// These are included in KPI totals, monthly summary, and cohort spend calculations
+// but do NOT appear in the daily spend chart (no daily granularity available).
+const GOOGLE_ADS_PRIOR_MONTHS: { month: string; year: number; monthIdx: number; spend: number; clicks: number; impressions: number }[] = [
+  { month: 'Apr 2026', year: 2026, monthIdx: 4, spend: 5021.47, clicks: 1396, impressions: 24974 },
+  { month: 'May 2026', year: 2026, monthIdx: 5, spend: 9728.21, clicks: 3093, impressions: 49404 },
+];
+
 // Google Ads daily seed data (source of truth — merged with Supabase on load)
 // June 1-15 spend/clicks/impressions from Google Ads Report Editor, June 15, 2026
 // June 16-22 spend/clicks/impressions from Google Ads Report Editor, June 22, 2026
@@ -116,7 +125,7 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
    DATA SOURCE 2: SALESFORCE (hardcoded constants)
    Use for leads, pipeline stages, checkouts, revenue,
    conversion timing, and cohort analysis.
-   Source: Salesforce "Google Ads 2026" export, July 13, 2026 (16:50).
+   Source: Salesforce "Google Ads 2026" export, July 14, 2026.
    ════════════════════════════════════════════ */
 
 const GOOGLE_SF_PIPELINE = {
@@ -295,10 +304,24 @@ export default function PaidAds() {
 
   const gT = useMemo(() => {
     const t = { spend: 0, impressions: 0, clicks: 0 };
+    // Daily data (June+)
     sorted.forEach((e) => {
       t.spend += e.spend || 0;
       t.impressions += e.impressions || 0;
       t.clicks += e.clicks || 0;
+    });
+    // Prior months without daily data (Apr, May)
+    GOOGLE_ADS_PRIOR_MONTHS.forEach((m) => {
+      // Only add if no daily data exists for this month (avoid double-counting)
+      const hasDailyData = sorted.some((e) => {
+        const [y, mo] = e.date.split('-').map(Number);
+        return y === m.year && mo === m.monthIdx;
+      });
+      if (!hasDailyData) {
+        t.spend += m.spend;
+        t.impressions += m.impressions;
+        t.clicks += m.clicks;
+      }
     });
     return t;
   }, [sorted]);
@@ -333,10 +356,13 @@ export default function PaidAds() {
       const monthIdx = MONTH_SHORT.indexOf(c.month.split(' ')[0]);
       const year = parseInt(c.month.split(' ')[1], 10);
 
-      const spend = sorted.reduce((s, e) => {
+      // Check prior months first, then daily data
+      const priorMonth = GOOGLE_ADS_PRIOR_MONTHS.find((p) => p.year === year && p.monthIdx === monthIdx);
+      const dailySpend = sorted.reduce((s, e) => {
         const [y, m] = e.date.split('-').map(Number);
         return (y === year && m === monthIdx) ? s + (e.spend || 0) : s;
       }, 0);
+      const spend = dailySpend > 0 ? dailySpend : (priorMonth?.spend ?? 0);
 
       const midpoint = new Date(year, monthIdx - 1, 15);
       const ageDays = Math.floor((now.getTime() - midpoint.getTime()) / (1000 * 60 * 60 * 24));
@@ -417,6 +443,17 @@ export default function PaidAds() {
   /* ──── Monthly spend summary table ──── */
   const monthlySpend = useMemo(() => {
     const byMonth = new Map<string, { spend: number; clicks: number; impressions: number }>();
+    // Prior months (Apr, May) — added first so daily data can override if it exists
+    GOOGLE_ADS_PRIOR_MONTHS.forEach((m) => {
+      const hasDailyData = sorted.some((e) => {
+        const [y, mo] = e.date.split('-').map(Number);
+        return y === m.year && mo === m.monthIdx;
+      });
+      if (!hasDailyData) {
+        byMonth.set(m.month, { spend: m.spend, clicks: m.clicks, impressions: m.impressions });
+      }
+    });
+    // Daily data (June+)
     sorted.forEach((e) => {
       const [y, m] = e.date.split('-');
       const key = `${MONTH_SHORT[parseInt(m, 10)]} ${y}`;
