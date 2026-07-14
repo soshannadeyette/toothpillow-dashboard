@@ -260,13 +260,17 @@ export default function PaidAds() {
   const googleWaitingInfo = GOOGLE_SF_PIPELINE.waiting;
   const blackoutSpend = googleTotalSpend - googleTrackedSpend;
 
-  // True cost per checkout (ad spend + COGS)
+  // True cost per checkout: (ad spend + COGS - revenue) / checkouts = net out-of-pocket per checkout
   const totalCOGS = googleCheckouts * COGS_PER_CHECKOUT;
-  const trueTotalCost = googleTotalSpend + totalCOGS;
-  const trueCostPerCheckout = googleCheckouts > 0 ? trueTotalCost / googleCheckouts : 0;
   const revenuePerCheckout = googleCheckouts > 0 ? googleRevenue / googleCheckouts : 0;
-  const trueNetPerCheckout = revenuePerCheckout - trueCostPerCheckout;
-  const trueNet = googleRevenue - trueTotalCost;
+  // All spend (including blackout)
+  const allInCostPerCheckout = googleCheckouts > 0 ? (googleTotalSpend + totalCOGS) / googleCheckouts : 0;
+  const trueCostPerCheckout = allInCostPerCheckout - revenuePerCheckout;
+  const trueNet = googleRevenue - googleTotalSpend - totalCOGS;
+  // Excluding blackout
+  const allInCostPerCheckoutTracked = googleCheckouts > 0 ? (googleTrackedSpend + totalCOGS) / googleCheckouts : 0;
+  const trueCostPerCheckoutTracked = allInCostPerCheckoutTracked - revenuePerCheckout;
+  const trueNetTracked = googleRevenue - googleTrackedSpend - totalCOGS;
 
   // Meta stats
   const metaCampaignMonths = META_MONTHLY.filter((m) => m.spend >= 1000);
@@ -634,48 +638,74 @@ export default function PaidAds() {
           </div>
         </div>
 
-        {/* True Cost per Checkout (Ad Spend + COGS) */}
+        {/* True Cost per Checkout (Ad Spend + COGS - Revenue) */}
         <ChartLabel>True Cost per Checkout</ChartLabel>
         <div style={{
           background: 'linear-gradient(135deg, #faf8f0, #f7f2e8)',
           borderRadius: 12, padding: '20px 24px', marginBottom: 16, border: '1px solid #e8e0d0',
         }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 16, textAlign: 'center', marginBottom: 16 }}>
-            <div>
-              <div style={{ fontSize: '0.7em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Ad Cost per Checkout</div>
-              <div style={{ fontSize: '1.4em', fontWeight: 'bold', color: '#E57373' }}>{googleCheckouts > 0 ? `$${Math.round(googleCostPerCheckout).toLocaleString()}` : '--'}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.7em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>COGS per Checkout</div>
-              <div style={{ fontSize: '1.4em', fontWeight: 'bold', color: '#999' }}>${COGS_PER_CHECKOUT.toLocaleString()}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.7em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>True Cost per Checkout</div>
-              <div style={{ fontSize: '1.4em', fontWeight: 'bold', color: TP.navy }}>{googleCheckouts > 0 ? `$${Math.round(trueCostPerCheckout).toLocaleString()}` : '--'}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.7em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Revenue per Checkout</div>
-              <div style={{ fontSize: '1.4em', fontWeight: 'bold', color: '#00C853' }}>{googleCheckouts > 0 ? `$${Math.round(revenuePerCheckout).toLocaleString()}` : '--'}</div>
-            </div>
-          </div>
-          <div style={{ borderTop: '1px dashed #d8d0c0', paddingTop: 14, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, textAlign: 'center' }}>
-            <div>
-              <div style={{ fontSize: '0.7em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Total Ad Spend</div>
-              <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#E57373' }}>${googleTotalSpend.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.7em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Total COGS ({googleCheckouts} checkouts)</div>
-              <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#999' }}>${totalCOGS.toLocaleString()}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.7em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>True Net (Rev − Ads − COGS)</div>
-              <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: trueNet >= 0 ? '#00C853' : '#E57373' }}>
-                {googleCheckouts > 0 ? `${trueNet >= 0 ? '+' : '-'}$${Math.abs(Math.round(trueNet)).toLocaleString()}` : '--'}
+          {/* Row 1: All spend (including blackout) */}
+          <div style={{ marginBottom: 4 }}>
+            <div style={{ fontSize: '0.7em', fontWeight: 600, color: '#666', textTransform: 'uppercase', marginBottom: 8 }}>Including Blackout ({blackoutDays} days)</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: 12, textAlign: 'center' }}>
+              <div>
+                <div style={{ fontSize: '0.65em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Ad Spend</div>
+                <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#E57373' }}>${googleTotalSpend.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.65em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>+ COGS ({googleCheckouts})</div>
+                <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#999' }}>${totalCOGS.toLocaleString()}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.65em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>− Revenue</div>
+                <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#00C853' }}>${googleRevenue.toLocaleString()}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.65em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>= Net Loss</div>
+                <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: trueNet >= 0 ? '#00C853' : '#E57373' }}>
+                  {googleCheckouts > 0 ? `${trueNet >= 0 ? '+' : '-'}$${Math.abs(Math.round(trueNet)).toLocaleString()}` : '--'}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.65em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>True Cost / Checkout</div>
+                <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: trueCostPerCheckout > 0 ? '#E57373' : '#00C853' }}>{googleCheckouts > 0 ? `$${Math.abs(Math.round(trueCostPerCheckout)).toLocaleString()}` : '--'}</div>
               </div>
             </div>
           </div>
+
+          {/* Row 2: Excluding blackout */}
+          {blackoutDays > 0 && (
+            <div style={{ borderTop: '1px dashed #d8d0c0', paddingTop: 12, marginTop: 12 }}>
+              <div style={{ fontSize: '0.7em', fontWeight: 600, color: '#2e7d32', textTransform: 'uppercase', marginBottom: 8 }}>Excluding Blackout</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: 12, textAlign: 'center' }}>
+                <div>
+                  <div style={{ fontSize: '0.65em', color: '#2e7d32', textTransform: 'uppercase', marginBottom: 4 }}>Ad Spend</div>
+                  <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#2e7d32' }}>${googleTrackedSpend.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.65em', color: '#2e7d32', textTransform: 'uppercase', marginBottom: 4 }}>+ COGS ({googleCheckouts})</div>
+                  <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#999' }}>${totalCOGS.toLocaleString()}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.65em', color: '#2e7d32', textTransform: 'uppercase', marginBottom: 4 }}>− Revenue</div>
+                  <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#00C853' }}>${googleRevenue.toLocaleString()}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.65em', color: '#2e7d32', textTransform: 'uppercase', marginBottom: 4 }}>= Net Loss</div>
+                  <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: trueNetTracked >= 0 ? '#00C853' : '#E57373' }}>
+                    {googleCheckouts > 0 ? `${trueNetTracked >= 0 ? '+' : '-'}$${Math.abs(Math.round(trueNetTracked)).toLocaleString()}` : '--'}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.65em', color: '#2e7d32', textTransform: 'uppercase', marginBottom: 4 }}>True Cost / Checkout</div>
+                  <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: trueCostPerCheckoutTracked > 0 ? '#E57373' : '#00C853' }}>{googleCheckouts > 0 ? `$${Math.abs(Math.round(trueCostPerCheckoutTracked)).toLocaleString()}` : '--'}</div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div style={{ fontSize: '0.78em', color: '#888', marginTop: 10 }}>
-            COGS = ${COGS_PER_CHECKOUT}/checkout (appliance, lab, fulfillment). True cost = ad spend + COGS. {googleCheckouts > 0 && trueNetPerCheckout < 0 ? `Currently $${Math.abs(Math.round(trueNetPerCheckout)).toLocaleString()} underwater per checkout.` : ''} {GOOGLE_SF_PIPELINE.sentCheckout} more at Sent Checkout stage.
+            True cost per checkout = (ad spend + ${COGS_PER_CHECKOUT} COGS − checkout revenue) / checkouts. {GOOGLE_SF_PIPELINE.sentCheckout} more at Sent Checkout stage.
           </div>
         </div>
       </div>
