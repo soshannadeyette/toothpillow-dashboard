@@ -52,7 +52,7 @@ const infSubs: Record<string, number> = {
 const newAddsAmb: Record<string, number> = {
   '2024-01':4,'2024-02':7,'2024-03':7,'2024-04':6,'2024-05':3,'2024-06':7,'2024-07':10,'2024-08':2,'2024-09':6,'2024-10':7,'2024-11':7,'2024-12':7,
   '2025-01':7,'2025-02':84,'2025-03':7,'2025-04':6,'2025-05':5,'2025-06':6,'2025-07':1,'2025-08':15,'2025-09':2,'2025-10':1,'2025-11':6,'2025-12':1,
-  '2026-01':5,'2026-02':13,'2026-03':10,'2026-04':28,'2026-05':20,'2026-06':28,'2026-07':8,
+  '2026-01':5,'2026-02':13,'2026-03':10,'2026-04':28,'2026-05':20,'2026-06':28,'2026-07':10,
 };
 const newAddsInf: Record<string, number> = {
   '2024-01':1,'2024-02':8,'2024-03':3,'2024-04':4,'2024-05':9,'2024-06':2,'2024-07':7,'2024-08':2,'2024-09':4,'2024-10':6,'2024-11':6,'2024-12':9,
@@ -63,9 +63,9 @@ const newAddsInf: Record<string, number> = {
 const ambSubsYear: Record<number, number> = {2023:465, 2024:435, 2025:566, 2026:367};
 const infSubsYear: Record<number, number> = {2023:1339, 2024:8398, 2025:5583, 2026:2163};
 const combSubsYear: Record<number, number> = {2023:1804, 2024:8833, 2025:6149, 2026:2530};
-const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:112};
+const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:114};
 const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:22};
-const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:135};
+const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:137};
 // Note: adds counts are from ambassador program tracking, not Salesforce referral exports
 
 // Active ambassadors with ≥1 submission per year (from Salesforce)
@@ -95,7 +95,7 @@ const recruit26: {label:string; amb:number; inf:number; accent:string; tag?:stri
   {label:'Apr', amb:28, inf:5, accent:'#FDBE67'},
   {label:'May', amb:20, inf:6, accent:'#B26CA6'},
   {label:'Jun', amb:28, inf:4, accent:'#DD5759'},
-  {label:'Jul', amb:8, inf:1, accent:'#F6AACB'},
+  {label:'Jul', amb:10, inf:1, accent:'#F6AACB'},
 ];
 
 const concRows = [
@@ -164,7 +164,7 @@ const moversData: Record<string, {y25:number; y26:number; type:string}> = {
   'Cy Tidwell':           {y25:0,    y26:5,   type:'Amb'},
 };
 
-// Launch Bonus Tracker — updated from Salesforce export 2026-07-13
+// Launch Bonus Tracker — updated from Salesforce export 2026-07-14
 // 130 ambassadors with ≥1 WINDOW submission (counted from window start, not YTD).
 // Pre-2026 onboards: window starts 04/01/2026. 2026 onboards: window starts at onboard date.
 // Tier computed from window subs: Tier 2 = 50+, Tier 1 = 25-49.
@@ -193,18 +193,18 @@ const LAUNCH_BONUS_PAYOUTS: {month:string; payouts:{name:string;amount:number;ti
 
 const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;paid:number;winStart:string;winEnd:string;tier1Date?:string;tier2Date?:string;is2026?:boolean;omit?:boolean}[] = [
   {name:'Soshanna Salsman',bonusSubs:95,tier:2,earned:1250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/25',tier2Date:'05/28',omit:true},
-  {name:'Shannon Tripp',bonusSubs:90,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/21',tier2Date:'05/26'},
-  {name:'Lauren Johnson NNM',bonusSubs:74,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/27',tier2Date:'06/11'},
+  {name:'Shannon Tripp',bonusSubs:91,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/21',tier2Date:'05/26'},
+  {name:'Lauren Johnson NNM',bonusSubs:109,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/27',tier2Date:'06/11'},
   {name:'Emily Boazman',bonusSubs:50,tier:2,earned:1250,paid:1250,winStart:'04/02/2026',winEnd:'12/31/2026',is2026:true,tier1Date:'05/24',tier2Date:'06/29'},
-  {name:'Kendra Needham',bonusSubs:48,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'05/22'},
+  {name:'Kendra Needham',bonusSubs:51,tier:2,earned:1250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'05/22',tier2Date:'07/13'},
   {name:'Katelyn Alsop (James)',bonusSubs:40,tier:1,earned:250,paid:250,winStart:'01/19/2026',winEnd:'12/31/2026',is2026:true,tier1Date:'02/21'},
   {name:'Amy Bernhard',bonusSubs:46,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/04'},
   {name:'Jeff Cruz Talia_likeitis',bonusSubs:41,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'05/19'},
-  {name:'Ginny Yurich',bonusSubs:39,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/02'},
+  {name:'Ginny Yurich',bonusSubs:40,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/02'},
   {name:'Jasyra Santiago-Hines',bonusSubs:31,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/10'},
   {name:'Melody Brandon',bonusSubs:29,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/08'},
-  {name:'Carly Brown',bonusSubs:32,tier:1,earned:250,paid:250,winStart:'04/21/2026',winEnd:'12/31/2026',is2026:true,tier1Date:'06/24'},
-  {name:'Eden Lee loverlees',bonusSubs:27,tier:1,earned:250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'07/10'},
+  {name:'Carly Brown',bonusSubs:33,tier:1,earned:250,paid:250,winStart:'04/21/2026',winEnd:'12/31/2026',is2026:true,tier1Date:'06/24'},
+  {name:'Eden Lee loverlees',bonusSubs:29,tier:1,earned:250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'07/10'},
   {name:'Amy Erickson',bonusSubs:23,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Hayley Lombard',bonusSubs:24,tier:0,earned:0,paid:0,winStart:'05/19/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Hilary Fritsch*',bonusSubs:21,tier:0,earned:0,paid:0,winStart:'05/08/2026',winEnd:'12/31/2026',is2026:true},
@@ -1463,7 +1463,7 @@ export default function AmbassadorGrowth() {
         </div>
 
         <div style={{ fontSize: '0.7rem', color: '#888', marginTop: 8, textAlign: 'center' }}>
-          {launchBonusData.length} ambassadors with ≥1 submission. Source: Salesforce Launch Bonus Tracker, July 6 2026.
+          {launchBonusData.length} ambassadors with ≥1 submission. Source: Salesforce Launch Bonus Tracker, July 14 2026.
         </div>
       </div>
 
