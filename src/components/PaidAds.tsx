@@ -65,7 +65,6 @@ const META_FUNNEL = { entered: 58, waitingInfo: 30, sentCheckout: 13, checkedOut
 // 379 Google Ads leads (excl DNC). 16 checkouts, $27,382 revenue (all amounts populated).
 const GOOGLE_SF_PIPELINE = { total: 379, waiting: 216, sentToTxP: 26, txpApproved: 0, sentCheckout: 91, checkedOut: 16, referredOut: 22, denied: 0, closedLost: 6, waitingTxPAssign: 0, tempHold: 2 };
 const GOOGLE_REVENUE: number = 27382; // 16 checkouts, $27,382 subtotal from Salesforce
-const COGS_PER_CHECKOUT: number = 650; // Cost of goods sold per checkout (appliance, lab, fulfillment)
 
 // Google Ads daily seed data (source of truth — merged with Supabase on load)
 // June 1-15 spend/clicks/impressions from Google Ads Report Editor, June 15, 2026
@@ -126,6 +125,49 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-07-13', spend: 493.87, clicks: 130, impressions: 2689, submit: 4, started: 4, finished: 8, treatment: 0 },
 ];
 
+/* ════════════════════════════════════════════
+   COHORT MATURITY CURVE (Kenny P's framework, Jul 2026)
+   % of eventual checkouts that have occurred by cohort age.
+   Used to project how many checkouts a young cohort will
+   ultimately produce, so recent months' CAC isn't overstated.
+   ════════════════════════════════════════════ */
+const MATURITY_CURVE = [
+  { days: 0, pct: 0 },
+  { days: 15, pct: 0.41 },
+  { days: 30, pct: 0.66 },
+  { days: 60, pct: 0.85 },
+  { days: 90, pct: 0.92 },
+  { days: 120, pct: 1.0 },
+];
+
+function getMaturity(ageDays: number): number {
+  if (ageDays >= 120) return 1.0;
+  if (ageDays <= 0) return 0;
+  for (let i = 0; i < MATURITY_CURVE.length - 1; i++) {
+    const curr = MATURITY_CURVE[i];
+    const next = MATURITY_CURVE[i + 1];
+    if (ageDays <= next.days) {
+      const ratio = (ageDays - curr.days) / (next.days - curr.days);
+      return curr.pct + ratio * (next.pct - curr.pct);
+    }
+  }
+  return 1.0;
+}
+
+const MONTH_SHORT = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+interface CohortRow {
+  label: string;
+  spend: number;
+  leads: number;
+  checkouts: number;
+  ageDays: number;
+  maturity: number;
+  projectedFinal: number;
+  rawCAC: number | null;
+  adjCAC: number | null;
+}
+
 // Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)
 function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
   const byDate = new Map<string, GoogleAdsDaily>();
@@ -145,6 +187,7 @@ export default function PaidAds() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showMaturityRef, setShowMaturityRef] = useState(false);
 
   // Form state
   const [formDate, setFormDate] = useState(todayStr());
@@ -260,17 +303,67 @@ export default function PaidAds() {
   const googleWaitingInfo = GOOGLE_SF_PIPELINE.waiting;
   const blackoutSpend = googleTotalSpend - googleTrackedSpend;
 
-  // True cost per checkout: (ad spend + COGS - revenue) / checkouts = net out-of-pocket per checkout
-  const totalCOGS = googleCheckouts * COGS_PER_CHECKOUT;
-  const revenuePerCheckout = googleCheckouts > 0 ? googleRevenue / googleCheckouts : 0;
-  // All spend (including blackout)
-  const allInCostPerCheckout = googleCheckouts > 0 ? (googleTotalSpend + totalCOGS) / googleCheckouts : 0;
-  const trueCostPerCheckout = allInCostPerCheckout - revenuePerCheckout;
-  const trueNet = googleRevenue - googleTotalSpend - totalCOGS;
-  // Excluding blackout
-  const allInCostPerCheckoutTracked = googleCheckouts > 0 ? (googleTrackedSpend + totalCOGS) / googleCheckouts : 0;
-  const trueCostPerCheckoutTracked = allInCostPerCheckoutTracked - revenuePerCheckout;
-  const trueNetTracked = googleRevenue - googleTrackedSpend - totalCOGS;
+  /* ──── Cohort maturity analysis ──── */
+  const cohortData = useMemo((): CohortRow[] => {
+    const byMonth = new Map<string, { spend: number; leads: number; checkouts: number; month: number; year: number }>();
+
+    sorted.forEach(e => {
+      const parts = e.date.split('-');
+      const y = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10);
+      const key = `${y}-${String(m).padStart(2, '0')}`;
+      if (!byMonth.has(key)) {
+        byMonth.set(key, { spend: 0, leads: 0, checkouts: 0, month: m, year: y });
+      }
+      const bucket = byMonth.get(key)!;
+      bucket.spend += e.spend || 0;
+      bucket.leads += e.submit || 0;
+      // Exclude blackout days from checkout counts only
+      if (!isBlackout(e.date)) {
+        bucket.checkouts += e.treatment || 0;
+      }
+    });
+
+    const now = new Date();
+    const keys = Array.from(byMonth.keys()).sort();
+
+    return keys.map(key => {
+      const val = byMonth.get(key)!;
+      const midpoint = new Date(val.year, val.month - 1, 15);
+      const ageDays = Math.floor((now.getTime() - midpoint.getTime()) / (1000 * 60 * 60 * 24));
+      const maturity = getMaturity(ageDays);
+      const projectedFinal = (maturity > 0.05 && val.checkouts > 0) ? val.checkouts / maturity : 0;
+      const rawCAC = val.checkouts > 0 ? val.spend / val.checkouts : null;
+      const adjCAC = projectedFinal > 0 ? val.spend / projectedFinal : null;
+
+      return {
+        label: `${MONTH_SHORT[val.month]} ${val.year}`,
+        spend: val.spend,
+        leads: val.leads,
+        checkouts: val.checkouts,
+        ageDays,
+        maturity,
+        projectedFinal,
+        rawCAC,
+        adjCAC,
+      };
+    });
+  }, [sorted]);
+
+  const cohortTotals = useMemo(() => {
+    const totalSpend = cohortData.reduce((s, c) => s + c.spend, 0);
+    const totalCheckouts = cohortData.reduce((s, c) => s + c.checkouts, 0);
+    const totalProjected = cohortData.reduce((s, c) => s + c.projectedFinal, 0);
+    const totalLeads = cohortData.reduce((s, c) => s + c.leads, 0);
+    return {
+      totalSpend,
+      totalCheckouts,
+      totalLeads,
+      totalProjected,
+      overallRawCAC: totalCheckouts > 0 ? totalSpend / totalCheckouts : null,
+      overallAdjCAC: totalProjected > 0 ? totalSpend / totalProjected : null,
+    };
+  }, [cohortData]);
 
   // Meta stats
   const metaCampaignMonths = META_MONTHLY.filter((m) => m.spend >= 1000);
@@ -428,7 +521,7 @@ export default function PaidAds() {
           <KPICard color={TP.yellow} label="Cost per Click" value={`$${avgCPC.toFixed(2)}`} sub={`${gT.clicks.toLocaleString()} clicks total`} />
           <KPICard color={TP.blue} label="Cost per Lead" value={`$${Math.round(googleCPL)}`} sub={<>{googleTotalLeads} leads ({trackedDays}d tracked){blackoutDays > 0 && <><br/><span style={{ color: '#2e7d32' }}>Excl. blackout: ${Math.round(googleCPLTracked)}</span></>}</>} />
           <KPICard color={TP.darkPurple} label="Cost per Submission" value={`$${Math.round(googleCostPerSubmission)}`} sub={<>{googleSubmissions} submitted ({trackedDays}d tracked){blackoutDays > 0 && <><br/><span style={{ color: '#2e7d32' }}>Excl. blackout: ${Math.round(googleCostPerSubmissionTracked)}</span></>}</>} />
-          <KPICard color="#00C853" label="Cost per Checkout" value={googleCheckouts > 0 ? `$${Math.round(googleCostPerCheckout).toLocaleString()}` : '--'} sub={<>{googleCheckouts} checkout{googleCheckouts !== 1 ? 's' : ''} (${googleRevenue.toLocaleString()} rev){blackoutDays > 0 && googleCheckouts > 0 && <><br/><span style={{ color: '#2e7d32' }}>Excl. blackout: ${Math.round(googleCostPerCheckoutTracked).toLocaleString()}</span></>}</>} />
+          <KPICard color="#00C853" label="Cost per Checkout" value={googleCheckouts > 0 ? `$${Math.round(googleCostPerCheckout).toLocaleString()}` : '--'} sub={<>{googleCheckouts} checkout{googleCheckouts !== 1 ? 's' : ''}{blackoutDays > 0 && googleCheckouts > 0 && <><br/><span style={{ color: '#2e7d32' }}>Excl. blackout: ${Math.round(googleCostPerCheckoutTracked).toLocaleString()}</span></>}</>} />
         </div>
 
         {/* Chart 1: Clicks, CPC & Spend */}
@@ -636,78 +729,162 @@ export default function PaidAds() {
           <div style={{ fontSize: '0.78em', color: '#888', marginTop: 10 }}>
             {googleCheckouts} checkout{googleCheckouts !== 1 ? 's' : ''} totaling ${googleRevenue.toLocaleString()}. {GOOGLE_SF_PIPELINE.sentCheckout} more at Sent Checkout stage.
           </div>
+          <div style={{ fontSize: '0.72em', color: '#aaa', marginTop: 6, fontStyle: 'italic' }}>
+            Revenue reflects initial checkout amounts only. Does not include lifetime value, refunds, or cancellations.
+          </div>
         </div>
 
-        {/* True Cost per Checkout (Ad Spend + COGS - Revenue) */}
-        <ChartLabel>True Cost per Checkout</ChartLabel>
-        <div style={{
-          background: 'linear-gradient(135deg, #faf8f0, #f7f2e8)',
-          borderRadius: 12, padding: '20px 24px', marginBottom: 16, border: '1px solid #e8e0d0',
-        }}>
-          {/* Row 1: All spend (including blackout) */}
-          <div style={{ marginBottom: 4 }}>
-            <div style={{ fontSize: '0.7em', fontWeight: 600, color: '#666', textTransform: 'uppercase', marginBottom: 8 }}>Including Blackout ({blackoutDays} days)</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: 12, textAlign: 'center' }}>
-              <div>
-                <div style={{ fontSize: '0.65em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Ad Spend</div>
-                <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#E57373' }}>${googleTotalSpend.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.65em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>+ COGS ({googleCheckouts})</div>
-                <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#999' }}>${totalCOGS.toLocaleString()}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.65em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>− Revenue</div>
-                <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#00C853' }}>${googleRevenue.toLocaleString()}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.65em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>= Net Loss</div>
-                <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: trueNet >= 0 ? '#00C853' : '#E57373' }}>
-                  {googleCheckouts > 0 ? `${trueNet >= 0 ? '+' : '-'}$${Math.abs(Math.round(trueNet)).toLocaleString()}` : '--'}
-                </div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.65em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>True Cost / Checkout</div>
-                <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: trueCostPerCheckout > 0 ? '#E57373' : '#00C853' }}>{googleCheckouts > 0 ? `$${Math.abs(Math.round(trueCostPerCheckout)).toLocaleString()}` : '--'}</div>
-              </div>
-            </div>
-          </div>
+        {/* ──── Cohort Maturity Analysis ──── */}
+        <div style={{ fontSize: 16, fontWeight: 700, color: '#E57373', borderBottom: `2px solid ${TP.navy}`, paddingBottom: 8, marginBottom: 16, marginTop: 32 }}>
+          Cohort Maturity Analysis
+        </div>
 
-          {/* Row 2: Excluding blackout */}
-          {blackoutDays > 0 && (
-            <div style={{ borderTop: '1px dashed #d8d0c0', paddingTop: 12, marginTop: 12 }}>
-              <div style={{ fontSize: '0.7em', fontWeight: 600, color: '#2e7d32', textTransform: 'uppercase', marginBottom: 8 }}>Excluding Blackout</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: 12, textAlign: 'center' }}>
-                <div>
-                  <div style={{ fontSize: '0.65em', color: '#2e7d32', textTransform: 'uppercase', marginBottom: 4 }}>Ad Spend</div>
-                  <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#2e7d32' }}>${googleTrackedSpend.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.65em', color: '#2e7d32', textTransform: 'uppercase', marginBottom: 4 }}>+ COGS ({googleCheckouts})</div>
-                  <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#999' }}>${totalCOGS.toLocaleString()}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.65em', color: '#2e7d32', textTransform: 'uppercase', marginBottom: 4 }}>− Revenue</div>
-                  <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#00C853' }}>${googleRevenue.toLocaleString()}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.65em', color: '#2e7d32', textTransform: 'uppercase', marginBottom: 4 }}>= Net Loss</div>
-                  <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: trueNetTracked >= 0 ? '#00C853' : '#E57373' }}>
-                    {googleCheckouts > 0 ? `${trueNetTracked >= 0 ? '+' : '-'}$${Math.abs(Math.round(trueNetTracked)).toLocaleString()}` : '--'}
-                  </div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.65em', color: '#2e7d32', textTransform: 'uppercase', marginBottom: 4 }}>True Cost / Checkout</div>
-                  <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: trueCostPerCheckoutTracked > 0 ? '#E57373' : '#00C853' }}>{googleCheckouts > 0 ? `$${Math.abs(Math.round(trueCostPerCheckoutTracked)).toLocaleString()}` : '--'}</div>
-                </div>
+        <div style={{ fontSize: '0.85em', color: '#555', marginBottom: 12, lineHeight: 1.6 }}>
+          CAC = spend / checkouts. Recent cohorts have not fully matured. Adjusted CAC projects forward using Kenny{"'"}s checkout maturity curve.
+        </div>
+
+        {/* Maturity curve reference toggle */}
+        <div style={{ marginBottom: 16 }}>
+          <button
+            onClick={() => setShowMaturityRef(!showMaturityRef)}
+            style={{
+              background: 'none', border: 'none', color: TP.blue, cursor: 'pointer',
+              fontSize: '0.82em', fontWeight: 600, padding: 0, textDecoration: 'underline',
+            }}
+          >
+            {showMaturityRef ? 'Hide' : 'Show'} maturity curve reference
+          </button>
+          {showMaturityRef && (
+            <div style={{
+              background: '#f8f9fa', borderRadius: 8, padding: '12px 16px', marginTop: 8,
+              fontSize: '0.82em', color: '#555', border: '1px solid #e8e8e8',
+            }}>
+              <div style={{ fontWeight: 600, marginBottom: 6, color: TP.navy }}>Checkout Maturity Curve</div>
+              <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+                {MATURITY_CURVE.filter(p => p.days > 0).map(p => (
+                  <span key={p.days}>{p.days}d = {Math.round(p.pct * 100)}%</span>
+                ))}
+              </div>
+              <div style={{ marginTop: 6, color: '#888', fontSize: '0.9em' }}>
+                Percentage of eventual checkouts that have occurred by cohort age.
               </div>
             </div>
           )}
-
-          <div style={{ fontSize: '0.78em', color: '#888', marginTop: 10 }}>
-            True cost per checkout = (ad spend + ${COGS_PER_CHECKOUT} COGS − checkout revenue) / checkouts. {GOOGLE_SF_PIPELINE.sentCheckout} more at Sent Checkout stage.
-          </div>
         </div>
+
+        {/* Cohort table */}
+        <div style={{ overflowX: 'auto', marginBottom: 20 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
+            <thead>
+              <tr style={{ background: TP.navy }}>
+                {['Cohort', 'Google Spend', 'Leads', 'Checkouts', 'Age', '~Maturity', 'Projected Final', 'Raw CAC', 'Adj CAC'].map(h => (
+                  <th key={h} style={{ padding: '8px 10px', textAlign: h === 'Cohort' ? 'left' : 'right', color: '#fff', whiteSpace: 'nowrap' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {cohortData.map((c, idx) => (
+                <tr key={c.label} style={{
+                  background: idx % 2 === 0 ? '#f9f9f9' : '#fff',
+                  opacity: c.maturity < 0.40 ? 0.6 : 1,
+                }}>
+                  <td style={{ padding: '6px 10px', fontWeight: 600 }}>{c.label}</td>
+                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>${Math.round(c.spend).toLocaleString()}</td>
+                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>{c.leads}</td>
+                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>{c.checkouts}</td>
+                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>{c.ageDays}d</td>
+                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>{Math.round(c.maturity * 100)}%</td>
+                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>{c.projectedFinal > 0 ? c.projectedFinal.toFixed(1) : '—'}</td>
+                  <td style={{ padding: '6px 10px', textAlign: 'right', color: '#888' }}>{c.rawCAC !== null ? `$${Math.round(c.rawCAC).toLocaleString()}` : '—'}</td>
+                  <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 600, color: c.adjCAC !== null && c.adjCAC <= 500 ? '#00C853' : (c.adjCAC !== null ? '#E57373' : '#888') }}>
+                    {c.adjCAC !== null ? `$${Math.round(c.adjCAC).toLocaleString()}` : '—'}
+                  </td>
+                </tr>
+              ))}
+              {/* Totals row */}
+              <tr style={{ background: TP.navy, color: '#fff', fontWeight: 700 }}>
+                <td style={{ padding: '8px 10px' }}>Total</td>
+                <td style={{ padding: '8px 10px', textAlign: 'right' }}>${Math.round(cohortTotals.totalSpend).toLocaleString()}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.totalLeads}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.totalCheckouts}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'right' }}></td>
+                <td style={{ padding: '8px 10px', textAlign: 'right' }}></td>
+                <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.totalProjected > 0 ? cohortTotals.totalProjected.toFixed(1) : '—'}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.overallRawCAC !== null ? `$${Math.round(cohortTotals.overallRawCAC).toLocaleString()}` : '—'}</td>
+                <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.overallAdjCAC !== null ? `$${Math.round(cohortTotals.overallAdjCAC).toLocaleString()}` : '—'}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* CAC Trend Chart */}
+        <ChartLabel>CAC Trend by Cohort</ChartLabel>
+        <ChartCard>
+          <div style={{ height: 300 }}>
+            {cohortData.length > 0 ? (
+              <Bar
+                data={{
+                  labels: cohortData.map(c => c.label),
+                  datasets: [
+                    {
+                      label: 'Raw CAC',
+                      data: cohortData.map(c => c.rawCAC),
+                      backgroundColor: '#ccc',
+                      borderColor: '#aaa',
+                      borderWidth: 1,
+                      borderRadius: 4,
+                      barPercentage: 0.7,
+                      categoryPercentage: 0.8,
+                    },
+                    {
+                      label: 'Maturity-Adj CAC',
+                      data: cohortData.map(c => c.adjCAC),
+                      backgroundColor: TP.blue,
+                      borderColor: TP.navy,
+                      borderWidth: 1,
+                      borderRadius: 4,
+                      barPercentage: 0.7,
+                      categoryPercentage: 0.8,
+                    },
+                    {
+                      label: '$500 Target',
+                      data: cohortData.map(() => 500),
+                      type: 'line',
+                      borderColor: TP.red,
+                      borderWidth: 2,
+                      borderDash: [8, 4],
+                      pointRadius: 0,
+                      fill: false,
+                    } as never,
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { position: 'top', labels: { usePointStyle: true, padding: 14, font: { size: 11 } } },
+                    tooltip: {
+                      callbacks: {
+                        label: (ctx) => {
+                          if (ctx.dataset.label === '$500 Target') return '$500 Target';
+                          const val = ctx.parsed.y;
+                          return val !== null ? `${ctx.dataset.label}: $${Math.round(val).toLocaleString()}` : `${ctx.dataset.label}: --`;
+                        },
+                      },
+                    },
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      ticks: { callback: (v) => `$${Number(v).toLocaleString()}` },
+                      title: { display: true, text: 'Cost per Checkout', font: { size: 10 } },
+                    },
+                  },
+                }}
+              />
+            ) : <NoData />}
+          </div>
+        </ChartCard>
       </div>
 
       {/* ═══════ SECTION 2: Google vs Meta — Platform Comparison ═══════ */}
