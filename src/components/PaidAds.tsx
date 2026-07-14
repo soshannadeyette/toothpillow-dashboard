@@ -386,6 +386,25 @@ export default function PaidAds() {
   // Spend comes directly from SF_WEEKLY_COHORT_DATA (Fable's Google Ads weekly totals).
   // No need to compute from daily data — actual weekly spend is more accurate.
 
+  // Compute historical checkout rate from mature cohorts (>35 days old = fully mature)
+  // Used as fallback for young cohorts with zero checkouts
+  const matureCheckoutRate = useMemo(() => {
+    const now = new Date();
+    let matureCompleted = 0;
+    let matureCheckouts = 0;
+    SF_WEEKLY_COHORT_DATA.forEach((c) => {
+      const ws = new Date(c.week);
+      const mid = new Date(ws);
+      mid.setDate(ws.getDate() + 3);
+      const age = Math.floor((now.getTime() - mid.getTime()) / (1000 * 60 * 60 * 24));
+      if (age >= 35) {
+        matureCompleted += c.completed;
+        matureCheckouts += c.checkouts;
+      }
+    });
+    return matureCompleted > 0 ? matureCheckouts / matureCompleted : 0;
+  }, []);
+
   const cohortData = useMemo((): CohortRow[] => {
     const now = new Date();
 
@@ -396,7 +415,18 @@ export default function PaidAds() {
       midpoint.setDate(ws.getDate() + 3);
       const ageDays = Math.floor((now.getTime() - midpoint.getTime()) / (1000 * 60 * 60 * 24));
       const maturity = getMaturity(ageDays);
-      const projectedFinal = (maturity > 0.05 && c.checkouts > 0) ? c.checkouts / maturity : 0;
+
+      let projectedFinal: number;
+      if (c.checkouts > 0 && maturity > 0.05) {
+        // Has checkouts — extend by maturity curve
+        projectedFinal = c.checkouts / maturity;
+      } else if (c.completed > 0 && maturity < 1.0) {
+        // No checkouts yet but has completed subs — use historical rate
+        projectedFinal = c.completed * matureCheckoutRate;
+      } else {
+        projectedFinal = c.checkouts; // fully mature with whatever it has
+      }
+
       const rawCAC = c.checkouts > 0 ? c.spend / c.checkouts : null;
       const adjCAC = projectedFinal > 0 ? c.spend / projectedFinal : null;
       const compRate = c.leads > 0 ? c.completed / c.leads : 0;
@@ -421,7 +451,7 @@ export default function PaidAds() {
         adjCAC,
       };
     });
-  }, []);
+  }, [matureCheckoutRate]);
 
   const cohortTotals = useMemo(() => {
     const tSpend = cohortData.reduce((s, c) => s + c.spend, 0);
