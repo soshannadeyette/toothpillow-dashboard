@@ -450,12 +450,18 @@ export default function PaidAds() {
     const tProjected = cohortData.reduce((s, c) => s + c.projectedFinal, 0);
     const tSubs = cohortData.reduce((s, c) => s + c.subs, 0);
     const tPipeline = cohortData.reduce((s, c) => s + c.pipeline, 0);
+    const avgRevPerCheckout = tCheckouts > 0 ? GOOGLE_REVENUE / tCheckouts : 0;
+    const additionalCheckouts = Math.max(0, tProjected - tCheckouts);
+    const projectedRevenue = GOOGLE_REVENUE + (additionalCheckouts * avgRevPerCheckout);
     return {
       totalSpend: tSpend,
       totalCheckouts: tCheckouts,
       totalSubs: tSubs,
       totalPipeline: tPipeline,
       totalProjected: tProjected,
+      additionalCheckouts,
+      avgRevPerCheckout,
+      projectedRevenue,
       overallRawCAC: tCheckouts > 0 ? tSpend / tCheckouts : null,
       overallAdjCAC: tProjected > 0 ? tSpend / tProjected : null,
     };
@@ -702,6 +708,66 @@ export default function PaidAds() {
             </tr>
           </tbody>
         </table>
+      </div>
+
+      {/* ─── Maturity Projection Summary ─── */}
+      <div style={{ background: '#f0f4ff', border: '1px solid #c7d2fe', borderRadius: 10, padding: '20px 24px', marginBottom: 28 }}>
+        <div style={{ fontWeight: 700, fontSize: '0.95em', color: TP.navy, marginBottom: 14 }}>
+          Maturity Projection — What the Data Says When You Let It Settle
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 16 }}>
+          <div style={{ background: '#fff', borderRadius: 8, padding: '14px 16px', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.75em', color: '#888', marginBottom: 4 }}>Actual Checkouts</div>
+            <div style={{ fontSize: '1.6em', fontWeight: 700, color: '#888' }}>{cohortTotals.totalCheckouts}</div>
+            <div style={{ fontSize: '0.75em', color: '#aaa' }}>as of today</div>
+          </div>
+          <div style={{ background: '#fff', borderRadius: 8, padding: '14px 16px', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.75em', color: '#888', marginBottom: 4 }}>Projected Total</div>
+            <div style={{ fontSize: '1.6em', fontWeight: 700, color: TP.navy }}>{cohortTotals.totalProjected.toFixed(1)}</div>
+            <div style={{ fontSize: '0.75em', color: '#aaa' }}>when all cohorts mature</div>
+          </div>
+          <div style={{ background: '#fff', borderRadius: 8, padding: '14px 16px', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.75em', color: '#888', marginBottom: 4 }}>Still Coming</div>
+            <div style={{ fontSize: '1.6em', fontWeight: 700, color: '#00C853' }}>+{cohortTotals.additionalCheckouts.toFixed(1)}</div>
+            <div style={{ fontSize: '0.75em', color: '#aaa' }}>from existing pipeline</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 16 }}>
+          <div style={{ background: '#fff', borderRadius: 8, padding: '14px 16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+              <span style={{ fontSize: '0.82em', color: '#888' }}>Raw CAC (today)</span>
+              <span style={{ fontSize: '1.3em', fontWeight: 700, color: '#E57373' }}>
+                {cohortTotals.overallRawCAC !== null ? `$${Math.round(cohortTotals.overallRawCAC).toLocaleString()}` : '—'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <span style={{ fontSize: '0.82em', color: '#888' }}>Maturity-Adj CAC</span>
+              <span style={{ fontSize: '1.3em', fontWeight: 700, color: '#00C853' }}>
+                {cohortTotals.overallAdjCAC !== null ? `$${Math.round(cohortTotals.overallAdjCAC).toLocaleString()}` : '—'}
+              </span>
+            </div>
+          </div>
+          <div style={{ background: '#fff', borderRadius: 8, padding: '14px 16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+              <span style={{ fontSize: '0.82em', color: '#888' }}>Actual Revenue</span>
+              <span style={{ fontSize: '1.3em', fontWeight: 700, color: '#888' }}>${GOOGLE_REVENUE.toLocaleString()}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <span style={{ fontSize: '0.82em', color: '#888' }}>Projected Revenue</span>
+              <span style={{ fontSize: '1.3em', fontWeight: 700, color: '#00C853' }}>
+                ${Math.round(cohortTotals.projectedRevenue).toLocaleString()}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ fontSize: '0.78em', color: '#666', lineHeight: 1.6 }}>
+          Based on Kenny{"'"}s checkout maturity curve. Recent cohorts have not fully converted yet.
+          Projected values estimate how many additional checkouts will come from submissions already in the pipeline as those cohorts age.
+          Avg revenue per checkout: ${Math.round(cohortTotals.avgRevPerCheckout).toLocaleString()}.
+        </div>
       </div>
 
       <ChartLabel>CAC Trend by Cohort</ChartLabel>
