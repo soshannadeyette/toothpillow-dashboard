@@ -114,10 +114,15 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-07-03', spend: 440.25, clicks: 119, impressions: 2260, submit: 3, started: 3, finished: 1, treatment: 0 },
   { date: '2026-07-04', spend: 345.97, clicks: 111, impressions: 1992, submit: 3, started: 1, finished: 2, treatment: 0 },
   { date: '2026-07-05', spend: 751.95, clicks: 204, impressions: 3610, submit: 5, started: 5, finished: 1, treatment: 0 },
-  { date: '2026-07-06', spend: 0, clicks: 0, impressions: 0, submit: 11, started: 5, finished: 10, treatment: 1 },
-  // July 7-8: lead metrics from Salesforce July 8 export. Spend/clicks/impressions TBD from Google Ads.
+  { date: '2026-07-06', spend: 0, clicks: 0, impressions: 0, submit: 11, started: 5, finished: 9, treatment: 1 },
+  // July 6-13: lead metrics from Salesforce July 13 16:50 export. Spend/clicks/impressions TBD from Google Ads.
   { date: '2026-07-07', spend: 0, clicks: 0, impressions: 0, submit: 8, started: 1, finished: 2, treatment: 0 },
-  { date: '2026-07-08', spend: 0, clicks: 0, impressions: 0, submit: 4, started: 3, finished: 2, treatment: 0 },
+  { date: '2026-07-08', spend: 0, clicks: 0, impressions: 0, submit: 6, started: 6, finished: 6, treatment: 0 },
+  { date: '2026-07-09', spend: 0, clicks: 0, impressions: 0, submit: 7, started: 4, finished: 2, treatment: 0 },
+  { date: '2026-07-10', spend: 0, clicks: 0, impressions: 0, submit: 3, started: 2, finished: 5, treatment: 2 },
+  { date: '2026-07-11', spend: 0, clicks: 0, impressions: 0, submit: 3, started: 2, finished: 0, treatment: 0 },
+  { date: '2026-07-12', spend: 0, clicks: 0, impressions: 0, submit: 6, started: 2, finished: 2, treatment: 0 },
+  { date: '2026-07-13', spend: 0, clicks: 0, impressions: 0, submit: 4, started: 4, finished: 8, treatment: 0 },
 ];
 
 // Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)
