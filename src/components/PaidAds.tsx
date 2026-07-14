@@ -65,6 +65,7 @@ const META_FUNNEL = { entered: 58, waitingInfo: 30, sentCheckout: 13, checkedOut
 // 379 Google Ads leads (excl DNC). 16 checkouts, $27,382 revenue (all amounts populated).
 const GOOGLE_SF_PIPELINE = { total: 379, waiting: 216, sentToTxP: 26, txpApproved: 0, sentCheckout: 91, checkedOut: 16, referredOut: 22, denied: 0, closedLost: 6, waitingTxPAssign: 0, tempHold: 2 };
 const GOOGLE_REVENUE: number = 27382; // 16 checkouts, $27,382 subtotal from Salesforce
+const COGS_PER_CHECKOUT: number = 650; // Cost of goods sold per checkout (appliance, lab, fulfillment)
 
 // Google Ads daily seed data (source of truth — merged with Supabase on load)
 // June 1-15 spend/clicks/impressions from Google Ads Report Editor, June 15, 2026
@@ -114,15 +115,15 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-07-03', spend: 440.25, clicks: 119, impressions: 2260, submit: 3, started: 3, finished: 1, treatment: 0 },
   { date: '2026-07-04', spend: 345.97, clicks: 111, impressions: 1992, submit: 3, started: 1, finished: 2, treatment: 0 },
   { date: '2026-07-05', spend: 751.95, clicks: 204, impressions: 3610, submit: 5, started: 5, finished: 1, treatment: 0 },
-  { date: '2026-07-06', spend: 0, clicks: 0, impressions: 0, submit: 11, started: 5, finished: 9, treatment: 1 },
-  // July 6-13: lead metrics from Salesforce July 13 16:50 export. Spend/clicks/impressions TBD from Google Ads.
-  { date: '2026-07-07', spend: 0, clicks: 0, impressions: 0, submit: 8, started: 1, finished: 2, treatment: 0 },
-  { date: '2026-07-08', spend: 0, clicks: 0, impressions: 0, submit: 6, started: 6, finished: 6, treatment: 0 },
-  { date: '2026-07-09', spend: 0, clicks: 0, impressions: 0, submit: 7, started: 4, finished: 2, treatment: 0 },
-  { date: '2026-07-10', spend: 0, clicks: 0, impressions: 0, submit: 3, started: 2, finished: 5, treatment: 2 },
-  { date: '2026-07-11', spend: 0, clicks: 0, impressions: 0, submit: 3, started: 2, finished: 0, treatment: 0 },
-  { date: '2026-07-12', spend: 0, clicks: 0, impressions: 0, submit: 6, started: 2, finished: 2, treatment: 0 },
-  { date: '2026-07-13', spend: 0, clicks: 0, impressions: 0, submit: 4, started: 4, finished: 8, treatment: 0 },
+  { date: '2026-07-06', spend: 938.87, clicks: 207, impressions: 4891, submit: 11, started: 5, finished: 9, treatment: 1 },
+  // July 6-13: lead metrics from Salesforce July 13 16:50 export. Spend/clicks/impressions from Google Ads Jul 13.
+  { date: '2026-07-07', spend: 986.45, clicks: 213, impressions: 4440, submit: 8, started: 1, finished: 2, treatment: 0 },
+  { date: '2026-07-08', spend: 775.19, clicks: 196, impressions: 4154, submit: 6, started: 6, finished: 6, treatment: 0 },
+  { date: '2026-07-09', spend: 742.87, clicks: 206, impressions: 3797, submit: 7, started: 4, finished: 2, treatment: 0 },
+  { date: '2026-07-10', spend: 667.42, clicks: 175, impressions: 2571, submit: 3, started: 2, finished: 5, treatment: 2 },
+  { date: '2026-07-11', spend: 608.47, clicks: 156, impressions: 3248, submit: 3, started: 2, finished: 0, treatment: 0 },
+  { date: '2026-07-12', spend: 656.37, clicks: 172, impressions: 3544, submit: 6, started: 2, finished: 2, treatment: 0 },
+  { date: '2026-07-13', spend: 493.87, clicks: 130, impressions: 2689, submit: 4, started: 4, finished: 8, treatment: 0 },
 ];
 
 // Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)
@@ -258,6 +259,14 @@ export default function PaidAds() {
   const googleNetTracked = googleRevenue - googleTrackedSpend;
   const googleWaitingInfo = GOOGLE_SF_PIPELINE.waiting;
   const blackoutSpend = googleTotalSpend - googleTrackedSpend;
+
+  // True cost per checkout (ad spend + COGS)
+  const totalCOGS = googleCheckouts * COGS_PER_CHECKOUT;
+  const trueTotalCost = googleTotalSpend + totalCOGS;
+  const trueCostPerCheckout = googleCheckouts > 0 ? trueTotalCost / googleCheckouts : 0;
+  const revenuePerCheckout = googleCheckouts > 0 ? googleRevenue / googleCheckouts : 0;
+  const trueNetPerCheckout = revenuePerCheckout - trueCostPerCheckout;
+  const trueNet = googleRevenue - trueTotalCost;
 
   // Meta stats
   const metaCampaignMonths = META_MONTHLY.filter((m) => m.spend >= 1000);
@@ -622,6 +631,51 @@ export default function PaidAds() {
           )}
           <div style={{ fontSize: '0.78em', color: '#888', marginTop: 10 }}>
             {googleCheckouts} checkout{googleCheckouts !== 1 ? 's' : ''} totaling ${googleRevenue.toLocaleString()}. {GOOGLE_SF_PIPELINE.sentCheckout} more at Sent Checkout stage.
+          </div>
+        </div>
+
+        {/* True Cost per Checkout (Ad Spend + COGS) */}
+        <ChartLabel>True Cost per Checkout</ChartLabel>
+        <div style={{
+          background: 'linear-gradient(135deg, #faf8f0, #f7f2e8)',
+          borderRadius: 12, padding: '20px 24px', marginBottom: 16, border: '1px solid #e8e0d0',
+        }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 16, textAlign: 'center', marginBottom: 16 }}>
+            <div>
+              <div style={{ fontSize: '0.7em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Ad Cost per Checkout</div>
+              <div style={{ fontSize: '1.4em', fontWeight: 'bold', color: '#E57373' }}>{googleCheckouts > 0 ? `$${Math.round(googleCostPerCheckout).toLocaleString()}` : '--'}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.7em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>COGS per Checkout</div>
+              <div style={{ fontSize: '1.4em', fontWeight: 'bold', color: '#999' }}>${COGS_PER_CHECKOUT.toLocaleString()}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.7em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>True Cost per Checkout</div>
+              <div style={{ fontSize: '1.4em', fontWeight: 'bold', color: TP.navy }}>{googleCheckouts > 0 ? `$${Math.round(trueCostPerCheckout).toLocaleString()}` : '--'}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.7em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Revenue per Checkout</div>
+              <div style={{ fontSize: '1.4em', fontWeight: 'bold', color: '#00C853' }}>{googleCheckouts > 0 ? `$${Math.round(revenuePerCheckout).toLocaleString()}` : '--'}</div>
+            </div>
+          </div>
+          <div style={{ borderTop: '1px dashed #d8d0c0', paddingTop: 14, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, textAlign: 'center' }}>
+            <div>
+              <div style={{ fontSize: '0.7em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Total Ad Spend</div>
+              <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#E57373' }}>${googleTotalSpend.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.7em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Total COGS ({googleCheckouts} checkouts)</div>
+              <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#999' }}>${totalCOGS.toLocaleString()}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.7em', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>True Net (Rev − Ads − COGS)</div>
+              <div style={{ fontSize: '1.3em', fontWeight: 'bold', color: trueNet >= 0 ? '#00C853' : '#E57373' }}>
+                {googleCheckouts > 0 ? `${trueNet >= 0 ? '+' : '-'}$${Math.abs(Math.round(trueNet)).toLocaleString()}` : '--'}
+              </div>
+            </div>
+          </div>
+          <div style={{ fontSize: '0.78em', color: '#888', marginTop: 10 }}>
+            COGS = ${COGS_PER_CHECKOUT}/checkout (appliance, lab, fulfillment). True cost = ad spend + COGS. {googleCheckouts > 0 && trueNetPerCheckout < 0 ? `Currently $${Math.abs(Math.round(trueNetPerCheckout)).toLocaleString()} underwater per checkout.` : ''} {GOOGLE_SF_PIPELINE.sentCheckout} more at Sent Checkout stage.
           </div>
         </div>
       </div>
