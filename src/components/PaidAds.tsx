@@ -142,13 +142,27 @@ const GOOGLE_SF_PIPELINE = {
 // 16 checkouts, $27,382 subtotal from Salesforce
 const GOOGLE_REVENUE: number = 27382;
 
-// Cohort maturity input — leads/checkouts/revenue by month, from Salesforce.
-// Spend is joined in from Google Ads daily data at render time.
-const SF_COHORT_DATA: { month: string; leads: number; checkouts: number; revenue: number; avgDaysToCheckout: number | null }[] = [
-  { month: 'Apr 2026', leads: 57, checkouts: 2, revenue: 3291, avgDaysToCheckout: 18 },
-  { month: 'May 2026', leads: 80, checkouts: 4, revenue: 7081, avgDaysToCheckout: 19 },
-  { month: 'Jun 2026', leads: 173, checkouts: 10, revenue: 17010, avgDaysToCheckout: 16 },
-  { month: 'Jul 2026', leads: 73, checkouts: 0, revenue: 0, avgDaysToCheckout: null },
+// Weekly cohort data — from Salesforce export July 14, 2026.
+// 'subs' = total form submissions that week, 'incomplete' = still in Waiting-Info stage (not a real lead),
+// 'pipeline' = subs - incomplete = leads that progressed past initial submission.
+// Spend is joined from Google Ads daily/monthly data at render time.
+const SF_WEEKLY_COHORT_DATA: { week: string; subs: number; incomplete: number; pipeline: number; checkouts: number; revenue: number; avgDaysToCheckout: number | null }[] = [
+  { week: '2026-03-30', subs: 2, incomplete: 2, pipeline: 0, checkouts: 0, revenue: 0, avgDaysToCheckout: null },
+  { week: '2026-04-06', subs: 12, incomplete: 7, pipeline: 5, checkouts: 1, revenue: 1546, avgDaysToCheckout: 23 },
+  { week: '2026-04-13', subs: 18, incomplete: 11, pipeline: 7, checkouts: 1, revenue: 1745, avgDaysToCheckout: 14 },
+  { week: '2026-04-20', subs: 11, incomplete: 7, pipeline: 4, checkouts: 0, revenue: 0, avgDaysToCheckout: null },
+  { week: '2026-04-27', subs: 21, incomplete: 15, pipeline: 6, checkouts: 0, revenue: 0, avgDaysToCheckout: null },
+  { week: '2026-05-04', subs: 20, incomplete: 9, pipeline: 11, checkouts: 1, revenue: 1995, avgDaysToCheckout: 8 },
+  { week: '2026-05-11', subs: 7, incomplete: 5, pipeline: 2, checkouts: 0, revenue: 0, avgDaysToCheckout: null },
+  { week: '2026-05-18', subs: 10, incomplete: 7, pipeline: 3, checkouts: 1, revenue: 1595, avgDaysToCheckout: 32 },
+  { week: '2026-05-25', subs: 36, incomplete: 23, pipeline: 13, checkouts: 2, revenue: 3491, avgDaysToCheckout: 18 },
+  { week: '2026-06-01', subs: 41, incomplete: 23, pipeline: 18, checkouts: 3, revenue: 5187, avgDaysToCheckout: 24 },
+  { week: '2026-06-08', subs: 36, incomplete: 17, pipeline: 19, checkouts: 2, revenue: 3092, avgDaysToCheckout: 12 },
+  { week: '2026-06-15', subs: 37, incomplete: 19, pipeline: 18, checkouts: 3, revenue: 5286, avgDaysToCheckout: 12 },
+  { week: '2026-06-22', subs: 51, incomplete: 30, pipeline: 21, checkouts: 2, revenue: 3445, avgDaysToCheckout: 12 },
+  { week: '2026-06-29', subs: 29, incomplete: 17, pipeline: 12, checkouts: 0, revenue: 0, avgDaysToCheckout: null },
+  { week: '2026-07-06', subs: 44, incomplete: 22, pipeline: 22, checkouts: 0, revenue: 0, avgDaysToCheckout: null },
+  { week: '2026-07-13', subs: 8, incomplete: 6, pipeline: 2, checkouts: 0, revenue: 0, avgDaysToCheckout: null },
 ];
 
 // Lead → checkout timing, computed from the 16 Salesforce checkouts to date.
@@ -194,7 +208,8 @@ const MONTH_SHORT = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
 interface CohortRow {
   label: string;
   spend: number;
-  leads: number;
+  subs: number;
+  pipeline: number;
   checkouts: number;
   ageDays: number;
   maturity: number;
@@ -329,13 +344,16 @@ export default function PaidAds() {
   const googleTotalSpend = gT.spend;
   const googleDays = sorted.length || 1;
 
-  /* ──── KPIs (Salesforce for leads/checkouts/revenue, Google Ads for spend) ──── */
+  /* ──── KPIs (Salesforce for submissions/pipeline/checkouts/revenue, Google Ads for spend) ──── */
 
-  const totalLeads = GOOGLE_SF_PIPELINE.total;
+  const totalSubs = GOOGLE_SF_PIPELINE.total; // All form submissions from Google Ads
+  const totalIncomplete = GOOGLE_SF_PIPELINE.waitingInfo; // Still waiting on info — not a real lead
+  const totalPipeline = totalSubs - totalIncomplete; // Progressed past initial submission
   const totalCheckouts = GOOGLE_SF_PIPELINE.checkedOut;
-  const cpl = totalLeads > 0 ? googleTotalSpend / totalLeads : 0;
+  const costPerSub = totalSubs > 0 ? googleTotalSpend / totalSubs : 0;
   const cac = totalCheckouts > 0 ? googleTotalSpend / totalCheckouts : 0;
-  const leadToCheckoutRate = totalLeads > 0 ? (totalCheckouts / totalLeads) * 100 : 0;
+  const pipelineToCheckoutRate = totalPipeline > 0 ? (totalCheckouts / totalPipeline) * 100 : 0;
+  const completionRate = totalSubs > 0 ? (totalPipeline / totalSubs) * 100 : 0;
 
   /* ──── Salesforce pipeline funnel bar ──── */
   const pipelineBar = useMemo(() => ([
@@ -348,33 +366,73 @@ export default function PaidAds() {
     { label: 'Temp Hold', val: GOOGLE_SF_PIPELINE.tempHold, color: TP.skyBlue },
   ]), []);
 
-  /* ──── Cohort maturity analysis (Salesforce leads/checkouts + Google Ads spend) ──── */
+  /* ──── Weekly cohort maturity analysis (Salesforce subs/checkouts + Google Ads spend) ──── */
+
+  // Pre-compute daily spend lookup for efficiency
+  const dailySpendByDate = useMemo(() => {
+    const m = new Map<string, number>();
+    sorted.forEach((e) => m.set(e.date, e.spend || 0));
+    return m;
+  }, [sorted]);
+
+  // Pre-compute monthly avg daily spend for months with only monthly data (Apr, May)
+  const monthlyAvgDaily = useMemo(() => {
+    const m = new Map<string, number>();
+    GOOGLE_ADS_PRIOR_MONTHS.forEach((pm) => {
+      const daysInMonth = new Date(pm.year, pm.monthIdx, 0).getDate();
+      m.set(`${pm.year}-${pm.monthIdx}`, pm.spend / daysInMonth);
+    });
+    return m;
+  }, []);
+
+  function getWeekSpend(weekStart: string): number {
+    const ws = new Date(weekStart);
+    let total = 0;
+    for (let d = 0; d < 7; d++) {
+      const day = new Date(ws);
+      day.setDate(ws.getDate() + d);
+      const ds = day.toISOString().split('T')[0];
+      // Try daily data first
+      if (dailySpendByDate.has(ds)) {
+        total += dailySpendByDate.get(ds)!;
+      } else {
+        // Fall back to monthly avg daily
+        const y = day.getFullYear();
+        const mo = day.getMonth() + 1;
+        const key = `${y}-${mo}`;
+        if (monthlyAvgDaily.has(key)) {
+          total += monthlyAvgDaily.get(key)!;
+        }
+      }
+    }
+    return total;
+  }
+
   const cohortData = useMemo((): CohortRow[] => {
     const now = new Date();
 
-    return SF_COHORT_DATA.map((c) => {
-      const monthIdx = MONTH_SHORT.indexOf(c.month.split(' ')[0]);
-      const year = parseInt(c.month.split(' ')[1], 10);
+    return SF_WEEKLY_COHORT_DATA.map((c) => {
+      const spend = getWeekSpend(c.week);
 
-      // Check prior months first, then daily data
-      const priorMonth = GOOGLE_ADS_PRIOR_MONTHS.find((p) => p.year === year && p.monthIdx === monthIdx);
-      const dailySpend = sorted.reduce((s, e) => {
-        const [y, m] = e.date.split('-').map(Number);
-        return (y === year && m === monthIdx) ? s + (e.spend || 0) : s;
-      }, 0);
-      const spend = dailySpend > 0 ? dailySpend : (priorMonth?.spend ?? 0);
-
-      const midpoint = new Date(year, monthIdx - 1, 15);
+      // Midpoint = Wednesday of the week
+      const ws = new Date(c.week);
+      const midpoint = new Date(ws);
+      midpoint.setDate(ws.getDate() + 3);
       const ageDays = Math.floor((now.getTime() - midpoint.getTime()) / (1000 * 60 * 60 * 24));
       const maturity = getMaturity(ageDays);
       const projectedFinal = (maturity > 0.05 && c.checkouts > 0) ? c.checkouts / maturity : 0;
       const rawCAC = c.checkouts > 0 ? spend / c.checkouts : null;
       const adjCAC = projectedFinal > 0 ? spend / projectedFinal : null;
 
+      // Label: "Apr 7" format
+      const d = new Date(c.week);
+      const label = `${MONTH_SHORT[d.getMonth() + 1]} ${d.getDate()}`;
+
       return {
-        label: c.month,
+        label,
         spend,
-        leads: c.leads,
+        subs: c.subs,
+        pipeline: c.pipeline,
         checkouts: c.checkouts,
         ageDays,
         maturity,
@@ -383,20 +441,23 @@ export default function PaidAds() {
         adjCAC,
       };
     });
-  }, [sorted]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sorted, dailySpendByDate, monthlyAvgDaily]);
 
   const cohortTotals = useMemo(() => {
-    const totalSpend = cohortData.reduce((s, c) => s + c.spend, 0);
-    const totalCheckoutsC = cohortData.reduce((s, c) => s + c.checkouts, 0);
-    const totalProjected = cohortData.reduce((s, c) => s + c.projectedFinal, 0);
-    const totalLeadsC = cohortData.reduce((s, c) => s + c.leads, 0);
+    const tSpend = cohortData.reduce((s, c) => s + c.spend, 0);
+    const tCheckouts = cohortData.reduce((s, c) => s + c.checkouts, 0);
+    const tProjected = cohortData.reduce((s, c) => s + c.projectedFinal, 0);
+    const tSubs = cohortData.reduce((s, c) => s + c.subs, 0);
+    const tPipeline = cohortData.reduce((s, c) => s + c.pipeline, 0);
     return {
-      totalSpend,
-      totalCheckouts: totalCheckoutsC,
-      totalLeads: totalLeadsC,
-      totalProjected,
-      overallRawCAC: totalCheckoutsC > 0 ? totalSpend / totalCheckoutsC : null,
-      overallAdjCAC: totalProjected > 0 ? totalSpend / totalProjected : null,
+      totalSpend: tSpend,
+      totalCheckouts: tCheckouts,
+      totalSubs: tSubs,
+      totalPipeline: tPipeline,
+      totalProjected: tProjected,
+      overallRawCAC: tCheckouts > 0 ? tSpend / tCheckouts : null,
+      overallAdjCAC: tProjected > 0 ? tSpend / tProjected : null,
     };
   }, [cohortData]);
 
@@ -495,16 +556,19 @@ export default function PaidAds() {
         Google Ads — Overview
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 12, marginBottom: 8 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 8 }}>
         <KPICard color="#E57373" label="Total Spend" value={`$${googleTotalSpend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} sub="Source: Google Ads" />
-        <KPICard color={TP.darkPurple} label="Leads (SF)" value={`${totalLeads}`} sub="Source: Salesforce" />
-        <KPICard color={TP.yellow} label="CPL" value={`$${Math.round(cpl).toLocaleString()}`} sub="Spend ÷ SF leads" />
-        <KPICard color={TP.blue} label="Checkouts" value={`${totalCheckouts}`} sub="Source: Salesforce" />
-        <KPICard color="#00C853" label="CAC" value={totalCheckouts > 0 ? `$${Math.round(cac).toLocaleString()}` : '—'} sub="Spend ÷ SF checkouts" />
+        <KPICard color={TP.darkPurple} label="Submissions" value={`${totalSubs}`} sub={`${totalPipeline} pipeline / ${totalIncomplete} incomplete`} />
+        <KPICard color={TP.yellow} label="Cost / Sub" value={`$${Math.round(costPerSub).toLocaleString()}`} sub="Spend ÷ submissions" />
+        <KPICard color={TP.blue} label="Completion" value={`${completionRate.toFixed(0)}%`} sub={`${totalPipeline} of ${totalSubs} completed`} />
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 8 }}>
+        <KPICard color="#00C853" label="Checkouts" value={`${totalCheckouts}`} sub="Source: Salesforce" />
+        <KPICard color="#E57373" label="CAC" value={totalCheckouts > 0 ? `$${Math.round(cac).toLocaleString()}` : '—'} sub="Spend ÷ checkouts" />
         <KPICard color={TP.green} label="Revenue" value={`$${GOOGLE_REVENUE.toLocaleString()}`} sub="Source: Salesforce" />
       </div>
       <div style={{ fontSize: '0.78em', color: '#888', marginBottom: 28, fontStyle: 'italic' }}>
-        Lead and checkout counts from Salesforce. Spend from Google Ads.
+        Submission and checkout counts from Salesforce. Spend from Google Ads. Incomplete = Waiting Needs Info.
       </div>
 
       {/* ═══════ SALESFORCE PIPELINE ═══════ */}
@@ -536,8 +600,8 @@ export default function PaidAds() {
                   callbacks: {
                     label: (ctx) => {
                       const val = ctx.parsed.x ?? 0;
-                      const pct = totalLeads > 0 ? (val / totalLeads * 100).toFixed(1) : '0';
-                      return `${val} (${pct}% of leads)`;
+                      const pct = totalSubs > 0 ? (val / totalSubs * 100).toFixed(1) : '0';
+                      return `${val} (${pct}% of submissions)`;
                     },
                   },
                 },
@@ -553,7 +617,7 @@ export default function PaidAds() {
 
       <div style={{ background: '#f0f7ed', borderLeft: '4px solid #5BA88C', borderRadius: 8, padding: '14px 18px', marginBottom: 32 }}>
         <div style={{ fontWeight: 700, color: TP.navy }}>
-          {totalLeads} leads → {totalCheckouts} checkouts = {leadToCheckoutRate.toFixed(1)}% conversion rate.
+          {totalSubs} submissions ({totalIncomplete} incomplete, {totalPipeline} pipeline) → {totalCheckouts} checkouts = {pipelineToCheckoutRate.toFixed(1)}% pipeline-to-checkout rate.
         </div>
       </div>
 
@@ -561,7 +625,7 @@ export default function PaidAds() {
       <div style={{ fontSize: 16, fontWeight: 700, color: TP.navy, borderBottom: `2px solid ${TP.navy}`, paddingBottom: 8, marginBottom: 16 }}>
         Cohort Maturity Analysis
       </div>
-      <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 8 }}>Source: Salesforce (leads/checkouts) + Google Ads (spend)</div>
+      <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 8 }}>Source: Salesforce (subs/checkouts) + Google Ads (spend). Weekly cohorts by submission date.</div>
 
       <div style={{ fontSize: '0.85em', color: '#555', marginBottom: 12, lineHeight: 1.6 }}>
         CAC = spend / checkouts. Recent cohorts have not fully matured. Adjusted CAC projects forward using Kenny{"'"}s checkout maturity curve.
@@ -599,8 +663,8 @@ export default function PaidAds() {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
           <thead>
             <tr style={{ background: TP.navy }}>
-              {['Cohort', 'Google Spend', 'SF Leads', 'SF Checkouts', 'Age', '~Maturity', 'Projected Final', 'Raw CAC', 'Adj CAC'].map(h => (
-                <th key={h} style={{ padding: '8px 10px', textAlign: h === 'Cohort' ? 'left' : 'right', color: '#fff', whiteSpace: 'nowrap' }}>{h}</th>
+              {['Week', 'Spend', 'Subs', 'Pipeline', 'Checkouts', 'Age', '~Maturity', 'Projected', 'Raw CAC', 'Adj CAC'].map(h => (
+                <th key={h} style={{ padding: '8px 10px', textAlign: h === 'Week' ? 'left' : 'right', color: '#fff', whiteSpace: 'nowrap' }}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -610,9 +674,10 @@ export default function PaidAds() {
                 background: idx % 2 === 0 ? '#f9f9f9' : '#fff',
                 opacity: c.maturity < 0.40 ? 0.6 : 1,
               }}>
-                <td style={{ padding: '6px 10px', fontWeight: 600 }}>{c.label}</td>
+                <td style={{ padding: '6px 10px', fontWeight: 600, whiteSpace: 'nowrap' }}>{c.label}</td>
                 <td style={{ padding: '6px 10px', textAlign: 'right' }}>${Math.round(c.spend).toLocaleString()}</td>
-                <td style={{ padding: '6px 10px', textAlign: 'right' }}>{c.leads}</td>
+                <td style={{ padding: '6px 10px', textAlign: 'right' }}>{c.subs}</td>
+                <td style={{ padding: '6px 10px', textAlign: 'right' }}>{c.pipeline}</td>
                 <td style={{ padding: '6px 10px', textAlign: 'right' }}>{c.checkouts}</td>
                 <td style={{ padding: '6px 10px', textAlign: 'right' }}>{c.ageDays}d</td>
                 <td style={{ padding: '6px 10px', textAlign: 'right' }}>{Math.round(c.maturity * 100)}%</td>
@@ -626,7 +691,8 @@ export default function PaidAds() {
             <tr style={{ background: TP.navy, color: '#fff', fontWeight: 700 }}>
               <td style={{ padding: '8px 10px' }}>Total</td>
               <td style={{ padding: '8px 10px', textAlign: 'right' }}>${Math.round(cohortTotals.totalSpend).toLocaleString()}</td>
-              <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.totalLeads}</td>
+              <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.totalSubs}</td>
+              <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.totalPipeline}</td>
               <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.totalCheckouts}</td>
               <td style={{ padding: '8px 10px', textAlign: 'right' }}></td>
               <td style={{ padding: '8px 10px', textAlign: 'right' }}></td>
