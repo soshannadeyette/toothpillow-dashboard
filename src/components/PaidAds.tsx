@@ -213,6 +213,45 @@ function getMaturity(ageDays: number): number {
   return 1.0;
 }
 
+/* ════════════════════════════════════════════
+   SUBMISSION COMPLETION MATURITY — by weekly cohort
+   How quickly leads complete the assessment after opening the form.
+   Source: Salesforce "Google Ads 2026" export, July 14, 2026.
+   d1/d3/d7/d14 = cumulative completion rate within that many days of Created Date.
+   null = cohort too young to measure at that threshold.
+   ════════════════════════════════════════════ */
+const SF_COMPLETION_MATURITY: { week: string; leads: number; ageDays: number; d1: number | null; d3: number | null; d7: number | null; d14: number | null }[] = [
+  { week: '2026-03-30', leads: 2, ageDays: 106, d1: 0.0, d3: 0.0, d7: 0.0, d14: 0.0 },
+  { week: '2026-04-06', leads: 12, ageDays: 99, d1: 33.3, d3: 33.3, d7: 41.7, d14: 41.7 },
+  { week: '2026-04-13', leads: 18, ageDays: 92, d1: 27.8, d3: 27.8, d7: 33.3, d14: 38.9 },
+  { week: '2026-04-20', leads: 11, ageDays: 85, d1: 36.4, d3: 36.4, d7: 36.4, d14: 36.4 },
+  { week: '2026-04-27', leads: 21, ageDays: 78, d1: 23.8, d3: 28.6, d7: 28.6, d14: 28.6 },
+  { week: '2026-05-04', leads: 20, ageDays: 71, d1: 50.0, d3: 50.0, d7: 50.0, d14: 50.0 },
+  { week: '2026-05-11', leads: 7, ageDays: 64, d1: 28.6, d3: 28.6, d7: 28.6, d14: 28.6 },
+  { week: '2026-05-18', leads: 10, ageDays: 57, d1: 20.0, d3: 30.0, d7: 30.0, d14: 30.0 },
+  { week: '2026-05-25', leads: 36, ageDays: 50, d1: 25.0, d3: 27.8, d7: 27.8, d14: 30.6 },
+  { week: '2026-06-01', leads: 44, ageDays: 43, d1: 38.6, d3: 40.9, d7: 43.2, d14: 45.5 },
+  { week: '2026-06-08', leads: 36, ageDays: 36, d1: 41.7, d3: 47.2, d7: 50.0, d14: 52.8 },
+  { week: '2026-06-15', leads: 37, ageDays: 29, d1: 43.2, d3: 43.2, d7: 45.9, d14: 45.9 },
+  { week: '2026-06-22', leads: 51, ageDays: 22, d1: 37.3, d3: 37.3, d7: 39.2, d14: 41.2 },
+  { week: '2026-06-29', leads: 29, ageDays: 15, d1: 41.4, d3: 41.4, d7: 41.4, d14: 41.4 },
+  { week: '2026-07-06', leads: 44, ageDays: 8, d1: 43.2, d3: 47.7, d7: 50.0, d14: null },
+  { week: '2026-07-13', leads: 8, ageDays: 1, d1: 25.0, d3: null, d7: null, d14: null },
+];
+
+/* ════════════════════════════════════════════
+   PIPELINE AGING — leads at "Sent Checkout Link" stage
+   Bucketed by days since Created Date. No checkout has
+   ever taken longer than 32 days, so 33+ is effectively dead.
+   Source: Salesforce "Google Ads 2026" export, July 14, 2026.
+   ════════════════════════════════════════════ */
+const SF_PIPELINE_AGING = {
+  fresh: 15,      // 0-14 days — newest, expect checkouts in 1-2 weeks
+  maturing: 32,   // 15-32 days — mid-process, most checkouts happen here
+  stale: 44,      // 33+ days — no checkout has ever taken longer than 32 days
+  total: 91,
+};
+
 const MONTH_SHORT = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 interface CohortRow {
@@ -876,6 +915,129 @@ export default function PaidAds() {
           Range: {CONVERSION_TIMING.min}–{CONVERSION_TIMING.max} days (average {CONVERSION_TIMING.mean} days), n={CONVERSION_TIMING.count}
         </div>
         <div style={{ fontSize: '0.75em', color: '#aaa', marginTop: 8 }}>Source: Salesforce</div>
+      </div>
+
+      {/* ═══════ SUBMISSION COMPLETION MATURITY ═══════ */}
+      <div style={{ fontSize: 16, fontWeight: 700, color: TP.navy, borderBottom: `2px solid ${TP.navy}`, paddingBottom: 8, marginBottom: 16 }}>
+        Submission Completion Maturity
+      </div>
+      <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 8 }}>Source: Salesforce. How quickly leads complete the assessment after opening the form, by weekly cohort.</div>
+      <div style={{ fontSize: '0.85em', color: '#555', marginBottom: 16, lineHeight: 1.6 }}>
+        Each column shows the cumulative % of leads that finished their submission within that many days of starting. Most who complete do so within the first day. The gap between ≤1d and ≤14d tells you how many return later to finish.
+      </div>
+
+      <div style={{ overflowX: 'auto', marginBottom: 20 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
+          <thead>
+            <tr style={{ background: TP.navy }}>
+              {['Week', 'Leads', 'Age', '≤ 1 day', '≤ 3 days', '≤ 7 days', '≤ 14 days'].map(h => (
+                <th key={h} style={{ padding: '8px 10px', textAlign: h === 'Week' ? 'left' : 'right', color: '#fff', whiteSpace: 'nowrap', fontSize: '0.85em' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {SF_COMPLETION_MATURITY.map((c, idx) => {
+              const d = new Date(c.week);
+              const label = `${MONTH_SHORT[d.getMonth() + 1]} ${d.getDate()}`;
+              const cellStyle = (val: number | null) => ({
+                padding: '6px 8px' as const,
+                textAlign: 'right' as const,
+                color: val === null ? '#ccc' : (val >= 45 ? '#00C853' : (val >= 30 ? TP.yellow : '#E57373')),
+                fontWeight: (val !== null && val >= 45 ? 600 : 400) as number,
+              });
+              return (
+                <tr key={c.week} style={{ background: idx % 2 === 0 ? '#f9f9f9' : '#fff' }}>
+                  <td style={{ padding: '6px 8px', fontWeight: 600, whiteSpace: 'nowrap' }}>{label}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right' }}>{c.leads}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', color: '#888' }}>{c.ageDays}d</td>
+                  <td style={cellStyle(c.d1)}>{c.d1 !== null ? `${c.d1.toFixed(1)}%` : '—'}</td>
+                  <td style={cellStyle(c.d3)}>{c.d3 !== null ? `${c.d3.toFixed(1)}%` : '—'}</td>
+                  <td style={cellStyle(c.d7)}>{c.d7 !== null ? `${c.d7.toFixed(1)}%` : '—'}</td>
+                  <td style={cellStyle(c.d14)}>{c.d14 !== null ? `${c.d14.toFixed(1)}%` : '—'}</td>
+                </tr>
+              );
+            })}
+            {(() => {
+              const mature = SF_COMPLETION_MATURITY.filter(c => c.d14 !== null && c.ageDays >= 14);
+              if (mature.length === 0) return null;
+              const avgD1 = mature.reduce((s, c) => s + (c.d1 ?? 0), 0) / mature.length;
+              const avgD3 = mature.reduce((s, c) => s + (c.d3 ?? 0), 0) / mature.length;
+              const avgD7 = mature.reduce((s, c) => s + (c.d7 ?? 0), 0) / mature.length;
+              const avgD14 = mature.reduce((s, c) => s + (c.d14 ?? 0), 0) / mature.length;
+              const totalLeads = mature.reduce((s, c) => s + c.leads, 0);
+              return (
+                <tr style={{ background: TP.navy, color: '#fff', fontWeight: 700 }}>
+                  <td style={{ padding: '8px 10px' }}>Avg</td>
+                  <td style={{ padding: '8px 10px', textAlign: 'right' }}>{totalLeads}</td>
+                  <td style={{ padding: '8px 10px', textAlign: 'right' }}></td>
+                  <td style={{ padding: '8px 10px', textAlign: 'right' }}>{avgD1.toFixed(1)}%</td>
+                  <td style={{ padding: '8px 10px', textAlign: 'right' }}>{avgD3.toFixed(1)}%</td>
+                  <td style={{ padding: '8px 10px', textAlign: 'right' }}>{avgD7.toFixed(1)}%</td>
+                  <td style={{ padding: '8px 10px', textAlign: 'right' }}>{avgD14.toFixed(1)}%</td>
+                </tr>
+              );
+            })()}
+          </tbody>
+        </table>
+      </div>
+
+      <div style={{ background: '#f0f7ed', borderLeft: '4px solid #5BA88C', borderRadius: 8, padding: '14px 18px', marginBottom: 32, fontSize: '0.85em', color: '#555', lineHeight: 1.6 }}>
+        Most completions happen same-day. The small gap between ≤1d and ≤14d means very few leads come back to finish later — if they don't complete right away, they probably won't.
+      </div>
+
+      {/* ═══════ PIPELINE AGING ═══════ */}
+      <div style={{ fontSize: 16, fontWeight: 700, color: TP.navy, borderBottom: `2px solid ${TP.navy}`, paddingBottom: 8, marginBottom: 16 }}>
+        Pipeline Aging — Sent Checkout Link
+      </div>
+      <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 8 }}>Source: Salesforce. {SF_PIPELINE_AGING.total} leads currently at &quot;Sent Checkout Link&quot; stage, bucketed by days since Created Date.</div>
+      <div style={{ fontSize: '0.85em', color: '#555', marginBottom: 16, lineHeight: 1.6 }}>
+        No checkout has ever taken longer than {CONVERSION_TIMING.max} days. Leads in the 33+ bucket are effectively dead — they will not convert without direct re-engagement.
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
+        <div style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', borderTop: '3px solid #00C853', textAlign: 'center' }}>
+          <div style={{ fontSize: '0.65em', color: '#666', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: 4 }}>Fresh (0–14 days)</div>
+          <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#00C853' }}>{SF_PIPELINE_AGING.fresh}</div>
+          <div style={{ fontSize: '0.72em', color: '#888', marginTop: 4 }}>Expect checkouts in 1–2 weeks</div>
+        </div>
+        <div style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', borderTop: `3px solid ${TP.yellow}`, textAlign: 'center' }}>
+          <div style={{ fontSize: '0.65em', color: '#666', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: 4 }}>Maturing (15–32 days)</div>
+          <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: TP.yellow }}>{SF_PIPELINE_AGING.maturing}</div>
+          <div style={{ fontSize: '0.72em', color: '#888', marginTop: 4 }}>Mid-process, most checkouts happen here</div>
+        </div>
+        <div style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', borderTop: '3px solid #E57373', textAlign: 'center' }}>
+          <div style={{ fontSize: '0.65em', color: '#666', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: 4 }}>Stale (33+ days)</div>
+          <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#E57373' }}>{SF_PIPELINE_AGING.stale}</div>
+          <div style={{ fontSize: '0.72em', color: '#888', marginTop: 4 }}>Past max observed checkout time</div>
+        </div>
+      </div>
+
+      {/* Pipeline aging stacked bar */}
+      <ChartCard>
+        <div style={{ height: 80 }}>
+          <div style={{ display: 'flex', height: '100%', borderRadius: 8, overflow: 'hidden' }}>
+            {[
+              { label: 'Fresh', count: SF_PIPELINE_AGING.fresh, color: '#00C853' },
+              { label: 'Maturing', count: SF_PIPELINE_AGING.maturing, color: TP.yellow },
+              { label: 'Stale', count: SF_PIPELINE_AGING.stale, color: '#E57373' },
+            ].map((b) => (
+              <div key={b.label} style={{
+                width: `${(b.count / SF_PIPELINE_AGING.total) * 100}%`,
+                background: b.color,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#fff', fontWeight: 700, fontSize: '0.9em',
+                minWidth: b.count > 0 ? 60 : 0,
+              }}>
+                {b.count > 0 && `${b.count} (${Math.round(b.count / SF_PIPELINE_AGING.total * 100)}%)`}
+              </div>
+            ))}
+          </div>
+        </div>
+      </ChartCard>
+
+      <div style={{ background: '#fef2f2', borderLeft: '4px solid #E57373', borderRadius: 8, padding: '14px 18px', marginBottom: 32, fontSize: '0.85em', color: '#555', lineHeight: 1.6 }}>
+        {SF_PIPELINE_AGING.stale} of {SF_PIPELINE_AGING.total} checkout links ({Math.round(SF_PIPELINE_AGING.stale / SF_PIPELINE_AGING.total * 100)}%) are past the point where any checkout has ever converted.
+        {SF_PIPELINE_AGING.fresh + SF_PIPELINE_AGING.maturing} are still within the conversion window.
       </div>
 
       {/* ═══════ DAILY SPEND TREND ═══════ */}
