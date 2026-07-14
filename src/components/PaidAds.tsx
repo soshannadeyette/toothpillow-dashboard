@@ -428,7 +428,8 @@ export default function PaidAds() {
       }
 
       const rawCAC = c.checkouts > 0 ? c.spend / c.checkouts : null;
-      const adjCAC = projectedFinal > 0 ? c.spend / projectedFinal : null;
+      // Don't show adjusted CAC for cohorts under 14 days — too young to have checkouts (median = 14d)
+      const adjCAC = (projectedFinal > 0 && ageDays >= 14) ? c.spend / projectedFinal : null;
       const compRate = c.leads > 0 ? c.completed / c.leads : 0;
 
       // Label: "Apr 7" format
@@ -646,7 +647,8 @@ export default function PaidAds() {
       <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 8 }}>Source: Salesforce (subs/checkouts) + Google Ads (spend). Weekly cohorts by submission date.</div>
 
       <div style={{ fontSize: '0.85em', color: '#555', marginBottom: 12, lineHeight: 1.6 }}>
-        CAC = spend / checkouts. Recent cohorts have not fully matured. Adjusted CAC projects forward using Kenny{"'"}s checkout maturity curve.
+        Adjusted CAC projects forward using observed checkout timing (median {CONVERSION_TIMING.median}d, max {CONVERSION_TIMING.max}d). Cohorts under 2 weeks are too young to show meaningful checkout data.
+        Checkout rate (CO %) = checkouts / completed subs.
       </div>
 
       <div style={{ marginBottom: 16 }}>
@@ -681,7 +683,7 @@ export default function PaidAds() {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
           <thead>
             <tr style={{ background: TP.navy }}>
-              {['Week', 'Spend', 'Leads', 'Completed', 'Comp %', 'Checkouts', 'Age', 'Maturity', 'Projected', 'Raw CAC', 'Adj CAC'].map(h => (
+              {['Week', 'Spend', 'Leads', 'Completed', 'Comp %', 'Checkouts', 'CO %', 'Age', 'Maturity', 'Projected', 'Adj CAC'].map(h => (
                 <th key={h} style={{ padding: '8px 10px', textAlign: h === 'Week' ? 'left' : 'right', color: '#fff', whiteSpace: 'nowrap', fontSize: '0.85em' }}>{h}</th>
               ))}
             </tr>
@@ -700,12 +702,14 @@ export default function PaidAds() {
                   {c.leads > 0 ? `${Math.round(c.completionRate * 100)}%` : '—'}
                 </td>
                 <td style={{ padding: '6px 8px', textAlign: 'right' }}>{c.checkouts}</td>
+                <td style={{ padding: '6px 8px', textAlign: 'right', color: c.completed > 0 && c.checkouts > 0 ? '#00C853' : '#888' }}>
+                  {c.completed > 0 && c.ageDays >= 14 ? (c.checkouts > 0 ? `${Math.round(c.checkouts / c.completed * 100)}%` : '0%') : (c.ageDays < 14 ? <span style={{ fontSize: '0.8em' }}>too early</span> : '—')}
+                </td>
                 <td style={{ padding: '6px 8px', textAlign: 'right' }}>{c.ageDays}d</td>
                 <td style={{ padding: '6px 8px', textAlign: 'right' }}>{Math.round(c.maturity * 100)}%</td>
-                <td style={{ padding: '6px 8px', textAlign: 'right' }}>{c.projectedFinal > 0 ? c.projectedFinal.toFixed(1) : '—'}</td>
-                <td style={{ padding: '6px 8px', textAlign: 'right', color: '#888' }}>{c.rawCAC !== null ? `$${Math.round(c.rawCAC).toLocaleString()}` : '—'}</td>
-                <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 600, color: c.adjCAC !== null && c.adjCAC <= 500 ? '#00C853' : (c.adjCAC !== null ? '#E57373' : '#888') }}>
-                  {c.adjCAC !== null ? `$${Math.round(c.adjCAC).toLocaleString()}` : '—'}
+                <td style={{ padding: '6px 8px', textAlign: 'right' }}>{c.ageDays >= 14 && c.projectedFinal > 0 ? c.projectedFinal.toFixed(1) : (c.ageDays < 14 ? <span style={{ fontSize: '0.8em', color: '#aaa' }}>too early</span> : '—')}</td>
+                <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 600, color: c.adjCAC !== null && c.adjCAC <= 1711 ? '#00C853' : (c.adjCAC !== null ? '#E57373' : '#888') }}>
+                  {c.adjCAC !== null ? `$${Math.round(c.adjCAC).toLocaleString()}` : (c.ageDays < 14 ? <span style={{ fontSize: '0.8em', fontWeight: 400, color: '#aaa' }}>too early</span> : '—')}
                 </td>
               </tr>
             ))}
@@ -716,10 +720,10 @@ export default function PaidAds() {
               <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.totalCompleted}</td>
               <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.totalLeads > 0 ? `${Math.round(cohortTotals.totalCompleted / cohortTotals.totalLeads * 100)}%` : '—'}</td>
               <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.totalCheckouts}</td>
+              <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.totalCompleted > 0 ? `${Math.round(cohortTotals.totalCheckouts / cohortTotals.totalCompleted * 100)}%` : '—'}</td>
               <td style={{ padding: '8px 10px', textAlign: 'right' }}></td>
               <td style={{ padding: '8px 10px', textAlign: 'right' }}></td>
               <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.totalProjected > 0 ? cohortTotals.totalProjected.toFixed(1) : '—'}</td>
-              <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.overallRawCAC !== null ? `$${Math.round(cohortTotals.overallRawCAC).toLocaleString()}` : '—'}</td>
               <td style={{ padding: '8px 10px', textAlign: 'right' }}>{cohortTotals.overallAdjCAC !== null ? `$${Math.round(cohortTotals.overallAdjCAC).toLocaleString()}` : '—'}</td>
             </tr>
           </tbody>
@@ -750,7 +754,7 @@ export default function PaidAds() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 16 }}>
           <div style={{ background: '#fff', borderRadius: 8, padding: '14px 16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
               <span style={{ fontSize: '0.82em', color: '#888' }}>Raw CAC (today)</span>
@@ -763,6 +767,17 @@ export default function PaidAds() {
               <span style={{ fontSize: '1.3em', fontWeight: 700, color: '#00C853' }}>
                 {cohortTotals.overallAdjCAC !== null ? `$${Math.round(cohortTotals.overallAdjCAC).toLocaleString()}` : '—'}
               </span>
+            </div>
+          </div>
+          <div style={{ background: '#fff', borderRadius: 8, padding: '14px 16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+              <span style={{ fontSize: '0.82em', color: '#888' }}>Checkout Rate</span>
+              <span style={{ fontSize: '1.3em', fontWeight: 700, color: TP.navy }}>
+                {cohortTotals.totalCompleted > 0 ? `${Math.round(cohortTotals.totalCheckouts / cohortTotals.totalCompleted * 100)}%` : '—'}
+              </span>
+            </div>
+            <div style={{ fontSize: '0.75em', color: '#aaa' }}>
+              {cohortTotals.totalCheckouts} of {cohortTotals.totalCompleted} completed subs
             </div>
           </div>
           <div style={{ background: '#fff', borderRadius: 8, padding: '14px 16px' }}>
@@ -786,28 +801,20 @@ export default function PaidAds() {
         </div>
       </div>
 
-      <ChartLabel>CAC Trend by Cohort</ChartLabel>
+      <ChartLabel>Adjusted CAC Trend (cohorts ≥ 14 days old)</ChartLabel>
       <ChartCard>
         <div style={{ height: 300 }}>
-          {cohortData.length > 0 ? (
+          {cohortData.filter(c => c.ageDays >= 14).length > 0 ? (
             <Bar
               data={{
-                labels: cohortData.map(c => c.label),
+                labels: cohortData.filter(c => c.ageDays >= 14).map(c => c.label),
                 datasets: [
                   {
-                    label: 'Raw CAC',
-                    data: cohortData.map(c => c.rawCAC),
-                    backgroundColor: '#ccc',
-                    borderColor: '#aaa',
-                    borderWidth: 1,
-                    borderRadius: 4,
-                    barPercentage: 0.7,
-                    categoryPercentage: 0.8,
-                  },
-                  {
-                    label: 'Maturity-Adj CAC',
-                    data: cohortData.map(c => c.adjCAC),
-                    backgroundColor: TP.blue,
+                    label: 'Adj CAC',
+                    data: cohortData.filter(c => c.ageDays >= 14).map(c => c.adjCAC),
+                    backgroundColor: cohortData.filter(c => c.ageDays >= 14).map(c =>
+                      c.adjCAC !== null && c.adjCAC <= 1711 ? '#00C853' : TP.blue
+                    ),
                     borderColor: TP.navy,
                     borderWidth: 1,
                     borderRadius: 4,
@@ -815,8 +822,8 @@ export default function PaidAds() {
                     categoryPercentage: 0.8,
                   },
                   {
-                    label: '$500 Target',
-                    data: cohortData.map(() => 500),
+                    label: `$${Math.round(cohortTotals.avgRevPerCheckout).toLocaleString()} Avg Order (break-even)`,
+                    data: cohortData.filter(c => c.ageDays >= 14).map(() => cohortTotals.avgRevPerCheckout),
                     type: 'line',
                     borderColor: TP.red,
                     borderWidth: 2,
