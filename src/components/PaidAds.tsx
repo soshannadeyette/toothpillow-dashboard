@@ -150,6 +150,37 @@ const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: n
 ];
 
 /* ════════════════════════════════════════════
+   MATURITY CURVE — Kenny P's model
+   Leads take time to convert. This curve shows what % of
+   eventual checkouts have happened by a given cohort age.
+   Use it to project how many more checkouts a young month
+   will produce as it matures.
+   Source: Kenny P back-of-napkin analysis, July 14, 2026.
+   ════════════════════════════════════════════ */
+const KENNY_MATURITY = [
+  { days: 0, pct: 0 },
+  { days: 15, pct: 0.41 },
+  { days: 30, pct: 0.66 },
+  { days: 60, pct: 0.85 },
+  { days: 90, pct: 0.92 },
+  { days: 120, pct: 1.0 },
+];
+
+function getMaturity(ageDays: number): number {
+  if (ageDays >= 120) return 1.0;
+  if (ageDays <= 0) return 0;
+  for (let i = 0; i < KENNY_MATURITY.length - 1; i++) {
+    const curr = KENNY_MATURITY[i];
+    const next = KENNY_MATURITY[i + 1];
+    if (ageDays <= next.days) {
+      const ratio = (ageDays - curr.days) / (next.days - curr.days);
+      return curr.pct + ratio * (next.pct - curr.pct);
+    }
+  }
+  return 1.0;
+}
+
+/* ════════════════════════════════════════════
    META ADS (Paused — Historical)
    ════════════════════════════════════════════ */
 
@@ -476,6 +507,71 @@ export default function PaidAds() {
             </tr>
           </tbody>
         </table>
+      </div>
+
+      {/* ═══════ MATURITY-ADJUSTED CAC (Kenny's model) ═══════ */}
+      <SectionHeader>What Google Ads Actually Costs (Maturity-Adjusted)</SectionHeader>
+      <div style={{ fontSize: '0.85em', color: '#555', marginBottom: 16, lineHeight: 1.6 }}>
+        Raw CAC (spend ÷ checkouts) overstates the true cost because recent months haven&#39;t finished converting. Leads take up to 120 days to fully settle. This table projects how many checkouts each month will end up with based on how far along it is.
+      </div>
+
+      <div style={{ overflowX: 'auto', marginBottom: 16 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
+          <thead>
+            <tr style={{ background: TP.navy }}>
+              {['Month', 'Spend', 'Checkouts', 'Age', 'Maturity', 'Projected', 'Raw CAC', 'Adj CAC'].map(h => (
+                <th key={h} style={{ padding: '10px 12px', textAlign: h === 'Month' ? 'left' : 'right', color: '#fff', fontSize: '0.9em' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {(() => {
+              const now = new Date();
+              return monthlySpend.map((m, idx) => {
+                const sf = SF_MONTHLY.find(s => s.monthKey === m.label);
+                if (!sf) return null;
+                // Cohort midpoint = 15th of the month
+                const parts = m.label.split(' ');
+                const monthIdx = MONTH_SHORT.indexOf(parts[0]);
+                const year = parseInt(parts[1]);
+                const midpoint = new Date(year, monthIdx - 1, 15);
+                const ageDays = Math.floor((now.getTime() - midpoint.getTime()) / (1000 * 60 * 60 * 24));
+                const maturity = getMaturity(ageDays);
+                const projected = maturity > 0.05 && sf.checkouts > 0
+                  ? sf.checkouts / maturity
+                  : (maturity > 0.3 && sf.checkouts === 0 ? 0 : null);
+                const rawCAC = sf.checkouts > 0 ? m.spend / sf.checkouts : null;
+                const adjCAC = projected && projected > 0 ? m.spend / projected : null;
+                const tooYoung = ageDays < 15;
+
+                return (
+                  <tr key={m.label} style={{ background: idx % 2 === 0 ? '#f9f9f9' : '#fff', opacity: tooYoung ? 0.5 : 1 }}>
+                    <td style={{ padding: '8px 12px', fontWeight: 600 }}>{m.label}</td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right' }}>${Math.round(m.spend).toLocaleString()}</td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right' }}>{sf.checkouts}</td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right', color: '#888' }}>{ageDays}d</td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right' }}>{Math.round(maturity * 100)}%</td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right' }}>
+                      {tooYoung ? <span style={{ fontSize: '0.85em', color: '#aaa' }}>too early</span> : (projected !== null ? `~${projected.toFixed(1)}` : '—')}
+                    </td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right', color: '#888' }}>
+                      {rawCAC !== null ? `$${Math.round(rawCAC).toLocaleString()}` : '—'}
+                    </td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 700, color: adjCAC !== null && adjCAC < 1700 ? '#00C853' : TP.navy }}>
+                      {tooYoung ? <span style={{ fontSize: '0.85em', fontWeight: 400, color: '#aaa' }}>too early</span> : (adjCAC !== null ? `~$${Math.round(adjCAC).toLocaleString()}` : '—')}
+                    </td>
+                  </tr>
+                );
+              }).filter(Boolean);
+            })()}
+          </tbody>
+        </table>
+      </div>
+
+      <div style={{ background: '#f0f4ff', borderLeft: '4px solid ' + TP.blue, borderRadius: 8, padding: '14px 18px', marginBottom: 32, fontSize: '0.82em', color: '#555', lineHeight: 1.6 }}>
+        <strong>How to read this:</strong> &quot;Maturity&quot; is how much of each month&#39;s eventual checkouts have happened so far. A 66% mature month has only shown 2/3 of its final checkouts. &quot;Projected&quot; divides actual checkouts by maturity to estimate the final count. &quot;Adj CAC&quot; divides spend by the projected count instead of the raw count.
+        <br /><br />
+        Maturity curve from Kenny P: 15 days = 41%, 30 days = 66%, 60 days = 85%, 90 days = 92%, ~120 days = settled.
       </div>
 
       {/* ═══════ DAILY SPEND ═══════ */}
