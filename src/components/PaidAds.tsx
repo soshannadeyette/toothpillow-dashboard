@@ -527,6 +527,21 @@ export default function PaidAds() {
           <tbody>
             {(() => {
               const now = new Date();
+
+              // Checkout rate from months ≥60 days old (mature enough to be meaningful)
+              // Used to estimate months that have 0 checkouts because they're too young
+              const matureMonths = SF_MONTHLY.filter(sf => {
+                const parts = sf.monthKey.split(' ');
+                const mi = MONTH_SHORT.indexOf(parts[0]);
+                const yr = parseInt(parts[1]);
+                const mid = new Date(yr, mi - 1, 15);
+                const age = Math.floor((now.getTime() - mid.getTime()) / (1000 * 60 * 60 * 24));
+                return age >= 60 && sf.completed > 0;
+              });
+              const histCheckoutRate = matureMonths.length > 0
+                ? matureMonths.reduce((s, m) => s + m.checkouts, 0) / matureMonths.reduce((s, m) => s + m.completed, 0)
+                : 0;
+
               return monthlySpend.map((m, idx) => {
                 const sf = SF_MONTHLY.find(s => s.monthKey === m.label);
                 if (!sf) return null;
@@ -537,28 +552,38 @@ export default function PaidAds() {
                 const midpoint = new Date(year, monthIdx - 1, 15);
                 const ageDays = Math.floor((now.getTime() - midpoint.getTime()) / (1000 * 60 * 60 * 24));
                 const maturity = getMaturity(ageDays);
-                const projected = maturity > 0.05 && sf.checkouts > 0
-                  ? sf.checkouts / maturity
-                  : (maturity > 0.3 && sf.checkouts === 0 ? 0 : null);
+
+                let projected: number | null;
+                let isEstimate = false;
+                if (sf.checkouts > 0 && maturity > 0.05) {
+                  // Has checkouts — project by dividing by maturity
+                  projected = sf.checkouts / maturity;
+                } else if (sf.completed > 0 && histCheckoutRate > 0) {
+                  // No checkouts yet but has completed subs — estimate from historical rate
+                  projected = sf.completed * histCheckoutRate;
+                  isEstimate = true;
+                } else {
+                  projected = null;
+                }
+
                 const rawCAC = sf.checkouts > 0 ? m.spend / sf.checkouts : null;
                 const adjCAC = projected && projected > 0 ? m.spend / projected : null;
-                const tooYoung = ageDays < 15;
 
                 return (
-                  <tr key={m.label} style={{ background: idx % 2 === 0 ? '#f9f9f9' : '#fff', opacity: tooYoung ? 0.5 : 1 }}>
+                  <tr key={m.label} style={{ background: idx % 2 === 0 ? '#f9f9f9' : '#fff' }}>
                     <td style={{ padding: '8px 12px', fontWeight: 600 }}>{m.label}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'right' }}>${Math.round(m.spend).toLocaleString()}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'right' }}>{sf.checkouts}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'right', color: '#888' }}>{ageDays}d</td>
                     <td style={{ padding: '8px 12px', textAlign: 'right' }}>{Math.round(maturity * 100)}%</td>
                     <td style={{ padding: '8px 12px', textAlign: 'right' }}>
-                      {tooYoung ? <span style={{ fontSize: '0.85em', color: '#aaa' }}>too early</span> : (projected !== null ? `~${projected.toFixed(1)}` : '—')}
+                      {projected !== null ? <span>{isEstimate ? '~' : '~'}{projected.toFixed(1)}{isEstimate ? '*' : ''}</span> : '—'}
                     </td>
                     <td style={{ padding: '8px 12px', textAlign: 'right', color: '#888' }}>
                       {rawCAC !== null ? `$${Math.round(rawCAC).toLocaleString()}` : '—'}
                     </td>
                     <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 700, color: adjCAC !== null && adjCAC < 1700 ? '#00C853' : TP.navy }}>
-                      {tooYoung ? <span style={{ fontSize: '0.85em', fontWeight: 400, color: '#aaa' }}>too early</span> : (adjCAC !== null ? `~$${Math.round(adjCAC).toLocaleString()}` : '—')}
+                      {adjCAC !== null ? <span>~${Math.round(adjCAC).toLocaleString()}{isEstimate ? '*' : ''}</span> : '—'}
                     </td>
                   </tr>
                 );
@@ -572,6 +597,8 @@ export default function PaidAds() {
         <strong>How to read this:</strong> &quot;Maturity&quot; is how much of each month&#39;s eventual checkouts have happened so far. A 66% mature month has only shown 2/3 of its final checkouts. &quot;Projected&quot; divides actual checkouts by maturity to estimate the final count. &quot;Adj CAC&quot; divides spend by the projected count instead of the raw count.
         <br /><br />
         Maturity curve from Kenny P: 15 days = 41%, 30 days = 66%, 60 days = 85%, 90 days = 92%, ~120 days = settled.
+        <br /><br />
+        * Months with 0 checkouts are estimated using the checkout rate from older months ({Math.round((() => { const mm = SF_MONTHLY.filter(sf => { const p = sf.monthKey.split(' '); const mi = MONTH_SHORT.indexOf(p[0]); const yr = parseInt(p[1]); const mid = new Date(yr, mi - 1, 15); return Math.floor((new Date().getTime() - mid.getTime()) / 86400000) >= 60 && sf.completed > 0; }); return mm.length > 0 ? mm.reduce((s, m) => s + m.checkouts, 0) / mm.reduce((s, m) => s + m.completed, 0) * 100 : 0; })())}% of completed submissions eventually check out) instead of the maturity curve. This is a rougher estimate.
       </div>
 
       {/* ═══════ DAILY SPEND ═══════ */}
