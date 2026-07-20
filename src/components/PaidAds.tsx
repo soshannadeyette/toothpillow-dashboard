@@ -61,6 +61,7 @@ const GOOGLE_ADS_PRIOR_MONTHS: { month: string; year: number; monthIdx: number; 
 // June 26-29 spend/clicks/impressions from Google Ads Campaigns view, June 30, 2026
 // June 30-Jul 5 spend/clicks/impressions from Google Ads Report Editor, July 6, 2026
 // July 6-13 spend/clicks/impressions from Google Ads Report Editor, July 13, 2026
+// July 14-19 spend/clicks/impressions from Google Ads Campaigns > Day segment, July 20, 2026
 // submit/started/finished/treatment fields retained for the entry form only —
 // NOT used anywhere in this page's analysis (see Salesforce constants below instead).
 const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
@@ -107,6 +108,12 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-07-11', spend: 608.47, clicks: 156, impressions: 3248, submit: 3, started: 2, finished: 0, treatment: 0 },
   { date: '2026-07-12', spend: 656.37, clicks: 172, impressions: 3544, submit: 6, started: 2, finished: 2, treatment: 0 },
   { date: '2026-07-13', spend: 493.87, clicks: 130, impressions: 2689, submit: 4, started: 4, finished: 8, treatment: 0 },
+  { date: '2026-07-14', spend: 675.54, clicks: 174, impressions: 3095, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-07-15', spend: 664.07, clicks: 187, impressions: 2558, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-07-16', spend: 599.98, clicks: 160, impressions: 3256, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-07-17', spend: 515.77, clicks: 134, impressions: 2620, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-07-18', spend: 514.45, clicks: 126, impressions: 1932, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-07-19', spend: 550.05, clicks: 142, impressions: 2525, submit: 0, started: 0, finished: 0, treatment: 0 },
 ];
 
 // Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)
@@ -119,26 +126,29 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
 
 /* ════════════════════════════════════════════
    DATA SOURCE 2: SALESFORCE (hardcoded constants)
-   Source: Salesforce "Google Ads 2026" export, July 15, 2026.
+   Source: Salesforce "Google Ads 2026" export, July 20, 2026.
+   Note: Export filter includes "Up 1 equals Google Ads,Meta Ads"
+   but Apr–Jun numbers are unchanged from Google-only pulls,
+   so Meta contribution is negligible in those months.
    ════════════════════════════════════════════ */
 
 // Pipeline totals
 const GOOGLE_SF_PIPELINE = {
-  total: 393,           // leads created (started form)
-  completed: 167,       // all stages except Waiting-Info (42%)
-  waitingInfo: 226,     // incomplete submissions
-  sentCheckout: 115,    // Sent Checkout Link (98) + Checked Out (17)
-  sentToTxP: 15,
+  total: 420,           // leads created (started form)
+  completed: 173,       // all stages except Waiting-Info (41%)
+  waitingInfo: 247,     // incomplete submissions
+  sentCheckout: 125,    // Sent Checkout Link (106) + Checked Out (19)
+  sentToTxP: 11,
   txpApproved: 2,
-  checkedOut: 17,
+  checkedOut: 19,
   referredOut: 23,
-  closedLost: 10,       // 6 Closed Lost + 4 Do Not Contact
+  closedLost: 11,       // 7 Closed Lost + 4 Do Not Contact
   tempHold: 2,
   formOpens: 1436,      // Google Ads conversions (form opens, Google-only)
 };
 
 // Revenue from checkouts
-const GOOGLE_REVENUE: number = 28977;
+const GOOGLE_REVENUE: number = 33417;
 
 // Monthly breakdown from Salesforce (by Created Date)
 // Used in the monthly summary table alongside Google Ads spend data
@@ -146,7 +156,7 @@ const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: n
   { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 21, checkouts: 2, revenue: 3291 },
   { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 30, checkouts: 5, revenue: 8676 },
   { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 83, checkouts: 10, revenue: 17010 },
-  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 80, completed: 33, checkouts: 0, revenue: 0 },
+  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 107, completed: 39, checkouts: 2, revenue: 4440 },
 ];
 
 /* ════════════════════════════════════════════
