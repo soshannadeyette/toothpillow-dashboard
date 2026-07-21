@@ -23,11 +23,11 @@ const TP = {
 
 /* ════════════════════════════════════════════
    HARDCODED GSC DATA — Source of truth
-   Data pulled fresh from Google Search Console on July 6, 2026
+   Data pulled fresh from Google Search Console on July 20, 2026
    Property: https://www.toothpillow.com/ (URL prefix)
    Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
    SEO program reset date: May 19, 2026
-   May 2026: full month (31 days). June 2026: full month (30 days). July 2026: through Jul 4.
+   May 2026: full month (31 days). June 2026: full month (30 days). July 2026: through Jul 19.
    ════════════════════════════════════════════ */
 
 const SEO_START_DATE = '2026-05-19';
@@ -59,6 +59,7 @@ const GSC_MONTHLY = [
   { month: '2026-04', clicks: 11180, impressions: 105758, ctr: 10.6, position: 37.4 },
   { month: '2026-05', clicks: 10509, impressions: 53592, ctr: 19.6, position: 17.8 },
   { month: '2026-06', clicks: 11550, impressions: 54729, ctr: 21.1, position: 10.1 },
+  { month: '2026-07', clicks: 6080, impressions: 30650, ctr: 19.8, position: 9.7 },
 ];
 
 const GSC_WEEKLY = [
@@ -135,10 +136,13 @@ const GSC_WEEKLY = [
   { week: '2026-06-08', clicks: 2789, impressions: 12777, ctr: 21.8, position: 9.3 },
   { week: '2026-06-15', clicks: 2182, impressions: 12279, ctr: 17.8, position: 13.0 },
   { week: '2026-06-22', clicks: 2396, impressions: 12319, ctr: 19.4, position: 9.7 },
+  { week: '2026-06-29', clicks: 1831, impressions: 9952, ctr: 18.4, position: 8.8 },
+  { week: '2026-07-06', clicks: 2132, impressions: 11471, ctr: 18.6, position: 9.8 },
+  { week: '2026-07-13', clicks: 2767, impressions: 12827, ctr: 21.6, position: 10.1 },
 ];
 
-// Full-year daily GSC data — Jan 1 to Jul 4, 2026
-// Source: Google Search Console DAYS view, updated July 6, 2026
+// Full-year daily GSC data — Jan 1 to Jul 19, 2026
+// Source: Google Search Console DAYS view, updated July 20, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -183,7 +187,9 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
     [25,440,1945],[26,290,1676],[27,246,1450],[28,247,1330],[29,309,1627],[30,341,1973],
   ],
   Jul: [
-    [1,353,1618],[2,288,1627],[3,176,956],[4,148,965],
+    [1,353,1618],[2,288,1627],[3,176,956],[4,148,965],[5,216,1186],[6,385,1840],[7,336,2000],
+    [8,381,1816],[9,342,1640],[10,261,1431],[11,212,1351],[12,215,1393],[13,463,2101],
+    [14,511,2209],[15,464,1929],[16,466,1944],[17,352,1697],[18,250,1408],[19,261,1539],
   ],
 };
 
@@ -193,10 +199,10 @@ for (const [d, c, i] of GSC_DAILY_2026.May) { GSC_DAILY_MAY_2026[d] = { clicks: 
 
 /* ════════════════════════════════════════════
    KEYWORD MOVERS — Non-branded keywords showing movement
-   GSC comparison: Jun 7–Jul 4, 2026 (28d) vs Mar 30–May 29, 2026 (prev 60d)
+   GSC comparison: Jun 22–Jul 19, 2026 (28d)
    Only keywords verified as appearing in recent GSC data are included.
    Excludes all branded variations (toothpillow, tooth pillow, etc.)
-   Updated July 6, 2026
+   Updated July 20, 2026
    ════════════════════════════════════════════ */
 
 // Position climbers with monthly position history from GSC
@@ -223,41 +229,41 @@ const KEYWORD_CLIMBERS = [
 // posHistory is 17 values: Feb'25..Jun'26 monthly avg position, null = no data that month
 
 // Non-branded keywords already driving clicks (sorted by clicks, last 28 days)
-// Source: GSC 28-day data (Jun 7–Jul 4, 2026), pulled July 6, 2026
+// Source: GSC 28-day data (Jun 22–Jul 19, 2026), pulled July 20, 2026
 const CLICK_DRIVING_KEYWORDS = [
-  { query: 'kids pillow for mouth breathing', posNow: 1.5, clicksNow: 32, imprNow: 141, status: 'Page 1' },
-  { query: 'tongue pillow', posNow: 8.3, clicksNow: 15, imprNow: 88, status: 'Near page 1' },
-  { query: 'mouth pillow for adults', posNow: 6.5, clicksNow: 14, imprNow: 133, status: 'Page 1' },
-  { query: 'recovery kids pillow mouth breathing', posNow: 1.5, clicksNow: 12, imprNow: 38, status: 'Page 1' },
-  { query: 'mouth breathing pillow', posNow: 1.7, clicksNow: 11, imprNow: 81, status: 'Page 1' },
-  { query: 'pillow for mouth breathers', posNow: 8.5, clicksNow: 9, imprNow: 128, status: 'Near page 1' },
-  { query: 'kids mouth breathing pillow', posNow: 1.4, clicksNow: 8, imprNow: 54, status: 'Page 1' },
-  { query: 'best kids pillow for mouth breathing', posNow: 2.8, clicksNow: 6, imprNow: 41, status: 'Page 1' },
-  { query: 'pillow for mouth breathers kids', posNow: 1.4, clicksNow: 5, imprNow: 30, status: 'Page 1' },
-  { query: 'tongue pillow for kids', posNow: 1.0, clicksNow: 4, imprNow: 19, status: 'Page 1' },
-  { query: 'kids airway pillow', posNow: 1.2, clicksNow: 4, imprNow: 14, status: 'Page 1' },
+  { query: 'kids pillow for mouth breathing', posNow: 1.5, clicksNow: 37, imprNow: 157, status: 'Page 1' },
+  { query: 'recovery kids pillow mouth breathing', posNow: 1.5, clicksNow: 11, imprNow: 26, status: 'Page 1' },
+  { query: 'best kids pillow for mouth breathing', posNow: 2.9, clicksNow: 10, imprNow: 79, status: 'Page 1' },
+  { query: 'kids mouth breathing pillow', posNow: 1.4, clicksNow: 10, imprNow: 52, status: 'Page 1' },
+  { query: 'mouth pillow for adults', posNow: 8.6, clicksNow: 8, imprNow: 87, status: 'Near page 1' },
+  { query: 'pillow for mouth breathers kids', posNow: 1.5, clicksNow: 7, imprNow: 45, status: 'Page 1' },
+  { query: 'pillow for mouth breathers', posNow: 8.0, clicksNow: 6, imprNow: 102, status: 'Near page 1' },
+  { query: 'kids posture pillow for mouth breathing', posNow: 3.5, clicksNow: 6, imprNow: 42, status: 'Page 1' },
+  { query: 'mouth breathing pillow', posNow: 1.8, clicksNow: 5, imprNow: 62, status: 'Page 1' },
+  { query: 'mouth breathing pillow kids', posNow: 1.4, clicksNow: 5, imprNow: 33, status: 'Page 1' },
+  { query: 'tongue pillow for kids', posNow: 1.0, clicksNow: 3, imprNow: 15, status: 'Page 1' },
 ];
-// Source: GSC 16-month aggregate (Feb 8 2025 – Jul 4 2026), pulled July 6, 2026
+// Source: GSC 16-month aggregate (Mar 20 2025 – Jul 19 2026), pulled July 20, 2026
 const TOP_QUERIES = [
-  { query: 'tooth pillow', clicks: 80283, impressions: 128750, ctr: 62.4, position: 1.1, branded: true },
-  { query: 'toothpillow', clicks: 54410, impressions: 82428, ctr: 66.0, position: 1.6, branded: true },
-  { query: 'tooth pillow for kids', clicks: 10035, impressions: 16312, ctr: 61.5, position: 1.0, branded: true },
-  { query: 'toothpillow for kids', clicks: 5218, impressions: 7354, ctr: 71.0, position: 1.0, branded: true },
-  { query: 'tooth pillow device', clicks: 4411, impressions: 8298, ctr: 53.2, position: 2.9, branded: true },
-  { query: 'tooth pillow for adults', clicks: 3500, impressions: 8379, ctr: 41.8, position: 5.0, branded: true },
-  { query: 'mouth pillow', clicks: 2425, impressions: 8757, ctr: 27.7, position: 1.3, branded: false },
-  { query: 'toothpillow for adults', clicks: 1852, impressions: 4967, ctr: 37.3, position: 6.1, branded: true },
-  { query: 'the tooth pillow', clicks: 1711, impressions: 2293, ctr: 74.6, position: 1.1, branded: true },
-  { query: 'my tooth pillow', clicks: 1567, impressions: 2031, ctr: 77.2, position: 1.2, branded: true },
-  { query: 'tooth pillow appliance', clicks: 1163, impressions: 3332, ctr: 34.9, position: 8.4, branded: true },
-  { query: 'teeth pillow', clicks: 978, impressions: 2398, ctr: 40.8, position: 1.2, branded: false },
-  { query: 'tooth pillow canada', clicks: 965, impressions: 1640, ctr: 58.8, position: 1.0, branded: true },
-  { query: 'what is a tooth pillow', clicks: 828, impressions: 2813, ctr: 29.4, position: 1.3, branded: true },
-  { query: 'toothpillow reviews', clicks: 807, impressions: 7400, ctr: 10.9, position: 2.6, branded: true },
-  { query: 'toothpillow cost', clicks: 716, impressions: 2497, ctr: 28.7, position: 1.7, branded: true },
-  { query: 'tongue pillow', clicks: 674, impressions: 1688, ctr: 39.9, position: 1.5, branded: false },
-  { query: 'mouth pillow kids', clicks: 651, impressions: 1146, ctr: 56.8, position: 1.0, branded: false },
-  { query: 'mouth breathing device for kids', clicks: 36, impressions: 434, ctr: 8.3, position: 3.9, branded: false },
+  { query: 'tooth pillow', clicks: 75386, impressions: 121893, ctr: 61.8, position: 1.1, branded: true },
+  { query: 'toothpillow', clicks: 49708, impressions: 75780, ctr: 65.6, position: 1.7, branded: true },
+  { query: 'tooth pillow for kids', clicks: 10402, impressions: 16904, ctr: 61.5, position: 1.0, branded: true },
+  { query: 'toothpillow for kids', clicks: 4151, impressions: 6044, ctr: 68.7, position: 1.0, branded: true },
+  { query: 'tooth pillow device', clicks: 3657, impressions: 7241, ctr: 50.5, position: 3.3, branded: true },
+  { query: 'tooth pillow for adults', clicks: 3133, impressions: 7770, ctr: 40.3, position: 5.4, branded: true },
+  { query: 'mouth pillow', clicks: 2256, impressions: 8569, ctr: 26.3, position: 1.4, branded: false },
+  { query: 'the tooth pillow', clicks: 1618, impressions: 2201, ctr: 73.5, position: 1.1, branded: true },
+  { query: 'my tooth pillow', clicks: 1479, impressions: 1934, ctr: 76.5, position: 1.3, branded: true },
+  { query: 'toothpillow for adults', clicks: 1471, impressions: 4335, ctr: 33.9, position: 7.3, branded: true },
+  { query: 'tooth pillow appliance', clicks: 1080, impressions: 3257, ctr: 33.2, position: 8.9, branded: true },
+  { query: 'tooth pillow canada', clicks: 916, impressions: 1558, ctr: 58.8, position: 1.0, branded: true },
+  { query: 'teeth pillow', clicks: 883, impressions: 2236, ctr: 39.5, position: 1.2, branded: false },
+  { query: 'what is a tooth pillow', clicks: 769, impressions: 2746, ctr: 28.0, position: 1.3, branded: true },
+  { query: 'toothpillow reviews', clicks: 762, impressions: 7124, ctr: 10.7, position: 2.6, branded: true },
+  { query: 'mouth pillow kids', clicks: 677, impressions: 1216, ctr: 55.7, position: 1.0, branded: false },
+  { query: 'toothpillow cost', clicks: 640, impressions: 2347, ctr: 27.3, position: 1.9, branded: true },
+  { query: 'tongue pillow', clicks: 585, impressions: 1536, ctr: 38.1, position: 2.0, branded: false },
+  { query: 'mouth breathing device for kids', clicks: 31, impressions: 402, ctr: 7.7, position: 3.9, branded: false },
   { query: 'virtual airway dentist', clicks: 32, impressions: 184, ctr: 17.4, position: 1.2, branded: false },
 ];
 
@@ -269,7 +275,7 @@ const TOP_QUERIES = [
    queries are almost exclusively branded variations.
    Product NB = pillow-related searches (mouth pillow, tongue pillow, etc.)
    Discovery NB = problem/treatment searches (airway dentist, mouth breathing treatment, etc.)
-   Updated July 6, 2026
+   Updated July 20, 2026
    ════════════════════════════════════════════ */
 const YOY_JUNE = {
   jun25: { total: 14288, nonBranded: 313, productNB: 281, discoveryNB: 32, days: 30 },
@@ -338,11 +344,11 @@ export default function OrganicGrowth() {
   const SUBMISSIONS_BY_MONTH: Record<string, number> = { ...SUBMISSIONS_2025, ...subs2026 };
 
   const latestMonth = GSC_MONTHLY[GSC_MONTHLY.length - 1];
-  const latestDaysReported = 30; // June 1-30 (complete month)
-  const junClickPace = Math.round(latestMonth.clicks / latestDaysReported * 30);
-  const junImprPace = Math.round(latestMonth.impressions / latestDaysReported * 30);
+  const latestDaysReported = 19; // July 1-19 (partial month)
+  const julClickPace = Math.round(latestMonth.clicks / latestDaysReported * 31);
+  const julImprPace = Math.round(latestMonth.impressions / latestDaysReported * 31);
 
-  const jun2025 = GSC_MONTHLY.find(m => m.month === '2025-06')!;
+  const jul2025 = GSC_MONTHLY.find(m => m.month === '2025-07')!;
 
 
   // Annotation indices for chart markers
@@ -497,8 +503,8 @@ export default function OrganicGrowth() {
   // ── Chart: Daily 2026 Clicks with 7-day MA ──
   const dailyClicksData = useMemo(() => {
     const allDays: { label: string; clicks: number }[] = [];
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'] as const;
-    const monthNums = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06' };
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'] as const;
+    const monthNums = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06', Jul: '07' };
     for (const mo of months) {
       const days = GSC_DAILY_2026[mo];
       if (!days) continue;
@@ -661,18 +667,18 @@ export default function OrganicGrowth() {
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
         <div style={cardStyle}>
           <div style={labelStyle}>Organic Clicks</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{fmtK(junClickPace)}</div>
-          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>Jun pace ({latestDaysReported} days)</div>
-          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: junClickPace < jun2025.clicks ? TP.red : TP.green }}>
-            {junClickPace >= jun2025.clicks ? '▲' : '▼'} {delta(junClickPace, jun2025.clicks)} vs Jun &apos;25
+          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{fmtK(julClickPace)}</div>
+          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>Jul pace ({latestDaysReported} days)</div>
+          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: julClickPace < jul2025.clicks ? TP.red : TP.green }}>
+            {julClickPace >= jul2025.clicks ? '▲' : '▼'} {delta(julClickPace, jul2025.clicks)} vs Jul &apos;25
           </div>
         </div>
         <div style={cardStyle}>
           <div style={labelStyle}>Impressions</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{fmtK(junImprPace)}</div>
-          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>Jun pace ({latestDaysReported} days)</div>
-          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: junImprPace < jun2025.impressions ? TP.red : TP.green }}>
-            {junImprPace >= jun2025.impressions ? '▲' : '▼'} {delta(junImprPace, jun2025.impressions)} vs Jun &apos;25
+          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{fmtK(julImprPace)}</div>
+          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>Jul pace ({latestDaysReported} days)</div>
+          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: julImprPace < jul2025.impressions ? TP.red : TP.green }}>
+            {julImprPace >= jul2025.impressions ? '▲' : '▼'} {delta(julImprPace, jul2025.impressions)} vs Jul &apos;25
           </div>
         </div>
         <div style={cardStyle}>
@@ -681,8 +687,8 @@ export default function OrganicGrowth() {
           <div style={{ fontSize: 11, color: TP.green, fontWeight: 600, marginTop: 2 }}>
             {latestMonth.position <= 10 ? 'Page 1' : latestMonth.position <= 20 ? 'Page 2' : `Page ${Math.ceil(latestMonth.position / 10)}`}
           </div>
-          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: latestMonth.position < jun2025.position ? TP.green : TP.red }}>
-            {latestMonth.position < jun2025.position ? '▲' : '▼'} from {jun2025.position} (Pg {Math.ceil(jun2025.position / 10)}) in Jun &apos;25
+          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: latestMonth.position < jul2025.position ? TP.green : TP.red }}>
+            {latestMonth.position < jul2025.position ? '▲' : '▼'} from {jul2025.position} (Pg {Math.ceil(jul2025.position / 10)}) in Jul &apos;25
           </div>
         </div>
 
