@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
+function noCacheJson(data: unknown, status = 200) {
+  return NextResponse.json(data, {
+    status,
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
+  });
+}
+
 // GET /api/annual — fetch monthly summaries, optionally filtered by year
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
@@ -17,8 +30,8 @@ export async function GET(request: NextRequest) {
     }
 
     const { data, error } = await query;
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(data);
+    if (error) return noCacheJson({ error: error.message }, 500);
+    return noCacheJson(data);
 }
 
 // POST /api/annual — upsert a monthly summary row
@@ -27,7 +40,7 @@ export async function POST(request: NextRequest) {
     const { year, month, month_name, ...rest } = body;
 
     if (!year || !month) {
-        return NextResponse.json({ error: 'Year and month are required' }, { status: 400 });
+        return noCacheJson({ error: 'Year and month are required' }, 400);
     }
 
     const { data, error } = await supabase
@@ -38,6 +51,6 @@ export async function POST(request: NextRequest) {
         )
         .select();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(data);
+    if (error) return noCacheJson({ error: error.message }, 500);
+    return noCacheJson(data);
 }

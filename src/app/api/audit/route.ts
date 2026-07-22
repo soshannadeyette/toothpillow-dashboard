@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
+function noCacheJson(data: unknown, status = 200) {
+  return NextResponse.json(data, {
+    status,
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
+  });
+}
+
 // GET /api/audit — fetch audit patients, optionally filtered by status
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
@@ -16,8 +29,8 @@ export async function GET(request: NextRequest) {
     }
 
     const { data, error } = await query;
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(data);
+    if (error) return noCacheJson({ error: error.message }, 500);
+    return noCacheJson(data);
 }
 
 // POST /api/audit — create or update an audit patient
@@ -26,7 +39,7 @@ export async function POST(request: NextRequest) {
     const { id, ...fields } = body;
 
     if (!fields.name) {
-        return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+        return noCacheJson({ error: 'Name is required' }, 400);
     }
 
     if (id) {
@@ -36,16 +49,16 @@ export async function POST(request: NextRequest) {
             .update(fields)
             .eq('id', id)
             .select();
-        if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-        return NextResponse.json(data);
+        if (error) return noCacheJson({ error: error.message }, 500);
+        return noCacheJson(data);
     } else {
         // Insert new
         const { data, error } = await supabase
             .from('audit_patients')
             .insert(fields)
             .select();
-        if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-        return NextResponse.json(data);
+        if (error) return noCacheJson({ error: error.message }, 500);
+        return noCacheJson(data);
     }
 }
 
@@ -55,7 +68,7 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-        return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+        return noCacheJson({ error: 'ID is required' }, 400);
     }
 
     const { error } = await supabase
@@ -63,6 +76,6 @@ export async function DELETE(request: NextRequest) {
         .delete()
         .eq('id', Number(id));
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ success: true });
+    if (error) return noCacheJson({ error: error.message }, 500);
+    return noCacheJson({ success: true });
 }

@@ -52,6 +52,7 @@ export default function DailyTracker() {
   const [formHybrid, setFormHybrid] = useState('');
   const [formPrime, setFormPrime] = useState('');
   const [formVisitors, setFormVisitors] = useState('');
+  const [saveConfirm, setSaveConfirm] = useState<string | null>(null);
 
   const tableRef = useRef<HTMLDivElement>(null);
 
@@ -103,6 +104,17 @@ export default function DailyTracker() {
       if (formPrime.trim() !== '')    payload.prime    = parseInt(formPrime);
       if (formVisitors.trim() !== '') payload.visitors = parseInt(formVisitors);
       await upsertSubmission(payload as Partial<import('@/lib/types').DailySubmission>);
+      // Show confirmation of what was saved
+      const d = new Date(formDate + 'T12:00:00');
+      const label = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      const parts = [
+        payload.online !== undefined ? `online=${payload.online}` : null,
+        payload.hybrid !== undefined ? `hybrid=${payload.hybrid}` : null,
+        payload.prime !== undefined ? `prime=${payload.prime}` : null,
+        payload.visitors !== undefined ? `visitors=${payload.visitors}` : null,
+      ].filter(Boolean).join(', ');
+      setSaveConfirm(`Saved ${label}: ${parts || '(no changes)'}`);
+      setTimeout(() => setSaveConfirm(null), 5000);
       // Clear form
       setFormOnline('');
       setFormHybrid('');
@@ -412,6 +424,11 @@ export default function DailyTracker() {
             {saving ? 'Saving...' : 'Save'}
           </button>
         </div>
+        {saveConfirm && (
+          <div className="mt-2 text-sm font-medium" style={{ color: TP.green }}>
+            {saveConfirm}
+          </div>
+        )}
       </div>
 
       {/* Stacked bar chart */}

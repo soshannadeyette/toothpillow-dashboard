@@ -8,19 +8,27 @@ import { MONTHLY_GOALS_2026 } from './types';
 
 const BASE = '';
 
+/** Wrapper around fetch that forces no-cache on all requests */
+async function apiFetch(url: string, init?: RequestInit): Promise<Response> {
+    // Add cache-busting param + no-store to defeat browser/CDN caching
+    const separator = url.includes('?') ? '&' : '?';
+    const bustUrl = `${url}${separator}_t=${Date.now()}`;
+    return fetch(bustUrl, { ...init, cache: 'no-store' as RequestCache });
+}
+
 // ---- Daily Submissions ----
 
 export async function fetchSubmissions(year?: number, month?: number): Promise<DailySubmission[]> {
     const params = new URLSearchParams();
     if (year) params.set('year', String(year));
     if (month) params.set('month', String(month));
-    const res = await fetch(`${BASE}/api/submissions?${params}`);
+    const res = await apiFetch(`${BASE}/api/submissions?${params}`);
     if (!res.ok) throw new Error(await res.text());
     return res.json();
 }
 
 export async function upsertSubmission(entry: Partial<DailySubmission>): Promise<DailySubmission[]> {
-    const res = await fetch(`${BASE}/api/submissions`, {
+    const res = await apiFetch(`${BASE}/api/submissions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(entry),
@@ -35,13 +43,13 @@ export async function fetchGoogleAds(year?: number, month?: number): Promise<Goo
     const params = new URLSearchParams();
     if (year) params.set('year', String(year));
     if (month) params.set('month', String(month));
-    const res = await fetch(`${BASE}/api/google-ads?${params}`);
+    const res = await apiFetch(`${BASE}/api/google-ads?${params}`);
     if (!res.ok) throw new Error(await res.text());
     return res.json();
 }
 
 export async function upsertGoogleAds(entry: Partial<GoogleAdsDaily>): Promise<GoogleAdsDaily[]> {
-    const res = await fetch(`${BASE}/api/google-ads`, {
+    const res = await apiFetch(`${BASE}/api/google-ads`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(entry),
@@ -55,13 +63,13 @@ export async function upsertGoogleAds(entry: Partial<GoogleAdsDaily>): Promise<G
 export async function fetchAnnualSummaries(year?: number): Promise<MonthlySummary[]> {
     const params = new URLSearchParams();
     if (year) params.set('year', String(year));
-    const res = await fetch(`${BASE}/api/annual?${params}`);
+    const res = await apiFetch(`${BASE}/api/annual?${params}`);
     if (!res.ok) throw new Error(await res.text());
     return res.json();
 }
 
 export async function upsertMonthlySummary(entry: Partial<MonthlySummary>): Promise<MonthlySummary[]> {
-    const res = await fetch(`${BASE}/api/annual`, {
+    const res = await apiFetch(`${BASE}/api/annual`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(entry),
@@ -75,13 +83,13 @@ export async function upsertMonthlySummary(entry: Partial<MonthlySummary>): Prom
 export async function fetchAuditPatients(status?: string): Promise<AuditPatient[]> {
     const params = new URLSearchParams();
     if (status) params.set('status', status);
-    const res = await fetch(`${BASE}/api/audit?${params}`);
+    const res = await apiFetch(`${BASE}/api/audit?${params}`);
     if (!res.ok) throw new Error(await res.text());
     return res.json();
 }
 
 export async function upsertAuditPatient(entry: Partial<AuditPatient> & { name: string }): Promise<AuditPatient[]> {
-    const res = await fetch(`${BASE}/api/audit`, {
+    const res = await apiFetch(`${BASE}/api/audit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(entry),
@@ -91,7 +99,7 @@ export async function upsertAuditPatient(entry: Partial<AuditPatient> & { name: 
 }
 
 export async function deleteAuditPatient(id: number): Promise<void> {
-    const res = await fetch(`${BASE}/api/audit?id=${id}`, { method: 'DELETE' });
+    const res = await apiFetch(`${BASE}/api/audit?id=${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error(await res.text());
 }
 
@@ -128,7 +136,7 @@ export function currentYear(): number {
 
 export async function fetchMonthlyGoals(): Promise<MonthGoal[]> {
     try {
-        const res = await fetch(`${BASE}/api/settings?key=monthly_goals_2026`);
+        const res = await apiFetch(`${BASE}/api/settings?key=monthly_goals_2026`);
         if (!res.ok) return MONTHLY_GOALS_2026;
         const data = await res.json();
         if (data && data.length > 0 && data[0].value) {
@@ -141,7 +149,7 @@ export async function fetchMonthlyGoals(): Promise<MonthGoal[]> {
 }
 
 export async function saveMonthlyGoals(goals: MonthGoal[]): Promise<void> {
-    const res = await fetch(`${BASE}/api/settings`, {
+    const res = await apiFetch(`${BASE}/api/settings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key: 'monthly_goals_2026', value: JSON.stringify(goals) }),

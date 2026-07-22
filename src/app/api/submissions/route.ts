@@ -1,9 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+// Force dynamic — prevents Vercel/Next.js from caching this route
+export const dynamic = 'force-dynamic';
+
 // June 1-16 seed data already in Supabase — cleared to stop overwriting manual entries.
 // If a future batch needs seeding, add rows here temporarily, then clear after confirmed in Supabase.
 const SUBMISSIONS_SEED: {date:string;online:number;hybrid:number;prime:number;visitors:number;income:number}[] = [];
+
+/** Attach no-cache headers so browsers/CDNs never serve stale submission data */
+function noCacheJson(data: unknown, status = 200) {
+  return NextResponse.json(data, {
+    status,
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
+  });
+}
 
 function centralToday(): string {
   const parts = new Intl.DateTimeFormat('en-US', {
@@ -70,8 +85,8 @@ export async function GET(request: NextRequest) {
     }
 
     const { data, error } = await query;
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(data);
+    if (error) return noCacheJson({ error: error.message }, 500);
+    return noCacheJson(data);
 }
 
 // POST /api/submissions — upsert a daily submission entry
@@ -81,7 +96,7 @@ export async function POST(request: NextRequest) {
     const { date } = body;
 
     if (!date) {
-        return NextResponse.json({ error: 'Date is required' }, { status: 400 });
+        return noCacheJson({ error: 'Date is required' }, 400);
     }
 
     // Fetch existing row so we can merge rather than overwrite
@@ -91,14 +106,21 @@ export async function POST(request: NextRequest) {
         .eq('date', date)
         .maybeSingle();
 
-    const onlineCount = body.online ?? existing?.online ?? 0;
+    // Safe number helper: treats NaN/Infinity as "not provided"
+    const safeNum = (v: unknown): number | undefined => {
+        if (v === null || v === undefined) return undefined;
+        const n = Number(v);
+        return Number.isFinite(n) ? n : undefined;
+    };
+
+    const onlineCount = safeNum(body.online) ?? existing?.online ?? 0;
 
     const merged = {
         date,
         online:   onlineCount,
-        hybrid:   body.hybrid   ?? existing?.hybrid   ?? 0,
-        prime:    body.prime    ?? existing?.prime    ?? 0,
-        visitors: body.visitors ?? existing?.visitors ?? 0,
+        hybrid:   safeNum(body.hybrid)   ?? existing?.hybrid   ?? 0,
+        prime:    safeNum(body.prime)    ?? existing?.prime    ?? 0,
+        visitors: safeNum(body.visitors) ?? existing?.visitors ?? 0,
         income:   onlineCount * 5,  // $5 per online submission — always auto-calculated
     };
 
@@ -107,8 +129,8 @@ export async function POST(request: NextRequest) {
         .upsert(merged, { onConflict: 'date' })
         .select();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(data);
+    if (error) return noCacheJson({ error: error.message }, 500);
+    return noCacheJson(data);
 }
 
 // DELETE /api/submissions?id=123 — delete a submission by ID
@@ -117,7 +139,7 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-        return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+        return noCacheJson({ error: 'ID is required' }, 400);
     }
 
     const { error } = await supabase
@@ -125,6 +147,6 @@ export async function DELETE(request: NextRequest) {
         .delete()
         .eq('id', Number(id));
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ success: true, deletedId: Number(id) });
+    if (error) return noCacheJson({ error: error.message }, 500);
+    return noCacheJson({ success: true, deletedId: Number(id) });
 }

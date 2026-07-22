@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
+function noCacheJson(data: unknown, status = 200) {
+  return NextResponse.json(data, {
+    status,
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
+  });
+}
+
 // GET /api/settings — fetch all settings or a specific key
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
@@ -12,8 +25,8 @@ export async function GET(request: NextRequest) {
     }
 
     const { data, error } = await query;
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(data);
+    if (error) return noCacheJson({ error: error.message }, 500);
+    return noCacheJson(data);
 }
 
 // POST /api/settings — upsert a setting
@@ -22,7 +35,7 @@ export async function POST(request: NextRequest) {
     const { key, value } = body;
 
     if (!key || value === undefined) {
-        return NextResponse.json({ error: 'key and value are required' }, { status: 400 });
+        return noCacheJson({ error: 'key and value are required' }, 400);
     }
 
     const { data, error } = await supabase
@@ -33,6 +46,6 @@ export async function POST(request: NextRequest) {
         )
         .select();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(data);
+    if (error) return noCacheJson({ error: error.message }, 500);
+    return noCacheJson(data);
 }

@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
+function noCacheJson(data: unknown, status = 200) {
+  return NextResponse.json(data, {
+    status,
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
+  });
+}
+
 // GET /api/google-ads — fetch daily Google Ads data, optionally filtered by year/month
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
@@ -21,8 +34,8 @@ export async function GET(request: NextRequest) {
     }
 
     const { data, error } = await query;
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(data);
+    if (error) return noCacheJson({ error: error.message }, 500);
+    return noCacheJson(data);
 }
 
 // POST /api/google-ads — upsert a daily Google Ads entry
@@ -31,7 +44,7 @@ export async function POST(request: NextRequest) {
     const { date, spend, impressions, clicks, submit, started, finished, treatment } = body;
 
     if (!date) {
-        return NextResponse.json({ error: 'Date is required' }, { status: 400 });
+        return noCacheJson({ error: 'Date is required' }, 400);
     }
 
     const { data, error } = await supabase
@@ -51,6 +64,6 @@ export async function POST(request: NextRequest) {
         )
         .select();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(data);
+    if (error) return noCacheJson({ error: error.message }, 500);
+    return noCacheJson(data);
 }
