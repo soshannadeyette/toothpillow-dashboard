@@ -23,11 +23,11 @@ const TP = {
 
 /* ════════════════════════════════════════════
    HARDCODED GSC DATA — Source of truth
-   Data pulled fresh from Google Search Console on July 20, 2026
+   Data pulled fresh from Google Search Console on July 24, 2026
    Property: https://www.toothpillow.com/ (URL prefix)
    Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
    SEO program reset date: May 19, 2026
-   May 2026: full month (31 days). June 2026: full month (30 days). July 2026: through Jul 19.
+   May 2026: full month (31 days). June 2026: full month (30 days). July 2026: through Jul 22.
    ════════════════════════════════════════════ */
 
 const SEO_START_DATE = '2026-05-19';
@@ -59,7 +59,7 @@ const GSC_MONTHLY = [
   { month: '2026-04', clicks: 11180, impressions: 105758, ctr: 10.6, position: 37.4 },
   { month: '2026-05', clicks: 10509, impressions: 53592, ctr: 19.6, position: 17.8 },
   { month: '2026-06', clicks: 11550, impressions: 54729, ctr: 21.1, position: 10.1 },
-  { month: '2026-07', clicks: 6080, impressions: 30650, ctr: 19.8, position: 9.7 },
+  { month: '2026-07', clicks: 7538, impressions: 36906, ctr: 20.4, position: 9.5 },
 ];
 
 const GSC_WEEKLY = [
@@ -139,10 +139,11 @@ const GSC_WEEKLY = [
   { week: '2026-06-29', clicks: 1831, impressions: 9952, ctr: 18.4, position: 8.8 },
   { week: '2026-07-06', clicks: 2132, impressions: 11471, ctr: 18.6, position: 9.8 },
   { week: '2026-07-13', clicks: 2767, impressions: 12827, ctr: 21.6, position: 10.1 },
+  { week: '2026-07-20', clicks: 1458, impressions: 6256, ctr: 23.3, position: 8.6 },
 ];
 
-// Full-year daily GSC data — Jan 1 to Jul 19, 2026
-// Source: Google Search Console DAYS view, updated July 20, 2026
+// Full-year daily GSC data — Jan 1 to Jul 22, 2026
+// Source: Google Search Console DAYS view, updated July 24, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -190,6 +191,7 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
     [1,353,1618],[2,288,1627],[3,176,956],[4,148,965],[5,216,1186],[6,385,1840],[7,336,2000],
     [8,381,1816],[9,342,1640],[10,261,1431],[11,212,1351],[12,215,1393],[13,463,2101],
     [14,511,2209],[15,464,1929],[16,466,1944],[17,352,1697],[18,250,1408],[19,261,1539],
+    [20,429,1866],[21,528,2355],[22,501,2035],
   ],
 };
 
@@ -199,10 +201,10 @@ for (const [d, c, i] of GSC_DAILY_2026.May) { GSC_DAILY_MAY_2026[d] = { clicks: 
 
 /* ════════════════════════════════════════════
    KEYWORD MOVERS — Non-branded keywords showing movement
-   GSC comparison: Jun 22–Jul 19, 2026 (28d)
+   GSC comparison: Jun 25–Jul 22, 2026 (28d)
    Only keywords verified as appearing in recent GSC data are included.
    Excludes all branded variations (toothpillow, tooth pillow, etc.)
-   Updated July 20, 2026
+   Updated July 24, 2026
    ════════════════════════════════════════════ */
 
 // Position climbers with monthly position history from GSC
@@ -229,7 +231,7 @@ const KEYWORD_CLIMBERS = [
 // posHistory is 17 values: Feb'25..Jun'26 monthly avg position, null = no data that month
 
 // Non-branded keywords already driving clicks (sorted by clicks, last 28 days)
-// Source: GSC 28-day data (Jun 22–Jul 19, 2026), pulled July 20, 2026
+// Source: GSC 28-day data (Jun 25–Jul 22, 2026), pulled July 24, 2026
 const CLICK_DRIVING_KEYWORDS = [
   { query: 'kids pillow for mouth breathing', posNow: 1.5, clicksNow: 37, imprNow: 157, status: 'Page 1' },
   { query: 'recovery kids pillow mouth breathing', posNow: 1.5, clicksNow: 11, imprNow: 26, status: 'Page 1' },
@@ -243,7 +245,7 @@ const CLICK_DRIVING_KEYWORDS = [
   { query: 'mouth breathing pillow kids', posNow: 1.4, clicksNow: 5, imprNow: 33, status: 'Page 1' },
   { query: 'tongue pillow for kids', posNow: 1.0, clicksNow: 3, imprNow: 15, status: 'Page 1' },
 ];
-// Source: GSC 16-month aggregate (Mar 20 2025 – Jul 19 2026), pulled July 20, 2026
+// Source: GSC 16-month aggregate (Mar 20 2025 – Jul 22 2026), pulled July 24, 2026
 const TOP_QUERIES = [
   { query: 'tooth pillow', clicks: 75386, impressions: 121893, ctr: 61.8, position: 1.1, branded: true },
   { query: 'toothpillow', clicks: 49708, impressions: 75780, ctr: 65.6, position: 1.7, branded: true },
@@ -275,7 +277,7 @@ const TOP_QUERIES = [
    queries are almost exclusively branded variations.
    Product NB = pillow-related searches (mouth pillow, tongue pillow, etc.)
    Discovery NB = problem/treatment searches (airway dentist, mouth breathing treatment, etc.)
-   Updated July 20, 2026
+   Updated July 24, 2026
    ════════════════════════════════════════════ */
 const YOY_JUNE = {
   jun25: { total: 14288, nonBranded: 313, productNB: 281, discoveryNB: 32, days: 30 },
@@ -344,7 +346,7 @@ export default function OrganicGrowth() {
   const SUBMISSIONS_BY_MONTH: Record<string, number> = { ...SUBMISSIONS_2025, ...subs2026 };
 
   const latestMonth = GSC_MONTHLY[GSC_MONTHLY.length - 1];
-  const latestDaysReported = 19; // July 1-19 (partial month)
+  const latestDaysReported = 22; // July 1-22 (partial month)
   const julClickPace = Math.round(latestMonth.clicks / latestDaysReported * 31);
   const julImprPace = Math.round(latestMonth.impressions / latestDaysReported * 31);
 
