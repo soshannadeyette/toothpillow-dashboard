@@ -39,29 +39,43 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/google-ads — upsert a daily Google Ads entry
+// Only updates fields that are explicitly provided; leaves others untouched.
 export async function POST(request: NextRequest) {
     const body = await request.json();
-    const { date, spend, impressions, clicks, submit, started, finished, treatment } = body;
+    const { date } = body;
 
     if (!date) {
         return noCacheJson({ error: 'Date is required' }, 400);
     }
 
+    // Fetch existing row so we can merge rather than overwrite
+    const { data: existing } = await supabase
+        .from('google_ads_daily')
+        .select('*')
+        .eq('date', date)
+        .maybeSingle();
+
+    // Safe number helper: treats NaN/Infinity as "not provided"
+    const safeNum = (v: unknown): number | undefined => {
+        if (v === null || v === undefined) return undefined;
+        const n = Number(v);
+        return Number.isFinite(n) ? n : undefined;
+    };
+
+    const merged = {
+        date,
+        spend:       safeNum(body.spend)       ?? existing?.spend       ?? 0,
+        impressions: safeNum(body.impressions) ?? existing?.impressions ?? 0,
+        clicks:      safeNum(body.clicks)      ?? existing?.clicks      ?? 0,
+        submit:      safeNum(body.submit)      ?? existing?.submit      ?? 0,
+        started:     safeNum(body.started)     ?? existing?.started     ?? 0,
+        finished:    safeNum(body.finished)    ?? existing?.finished    ?? 0,
+        treatment:   safeNum(body.treatment)   ?? existing?.treatment   ?? 0,
+    };
+
     const { data, error } = await supabase
         .from('google_ads_daily')
-        .upsert(
-            {
-                date,
-                spend: spend || 0,
-                impressions: impressions || 0,
-                clicks: clicks || 0,
-                submit: submit || 0,
-                started: started || 0,
-                finished: finished || 0,
-                treatment: treatment || 0,
-            },
-            { onConflict: 'date' }
-        )
+        .upsert(merged, { onConflict: 'date' })
         .select();
 
     if (error) return noCacheJson({ error: error.message }, 500);
