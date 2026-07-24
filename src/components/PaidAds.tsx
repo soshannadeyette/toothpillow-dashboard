@@ -62,6 +62,7 @@ const GOOGLE_ADS_PRIOR_MONTHS: { month: string; year: number; monthIdx: number; 
 // June 30-Jul 5 spend/clicks/impressions from Google Ads Report Editor, July 6, 2026
 // July 6-13 spend/clicks/impressions from Google Ads Report Editor, July 13, 2026
 // July 14-19 spend/clicks/impressions from Google Ads Campaigns > Day segment, July 20, 2026
+// July 6-24 spend/clicks/impressions refreshed from Google Ads Report Editor, July 24, 2026
 // submit/started/finished/treatment fields retained for the entry form only —
 // NOT used anywhere in this page's analysis (see Salesforce constants below instead).
 const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
@@ -100,20 +101,25 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-07-03', spend: 440.25, clicks: 119, impressions: 2260, submit: 3, started: 3, finished: 1, treatment: 0 },
   { date: '2026-07-04', spend: 345.97, clicks: 111, impressions: 1992, submit: 3, started: 1, finished: 2, treatment: 0 },
   { date: '2026-07-05', spend: 751.95, clicks: 204, impressions: 3610, submit: 5, started: 5, finished: 1, treatment: 0 },
-  { date: '2026-07-06', spend: 938.87, clicks: 207, impressions: 4891, submit: 11, started: 5, finished: 9, treatment: 1 },
+  { date: '2026-07-06', spend: 936.89, clicks: 206, impressions: 4891, submit: 11, started: 5, finished: 9, treatment: 1 },
   { date: '2026-07-07', spend: 986.45, clicks: 213, impressions: 4440, submit: 8, started: 1, finished: 2, treatment: 0 },
-  { date: '2026-07-08', spend: 775.19, clicks: 196, impressions: 4154, submit: 6, started: 6, finished: 6, treatment: 0 },
-  { date: '2026-07-09', spend: 742.87, clicks: 206, impressions: 3797, submit: 7, started: 4, finished: 2, treatment: 0 },
+  { date: '2026-07-08', spend: 775.20, clicks: 196, impressions: 4154, submit: 6, started: 6, finished: 6, treatment: 0 },
+  { date: '2026-07-09', spend: 742.87, clicks: 206, impressions: 3795, submit: 7, started: 4, finished: 2, treatment: 0 },
   { date: '2026-07-10', spend: 667.42, clicks: 175, impressions: 2571, submit: 3, started: 2, finished: 5, treatment: 2 },
   { date: '2026-07-11', spend: 608.47, clicks: 156, impressions: 3248, submit: 3, started: 2, finished: 0, treatment: 0 },
   { date: '2026-07-12', spend: 656.37, clicks: 172, impressions: 3544, submit: 6, started: 2, finished: 2, treatment: 0 },
-  { date: '2026-07-13', spend: 493.87, clicks: 130, impressions: 2689, submit: 4, started: 4, finished: 8, treatment: 0 },
+  { date: '2026-07-13', spend: 670.16, clicks: 184, impressions: 3925, submit: 4, started: 4, finished: 8, treatment: 0 },
   { date: '2026-07-14', spend: 675.54, clicks: 174, impressions: 3095, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-07-15', spend: 664.07, clicks: 187, impressions: 2558, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-07-16', spend: 599.98, clicks: 160, impressions: 3256, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-07-17', spend: 515.77, clicks: 134, impressions: 2620, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-07-18', spend: 514.45, clicks: 126, impressions: 1932, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-07-19', spend: 550.05, clicks: 142, impressions: 2525, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-07-20', spend: 653.31, clicks: 172, impressions: 2558, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-07-21', spend: 656.91, clicks: 162, impressions: 2514, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-07-22', spend: 643.76, clicks: 161, impressions: 2536, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-07-23', spend: 605.30, clicks: 144, impressions: 2383, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-07-24', spend: 340.22, clicks: 86, impressions: 1327, submit: 0, started: 0, finished: 0, treatment: 0 },
 ];
 
 // Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)

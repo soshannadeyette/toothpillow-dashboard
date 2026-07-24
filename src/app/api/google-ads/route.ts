@@ -14,8 +14,47 @@ function noCacheJson(data: unknown, status = 200) {
   });
 }
 
+// Google Ads daily seed — spend/clicks/impressions from Google Ads Report Editor.
+// Upserted into Supabase on GET (idempotent, merges with existing rows to preserve
+// submit/started/finished/treatment fields from manual entry).
+// July 6-24 refreshed from Google Ads Report Editor, July 24, 2026.
+const GOOGLE_ADS_SEED: {date:string;spend:number;clicks:number;impressions:number}[] = [
+  { date: '2026-07-20', spend: 653.31, clicks: 172, impressions: 2558 },
+  { date: '2026-07-21', spend: 656.91, clicks: 162, impressions: 2514 },
+  { date: '2026-07-22', spend: 643.76, clicks: 161, impressions: 2536 },
+  { date: '2026-07-23', spend: 605.30, clicks: 144, impressions: 2383 },
+  { date: '2026-07-24', spend: 340.22, clicks: 86, impressions: 1327 },
+];
+
+async function seedGoogleAdsData() {
+  if (GOOGLE_ADS_SEED.length === 0) return;
+  const dates = GOOGLE_ADS_SEED.map(s => s.date);
+  const { data: existing } = await supabase
+    .from('google_ads_daily')
+    .select('*')
+    .in('date', dates);
+  const existingByDate = new Map((existing || []).map((r: Record<string, unknown>) => [r.date as string, r]));
+  const merged = GOOGLE_ADS_SEED.map(s => {
+    const ex = existingByDate.get(s.date) as Record<string, unknown> | undefined;
+    return {
+      date: s.date,
+      spend: s.spend,
+      clicks: s.clicks,
+      impressions: s.impressions,
+      submit: (ex?.submit as number) ?? 0,
+      started: (ex?.started as number) ?? 0,
+      finished: (ex?.finished as number) ?? 0,
+      treatment: (ex?.treatment as number) ?? 0,
+    };
+  });
+  await supabase.from('google_ads_daily').upsert(merged, { onConflict: 'date' });
+}
+
 // GET /api/google-ads — fetch daily Google Ads data, optionally filtered by year/month
 export async function GET(request: NextRequest) {
+    // Seed new days into Supabase (idempotent)
+    await seedGoogleAdsData();
+
     const { searchParams } = new URL(request.url);
     const year = searchParams.get('year');
     const month = searchParams.get('month');
