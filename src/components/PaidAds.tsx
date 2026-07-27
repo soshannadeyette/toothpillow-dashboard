@@ -138,22 +138,22 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
    so Meta contribution is negligible in those months.
    ════════════════════════════════════════════ */
 
-// Pipeline totals — Salesforce export Jul 24, 2026 + 20th checkout adjustment
+// Pipeline totals — Salesforce export Jul 27, 2026
 const GOOGLE_SF_PIPELINE = {
-  total: 455,           // leads created (started form)
-  completed: 196,       // all stages except Waiting-Info (43%)
-  waitingInfo: 259,     // incomplete submissions
+  total: 478,           // leads created (started form)
+  completed: 210,       // all stages except Waiting-Info (44%)
+  waitingInfo: 268,     // incomplete submissions
   sentCheckout: 131,    // Sent Checkout Link (111) + Checked Out (20)
-  sentToTxP: 17,
-  txpApproved: 2,
+  sentToTxP: 34,        // 31 Sent to TxP + 3 Waiting for TxP Assignment
+  txpApproved: 6,
   checkedOut: 20,
-  referredOut: 24,
+  referredOut: 25,
   closedLost: 12,       // 7 Closed Lost + 5 Do Not Contact
   tempHold: 2,
   formOpens: 1436,      // Google Ads conversions (form opens, Google-only)
 };
 
-// Revenue from checkouts — 20th checkout puts us at $35,513
+// Revenue from checkouts — 20 checkouts at $35,513
 const GOOGLE_REVENUE: number = 35513;
 
 // Monthly breakdown from Salesforce (by Created Date)
@@ -162,7 +162,7 @@ const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: n
   { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 22, checkouts: 2, revenue: 3291 },
   { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 30, checkouts: 5, revenue: 8676 },
   { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 84, checkouts: 10, revenue: 17010 },
-  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 142, completed: 60, checkouts: 3, revenue: 6536 },
+  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 165, completed: 74, checkouts: 3, revenue: 6536 },
 ];
 
 /* ════════════════════════════════════════════
