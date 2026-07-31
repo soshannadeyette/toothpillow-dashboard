@@ -95,7 +95,7 @@ const recruit26: {label:string; amb:number; inf:number; accent:string; tag?:stri
   {label:'Apr', amb:28, inf:5, accent:'#FDBE67'},
   {label:'May', amb:20, inf:6, accent:'#B26CA6'},
   {label:'Jun', amb:28, inf:4, accent:'#DD5759'},
-  {label:'Jul', amb:28, inf:2, accent:'#F6AACB'},
+  {label:'Jul', amb:29, inf:2, accent:'#F6AACB'},
 ];
 
 const concRows = [
