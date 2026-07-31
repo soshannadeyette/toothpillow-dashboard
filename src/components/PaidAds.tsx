@@ -139,37 +139,37 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
 
 /* ════════════════════════════════════════════
    DATA SOURCE 2: SALESFORCE (hardcoded constants)
-   Source: Salesforce "Google Ads 2026" export, July 24, 2026.
+   Source: Salesforce "Google Ads 2026" export, July 30, 2026.
    Note: Export filter includes "Up 1 equals Google Ads,Meta Ads"
    but Apr–Jun numbers are unchanged from Google-only pulls,
    so Meta contribution is negligible in those months.
    ════════════════════════════════════════════ */
 
-// Pipeline totals — Salesforce export Jul 28, 2026
+// Pipeline totals — Salesforce export Jul 30, 2026
 const GOOGLE_SF_PIPELINE = {
-  total: 492,           // leads created (started form)
-  completed: 218,       // all stages except Waiting-Info (44%)
-  waitingInfo: 274,     // incomplete submissions
-  sentCheckout: 142,    // Sent Checkout Link (120) + SCL-Temp Hold (1) + Checked Out (21)
-  sentToTxP: 30,        // Sent to TxP (27) + Waiting for TxP Assignment (3)
-  txpApproved: 6,
-  checkedOut: 21,
+  total: 496,           // leads created (started form)
+  completed: 221,       // all stages except Waiting-Info (45%)
+  waitingInfo: 275,     // incomplete submissions
+  sentCheckout: 151,    // Sent Checkout Link (127) + SCL-Temp Hold (1) + Checked Out (23)
+  sentToTxP: 27,        // Sent to TxP (24) + Waiting for TxP Assignment (3)
+  txpApproved: 3,
+  checkedOut: 23,
   referredOut: 26,
   closedLost: 12,       // 7 Closed Lost + 5 Do Not Contact
   tempHold: 3,          // 2 Temp Hold + 1 SCL-Temp Hold
   formOpens: 1436,      // Google Ads conversions (form opens, Google-only)
 };
 
-// Revenue from checkouts — 21 checkouts at $37,409
-const GOOGLE_REVENUE: number = 37409;
+// Revenue from checkouts — 23 checkouts at $42,200
+const GOOGLE_REVENUE: number = 42200;
 
 // Monthly breakdown from Salesforce (by Created Date)
 // Used in the monthly summary table alongside Google Ads spend data
 const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: number; checkouts: number; revenue: number }[] = [
   { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 22, checkouts: 2, revenue: 3291 },
   { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 30, checkouts: 5, revenue: 8676 },
-  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 85, checkouts: 10, revenue: 17010 },
-  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 179, completed: 81, checkouts: 4, revenue: 8432 },
+  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 85, checkouts: 12, revenue: 21801 },
+  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 183, completed: 84, checkouts: 4, revenue: 8432 },
 ];
 
 /* ════════════════════════════════════════════
