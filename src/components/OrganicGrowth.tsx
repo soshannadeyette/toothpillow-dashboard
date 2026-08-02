@@ -23,11 +23,11 @@ const TP = {
 
 /* ════════════════════════════════════════════
    HARDCODED GSC DATA — Source of truth
-   Data pulled fresh from Google Search Console on July 24, 2026
+   Data pulled fresh from Google Search Console on August 2, 2026
    Property: https://www.toothpillow.com/ (URL prefix)
    Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
    SEO program reset date: May 19, 2026
-   May 2026: full month (31 days). June 2026: full month (30 days). July 2026: through Jul 22.
+   May 2026: full month (31 days). June 2026: full month (30 days). July 2026: full month (31 days).
    ════════════════════════════════════════════ */
 
 const SEO_START_DATE = '2026-05-19';
@@ -59,7 +59,7 @@ const GSC_MONTHLY = [
   { month: '2026-04', clicks: 11180, impressions: 105758, ctr: 10.6, position: 37.4 },
   { month: '2026-05', clicks: 10509, impressions: 53592, ctr: 19.6, position: 17.8 },
   { month: '2026-06', clicks: 11550, impressions: 54729, ctr: 21.1, position: 10.1 },
-  { month: '2026-07', clicks: 7538, impressions: 36906, ctr: 20.4, position: 9.5 },
+  { month: '2026-07', clicks: 11163, impressions: 52738, ctr: 21.2, position: 9.5 },
 ];
 
 const GSC_WEEKLY = [
@@ -139,11 +139,12 @@ const GSC_WEEKLY = [
   { week: '2026-06-29', clicks: 1831, impressions: 9952, ctr: 18.4, position: 8.8 },
   { week: '2026-07-06', clicks: 2132, impressions: 11471, ctr: 18.6, position: 9.8 },
   { week: '2026-07-13', clicks: 2767, impressions: 12827, ctr: 21.6, position: 10.1 },
-  { week: '2026-07-20', clicks: 1458, impressions: 6256, ctr: 23.3, position: 8.6 },
+  { week: '2026-07-20', clicks: 2949, impressions: 12640, ctr: 23.3, position: 8.6 },
+  { week: '2026-07-27', clicks: 2134, impressions: 9448, ctr: 22.6, position: 9.0 },
 ];
 
-// Full-year daily GSC data — Jan 1 to Jul 22, 2026
-// Source: Google Search Console DAYS view, updated July 24, 2026
+// Full-year daily GSC data — Jan 1 to Jul 31, 2026
+// Source: Google Search Console DAYS view, updated August 2, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -191,7 +192,8 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
     [1,353,1618],[2,288,1627],[3,176,956],[4,148,965],[5,216,1186],[6,385,1840],[7,336,2000],
     [8,381,1816],[9,342,1640],[10,261,1431],[11,212,1351],[12,215,1393],[13,463,2101],
     [14,511,2209],[15,464,1929],[16,466,1944],[17,352,1697],[18,250,1408],[19,261,1539],
-    [20,429,1866],[21,528,2355],[22,501,2035],
+    [20,429,1866],[21,528,2355],[22,501,2035],[23,467,1900],[24,428,1631],[25,303,1328],
+    [26,293,1525],[27,395,1957],[28,412,1722],[29,391,1790],[30,384,1714],[31,552,2265],
   ],
 };
 
@@ -203,8 +205,8 @@ for (const [d, c, i] of GSC_DAILY_2026.May) { GSC_DAILY_MAY_2026[d] = { clicks: 
    KEYWORD MOVERS — Non-branded keywords showing movement
    GSC comparison: Jun 25–Jul 22, 2026 (28d)
    Only keywords verified as appearing in recent GSC data are included.
-   Excludes all branded variations (toothpillow, tooth pillow, etc.)
-   Updated July 24, 2026
+   Excludes all branded variations (toothpillow, tooth pillow, mouth pillow, etc.)
+   Updated August 2, 2026
    ════════════════════════════════════════════ */
 
 // Position climbers with monthly position history from GSC
@@ -246,6 +248,8 @@ const CLICK_DRIVING_KEYWORDS = [
   { query: 'tongue pillow for kids', posNow: 1.0, clicksNow: 3, imprNow: 15, status: 'Page 1' },
 ];
 // Source: GSC 16-month aggregate (Mar 20 2025 – Jul 22 2026), pulled July 24, 2026
+// "mouth pillow", "mouth pillow kids", "teeth pillow" = quasi-branded (people searching
+// for Toothpillow by name variant, not discovering via symptom/treatment keywords)
 const TOP_QUERIES = [
   { query: 'tooth pillow', clicks: 75386, impressions: 121893, ctr: 61.8, position: 1.1, branded: true },
   { query: 'toothpillow', clicks: 49708, impressions: 75780, ctr: 65.6, position: 1.7, branded: true },
@@ -253,16 +257,16 @@ const TOP_QUERIES = [
   { query: 'toothpillow for kids', clicks: 4151, impressions: 6044, ctr: 68.7, position: 1.0, branded: true },
   { query: 'tooth pillow device', clicks: 3657, impressions: 7241, ctr: 50.5, position: 3.3, branded: true },
   { query: 'tooth pillow for adults', clicks: 3133, impressions: 7770, ctr: 40.3, position: 5.4, branded: true },
-  { query: 'mouth pillow', clicks: 2256, impressions: 8569, ctr: 26.3, position: 1.4, branded: false },
+  { query: 'mouth pillow', clicks: 2256, impressions: 8569, ctr: 26.3, position: 1.4, branded: true },
   { query: 'the tooth pillow', clicks: 1618, impressions: 2201, ctr: 73.5, position: 1.1, branded: true },
   { query: 'my tooth pillow', clicks: 1479, impressions: 1934, ctr: 76.5, position: 1.3, branded: true },
   { query: 'toothpillow for adults', clicks: 1471, impressions: 4335, ctr: 33.9, position: 7.3, branded: true },
   { query: 'tooth pillow appliance', clicks: 1080, impressions: 3257, ctr: 33.2, position: 8.9, branded: true },
   { query: 'tooth pillow canada', clicks: 916, impressions: 1558, ctr: 58.8, position: 1.0, branded: true },
-  { query: 'teeth pillow', clicks: 883, impressions: 2236, ctr: 39.5, position: 1.2, branded: false },
+  { query: 'teeth pillow', clicks: 883, impressions: 2236, ctr: 39.5, position: 1.2, branded: true },
   { query: 'what is a tooth pillow', clicks: 769, impressions: 2746, ctr: 28.0, position: 1.3, branded: true },
   { query: 'toothpillow reviews', clicks: 762, impressions: 7124, ctr: 10.7, position: 2.6, branded: true },
-  { query: 'mouth pillow kids', clicks: 677, impressions: 1216, ctr: 55.7, position: 1.0, branded: false },
+  { query: 'mouth pillow kids', clicks: 677, impressions: 1216, ctr: 55.7, position: 1.0, branded: true },
   { query: 'toothpillow cost', clicks: 640, impressions: 2347, ctr: 27.3, position: 1.9, branded: true },
   { query: 'tongue pillow', clicks: 585, impressions: 1536, ctr: 38.1, position: 2.0, branded: false },
   { query: 'mouth breathing device for kids', clicks: 31, impressions: 402, ctr: 7.7, position: 3.9, branded: false },
@@ -270,19 +274,41 @@ const TOP_QUERIES = [
 ];
 
 /* ════════════════════════════════════════════
-   YEAR-OVER-YEAR NON-BRANDED COMPARISON — June 2025 vs June 2026
+   YEAR-OVER-YEAR NON-BRANDED COMPARISON
    Total clicks from GSC_MONTHLY. Non-branded breakdown from JS extraction
    of GSC query tables (top 1000 queries). Non-branded counts are accurate
    because they appear fully within the 1000-query cap; truncated long-tail
    queries are almost exclusively branded variations.
-   Product NB = pillow-related searches (mouth pillow, tongue pillow, etc.)
+   "mouth pillow" reclassified as quasi-branded per Sosh (people searching by name variant).
+   Product NB = pillow-related searches (tongue pillow, mouth breathing pillow, etc.)
    Discovery NB = problem/treatment searches (airway dentist, mouth breathing treatment, etc.)
-   Updated July 24, 2026
+   Updated August 2, 2026
    ════════════════════════════════════════════ */
 const YOY_JUNE = {
   jun25: { total: 14288, nonBranded: 313, productNB: 281, discoveryNB: 32, days: 30 },
   jun26: { total: 11550, nonBranded: 335, productNB: 278, discoveryNB: 57, days: 30 },
 };
+
+const YOY_JULY = {
+  jul25: { total: 23188, nonBranded: 420, productNB: 355, discoveryNB: 65, days: 31 },
+  jul26: { total: 11163, nonBranded: 648, productNB: 510, discoveryNB: 138, days: 31 },
+};
+
+/* ════════════════════════════════════════════
+   TOP PAGES — Which pages get organic clicks
+   Source: GSC 12-month aggregate (Aug 2025 – Jul 2026), pulled August 2, 2026
+   ════════════════════════════════════════════ */
+const TOP_PAGES = [
+  { page: '/', label: 'Homepage', clicks: 25496, impressions: 117812 },
+  { page: '/teens-adult', label: 'Teens & Adults', clicks: 2374, impressions: 32454 },
+  { page: '/pricing', label: 'Pricing', clicks: 1359, impressions: 56317 },
+  { page: '/program', label: 'Program', clicks: 1181, impressions: 37164 },
+  { page: '/assessment', label: 'Assessment', clicks: 1169, impressions: 57532 },
+  { page: '/our-doctors', label: 'Our Doctors', clicks: 867, impressions: 58838 },
+  { page: '/faqs', label: 'FAQs', clicks: 735, impressions: 54981 },
+  { page: '/premium', label: 'Premium', clicks: 228, impressions: 10920 },
+  { page: '/symptoms', label: 'Symptoms', clicks: 169, impressions: 27907 },
+];
 
 
 /* ════════════════════════════════════════════
@@ -346,9 +372,9 @@ export default function OrganicGrowth() {
   const SUBMISSIONS_BY_MONTH: Record<string, number> = { ...SUBMISSIONS_2025, ...subs2026 };
 
   const latestMonth = GSC_MONTHLY[GSC_MONTHLY.length - 1];
-  const latestDaysReported = 22; // July 1-22 (partial month)
-  const julClickPace = Math.round(latestMonth.clicks / latestDaysReported * 31);
-  const julImprPace = Math.round(latestMonth.impressions / latestDaysReported * 31);
+  const latestDaysReported = 31; // July 1-31 (full month)
+  const julClickPace = latestMonth.clicks; // full month, no projection needed
+  const julImprPace = latestMonth.impressions;
 
   const jul2025 = GSC_MONTHLY.find(m => m.month === '2025-07')!;
 
@@ -654,6 +680,142 @@ export default function OrganicGrowth() {
     },
   }), []);
 
+  // ── Normalized clicks/day by month ──
+  const normalizedMonthly = useMemo(() => {
+    return GSC_MONTHLY.map(m => {
+      const [y, mo] = m.month.split('-').map(Number);
+      const days = new Date(y, mo, 0).getDate();
+      return {
+        month: m.month,
+        label: monthLabel(m.month),
+        clicksPerDay: Math.round(m.clicks / days * 10) / 10,
+        impressionsPerDay: Math.round(m.impressions / days),
+        ctr: m.ctr,
+        days,
+      };
+    });
+  }, []);
+
+  // ── CTR trend chart ──
+  const ctrChartData = useMemo(() => ({
+    labels: GSC_MONTHLY.map(m => monthLabel(m.month)),
+    datasets: [{
+      label: 'CTR %',
+      data: GSC_MONTHLY.map(m => m.ctr),
+      borderColor: TP.green,
+      backgroundColor: `${TP.green}18`,
+      pointRadius: 4,
+      pointBackgroundColor: GSC_MONTHLY.map(m => m.ctr >= 15 ? TP.green : m.ctr >= 8 ? TP.yellow : TP.red),
+      borderWidth: 2.5,
+      tension: 0.3,
+      fill: true,
+    }],
+  }), []);
+
+  const ctrChartOpts = useMemo(() => ({
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (ctx: { parsed: { y: number } }) => `CTR: ${ctx.parsed.y.toFixed(1)}%` } },
+      annotation: { annotations: { ...websiteAnnotation, ...seoAnnotation, ...coreUpdateAnnotation } },
+    },
+    scales: {
+      y: { beginAtZero: true, ticks: { callback: (v: number | string) => `${v}%` }, grid: { color: '#f0f0f0' }, title: { display: true, text: 'Click-through Rate', font: { size: 11 } } },
+      x: { grid: { display: false } },
+    },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [seoMonthIndex]);
+
+  // ── Top pages chart ──
+  const topPagesData = useMemo(() => ({
+    labels: TOP_PAGES.map(p => p.label),
+    datasets: [
+      {
+        label: 'Clicks',
+        data: TOP_PAGES.map(p => p.clicks),
+        backgroundColor: TP.blue,
+        borderRadius: 3,
+        barPercentage: 0.7,
+        categoryPercentage: 0.8,
+      },
+    ],
+  }), []);
+
+  const topPagesOpts = useMemo(() => ({
+    indexAxis: 'y' as const,
+    responsive: true, maintainAspectRatio: false,
+    scales: {
+      x: { beginAtZero: true, ticks: { callback: (v: number | string) => fmtK(Number(v)) }, grid: { color: '#f0f0f0' } },
+      y: { ticks: { font: { size: 12 }, color: TP.navy }, grid: { display: false } },
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (ctx: { raw: unknown }) => `${Number(ctx.raw).toLocaleString()} clicks` } },
+    },
+  }), []);
+
+  // ── YoY July comparison ──
+  const yoyJulNbPctChg = ((YOY_JULY.jul26.nonBranded - YOY_JULY.jul25.nonBranded) / YOY_JULY.jul25.nonBranded * 100);
+  const yoyJulDiscChg = ((YOY_JULY.jul26.discoveryNB - YOY_JULY.jul25.discoveryNB) / YOY_JULY.jul25.discoveryNB * 100);
+
+  // ── Normalized clicks/day chart data ──
+  const normalizedChartData = useMemo(() => {
+    // Only show 2026 months for the normalized view (clean comparison)
+    const months2026 = normalizedMonthly.filter(m => m.month >= '2026-01');
+    return {
+      labels: months2026.map(m => m.label),
+      datasets: [
+        {
+          label: 'Clicks/Day',
+          data: months2026.map(m => m.clicksPerDay),
+          backgroundColor: months2026.map(m => m.month >= '2026-05' ? TP.green : TP.blue),
+          borderRadius: 4,
+          borderSkipped: false as const,
+        },
+      ],
+    };
+  }, [normalizedMonthly]);
+
+  const normalizedChartOpts = useMemo(() => ({
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (ctx: { parsed: { y: number } }) => `${ctx.parsed.y.toFixed(1)} clicks/day` } },
+      annotation: {
+        annotations: {
+          ...((() => {
+            const months2026 = normalizedMonthly.filter(m => m.month >= '2026-01');
+            const seoIdx = months2026.findIndex(m => m.month === '2026-05');
+            return seoIdx >= 0 ? {
+              seoLine: {
+                type: 'line' as const,
+                xMin: seoIdx - 0.5,
+                xMax: seoIdx - 0.5,
+                borderColor: `${TP.green}B0`,
+                borderWidth: 2,
+                borderDash: [6, 3],
+                label: {
+                  display: true,
+                  content: 'SEO Live',
+                  position: 'end' as const,
+                  backgroundColor: TP.green,
+                  color: '#fff',
+                  font: { size: 9, weight: 'bold' as const },
+                  padding: { top: 2, bottom: 2, left: 5, right: 5 },
+                  borderRadius: 3,
+                },
+              },
+            } : {};
+          })()),
+        },
+      },
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#f0f0f0' }, title: { display: true, text: 'Clicks per day', font: { size: 11 } } },
+      x: { grid: { display: false } },
+    },
+  }), [normalizedMonthly]);
+
   const cardStyle = { background: '#fff', borderRadius: 10, padding: '16px 20px', border: '1px solid #e5e7eb', flex: '1 1 0', minWidth: 150 } as const;
   const labelStyle = { fontSize: 11, color: '#888', fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: 0.5, marginBottom: 6 } as const;
 
@@ -668,19 +830,27 @@ export default function OrganicGrowth() {
       {/* ═══════ SECTION 1: HEADLINE STAT CARDS ═══════ */}
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
         <div style={cardStyle}>
-          <div style={labelStyle}>Organic Clicks</div>
+          <div style={labelStyle}>Jul Organic Clicks</div>
           <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{fmtK(julClickPace)}</div>
-          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>Jul pace ({latestDaysReported} days)</div>
+          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>Full month</div>
           <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: julClickPace < jul2025.clicks ? TP.red : TP.green }}>
             {julClickPace >= jul2025.clicks ? '▲' : '▼'} {delta(julClickPace, jul2025.clicks)} vs Jul &apos;25
           </div>
         </div>
         <div style={cardStyle}>
-          <div style={labelStyle}>Impressions</div>
+          <div style={labelStyle}>Jul Impressions</div>
           <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{fmtK(julImprPace)}</div>
-          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>Jul pace ({latestDaysReported} days)</div>
+          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>Full month</div>
           <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: julImprPace < jul2025.impressions ? TP.red : TP.green }}>
             {julImprPace >= jul2025.impressions ? '▲' : '▼'} {delta(julImprPace, jul2025.impressions)} vs Jul &apos;25
+          </div>
+        </div>
+        <div style={cardStyle}>
+          <div style={labelStyle}>Jul CTR</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{latestMonth.ctr}%</div>
+          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>Click-through rate</div>
+          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: TP.green }}>
+            ▲ from {jul2025.ctr}% in Jul &apos;25
           </div>
         </div>
         <div style={cardStyle}>
@@ -695,6 +865,50 @@ export default function OrganicGrowth() {
         </div>
 
 
+      </div>
+
+      {/* ═══════ SECTION 1B: NORMALIZED CLICKS/DAY — 2026 ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4, marginTop: 0 }}>Organic Growth Rate: Clicks per Day</h3>
+        <p style={{ fontSize: 12, color: '#888', margin: '0 0 12px 0' }}>
+          Normalizes for month length so partial and short months compare fairly. Green bars = post-SEO months.
+        </p>
+        <div style={{ height: 240 }}>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <Bar data={normalizedChartData as any} options={normalizedChartOpts as object} />
+        </div>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 16 }}>
+          {(() => {
+            const months2026 = normalizedMonthly.filter(m => m.month >= '2026-01');
+            const mayRate = months2026.find(m => m.month === '2026-05')?.clicksPerDay || 0;
+            const julRate = months2026.find(m => m.month === '2026-07')?.clicksPerDay || 0;
+            const junRate = months2026.find(m => m.month === '2026-06')?.clicksPerDay || 0;
+            const postSeoGrowth = mayRate > 0 ? ((julRate - mayRate) / mayRate * 100) : 0;
+            return (
+              <>
+                <div style={{ flex: 1, minWidth: 140, padding: '10px 14px', background: `${TP.green}08`, borderRadius: 8, border: `1px solid ${TP.green}20` }}>
+                  <div style={{ fontSize: 11, color: '#888', marginBottom: 2 }}>May (SEO month)</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: TP.navy }}>{mayRate.toFixed(0)}/day</div>
+                </div>
+                <div style={{ flex: 1, minWidth: 140, padding: '10px 14px', background: `${TP.green}08`, borderRadius: 8, border: `1px solid ${TP.green}20` }}>
+                  <div style={{ fontSize: 11, color: '#888', marginBottom: 2 }}>June</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: TP.navy }}>{junRate.toFixed(0)}/day</div>
+                </div>
+                <div style={{ flex: 1, minWidth: 140, padding: '10px 14px', background: `${TP.green}08`, borderRadius: 8, border: `1px solid ${TP.green}20` }}>
+                  <div style={{ fontSize: 11, color: '#888', marginBottom: 2 }}>July</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: TP.navy }}>{julRate.toFixed(0)}/day</div>
+                </div>
+                <div style={{ flex: 1, minWidth: 140, padding: '10px 14px', background: `${TP.green}12`, borderRadius: 8, border: `1px solid ${TP.green}40` }}>
+                  <div style={{ fontSize: 11, color: '#888', marginBottom: 2 }}>Post-SEO trend</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: postSeoGrowth >= 0 ? TP.green : TP.red }}>
+                    {postSeoGrowth >= 0 ? '+' : ''}{postSeoGrowth.toFixed(1)}%
+                  </div>
+                  <div style={{ fontSize: 10, color: '#999' }}>May → Jul</div>
+                </div>
+              </>
+            );
+          })()}
+        </div>
       </div>
 
       {/* ═══════ SECTION 2: ORGANIC CLICKS (Monthly / Weekly / Daily toggle) ═══════ */}
@@ -718,7 +932,7 @@ export default function OrganicGrowth() {
         <div style={{ fontSize: 11, color: '#888', marginBottom: 8 }}>
           {clicksView === 'monthly' && 'Feb 2025 to present. Bars = total clicks per month, red line = 3-month moving average.'}
           {clicksView === 'weekly' && `${GSC_WEEKLY.length} weeks from Feb 2025. Blue area = weekly clicks, red line = 4-week moving average.`}
-          {clicksView === 'daily' && 'Jan 1 – Jul 4, 2026 (185 days). Gray area = daily clicks, red line = 7-day moving average.'}
+          {clicksView === 'daily' && 'Jan 1 – Jul 31, 2026 (212 days). Gray area = daily clicks, red line = 7-day moving average.'}
         </div>
         <div style={{ height: 320 }}>
           {clicksView === 'monthly' && (
@@ -827,52 +1041,96 @@ export default function OrganicGrowth() {
         </div>
       </div>
 
+      {/* ═══════ SECTION 4A: CTR TREND ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4, marginTop: 0 }}>Click-Through Rate Trend</h3>
+        <p style={{ fontSize: 12, color: '#888', margin: '0 0 12px 0' }}>
+          CTR measures what percentage of people who see Toothpillow in search results actually click.
+          Higher CTR = Google is showing the site to more relevant searchers and the listing is compelling.
+        </p>
+        <div style={{ height: 280 }}>
+          <Line data={ctrChartData} options={ctrChartOpts as object} />
+        </div>
+        <div style={{ marginTop: 12, padding: '10px 14px', background: `${TP.green}08`, borderRadius: 8, border: `1px solid ${TP.green}20`, fontSize: 12, color: '#555', lineHeight: 1.6 }}>
+          CTR improved from {GSC_MONTHLY[0].ctr}% (Feb &apos;25) to {latestMonth.ctr}% (Jul &apos;26).
+          The jump in Feb 2026 reflects the SEO metadata cleanup: when Google re-indexed the restored title tags and meta descriptions,
+          it started showing Toothpillow for fewer but more relevant queries, so a higher share of impressions converted to clicks.
+        </div>
+      </div>
+
       {/* ═══════ SECTION 4B: YoY NON-BRANDED TRACTION ═══════ */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
         <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4, marginTop: 0 }}>
           Year-over-Year: Non-Branded Search Traction
         </h3>
         <p style={{ fontSize: 12, color: '#888', margin: '0 0 16px 0' }}>
-          June 2025 ({YOY_JUNE.jun25.days}d) vs June 2026 ({YOY_JUNE.jun26.days}d). Non-branded = searches by people who didn&apos;t know Toothpillow by name.
+          Non-branded = searches by people who didn&apos;t know Toothpillow by name. &quot;Mouth pillow&quot; variants classified as quasi-branded.
         </p>
 
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
-          <div style={cardStyle}>
-            <div style={labelStyle}>Non-Branded Clicks</div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>{YOY_JUNE.jun26.nonBranded}</div>
-            <div style={{ fontSize: 12, color: '#888' }}>vs {YOY_JUNE.jun25.nonBranded} last year</div>
-            <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4, color: TP.green }}>
-              ▲ +{yoyNbPctChg.toFixed(0)}%
+        {/* June YoY */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: TP.navy, marginBottom: 8 }}>June 2025 vs June 2026</div>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <div style={cardStyle}>
+              <div style={labelStyle}>Non-Branded Clicks</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>{YOY_JUNE.jun26.nonBranded}</div>
+              <div style={{ fontSize: 12, color: '#888' }}>vs {YOY_JUNE.jun25.nonBranded} last year</div>
+              <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4, color: TP.green }}>
+                ▲ +{yoyNbPctChg.toFixed(0)}%
+              </div>
+            </div>
+            <div style={cardStyle}>
+              <div style={labelStyle}>Discovery Keywords</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>{YOY_JUNE.jun26.discoveryNB}</div>
+              <div style={{ fontSize: 12, color: '#888' }}>vs {YOY_JUNE.jun25.discoveryNB} last year</div>
+              <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4, color: TP.green }}>
+                ▲ +{yoyDiscChg.toFixed(0)}%
+              </div>
+            </div>
+            <div style={cardStyle}>
+              <div style={labelStyle}>Non-Branded Share</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>{yoyNbShare26.toFixed(1)}%</div>
+              <div style={{ fontSize: 12, color: '#888' }}>vs {yoyNbShare25.toFixed(1)}% last year</div>
+              <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4, color: TP.green }}>
+                ▲ +{yoyShareChg.toFixed(0)}%
+              </div>
             </div>
           </div>
-          <div style={cardStyle}>
-            <div style={labelStyle}>Discovery Keywords</div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>{YOY_JUNE.jun26.discoveryNB}</div>
-            <div style={{ fontSize: 12, color: '#888' }}>vs {YOY_JUNE.jun25.discoveryNB} last year</div>
-            <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4, color: TP.green }}>
-              ▲ +{yoyDiscChg.toFixed(0)}%
+        </div>
+
+        {/* July YoY */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: TP.navy, marginBottom: 8 }}>July 2025 vs July 2026</div>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <div style={cardStyle}>
+              <div style={labelStyle}>Non-Branded Clicks</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>{YOY_JULY.jul26.nonBranded}</div>
+              <div style={{ fontSize: 12, color: '#888' }}>vs {YOY_JULY.jul25.nonBranded} last year</div>
+              <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4, color: TP.green }}>
+                ▲ +{yoyJulNbPctChg.toFixed(0)}%
+              </div>
             </div>
-          </div>
-          <div style={cardStyle}>
-            <div style={labelStyle}>Non-Branded Share</div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>{yoyNbShare26.toFixed(1)}%</div>
-            <div style={{ fontSize: 12, color: '#888' }}>vs {yoyNbShare25.toFixed(1)}% last year</div>
-            <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4, color: TP.green }}>
-              ▲ +{yoyShareChg.toFixed(0)}%
+            <div style={cardStyle}>
+              <div style={labelStyle}>Discovery Keywords</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>{YOY_JULY.jul26.discoveryNB}</div>
+              <div style={{ fontSize: 12, color: '#888' }}>vs {YOY_JULY.jul25.discoveryNB} last year</div>
+              <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4, color: TP.green }}>
+                ▲ +{yoyJulDiscChg.toFixed(0)}%
+              </div>
             </div>
-          </div>
-          <div style={cardStyle}>
-            <div style={labelStyle}>Total Clicks (All)</div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: TP.navy }}>{fmtK(YOY_JUNE.jun26.total)}</div>
-            <div style={{ fontSize: 12, color: '#888' }}>vs {fmtK(YOY_JUNE.jun25.total)} last year</div>
-            <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4, color: TP.red }}>
-              ▼ {delta(YOY_JUNE.jun26.total, YOY_JUNE.jun25.total)}
+            <div style={cardStyle}>
+              <div style={labelStyle}>Total Clicks (All)</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: TP.navy }}>{fmtK(YOY_JULY.jul26.total)}</div>
+              <div style={{ fontSize: 12, color: '#888' }}>vs {fmtK(YOY_JULY.jul25.total)} last year</div>
+              <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4, color: TP.red }}>
+                ▼ {delta(YOY_JULY.jul26.total, YOY_JULY.jul25.total)}
+              </div>
             </div>
           </div>
         </div>
 
         <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>
-          Product = pillow/device searches. Discovery = treatment, airway, and condition searches.
+          Product = pillow/device searches (tongue pillow, mouth breathing pillow). Discovery = treatment, airway, and condition searches.
         </div>
         <div style={{ height: 160 }}>
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
@@ -880,9 +1138,10 @@ export default function OrganicGrowth() {
         </div>
 
         <div style={{ marginTop: 16, padding: '12px 16px', background: `${TP.green}08`, borderRadius: 8, border: `1px solid ${TP.green}20`, fontSize: 12, color: '#555', lineHeight: 1.7 }}>
-          Product keywords held flat — people searching for &quot;mouth pillow&quot; or &quot;tongue pillow&quot; were already finding Toothpillow a year ago.
-          The growth came from discovery keywords: searches like &quot;mouth breathing treatment kids&quot; and &quot;airway dentist near me&quot;
-          by parents who didn&apos;t know Toothpillow existed. These grew {yoyDiscChg.toFixed(0)}% year-over-year, and this is the category SEO is designed to expand.
+          Non-branded discovery clicks grew +{yoyJulNbPctChg.toFixed(0)}% YoY in July, with discovery keywords (treatment, airway, condition searches)
+          up +{yoyJulDiscChg.toFixed(0)}% — parents searching for solutions who didn&apos;t know Toothpillow existed. Total clicks are down YoY because
+          July 2025 had inflated impression counts from Google testing broader queries (493K impressions, 4.7% CTR vs 53K impressions, 21.2% CTR in July 2026).
+          The site is reaching fewer people but far more relevant ones.
         </div>
       </div>
 
@@ -916,6 +1175,51 @@ export default function OrganicGrowth() {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* ═══════ SECTION 5C: TOP PAGES ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4, marginTop: 0 }}>Where Organic Traffic Lands</h3>
+        <p style={{ fontSize: 12, color: '#888', margin: '0 0 16px 0' }}>
+          Clicks by page, last 12 months (Aug 2025 – Jul 2026). Shows which pages Google sends people to.
+        </p>
+        <div style={{ height: Math.max(280, TOP_PAGES.length * 40 + 40) }}>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <Bar data={topPagesData as any} options={topPagesOpts as object} />
+        </div>
+        <div style={{ overflowX: 'auto', marginTop: 16 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+            <thead>
+              <tr style={{ borderBottom: `2px solid ${TP.navy}` }}>
+                <th style={{ padding: '6px 10px', textAlign: 'left', color: TP.navy }}>Page</th>
+                <th style={{ padding: '6px 10px', textAlign: 'right', color: TP.navy }}>Clicks</th>
+                <th style={{ padding: '6px 10px', textAlign: 'right', color: TP.navy }}>Impressions</th>
+                <th style={{ padding: '6px 10px', textAlign: 'right', color: TP.navy }}>CTR</th>
+                <th style={{ padding: '6px 10px', textAlign: 'right', color: TP.navy }}>% of Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {TOP_PAGES.map((p, i) => {
+                const totalClicks = TOP_PAGES.reduce((s, x) => s + x.clicks, 0);
+                const ctrVal = p.impressions > 0 ? (p.clicks / p.impressions * 100) : 0;
+                return (
+                  <tr key={i} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : '#fff' }}>
+                    <td style={{ padding: '6px 10px', fontWeight: 500 }}>{p.label} <span style={{ color: '#bbb', fontSize: 10 }}>{p.page}</span></td>
+                    <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 600 }}>{p.clicks.toLocaleString()}</td>
+                    <td style={{ padding: '6px 10px', textAlign: 'right' }}>{p.impressions.toLocaleString()}</td>
+                    <td style={{ padding: '6px 10px', textAlign: 'right', color: ctrVal >= 5 ? TP.green : TP.yellow }}>{ctrVal.toFixed(1)}%</td>
+                    <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 600 }}>{(p.clicks / totalClicks * 100).toFixed(1)}%</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <div style={{ marginTop: 12, padding: '10px 14px', background: `${TP.blue}08`, borderRadius: 8, border: `1px solid ${TP.blue}20`, fontSize: 12, color: '#555', lineHeight: 1.6 }}>
+          The homepage captures {(TOP_PAGES[0].clicks / TOP_PAGES.reduce((s, x) => s + x.clicks, 0) * 100).toFixed(0)}% of all organic clicks.
+          Assessment and Symptoms pages have high impressions but low CTR, meaning Google shows them but the listing isn&apos;t compelling enough to click.
+          These are the highest-leverage pages for title tag and meta description optimization.
         </div>
       </div>
 
@@ -1096,7 +1400,7 @@ export default function OrganicGrowth() {
 
       {/* Data source */}
       <div style={{ fontSize: 11, color: '#aaa', textAlign: 'center', padding: '8px 0' }}>
-        Google Search Console (17 months). Data pulled July 6, 2026. SEO implemented May 19, 2026.
+        Google Search Console (18 months). Data pulled August 2, 2026. SEO implemented May 19, 2026.
       </div>
     </div>
   );
