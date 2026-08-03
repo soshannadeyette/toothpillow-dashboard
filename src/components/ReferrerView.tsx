@@ -93,14 +93,16 @@ const REFERRER_DATA: Record<string, RefMonth> = {
   "2026-05": {total:1125, Parent:49, "Dental Office":213, "Airway Ambassador":50, Influencer:268, Podcast:126, Instagram:55, TikTok:4, Facebook:13, "Meta Ad":1, "Online Search":251, "Unknown Referral":51, "Unknown Professional Referral":10, Other:0, "Google Ad":28, MYO:3, "Health Care Professional":3},
   // Source: Salesforce "Monthly Submissions by Referral Type" export, Jul 28, 2026
   "2026-06": {total:1475, Parent:85, "Dental Office":229, "Airway Ambassador":45, Influencer:306, Podcast:279, Instagram:54, TikTok:1, Facebook:3, "Meta Ad":0, "Online Search":326, "Unknown Referral":45, "Unknown Professional Referral":14, Other:0, "Google Ad":81, MYO:5, "Health Care Professional":2},
-  // Source: Salesforce "Monthly Submissions by Referral Type" export, Jul 28, 2026
-  "2026-07": {total:1648, Parent:85, "Dental Office":323, "Airway Ambassador":62, Influencer:506, Podcast:137, Instagram:63, TikTok:1, Facebook:19, "Meta Ad":4, "Online Search":272, "Unknown Referral":76, "Unknown Professional Referral":10, Other:0, "Google Ad":84, MYO:3, "Health Care Professional":2, "Brand Ambassador":1},
+  // Source: Salesforce "Monthly Submissions by Referral Type" export, Aug 3, 2026
+  "2026-07": {total:1958, Parent:111, "Dental Office":392, "Airway Ambassador":72, Influencer:591, Podcast:159, Instagram:79, TikTok:1, Facebook:22, "Meta Ad":4, "Online Search":323, "Unknown Referral":86, "Unknown Professional Referral":17, Other:0, "Google Ad":94, MYO:3, "Health Care Professional":2, "Brand Ambassador":2},
+  // Source: Salesforce "Monthly Submissions by Referral Type" export, Aug 3, 2026
+  "2026-08": {total:75, Parent:4, "Dental Office":15, "Airway Ambassador":1, Influencer:23, Podcast:6, Instagram:3, TikTok:0, Facebook:0, "Meta Ad":0, "Online Search":12, "Unknown Referral":6, "Unknown Professional Referral":1, Other:0, "Google Ad":4},
 };
 
 /* ────── Current month projection ────── */
 // Update these when changing the current partial month
-const CURRENT_MONTH_KEY = '2026-07';
-const CURRENT_MONTH_DAYS_TRACKED = 28;
+const CURRENT_MONTH_KEY = '2026-08';
+const CURRENT_MONTH_DAYS_TRACKED = 3;
 const CURRENT_MONTH_DAYS_TOTAL = 31;
 
 function buildProjected(monthKey: string, daysTracked: number, daysTotal: number): { actual: RefMonth; projected: RefMonth } {
