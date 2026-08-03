@@ -1391,6 +1391,7 @@ export default function AmbassadorGrowth() {
           <table style={{ width: '100%', fontSize: '0.75rem', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: TP.blue, color: '#fff' }}>
+                <th style={{ textAlign: 'center', padding: '10px 6px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: 0.5, width: 32 }}>#</th>
                 <th style={{ textAlign: 'left', padding: '10px 12px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>Ambassador</th>
                 <th style={{ textAlign: 'center', padding: '10px 8px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>Subs</th>
                 <th style={{ textAlign: 'center', padding: '10px 8px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: 0.5, minWidth: 100 }}>Progress</th>
@@ -1414,6 +1415,7 @@ export default function AmbassadorGrowth() {
                     : `${25 - row.bonusSubs} to Tier 1`;
                 return (
                   <tr key={row.name} style={{ background: i % 2 === 0 ? '#fff' : '#f9fafb', borderBottom: '1px solid #f0f0f0' }}>
+                    <td style={{ textAlign: 'center', padding: '10px 6px', fontSize: '0.75rem', color: '#999', width: 32 }}>{i + 1}</td>
                     <td style={{ padding: '10px 12px', fontWeight: 600, color: row.omit ? '#999' : row.is2026 ? TP.purple : TP.navy, fontSize: '0.82rem', textDecoration: row.omit ? 'line-through' : 'none', textDecorationColor: '#E24B4A' }}>
                       {row.name}
                       {row.is2026 && <span style={{ fontSize: '0.6rem', background: '#f3e8f1', color: TP.purple, padding: '1px 6px', borderRadius: 4, marginLeft: 4 }}>2026</span>}
