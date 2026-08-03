@@ -107,6 +107,7 @@ export default function AnnualView() {
 
   const [visitorInput, setVisitorInput] = useState('');
   const [usaVisitorInput, setUsaVisitorInput] = useState('');
+  const [editMonth, setEditMonth] = useState(thisMonth);
 
   async function loadData() {
     setLoading(true);
@@ -206,7 +207,7 @@ export default function AnnualView() {
     try {
       await upsertMonthlySummary({
         year: thisYear,
-        month: thisMonth,
+        month: editMonth,
         total_visitors: visitorInput ? parseInt(visitorInput, 10) : undefined,
         usa_visitors: usaVisitorInput ? parseInt(usaVisitorInput, 10) : undefined,
       });
@@ -435,9 +436,31 @@ export default function AnnualView() {
       {/* ===== 1. Visitor Data Entry ===== */}
       <section className="bg-white rounded-xl shadow p-5">
         <h2 className="text-lg font-semibold mb-4" style={{ color: TP.navy }}>
-          Update Visitor Data -- {allMonthLabels[thisMonth - 1]} {thisYear}
+          Update Visitor Data
         </h2>
         <div className="flex flex-wrap gap-4 items-end">
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-600">
+              Month
+            </label>
+            <select
+              className="border border-gray-300 rounded-lg px-3 py-2 w-44 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              value={editMonth}
+              onChange={e => {
+                const m = parseInt(e.target.value, 10);
+                setEditMonth(m);
+                // Pre-fill with existing visitor data for selected month
+                const row = data2026.find(r => r.month === m);
+                setVisitorInput(row?.total_visitors ? String(row.total_visitors) : '');
+                setUsaVisitorInput(row?.usa_visitors ? String(row.usa_visitors) : '');
+                setSaveMsg('');
+              }}
+            >
+              {allMonthLabels.map((name, i) => (
+                <option key={i + 1} value={i + 1}>{name} {thisYear}</option>
+              ))}
+            </select>
+          </div>
           <div>
             <label className="block text-sm font-medium mb-1 text-gray-600">
               GA4 Unique Visitors

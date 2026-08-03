@@ -14,9 +14,9 @@ import {
   Filler,
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
-import { fetchSubmissions, upsertSubmission, fetchAnnualSummaries, currentYear, currentMonth, todayStr } from '@/lib/api';
+import { fetchSubmissions, upsertSubmission, currentYear, currentMonth, todayStr } from '@/lib/api';
 import type { DailySubmission } from '@/lib/types';
-import { MONTHLY_GOALS_2026, MONTH_NAMES, TRAFFIC_2026, TRAFFIC_USA_2026 } from '@/lib/types';
+import { MONTHLY_GOALS_2026, MONTH_NAMES } from '@/lib/types';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler);
 
@@ -51,7 +51,6 @@ export default function DailyTracker() {
   const [formOnline, setFormOnline] = useState('');
   const [formHybrid, setFormHybrid] = useState('');
   const [formPrime, setFormPrime] = useState('');
-  const [formVisitors, setFormVisitors] = useState('');
   const [saveConfirm, setSaveConfirm] = useState<string | null>(null);
 
   const tableRef = useRef<HTMLDivElement>(null);
@@ -64,22 +63,13 @@ export default function DailyTracker() {
     (g) => g.month === selectedMonth && g.year === selectedYear
   );
 
-  // DB visitor data from monthly_summary (set via Annual tab Save Visitors)
-  const [dbVisitors, setDbVisitors] = useState(0);
-  const [dbUSAVisitors, setDbUSAVisitors] = useState(0);
 
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [data, summaries] = await Promise.all([
-        fetchSubmissions(selectedYear, selectedMonth),
-        fetchAnnualSummaries(selectedYear),
-      ]);
+      const data = await fetchSubmissions(selectedYear, selectedMonth);
       setEntries(data);
-      const ms = (summaries || []).find(s => s.month === selectedMonth);
-      setDbVisitors(ms?.total_visitors || 0);
-      setDbUSAVisitors(ms?.usa_visitors || 0);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load data');
     } finally {
@@ -102,7 +92,6 @@ export default function DailyTracker() {
       if (formOnline.trim() !== '')   payload.online   = parseInt(formOnline);
       if (formHybrid.trim() !== '')   payload.hybrid   = parseInt(formHybrid);
       if (formPrime.trim() !== '')    payload.prime    = parseInt(formPrime);
-      if (formVisitors.trim() !== '') payload.visitors = parseInt(formVisitors);
       await upsertSubmission(payload as Partial<import('@/lib/types').DailySubmission>);
       // Show confirmation of what was saved
       const d = new Date(formDate + 'T12:00:00');
@@ -111,7 +100,6 @@ export default function DailyTracker() {
         payload.online !== undefined ? `online=${payload.online}` : null,
         payload.hybrid !== undefined ? `hybrid=${payload.hybrid}` : null,
         payload.prime !== undefined ? `prime=${payload.prime}` : null,
-        payload.visitors !== undefined ? `visitors=${payload.visitors}` : null,
       ].filter(Boolean).join(', ');
       setSaveConfirm(`Saved ${label}: ${parts || '(no changes)'}`);
       setTimeout(() => setSaveConfirm(null), 5000);
@@ -119,7 +107,6 @@ export default function DailyTracker() {
       setFormOnline('');
       setFormHybrid('');
       setFormPrime('');
-      setFormVisitors('');
       // Reload
       await loadData();
     } catch (e) {
@@ -134,7 +121,6 @@ export default function DailyTracker() {
     setFormOnline(String(entry.online));
     setFormHybrid(String(entry.hybrid));
     setFormPrime(String(entry.prime));
-    setFormVisitors(String(entry.visitors));
   };
 
   // Computed stats
@@ -142,12 +128,8 @@ export default function DailyTracker() {
   const totalOnline = entries.reduce((s, e) => s + e.online, 0);
   const totalHybrid = entries.reduce((s, e) => s + e.hybrid, 0);
   const totalPrime = entries.reduce((s, e) => s + e.prime, 0);
-  const totalVisitors = entries.reduce((s, e) => s + e.visitors, 0);
   const daysTracked = entries.length;
   const dailyAvg = daysTracked > 0 ? (totalSubmissions / daysTracked).toFixed(1) : '0';
-  // GA4 monthly unique users for conversion rate — DB (from Annual tab) takes priority, then hardcoded fallback
-  const monthlyUniqueUsers = dbVisitors || TRAFFIC_2026[selectedMonth] || 0;
-  const monthlyUSAUsers = dbUSAVisitors || TRAFFIC_USA_2026[selectedMonth] || 0;
 
   // Days remaining in month
   const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
@@ -405,16 +387,6 @@ export default function DailyTracker() {
               className="border border-gray-300 rounded-md px-3 py-2 text-sm w-20"
             />
           </div>
-          <div>
-            <label className="block text-xs text-gray-500 mb-1">Visitors</label>
-            <input
-              type="number"
-              value={formVisitors}
-              onChange={(e) => setFormVisitors(e.target.value)}
-              placeholder="0"
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm w-24"
-            />
-          </div>
           <button
             onClick={handleSave}
             disabled={saving || !formDate}
@@ -527,106 +499,6 @@ export default function DailyTracker() {
         </div>
       )}
 
-      {/* ═══ Website Traffic Section ═══ */}
-      {entries.length > 0 && entries.some(e => e.visitors > 0) && (() => {
-        const trafficDays = entries.filter(e => e.visitors > 0);
-        const avgDailyVis = trafficDays.length > 0
-          ? Math.round(trafficDays.reduce((sum, e) => sum + e.visitors, 0) / trafficDays.length)
-          : 0;
-        // Project unique users from GA4 partial-month data, not from daily sessions
-        const ga4Partial = monthlyUniqueUsers;
-        const projVis = ga4Partial > 0 && trafficDays.length > 0
-          ? Math.round(ga4Partial * (daysInMonth / trafficDays.length))
-          : avgDailyVis * daysInMonth;
-        const peakDay = trafficDays.reduce((best, e) => e.visitors > (best?.visitors ?? 0) ? e : best, trafficDays[0]);
-        const peakLabel = peakDay ? new Date(peakDay.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-        const ga4Users = monthlyUniqueUsers;
-        const ga4USA = monthlyUSAUsers;
-        const allConv = ga4Users > 0 ? ((totalOnline / ga4Users) * 100).toFixed(2) : null;
-        const usaConv = ga4USA > 0 ? ((totalOnline / ga4USA) * 100).toFixed(2) : null;
-
-        return (
-          <>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.darkPurple}` }}>
-                <div className="text-xl font-bold" style={{ color: TP.darkPurple }}>{ga4Users > 0 ? ga4Users.toLocaleString() : totalVisitors.toLocaleString()}</div>
-                <div className="text-sm text-gray-500">{ga4Users > 0 ? 'Unique Users (GA4)' : 'Total Sessions'}</div>
-                <div className="text-xs text-gray-400 mt-1">{trafficDays.length} of {daysTracked} days tracked</div>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.darkPurple}` }}>
-                <div className="text-xl font-bold" style={{ color: TP.darkPurple }}>{avgDailyVis.toLocaleString()}</div>
-                <div className="text-sm text-gray-500">Avg Daily Visitors</div>
-                <div className="text-xs text-gray-400 mt-1">Projected: {projVis.toLocaleString()}/mo</div>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.green}` }}>
-                <div className="text-xl font-bold" style={{ color: TP.green }}>{allConv ? `${allConv}%` : '--'}</div>
-                <div className="text-sm text-gray-500">Monthly Conversion</div>
-                <div className="text-xs text-gray-400 mt-1">{ga4Users > 0 ? `${totalOnline.toLocaleString()} online / ${ga4Users.toLocaleString()} users` : 'No GA4 data yet'}</div>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.green}` }}>
-                <div className="text-xl font-bold" style={{ color: TP.green }}>{usaConv ? `${usaConv}%` : '--'}</div>
-                <div className="text-sm text-gray-500">USA Conversion</div>
-                <div className="text-xs text-gray-400 mt-1">{ga4USA > 0 ? `${totalOnline.toLocaleString()} online / ${ga4USA.toLocaleString()} USA users` : 'No USA data yet'}</div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-sm font-bold text-gray-700 mb-3">Daily Website Traffic & Submissions</h3>
-              <div style={{ height: 340 }}>
-                <Bar
-                  data={{
-                    labels: breakdownLabels,
-                    datasets: [
-                      {
-                        label: 'Visitors',
-                        data: entries.map(e => e.visitors),
-                        backgroundColor: `${TP.darkPurple}55`,
-                        borderColor: TP.darkPurple,
-                        borderWidth: 1,
-                        borderRadius: 3,
-                        yAxisID: 'y',
-                        order: 2,
-                      },
-                      {
-                        label: 'Online Submissions',
-                        data: entries.map(e => e.online),
-                        type: 'line' as const,
-                        borderColor: TP.blue,
-                        backgroundColor: `${TP.blue}18`,
-                        pointRadius: 3,
-                        pointBackgroundColor: TP.blue,
-                        borderWidth: 2.5,
-                        tension: 0.3,
-                        fill: true,
-                        yAxisID: 'y2',
-                        order: 1,
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      } as any,
-                    ],
-                  }}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
-                    },
-                    scales: {
-                      y: { beginAtZero: true, position: 'left' as const, title: { display: true, text: 'Visitors', font: { size: 11 } }, grid: { color: '#f0f0f0' } },
-                      y2: { beginAtZero: true, position: 'right' as const, title: { display: true, text: 'Submissions', font: { size: 11 }, color: TP.blue }, ticks: { color: TP.blue }, grid: { display: false } },
-                      x: { grid: { display: false } },
-                    },
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  } as any}
-                />
-              </div>
-              <div className="text-xs text-gray-400 mt-2">
-                Visitors from GA4 daily sessions. Monthly conversion uses GA4 unique users (deduplicated) from the Annual tab.
-              </div>
-            </div>
-          </>
-        );
-      })()}
-
       {/* ═══ Submission Totals by Type ═══ */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.blue}` }}>
@@ -642,9 +514,9 @@ export default function DailyTracker() {
           <div className="text-sm text-gray-500">Prime</div>
         </div>
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center" style={{ borderLeft: `4px solid ${TP.bubblegum}` }}>
-          <div className="text-xl font-bold" style={{ color: TP.navy }}>{(() => { const pd = entries.filter(e => e.visitors > 0).reduce((b, e) => e.visitors > (b?.visitors ?? 0) ? e : b, entries[0]); return pd ? pd.visitors.toLocaleString() : '--'; })()}</div>
-          <div className="text-sm text-gray-500">Peak Traffic Day</div>
-          <div className="text-xs text-gray-400 mt-1">{(() => { const pd = entries.filter(e => e.visitors > 0).reduce((b, e) => e.visitors > (b?.visitors ?? 0) ? e : b, entries[0]); return pd ? new Date(pd.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''; })()}</div>
+          <div className="text-xl font-bold" style={{ color: TP.navy }}>{dailyAvg}</div>
+          <div className="text-sm text-gray-500">Avg / Day</div>
+          <div className="text-xs text-gray-400 mt-1">{daysTracked} days tracked</div>
         </div>
       </div>
 
@@ -658,19 +530,18 @@ export default function DailyTracker() {
               <th className="px-3 py-2 font-medium text-right">Hybrid</th>
               <th className="px-3 py-2 font-medium text-right">Prime</th>
               <th className="px-3 py-2 font-medium text-right">Total</th>
-              <th className="px-3 py-2 font-medium text-right">Visitors</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} className="px-3 py-8 text-center text-gray-400">
+                <td colSpan={5} className="px-3 py-8 text-center text-gray-400">
                   Loading...
                 </td>
               </tr>
             ) : entries.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-3 py-8 text-center text-gray-400">
+                <td colSpan={5} className="px-3 py-8 text-center text-gray-400">
                   No entries yet
                 </td>
               </tr>
@@ -692,7 +563,6 @@ export default function DailyTracker() {
                     <td className="px-3 py-2 border-t border-gray-100 text-right" style={{ color: '#d97706' }}>{e.hybrid}</td>
                     <td className="px-3 py-2 border-t border-gray-100 text-right" style={{ color: TP.red }}>{e.prime}</td>
                     <td className="px-3 py-2 border-t border-gray-100 text-right font-medium">{total}</td>
-                    <td className="px-3 py-2 border-t border-gray-100 text-right">{e.visitors.toLocaleString()}</td>
                   </tr>
                 );
               })
@@ -704,7 +574,6 @@ export default function DailyTracker() {
                 <td className="px-3 py-2 border-t border-gray-200 text-right" style={{ color: '#d97706' }}>{totalHybrid}</td>
                 <td className="px-3 py-2 border-t border-gray-200 text-right" style={{ color: TP.red }}>{totalPrime}</td>
                 <td className="px-3 py-2 border-t border-gray-200 text-right">{totalSubmissions}</td>
-                <td className="px-3 py-2 border-t border-gray-200 text-right">{totalVisitors.toLocaleString()}</td>
               </tr>
             )}
           </tbody>
