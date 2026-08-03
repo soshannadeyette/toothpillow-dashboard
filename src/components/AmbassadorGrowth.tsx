@@ -334,7 +334,7 @@ const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;p
 const years = [2023, 2024, 2025, 2026] as const;
 const MONTHS_JAN24_MAY26: string[] = [];
 for (let y = 2024; y <= 2026; y++) {
-  const end = y === 2026 ? 7 : 12;
+  const end = y === 2026 ? 8 : 12;
   for (let m = 1; m <= end; m++) {
     MONTHS_JAN24_MAY26.push(`${y}-${String(m).padStart(2, '0')}`);
   }
@@ -342,7 +342,7 @@ for (let y = 2024; y <= 2026; y++) {
 // Full history month keys — Jan 2023 through current 2026
 const ALL_MONTHS: string[] = [];
 for (let y = 2023; y <= 2026; y++) {
-  const end = y === 2026 ? 7 : 12;
+  const end = y === 2026 ? 8 : 12;
   for (let m = 1; m <= end; m++) {
     ALL_MONTHS.push(`${y}-${String(m).padStart(2, '0')}`);
   }
