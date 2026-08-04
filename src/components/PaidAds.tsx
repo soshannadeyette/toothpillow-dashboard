@@ -602,7 +602,7 @@ export default function PaidAds() {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
           <thead>
             <tr style={{ background: TP.navy }}>
-              {['Month', 'Spend', 'Checkouts', 'Age', 'Maturity', 'Projected', 'Raw CAC', 'Adj CAC'].map(h => (
+              {['Month', 'Spend', 'Checkouts', 'Revenue', 'Age', 'Maturity', 'Projected', 'Raw CAC', 'Adj CAC'].map(h => (
                 <th key={h} style={{ padding: '10px 12px', textAlign: h === 'Month' ? 'left' : 'right', color: '#fff', fontSize: '0.9em' }}>{h}</th>
               ))}
             </tr>
@@ -657,6 +657,7 @@ export default function PaidAds() {
                     <td style={{ padding: '8px 12px', fontWeight: 600 }}>{m.label}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'right' }}>${Math.round(m.spend).toLocaleString()}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'right' }}>{sf.checkouts}</td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right', color: sf.revenue > 0 ? '#00C853' : '#888' }}>{sf.revenue > 0 ? `$${sf.revenue.toLocaleString()}` : '—'}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'right', color: '#888' }}>{ageDays}d</td>
                     <td style={{ padding: '8px 12px', textAlign: 'right' }}>{Math.round(maturity * 100)}%</td>
                     <td style={{ padding: '8px 12px', textAlign: 'right' }}>
