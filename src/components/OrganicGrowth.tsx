@@ -135,16 +135,17 @@ const GSC_WEEKLY = [
   { week: '2026-06-01', clicks: 3533, impressions: 13754, ctr: 25.7, position: 9.5 },
   { week: '2026-06-08', clicks: 2789, impressions: 12777, ctr: 21.8, position: 9.3 },
   { week: '2026-06-15', clicks: 2182, impressions: 12279, ctr: 17.8, position: 13.0 },
-  { week: '2026-06-22', clicks: 2396, impressions: 12319, ctr: 19.4, position: 9.7 },
-  { week: '2026-06-29', clicks: 1831, impressions: 9952, ctr: 18.4, position: 8.8 },
-  { week: '2026-07-06', clicks: 2132, impressions: 11471, ctr: 18.6, position: 9.8 },
-  { week: '2026-07-13', clicks: 2767, impressions: 12827, ctr: 21.6, position: 10.1 },
-  { week: '2026-07-20', clicks: 2949, impressions: 12640, ctr: 23.3, position: 8.6 },
-  { week: '2026-07-27', clicks: 2134, impressions: 9448, ctr: 22.6, position: 9.0 },
+  { week: '2026-06-22', clicks: 2346, impressions: 12638, ctr: 18.6, position: 12.6 },
+  { week: '2026-06-29', clicks: 1862, impressions: 10096, ctr: 18.4, position: 8.6 },
+  { week: '2026-07-06', clicks: 2133, impressions: 11264, ctr: 18.9, position: 9.4 },
+  { week: '2026-07-13', clicks: 2721, impressions: 12681, ctr: 21.5, position: 9.7 },
+  { week: '2026-07-20', clicks: 2917, impressions: 12654, ctr: 23.1, position: 9.1 },
+  { week: '2026-07-27', clicks: 2738, impressions: 12532, ctr: 21.8, position: 9.4 },
+  { week: '2026-08-03', clicks: 269, impressions: 1610, ctr: 16.7, position: 16.4 },
 ];
 
 // Full-year daily GSC data — Jan 1 to Jul 31, 2026
-// Source: Google Search Console DAYS view, updated August 2, 2026
+// Source: Google Search Console DAYS view, updated August 4, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -194,6 +195,9 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
     [14,511,2209],[15,464,1929],[16,466,1944],[17,352,1697],[18,250,1408],[19,261,1539],
     [20,429,1866],[21,528,2355],[22,501,2035],[23,467,1900],[24,428,1631],[25,303,1328],
     [26,293,1525],[27,395,1957],[28,412,1722],[29,391,1790],[30,384,1714],[31,552,2265],
+  ],
+  Aug: [
+    [1,311,1559],[2,269,1610],
   ],
 };
 

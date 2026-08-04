@@ -434,7 +434,7 @@ export default function AVDiagnostics() {
                 backgroundColor: COHORT_AGING.map(c => {
                   const pct = c.starts > 0 ? (c.waiting / c.starts) * 100 : 0;
                   if (c.daysElapsed < 14) return '#D1D5DB'; // gray for young
-                  if (c.tag) return '#FBBF24'; // yellow for Memorial Day
+                  if (c.tag) return '#7CB9E8'; // light blue — event marker
                   if (pct <= 30) return TP.green;
                   if (pct <= 42) return TP.amber;
                   return TP.red;
@@ -466,7 +466,7 @@ export default function AVDiagnostics() {
           <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: TP.amber, marginRight: 4 }} />31-42%</span>
           <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: TP.red, marginRight: 4 }} />&gt;42% (high)</span>
           <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#D1D5DB', marginRight: 4 }} />Too young to judge</span>
-          <span>* Memorial Day weekend</span>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#7CB9E8', marginRight: 4 }} />* Event week</span>
         </div>
       </div>
 
