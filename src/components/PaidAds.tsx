@@ -144,7 +144,7 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
 
 /* ════════════════════════════════════════════
    DATA SOURCE 2: SALESFORCE (hardcoded constants)
-   Source: Salesforce "Google Ads 2026" export, August 4, 2026.
+   Source: Salesforce "Google Ads 2026" export, August 4, 2026 (5:18pm).
    Note: Export filter includes "Up 1 equals Google Ads,Meta Ads"
    but Apr–Jun numbers are unchanged from Google-only pulls,
    so Meta contribution is negligible in those months.
@@ -152,30 +152,30 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
 
 // Pipeline totals — Salesforce export Aug 3, 2026
 const GOOGLE_SF_PIPELINE = {
-  total: 507,           // leads created (started form)
-  completed: 230,       // all stages except Waiting-Info (45%)
-  waitingInfo: 277,     // incomplete submissions
-  sentCheckout: 158,    // Sent Checkout Link (134) + SCL-Temp Hold (1) + Checked Out (23)
-  sentToTxP: 23,        // Sent to TxP (22) + Waiting for TxP Assignment (1)
-  txpApproved: 7,
-  checkedOut: 23,
+  total: 510,           // leads created (started form)
+  completed: 232,       // all stages except Waiting-Info (45%)
+  waitingInfo: 278,     // incomplete submissions
+  sentCheckout: 158,    // Sent Checkout Link (133) + SCL-Temp Hold (1) + Checked Out (24)
+  sentToTxP: 24,
+  txpApproved: 8,
+  checkedOut: 24,
   referredOut: 28,
   closedLost: 12,       // 7 Closed Lost + 5 Do Not Contact
   tempHold: 3,          // 2 Temp Hold + 1 SCL-Temp Hold
   formOpens: 1436,      // Google Ads conversions (form opens, Google-only)
 };
 
-// Revenue from checkouts — 23 checkouts at $41,399
-const GOOGLE_REVENUE: number = 41399;
+// Revenue from checkouts — 24 checkouts at $43,594
+const GOOGLE_REVENUE: number = 43594;
 
 // Monthly breakdown from Salesforce (by Created Date)
 // Used in the monthly summary table alongside Google Ads spend data
 const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: number; checkouts: number; revenue: number }[] = [
   { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 23, checkouts: 2, revenue: 3291 },
   { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 31, checkouts: 5, revenue: 8676 },
-  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 85, checkouts: 12, revenue: 21801 },
-  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 185, completed: 86, checkouts: 4, revenue: 7631 },
-  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 9, completed: 5, checkouts: 0, revenue: 0 },
+  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 85, checkouts: 12, revenue: 21000 },
+  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 185, completed: 86, checkouts: 5, revenue: 10627 },
+  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 12, completed: 7, checkouts: 0, revenue: 0 },
 ];
 
 /* ════════════════════════════════════════════
