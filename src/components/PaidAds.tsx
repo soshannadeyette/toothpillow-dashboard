@@ -64,6 +64,7 @@ const GOOGLE_ADS_PRIOR_MONTHS: { month: string; year: number; monthIdx: number; 
 // July 14-19 spend/clicks/impressions from Google Ads Campaigns > Day segment, July 20, 2026
 // July 6-24 spend/clicks/impressions refreshed from Google Ads Report Editor, July 24, 2026
 // July 24 (full day) + July 25-30 spend/clicks/impressions from Google Ads Report Editor, July 30, 2026
+// July 30 corrected + Aug 4-5 refreshed from Google Ads Report Editor, August 5, 2026
 // submit/started/finished/treatment fields retained for the entry form only —
 // NOT used anywhere in this page's analysis (see Salesforce constants below instead).
 const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
@@ -126,12 +127,13 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-07-27', spend: 493.26, clicks: 163, impressions: 2183, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-07-28', spend: 279.01, clicks: 106, impressions: 1502, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-07-29', spend: 383.28, clicks: 124, impressions: 1686, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-07-30', spend: 88.00, clicks: 28, impressions: 508, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-07-30', spend: 237.62, clicks: 96, impressions: 1423, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-07-31', spend: 160.32, clicks: 60, impressions: 1232, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-08-01', spend: 146.94, clicks: 66, impressions: 964, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-08-02', spend: 295.43, clicks: 111, impressions: 1384, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-08-03', spend: 357.80, clicks: 122, impressions: 1879, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-08-04', spend: 165.28, clicks: 49, impressions: 769, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-04', spend: 566.39, clicks: 177, impressions: 2662, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-05', spend: 340.24, clicks: 87, impressions: 1369, submit: 0, started: 0, finished: 0, treatment: 0 },
 ];
 
 // Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)
