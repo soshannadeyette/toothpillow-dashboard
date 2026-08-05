@@ -384,6 +384,25 @@ export default function PaidAds() {
         ctx.fillText('Tracking Blackout', (x0 + x1) / 2, yScale.top + 12);
         ctx.restore();
       }
+      // Conversion action change marker — July 22, 2026
+      const convIdx = chartLabels.indexOf('07/22');
+      if (convIdx >= 0) {
+        const cx = xScale.getPixelForValue(convIdx);
+        ctx.save();
+        ctx.strokeStyle = '#FF9800';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath();
+        ctx.moveTo(cx, yScale.top);
+        ctx.lineTo(cx, yScale.bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#FF9800';
+        ctx.font = 'bold 9px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Conv. Action Changed', cx, yScale.top + 12);
+        ctx.restore();
+      }
     },
   }), []);
 
