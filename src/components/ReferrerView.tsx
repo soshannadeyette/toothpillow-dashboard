@@ -86,23 +86,21 @@ const REFERRER_DATA: Record<string, RefMonth> = {
   "2025-10": {total:1475, Parent:78, "Dental Office":509, "Airway Ambassador":40, Influencer:273, Podcast:200, Instagram:81, TikTok:1, Facebook:10, "Meta Ad":0, "Online Search":198, "Unknown Referral":62, "Unknown Professional Referral":18, Other:5},
   "2025-11": {total:1589, Parent:74, "Dental Office":459, "Airway Ambassador":39, Influencer:485, Podcast:138, Instagram:65, TikTok:0, Facebook:12, "Meta Ad":0, "Online Search":221, "Unknown Referral":69, "Unknown Professional Referral":25, Other:2},
   "2025-12": {total:1226, Parent:57, "Dental Office":453, "Airway Ambassador":29, Influencer:273, Podcast:75, Instagram:79, TikTok:2, Facebook:9, "Meta Ad":8, "Online Search":169, "Unknown Referral":47, "Unknown Professional Referral":23, Other:2},
-  "2026-01": {total:1412, Parent:77, "Dental Office":368, "Airway Ambassador":53, Influencer:310, Podcast:152, Instagram:87, TikTok:2, Facebook:16, "Meta Ad":13, "Online Search":233, "Unknown Referral":74, "Unknown Professional Referral":23, Other:0, "Health Care Professional":3, MYO:1},
-  "2026-02": {total:1504, Parent:66, "Dental Office":313, "Airway Ambassador":58, Influencer:512, Podcast:96, Instagram:70, TikTok:3, Facebook:25, "Meta Ad":5, "Online Search":284, "Unknown Referral":46, "Unknown Professional Referral":26, Other:0},
-  "2026-03": {total:1603, Parent:75, "Dental Office":319, "Airway Ambassador":64, Influencer:462, Podcast:164, Instagram:74, TikTok:1, Facebook:11, "Meta Ad":2, "Online Search":339, "Unknown Referral":59, "Unknown Professional Referral":21, Other:0, MYO:6, "Health Care Professional":6},
-  "2026-04": {total:1228, Parent:76, "Dental Office":259, "Airway Ambassador":64, Influencer:233, Podcast:130, Instagram:39, TikTok:1, Facebook:10, "Meta Ad":0, "Online Search":298, "Unknown Referral":69, "Unknown Professional Referral":25, Other:0, "Google Ad":20, MYO:3, "Health Care Professional":1},
-  "2026-05": {total:1125, Parent:49, "Dental Office":213, "Airway Ambassador":50, Influencer:268, Podcast:126, Instagram:55, TikTok:4, Facebook:13, "Meta Ad":1, "Online Search":251, "Unknown Referral":51, "Unknown Professional Referral":10, Other:0, "Google Ad":28, MYO:3, "Health Care Professional":3},
-  // Source: Salesforce "Monthly Submissions by Referral Type" export, Jul 28, 2026
-  "2026-06": {total:1475, Parent:85, "Dental Office":229, "Airway Ambassador":45, Influencer:306, Podcast:279, Instagram:54, TikTok:1, Facebook:3, "Meta Ad":0, "Online Search":326, "Unknown Referral":45, "Unknown Professional Referral":14, Other:0, "Google Ad":81, MYO:5, "Health Care Professional":2},
-  // Source: Salesforce "Monthly Submissions by Referral Type" export, Aug 3, 2026
-  "2026-07": {total:1963, Parent:105, "Dental Office":392, "Airway Ambassador":79, Influencer:593, Podcast:159, Instagram:79, TikTok:1, Facebook:22, "Meta Ad":4, "Online Search":323, "Unknown Referral":88, "Unknown Professional Referral":17, Other:0, "Google Ad":94, MYO:3, "Health Care Professional":2, "Brand Ambassador":2},
-  // Source: Salesforce "Monthly Submissions by Referral Type" export, Aug 3, 2026
-  "2026-08": {total:149, Parent:7, "Dental Office":51, "Airway Ambassador":3, Influencer:38, Podcast:9, Instagram:4, TikTok:0, Facebook:0, "Meta Ad":0, "Online Search":21, "Unknown Referral":6, "Unknown Professional Referral":2, Other:0, "Google Ad":8},
+  // Source: Salesforce "Monthly Submissions by Referral Type" export, August 5, 2026
+  "2026-01": {total:1409, Parent:77, "Dental Office":368, "Airway Ambassador":53, Influencer:309, Podcast:150, Instagram:87, TikTok:2, Facebook:16, "Meta Ad":13, "Online Search":233, "Unknown Referral":74, "Unknown Professional Referral":23, Other:0, "Health Care Professional":3, MYO:1},
+  "2026-02": {total:1505, Parent:64, "Dental Office":314, "Airway Ambassador":61, Influencer:511, Podcast:96, Instagram:70, TikTok:3, Facebook:25, "Meta Ad":5, "Online Search":284, "Unknown Referral":46, "Unknown Professional Referral":26, Other:0},
+  "2026-03": {total:1604, Parent:73, "Dental Office":316, "Airway Ambassador":67, Influencer:462, Podcast:165, Instagram:74, TikTok:1, Facebook:11, "Meta Ad":2, "Online Search":339, "Unknown Referral":59, "Unknown Professional Referral":21, Other:0, MYO:6, "Health Care Professional":8},
+  "2026-04": {total:1228, Parent:73, "Dental Office":255, "Airway Ambassador":68, Influencer:233, Podcast:129, Instagram:39, TikTok:1, Facebook:10, "Meta Ad":0, "Online Search":298, "Unknown Referral":67, "Unknown Professional Referral":25, Other:0, "Google Ad":20, MYO:3, "Health Care Professional":7},
+  "2026-05": {total:1125, Parent:49, "Dental Office":213, "Airway Ambassador":53, Influencer:269, Podcast:127, Instagram:55, TikTok:4, Facebook:13, "Meta Ad":1, "Online Search":250, "Unknown Referral":46, "Unknown Professional Referral":10, Other:0, "Google Ad":28, MYO:4, "Health Care Professional":3},
+  "2026-06": {total:1476, Parent:85, "Dental Office":230, "Airway Ambassador":45, Influencer:306, Podcast:279, Instagram:54, TikTok:1, Facebook:3, "Meta Ad":0, "Online Search":326, "Unknown Referral":45, "Unknown Professional Referral":14, Other:0, "Google Ad":81, MYO:5, "Health Care Professional":2},
+  "2026-07": {total:1962, Parent:105, "Dental Office":391, "Airway Ambassador":79, Influencer:593, Podcast:159, Instagram:79, TikTok:1, Facebook:22, "Meta Ad":4, "Online Search":323, "Unknown Referral":88, "Unknown Professional Referral":17, Other:0, "Google Ad":94, MYO:3, "Health Care Professional":2, "Brand Ambassador":2},
+  "2026-08": {total:239, Parent:8, "Dental Office":87, "Airway Ambassador":8, Influencer:49, Podcast:18, Instagram:8, TikTok:0, Facebook:0, "Meta Ad":0, "Online Search":38, "Unknown Referral":7, "Unknown Professional Referral":2, Other:0, "Google Ad":14},
 };
 
 /* ────── Current month projection ────── */
 // Update these when changing the current partial month
 const CURRENT_MONTH_KEY = '2026-08';
-const CURRENT_MONTH_DAYS_TRACKED = 4;
+const CURRENT_MONTH_DAYS_TRACKED = 5;
 const CURRENT_MONTH_DAYS_TOTAL = 31;
 
 function buildProjected(monthKey: string, daysTracked: number, daysTotal: number): { actual: RefMonth; projected: RefMonth } {

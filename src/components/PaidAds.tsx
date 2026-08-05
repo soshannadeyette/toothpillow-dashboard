@@ -144,20 +144,20 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
 
 /* ════════════════════════════════════════════
    DATA SOURCE 2: SALESFORCE (hardcoded constants)
-   Source: Salesforce "Google Ads 2026" export, August 4, 2026 (5:18pm).
+   Source: Salesforce "Google Ads 2026" export, August 5, 2026 (11:27am).
    Note: Export filter includes "Up 1 equals Google Ads,Meta Ads"
    but Apr–Jun numbers are unchanged from Google-only pulls,
    so Meta contribution is negligible in those months.
    ════════════════════════════════════════════ */
 
-// Pipeline totals — Salesforce export Aug 3, 2026
+// Pipeline totals — Salesforce export Aug 5, 2026
 const GOOGLE_SF_PIPELINE = {
-  total: 510,           // leads created (started form)
-  completed: 232,       // all stages except Waiting-Info (45%)
-  waitingInfo: 278,     // incomplete submissions
-  sentCheckout: 158,    // Sent Checkout Link (133) + SCL-Temp Hold (1) + Checked Out (24)
-  sentToTxP: 24,
-  txpApproved: 8,
+  total: 516,           // leads created (started form)
+  completed: 236,       // all stages except Waiting-Info (46%)
+  waitingInfo: 280,     // incomplete submissions
+  sentCheckout: 160,    // Sent Checkout Link (135) + SCL-Temp Hold (1) + Checked Out (24)
+  sentToTxP: 22,        // Sent to TxP (21) + Waiting for TxP Assignment (1)
+  txpApproved: 12,
   checkedOut: 24,
   referredOut: 28,
   closedLost: 12,       // 7 Closed Lost + 5 Do Not Contact
@@ -175,7 +175,7 @@ const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: n
   { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 31, checkouts: 5, revenue: 8676 },
   { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 85, checkouts: 12, revenue: 21000 },
   { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 185, completed: 86, checkouts: 5, revenue: 10627 },
-  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 12, completed: 7, checkouts: 0, revenue: 0 },
+  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 18, completed: 11, checkouts: 0, revenue: 0 },
 ];
 
 /* ════════════════════════════════════════════
