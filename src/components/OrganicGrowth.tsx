@@ -32,6 +32,7 @@ const TP = {
 
 const SEO_START_DATE = '2026-05-19';
 const WEBSITE_LAUNCH_DATE = '2025-12-22';
+const BLOG_LAUNCH_DATE = '2026-08-06';
 
 // Total submissions (online + hybrid + prime) aligned to GSC_MONTHLY months
 // 2025: hardcoded historical. 2026: pulled from daily tracker at runtime.
@@ -387,6 +388,9 @@ export default function OrganicGrowth() {
   const seoMonthIndex = GSC_MONTHLY.findIndex(m => m.month >= SEO_START_DATE.substring(0, 7));
   const websiteMonthIndex = GSC_MONTHLY.findIndex(m => m.month >= WEBSITE_LAUNCH_DATE.substring(0, 7));
   const coreUpdateIndex = GSC_MONTHLY.findIndex(m => m.month === '2025-09');
+  const blogMonthIndex = GSC_MONTHLY.findIndex(m => m.month >= BLOG_LAUNCH_DATE.substring(0, 7));
+  // If Aug 2026 not in GSC_MONTHLY yet, place at end of chart (just past last month)
+  const blogMonthPos = blogMonthIndex >= 0 ? blogMonthIndex + 6 / 31 : GSC_MONTHLY.length - 1 + 0.9;
 
   // Branded vs non-branded totals
   const brandedClicks = TOP_QUERIES.filter(q => q.branded).reduce((s, q) => s + q.clicks, 0);
@@ -465,6 +469,27 @@ export default function OrganicGrowth() {
     },
   } : {};
 
+  const blogAnnotation = {
+    blogLine: {
+      type: 'line' as const,
+      xMin: blogMonthPos,
+      xMax: blogMonthPos,
+      borderColor: '#9C27B0B0',
+      borderWidth: 2.5,
+      borderDash: [6, 3],
+      label: {
+        display: true,
+        content: 'Blog Launch',
+        position: 'end' as const,
+        backgroundColor: '#9C27B0',
+        color: '#fff',
+        font: { size: 9, weight: 'bold' as const },
+        padding: { top: 2, bottom: 2, left: 5, right: 5 },
+        borderRadius: 3,
+      },
+    },
+  };
+
   // ── Chart: Monthly Organic Clicks with 3-month MA ──
   const monthlyClicksData = useMemo(() => {
     const clickValues = GSC_MONTHLY.map(m => m.clicks);
@@ -486,7 +511,7 @@ export default function OrganicGrowth() {
     plugins: {
       legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
       tooltip: { callbacks: { label: (ctx: { datasetIndex: number; parsed: { y: number } }) => ctx.datasetIndex === 0 ? `${ctx.parsed.y.toLocaleString()} clicks` : `${ctx.parsed.y.toLocaleString()} avg` } },
-      annotation: { annotations: { ...websiteAnnotation, ...seoAnnotation, ...coreUpdateAnnotation } },
+      annotation: { annotations: { ...websiteAnnotation, ...seoAnnotation, ...coreUpdateAnnotation, ...blogAnnotation } },
     },
     scales: { y: { beginAtZero: true, ticks: { callback: (v: number | string) => fmtK(Number(v)) }, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } },
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -511,6 +536,7 @@ export default function OrganicGrowth() {
   const seoWeekIndex = weekToIndex(GSC_WEEKLY[0]?.week || '', SEO_START_DATE);
   const websiteWeekIndex = weekToIndex(GSC_WEEKLY[0]?.week || '', WEBSITE_LAUNCH_DATE);
   const coreUpdateWeekIndex = GSC_WEEKLY.findIndex(w => w.week >= '2025-09-01');
+  const blogWeekIndex = weekToIndex(GSC_WEEKLY[0]?.week || '', BLOG_LAUNCH_DATE);
 
   const weeklyClicksOpts = useMemo(() => ({
     responsive: true, maintainAspectRatio: false,
@@ -522,6 +548,7 @@ export default function OrganicGrowth() {
           ...(websiteWeekIndex >= 0 ? { websiteLine: { type: 'line' as const, xMin: websiteWeekIndex, xMax: websiteWeekIndex, borderColor: `${TP.blue}B0`, borderWidth: 2, borderDash: [6, 3], label: { display: true, content: 'New Site (Dec 22)', position: 'end' as const, backgroundColor: TP.blue, color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { top: 2, bottom: 2, left: 5, right: 5 }, borderRadius: 3 } } } : {}),
           ...(coreUpdateWeekIndex >= 0 ? { coreUpdateLine: { type: 'line' as const, xMin: coreUpdateWeekIndex, xMax: coreUpdateWeekIndex, borderColor: `${TP.amber}B0`, borderWidth: 2, borderDash: [6, 3], label: { display: true, content: 'Core Update (Sep)', position: 'end' as const, backgroundColor: TP.amber, color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { top: 2, bottom: 2, left: 5, right: 5 }, borderRadius: 3 } } } : {}),
           ...(seoWeekIndex >= 0 ? { seoLine: { type: 'line' as const, xMin: seoWeekIndex, xMax: seoWeekIndex, borderColor: `${TP.green}B0`, borderWidth: 2, borderDash: [6, 3], label: { display: true, content: 'SEO Live (May 19)', position: 'end' as const, backgroundColor: TP.green, color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { top: 2, bottom: 2, left: 5, right: 5 }, borderRadius: 3 } } } : {}),
+          ...(blogWeekIndex >= 0 ? { blogLine: { type: 'line' as const, xMin: blogWeekIndex, xMax: blogWeekIndex, borderColor: '#9C27B0B0', borderWidth: 2, borderDash: [6, 3], label: { display: true, content: 'Blog Launch (Aug 6)', position: 'end' as const, backgroundColor: '#9C27B0', color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { top: 2, bottom: 2, left: 5, right: 5 }, borderRadius: 3 } } } : {}),
         },
       },
     },
@@ -602,7 +629,7 @@ export default function OrganicGrowth() {
     plugins: {
       legend: { position: 'top' as const, labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { size: 11 } } },
       tooltip: { callbacks: { label: (ctx: { datasetIndex: number; parsed: { y: number } }) => ctx.datasetIndex === 0 ? `${ctx.parsed.y.toLocaleString()} impressions` : ctx.datasetIndex === 1 ? `${ctx.parsed.y.toLocaleString()} submissions` : `${ctx.parsed.y.toLocaleString()} clicks` } },
-      annotation: { annotations: { ...websiteAnnotation, ...seoAnnotation, ...coreUpdateAnnotation } },
+      annotation: { annotations: { ...websiteAnnotation, ...seoAnnotation, ...coreUpdateAnnotation, ...blogAnnotation } },
     },
     scales: {
       y: { beginAtZero: true, ticks: { callback: (v: number | string) => fmtK(Number(v)) }, grid: { color: '#f0f0f0' }, title: { display: true, text: 'Impressions', font: { size: 11 }, color: TP.darkPurple } },
@@ -721,7 +748,7 @@ export default function OrganicGrowth() {
     plugins: {
       legend: { display: false },
       tooltip: { callbacks: { label: (ctx: { parsed: { y: number } }) => `CTR: ${ctx.parsed.y.toFixed(1)}%` } },
-      annotation: { annotations: { ...websiteAnnotation, ...seoAnnotation, ...coreUpdateAnnotation } },
+      annotation: { annotations: { ...websiteAnnotation, ...seoAnnotation, ...coreUpdateAnnotation, ...blogAnnotation } },
     },
     scales: {
       y: { beginAtZero: true, ticks: { callback: (v: number | string) => `${v}%` }, grid: { color: '#f0f0f0' }, title: { display: true, text: 'Click-through Rate', font: { size: 11 } } },
