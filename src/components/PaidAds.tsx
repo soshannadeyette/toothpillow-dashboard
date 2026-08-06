@@ -146,29 +146,29 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
 
 /* ════════════════════════════════════════════
    DATA SOURCE 2: SALESFORCE (hardcoded constants)
-   Source: Salesforce "Google Ads 2026" export, August 5, 2026 (11:27am).
+   Source: Salesforce "Google Ads 2026" export, August 6, 2026 (5:52pm).
    Note: Export filter includes "Up 1 equals Google Ads,Meta Ads"
    but Apr–Jun numbers are unchanged from Google-only pulls,
    so Meta contribution is negligible in those months.
    ════════════════════════════════════════════ */
 
-// Pipeline totals — Salesforce export Aug 5, 2026
+// Pipeline totals — Salesforce export Aug 6, 2026
 const GOOGLE_SF_PIPELINE = {
-  total: 516,           // leads created (started form)
-  completed: 236,       // all stages except Waiting-Info (46%)
-  waitingInfo: 280,     // incomplete submissions
-  sentCheckout: 160,    // Sent Checkout Link (135) + SCL-Temp Hold (1) + Checked Out (24)
-  sentToTxP: 22,        // Sent to TxP (21) + Waiting for TxP Assignment (1)
-  txpApproved: 12,
-  checkedOut: 24,
+  total: 524,           // leads created (started form)
+  completed: 241,       // all stages except Waiting-Info (46%)
+  waitingInfo: 283,     // incomplete submissions
+  sentCheckout: 158,    // Sent Checkout Link (132) + SCL-Temp Hold (1) + Checked Out (25)
+  sentToTxP: 24,        // Sent to TxP (23) + Waiting for TxP Assignment (1)
+  txpApproved: 7,
+  checkedOut: 25,
   referredOut: 28,
-  closedLost: 12,       // 7 Closed Lost + 5 Do Not Contact
-  tempHold: 3,          // 2 Temp Hold + 1 SCL-Temp Hold
+  closedLost: 22,       // 16 Closed Lost + 6 Do Not Contact
+  tempHold: 2,
   formOpens: 1436,      // Google Ads conversions (form opens, Google-only)
 };
 
-// Revenue from checkouts — 24 checkouts at $43,594
-const GOOGLE_REVENUE: number = 43594;
+// Revenue from checkouts — 25 checkouts at $43,195 (1 checkout at $0 pending amount)
+const GOOGLE_REVENUE: number = 43195;
 
 // Monthly breakdown from Salesforce (by Created Date)
 // Used in the monthly summary table alongside Google Ads spend data
@@ -176,8 +176,8 @@ const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: n
   { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 23, checkouts: 2, revenue: 3291 },
   { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 31, checkouts: 5, revenue: 8676 },
   { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 85, checkouts: 12, revenue: 21000 },
-  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 185, completed: 86, checkouts: 5, revenue: 10627 },
-  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 18, completed: 11, checkouts: 0, revenue: 0 },
+  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 184, completed: 85, checkouts: 6, revenue: 10228 },
+  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 27, completed: 17, checkouts: 0, revenue: 0 },
 ];
 
 /* ════════════════════════════════════════════
