@@ -64,7 +64,7 @@ const GOOGLE_ADS_PRIOR_MONTHS: { month: string; year: number; monthIdx: number; 
 // July 14-19 spend/clicks/impressions from Google Ads Campaigns > Day segment, July 20, 2026
 // July 6-24 spend/clicks/impressions refreshed from Google Ads Report Editor, July 24, 2026
 // July 24 (full day) + July 25-30 spend/clicks/impressions from Google Ads Report Editor, July 30, 2026
-// July 30 corrected + Aug 4-5 refreshed from Google Ads Report Editor, August 5, 2026
+// Aug 5 corrected to final + Aug 6 partial added from Google Ads Report Editor, August 6, 2026
 // submit/started/finished/treatment fields retained for the entry form only —
 // NOT used anywhere in this page's analysis (see Salesforce constants below instead).
 const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
@@ -133,7 +133,8 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-08-02', spend: 295.43, clicks: 111, impressions: 1384, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-08-03', spend: 357.80, clicks: 122, impressions: 1879, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-08-04', spend: 566.39, clicks: 177, impressions: 2662, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-08-05', spend: 340.24, clicks: 87, impressions: 1369, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-05', spend: 696.78, clicks: 183, impressions: 2774, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-06', spend: 346.31, clicks: 98, impressions: 2030, submit: 0, started: 0, finished: 0, treatment: 0 },
 ];
 
 // Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)
