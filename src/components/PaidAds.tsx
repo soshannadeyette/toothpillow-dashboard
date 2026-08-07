@@ -167,8 +167,8 @@ const GOOGLE_SF_PIPELINE = {
   formOpens: 1436,      // Google Ads conversions (form opens, Google-only)
 };
 
-// Revenue from checkouts — 25 checkouts at $43,195 (1 checkout at $0 pending amount)
-const GOOGLE_REVENUE: number = 43195;
+// Revenue from checkouts — 25 checkouts at $45,190 (Leo Mellein $1,995 added Aug 6)
+const GOOGLE_REVENUE: number = 45190;
 
 // Monthly breakdown from Salesforce (by Created Date)
 // Used in the monthly summary table alongside Google Ads spend data
@@ -176,7 +176,7 @@ const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: n
   { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 23, checkouts: 2, revenue: 3291 },
   { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 31, checkouts: 5, revenue: 8676 },
   { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 85, checkouts: 12, revenue: 21000 },
-  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 184, completed: 85, checkouts: 6, revenue: 10228 },
+  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 184, completed: 85, checkouts: 6, revenue: 12223 },
   { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 27, completed: 17, checkouts: 0, revenue: 0 },
 ];
 
