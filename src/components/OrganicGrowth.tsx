@@ -405,14 +405,26 @@ export default function OrganicGrowth() {
   const SUBMISSIONS_BY_MONTH: Record<string, number> = { ...SUBMISSIONS_2025, ...subs2026 };
 
   const latestFullMonth = GSC_MONTHLY.find(m => m.month === '2026-07')!;
+  void latestFullMonth;
   const latestMonth = GSC_MONTHLY[GSC_MONTHLY.length - 1];
   const augPartial = GSC_MONTHLY.find(m => m.month === '2026-08');
-  const latestDaysReported = augPartial?.daysReported || 31;
-  void latestDaysReported; // used for future pacing calculations
-  const julClickPace = latestFullMonth.clicks;
-  const julImprPace = latestFullMonth.impressions;
+  const augDays = augPartial?.daysReported || 8;
+  // Hero card values: show August partial with pace annotation
+  const heroClicks = augPartial?.clicks || latestMonth.clicks;
+  const heroImpr = augPartial?.impressions || latestMonth.impressions;
+  const heroCtr = augPartial?.ctr || latestMonth.ctr;
+  const heroPos = augPartial?.position || latestMonth.position;
+  const heroLabel = augPartial ? 'Aug' : 'Jul';
+  const heroSubLabel = augPartial ? `${augDays} days (partial)` : 'Full month';
+  // Paced projections for August
+  const augPacedClicks = augPartial ? Math.round(augPartial.clicks / augDays * 31) : 0;
+  const augPacedImpr = augPartial ? Math.round(augPartial.impressions / augDays * 31) : 0;
 
+  const aug2025 = GSC_MONTHLY.find(m => m.month === '2025-08')!;
   const jul2025 = GSC_MONTHLY.find(m => m.month === '2025-07')!;
+  // YoY comparison month for hero cards
+  const heroYoyMonth = augPartial ? aug2025 : jul2025;
+  const heroYoyLabel = augPartial ? "Aug '25" : "Jul '25";
 
 
   // Annotation indices for chart markers
@@ -746,14 +758,16 @@ export default function OrganicGrowth() {
   const normalizedMonthly = useMemo(() => {
     return GSC_MONTHLY.map(m => {
       const [y, mo] = m.month.split('-').map(Number);
-      const days = new Date(y, mo, 0).getDate();
+      // Use actual reported days for partial months, full month days otherwise
+      const days = m.daysReported || new Date(y, mo, 0).getDate();
       return {
         month: m.month,
-        label: monthLabel(m.month),
+        label: monthLabel(m.month) + (m.partial ? '*' : ''),
         clicksPerDay: Math.round(m.clicks / days * 10) / 10,
         impressionsPerDay: Math.round(m.impressions / days),
         ctr: m.ctr,
         days,
+        partial: m.partial || false,
       };
     });
   }, []);
@@ -894,37 +908,43 @@ export default function OrganicGrowth() {
       {/* ═══════ SECTION 1: HEADLINE STAT CARDS ═══════ */}
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
         <div style={cardStyle}>
-          <div style={labelStyle}>Jul Organic Clicks</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{fmtK(julClickPace)}</div>
-          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>Full month</div>
-          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: julClickPace < jul2025.clicks ? TP.red : TP.green }}>
-            {julClickPace >= jul2025.clicks ? '▲' : '▼'} {delta(julClickPace, jul2025.clicks)} vs Jul &apos;25
+          <div style={labelStyle}>{heroLabel} Organic Clicks</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{fmtK(heroClicks)}</div>
+          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>{heroSubLabel}</div>
+          {augPacedClicks > 0 && (
+            <div style={{ fontSize: 11, color: TP.blue, marginTop: 2 }}>Pacing ~{fmtK(augPacedClicks)} full month</div>
+          )}
+          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 4, color: heroClicks < heroYoyMonth.clicks ? TP.red : TP.green }}>
+            {heroClicks >= heroYoyMonth.clicks ? '▲' : '▼'} {delta(heroClicks, heroYoyMonth.clicks)} vs {heroYoyLabel}
           </div>
         </div>
         <div style={cardStyle}>
-          <div style={labelStyle}>Jul Impressions</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{fmtK(julImprPace)}</div>
-          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>Full month</div>
-          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: julImprPace < jul2025.impressions ? TP.red : TP.green }}>
-            {julImprPace >= jul2025.impressions ? '▲' : '▼'} {delta(julImprPace, jul2025.impressions)} vs Jul &apos;25
+          <div style={labelStyle}>{heroLabel} Impressions</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{fmtK(heroImpr)}</div>
+          <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>{heroSubLabel}</div>
+          {augPacedImpr > 0 && (
+            <div style={{ fontSize: 11, color: TP.blue, marginTop: 2 }}>Pacing ~{fmtK(augPacedImpr)} full month</div>
+          )}
+          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 4, color: heroImpr < heroYoyMonth.impressions ? TP.red : TP.green }}>
+            {heroImpr >= heroYoyMonth.impressions ? '▲' : '▼'} {delta(heroImpr, heroYoyMonth.impressions)} vs {heroYoyLabel}
           </div>
         </div>
         <div style={cardStyle}>
-          <div style={labelStyle}>Jul CTR</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{latestMonth.ctr}%</div>
+          <div style={labelStyle}>{heroLabel} CTR</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{heroCtr}%</div>
           <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>Click-through rate</div>
           <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: TP.green }}>
-            ▲ from {jul2025.ctr}% in Jul &apos;25
+            ▲ from {heroYoyMonth.ctr}% in {heroYoyLabel}
           </div>
         </div>
         <div style={cardStyle}>
           <div style={labelStyle}>Avg Position</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{latestMonth.position}</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: TP.navy }}>{heroPos}</div>
           <div style={{ fontSize: 11, color: TP.green, fontWeight: 600, marginTop: 2 }}>
-            {latestMonth.position <= 10 ? 'Page 1' : latestMonth.position <= 20 ? 'Page 2' : `Page ${Math.ceil(latestMonth.position / 10)}`}
+            {heroPos <= 10 ? 'Page 1' : heroPos <= 20 ? 'Page 2' : `Page ${Math.ceil(heroPos / 10)}`}
           </div>
-          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: latestMonth.position < jul2025.position ? TP.green : TP.red }}>
-            {latestMonth.position < jul2025.position ? '▲' : '▼'} from {jul2025.position} (Pg {Math.ceil(jul2025.position / 10)}) in Jul &apos;25
+          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: heroPos < heroYoyMonth.position ? TP.green : TP.red }}>
+            {heroPos < heroYoyMonth.position ? '▲' : '▼'} from {heroYoyMonth.position} (Pg {Math.ceil(heroYoyMonth.position / 10)}) in {heroYoyLabel}
           </div>
         </div>
 
@@ -945,29 +965,38 @@ export default function OrganicGrowth() {
           {(() => {
             const months2026 = normalizedMonthly.filter(m => m.month >= '2026-01');
             const mayRate = months2026.find(m => m.month === '2026-05')?.clicksPerDay || 0;
-            const julRate = months2026.find(m => m.month === '2026-07')?.clicksPerDay || 0;
             const junRate = months2026.find(m => m.month === '2026-06')?.clicksPerDay || 0;
-            const postSeoGrowth = mayRate > 0 ? ((julRate - mayRate) / mayRate * 100) : 0;
+            const julRate = months2026.find(m => m.month === '2026-07')?.clicksPerDay || 0;
+            const augEntry = months2026.find(m => m.month === '2026-08');
+            const augRate = augEntry?.clicksPerDay || 0;
+            const latestRate = augRate || julRate;
+            const postSeoGrowth = mayRate > 0 ? ((latestRate - mayRate) / mayRate * 100) : 0;
             return (
               <>
-                <div style={{ flex: 1, minWidth: 140, padding: '10px 14px', background: `${TP.green}08`, borderRadius: 8, border: `1px solid ${TP.green}20` }}>
-                  <div style={{ fontSize: 11, color: '#888', marginBottom: 2 }}>May (SEO month)</div>
+                <div style={{ flex: 1, minWidth: 120, padding: '10px 14px', background: `${TP.green}08`, borderRadius: 8, border: `1px solid ${TP.green}20` }}>
+                  <div style={{ fontSize: 11, color: '#888', marginBottom: 2 }}>May (SEO start)</div>
                   <div style={{ fontSize: 18, fontWeight: 700, color: TP.navy }}>{mayRate.toFixed(0)}/day</div>
                 </div>
-                <div style={{ flex: 1, minWidth: 140, padding: '10px 14px', background: `${TP.green}08`, borderRadius: 8, border: `1px solid ${TP.green}20` }}>
+                <div style={{ flex: 1, minWidth: 120, padding: '10px 14px', background: `${TP.green}08`, borderRadius: 8, border: `1px solid ${TP.green}20` }}>
                   <div style={{ fontSize: 11, color: '#888', marginBottom: 2 }}>June</div>
                   <div style={{ fontSize: 18, fontWeight: 700, color: TP.navy }}>{junRate.toFixed(0)}/day</div>
                 </div>
-                <div style={{ flex: 1, minWidth: 140, padding: '10px 14px', background: `${TP.green}08`, borderRadius: 8, border: `1px solid ${TP.green}20` }}>
+                <div style={{ flex: 1, minWidth: 120, padding: '10px 14px', background: `${TP.green}08`, borderRadius: 8, border: `1px solid ${TP.green}20` }}>
                   <div style={{ fontSize: 11, color: '#888', marginBottom: 2 }}>July</div>
                   <div style={{ fontSize: 18, fontWeight: 700, color: TP.navy }}>{julRate.toFixed(0)}/day</div>
                 </div>
-                <div style={{ flex: 1, minWidth: 140, padding: '10px 14px', background: `${TP.green}12`, borderRadius: 8, border: `1px solid ${TP.green}40` }}>
+                {augEntry && (
+                  <div style={{ flex: 1, minWidth: 120, padding: '10px 14px', background: `${TP.darkPurple}10`, borderRadius: 8, border: `1px solid ${TP.darkPurple}30` }}>
+                    <div style={{ fontSize: 11, color: '#888', marginBottom: 2 }}>Aug ({augEntry.days}d partial)</div>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: TP.darkPurple }}>{augRate.toFixed(0)}/day</div>
+                  </div>
+                )}
+                <div style={{ flex: 1, minWidth: 120, padding: '10px 14px', background: `${TP.green}12`, borderRadius: 8, border: `1px solid ${TP.green}40` }}>
                   <div style={{ fontSize: 11, color: '#888', marginBottom: 2 }}>Post-SEO trend</div>
                   <div style={{ fontSize: 18, fontWeight: 700, color: postSeoGrowth >= 0 ? TP.green : TP.red }}>
                     {postSeoGrowth >= 0 ? '+' : ''}{postSeoGrowth.toFixed(1)}%
                   </div>
-                  <div style={{ fontSize: 10, color: '#999' }}>May → Jul</div>
+                  <div style={{ fontSize: 10, color: '#999' }}>May → {augEntry ? 'Aug' : 'Jul'}</div>
                 </div>
               </>
             );
