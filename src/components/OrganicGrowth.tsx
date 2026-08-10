@@ -605,8 +605,7 @@ export default function OrganicGrowth() {
   // ── Chart: Daily 2026 Clicks with 7-day MA ──
   const dailyClicksData = useMemo(() => {
     const allDays: { label: string; clicks: number }[] = [];
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'] as const;
-    const monthNums = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06', Jul: '07' };
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'] as const;
     for (const mo of months) {
       const days = GSC_DAILY_2026[mo];
       if (!days) continue;
@@ -622,8 +621,9 @@ export default function OrganicGrowth() {
       return Math.round(sum / 7);
     });
 
-    // Find SEO start index (May 19)
+    // Find SEO start index (May 19) and blog launch index (Aug 6)
     const seoIdx = allDays.findIndex(d => d.label === 'May 19');
+    const blogIdx = allDays.findIndex(d => d.label === 'Aug 6');
 
     return {
       labels: allDays.map(d => d.label),
@@ -632,6 +632,7 @@ export default function OrganicGrowth() {
         { label: '7-Day Moving Avg', data: ma7, borderColor: TP.red, backgroundColor: 'transparent', pointRadius: 0, borderWidth: 2.5, tension: 0.35, spanGaps: true, order: 1 },
       ],
       seoIdx,
+      blogIdx,
     };
   }, []);
 
@@ -643,6 +644,7 @@ export default function OrganicGrowth() {
       annotation: {
         annotations: {
           ...(dailyClicksData.seoIdx >= 0 ? { seoLine: { type: 'line' as const, xMin: dailyClicksData.seoIdx, xMax: dailyClicksData.seoIdx, borderColor: `${TP.green}B0`, borderWidth: 2, borderDash: [6, 3], label: { display: true, content: 'SEO Live (May 19)', position: 'end' as const, backgroundColor: TP.green, color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { top: 2, bottom: 2, left: 5, right: 5 }, borderRadius: 3 } } } : {}),
+          ...(dailyClicksData.blogIdx >= 0 ? { blogLine: { type: 'line' as const, xMin: dailyClicksData.blogIdx, xMax: dailyClicksData.blogIdx, borderColor: `${TP.darkPurple}B0`, borderWidth: 2, borderDash: [6, 3], label: { display: true, content: 'Blog Launch (Aug 6)', position: 'start' as const, backgroundColor: TP.darkPurple, color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { top: 2, bottom: 2, left: 5, right: 5 }, borderRadius: 3 } } } : {}),
         },
       },
     },
@@ -651,7 +653,7 @@ export default function OrganicGrowth() {
       x: { grid: { display: false }, ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 20, font: { size: 10 } } },
     },
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [dailyClicksData.seoIdx]);
+  }), [dailyClicksData.seoIdx, dailyClicksData.blogIdx]);
 
   // ── Chart: Monthly Impressions + Submissions overlay ──
   const impressionsData = useMemo(() => ({
@@ -1025,7 +1027,7 @@ export default function OrganicGrowth() {
         <div style={{ fontSize: 11, color: '#888', marginBottom: 8 }}>
           {clicksView === 'monthly' && 'Feb 2025 to present. Bars = total clicks per month, red line = 3-month moving average.'}
           {clicksView === 'weekly' && `${GSC_WEEKLY.length} weeks from Feb 2025. Blue area = weekly clicks, red line = 4-week moving average.`}
-          {clicksView === 'daily' && 'Jan 1 – Jul 31, 2026 (212 days). Gray area = daily clicks, red line = 7-day moving average.'}
+          {clicksView === 'daily' && 'Jan 1 – Aug 8, 2026 (220 days). Gray area = daily clicks, red line = 7-day moving average.'}
         </div>
         <div style={{ height: 320 }}>
           {clicksView === 'monthly' && (
