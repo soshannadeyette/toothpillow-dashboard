@@ -331,17 +331,115 @@ const TOP_PAGES = [
    Source: GSC 3-month aggregate (May 9 – Aug 8, 2026), pulled August 10, 2026
    33 article pages indexed, 126 total clicks, 13,806 total impressions
    ════════════════════════════════════════════ */
-const ARTICLE_PAGES = [
-  { path: '/articles', label: 'Articles Index', clicks: 35, impressions: 3496, position: 9.9 },
-  { path: '/articles/rapid-palatal-expansion', label: 'Rapid Palatal Expansion', clicks: 34, impressions: 907, position: 9.3 },
-  { path: '/articles/the-human-airway', label: 'The Human Airway', clicks: 26, impressions: 2443, position: 12.0 },
-  { path: '/articles/is-your-child-a-mouth-breather...', label: 'Mouth Breather — New Help', clicks: 18, impressions: 4468, position: 7.1 },
-  { path: '/articles/snoring-can-be-a-danger-sign', label: 'Snoring Danger Sign', clicks: 4, impressions: 93, position: 8.8 },
-  { path: '/articles/craniofacial-changes...', label: 'Craniofacial Changes & SDB', clicks: 2, impressions: 579, position: 9.3 },
-  { path: '/articles/mouth-breathing-face', label: 'Mouth Breathing Face', clicks: 1, impressions: 736, position: 8.0 },
-  { path: '/articles/association-oral-habits...', label: 'Oral Habits & Mouth Breathing', clicks: 0, impressions: 277, position: 11.3 },
-  { path: '/articles/pediatric-orthodontic-expansion...', label: 'Pediatric Expansion for SDB', clicks: 0, impressions: 256, position: 27.0 },
+/* ════════════════════════════════════════════
+   BLOG ARTICLE TRACKER — Time-series data per article
+   Each snapshot = one GSC pull. Add a new snapshot row each time data is refreshed.
+   snapshots[]: { date, clicks, impressions, position, ctr } — cumulative from GSC window
+   When updating: add new snapshot to each article, keep all previous snapshots.
+   ════════════════════════════════════════════ */
+const BLOG_ARTICLES: Array<{
+  path: string;
+  label: string;
+  targetKeyword: string;
+  monthlyVol: number;
+  kd: number;
+  publishDate: string;
+  snapshots: Array<{ date: string; clicks: number; impressions: number; position: number; ctr: number }>;
+}> = [
+  {
+    path: '/articles/mouth-breathing-face',
+    label: 'Mouth Breathing Face',
+    targetKeyword: 'mouth breathing face',
+    monthlyVol: 22200, kd: 1,
+    publishDate: '2026-08-06',
+    snapshots: [
+      { date: '2026-08-10', clicks: 1, impressions: 736, position: 8.0, ctr: 0.1 },
+    ],
+  },
+  {
+    path: '/articles/is-your-child-a-mouth-breather',
+    label: 'Is Your Child a Mouth Breather',
+    targetKeyword: 'is my child a mouth breather',
+    monthlyVol: 720, kd: 0,
+    publishDate: '2026-08-06',
+    snapshots: [
+      { date: '2026-08-10', clicks: 18, impressions: 4468, position: 7.1, ctr: 0.4 },
+    ],
+  },
+  {
+    path: '/articles/rapid-palatal-expansion',
+    label: 'Rapid Palatal Expansion',
+    targetKeyword: 'rapid palatal expansion',
+    monthlyVol: 5400, kd: 3,
+    publishDate: '2026-08-06',
+    snapshots: [
+      { date: '2026-08-10', clicks: 34, impressions: 907, position: 9.3, ctr: 3.7 },
+    ],
+  },
+  {
+    path: '/articles/the-human-airway',
+    label: 'The Human Airway',
+    targetKeyword: 'pediatric airway anatomy',
+    monthlyVol: 260, kd: 0,
+    publishDate: '2026-08-06',
+    snapshots: [
+      { date: '2026-08-10', clicks: 26, impressions: 2443, position: 12.0, ctr: 1.1 },
+    ],
+  },
+  {
+    path: '/articles/snoring-can-be-a-danger-sign',
+    label: 'Snoring Can Be a Danger Sign',
+    targetKeyword: 'child snoring',
+    monthlyVol: 1400, kd: 3,
+    publishDate: '2026-08-06',
+    snapshots: [
+      { date: '2026-08-10', clicks: 4, impressions: 93, position: 8.8, ctr: 4.3 },
+    ],
+  },
+  {
+    path: '/articles/craniofacial-changes',
+    label: 'Craniofacial Changes & SDB',
+    targetKeyword: 'craniofacial development children',
+    monthlyVol: 170, kd: 0,
+    publishDate: '2026-08-06',
+    snapshots: [
+      { date: '2026-08-10', clicks: 2, impressions: 579, position: 9.3, ctr: 0.3 },
+    ],
+  },
+  {
+    path: '/articles/association-oral-habits',
+    label: 'Oral Habits & Mouth Breathing',
+    targetKeyword: 'oral habits mouth breathing',
+    monthlyVol: 110, kd: 0,
+    publishDate: '2026-08-06',
+    snapshots: [
+      { date: '2026-08-10', clicks: 0, impressions: 277, position: 11.3, ctr: 0.0 },
+    ],
+  },
+  {
+    path: '/articles/pediatric-orthodontic-expansion',
+    label: 'Pediatric Expansion for SDB',
+    targetKeyword: 'palate expander kids',
+    monthlyVol: 2200, kd: 0,
+    publishDate: '2026-08-06',
+    snapshots: [
+      { date: '2026-08-10', clicks: 0, impressions: 256, position: 27.0, ctr: 0.0 },
+    ],
+  },
+  {
+    path: '/articles',
+    label: 'Articles Index',
+    targetKeyword: '(index page)',
+    monthlyVol: 0, kd: 0,
+    publishDate: '2026-08-06',
+    snapshots: [
+      { date: '2026-08-10', clicks: 35, impressions: 3496, position: 9.9, ctr: 1.0 },
+    ],
+  },
 ];
+
+// Total indexed articles (includes pages not in the tracked list above)
+const BLOG_TOTAL_INDEXED = 33;
 
 
 /* ════════════════════════════════════════════
@@ -1450,64 +1548,180 @@ export default function OrganicGrowth() {
         </div>
       </div>
 
-      {/* ═══════ SECTION 7: BLOG ARTICLE PERFORMANCE ═══════ */}
-      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: `2px solid #9C27B020` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-          <span style={{ background: '#9C27B0', color: '#fff', borderRadius: 4, padding: '2px 8px', fontSize: 10, fontWeight: 700 }}>NEW</span>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, margin: 0 }}>Blog Article Performance</h3>
-        </div>
-        <p style={{ fontSize: 12, color: '#888', margin: '4px 0 16px 0' }}>
-          Blog launched Aug 6, 2026. 33 article pages indexed. {ARTICLE_PAGES.reduce((s, a) => s + a.clicks, 0)} clicks from {ARTICLE_PAGES.reduce((s, a) => s + a.impressions, 0).toLocaleString()} impressions across all articles (3-month window).
-        </p>
+      {/* ═══════ SECTION 7: BLOG ARTICLE TRACKER ═══════ */}
+      {(() => {
+        const PP = '#9C27B0'; // purple accent
+        const articles = BLOG_ARTICLES.filter(a => a.path !== '/articles'); // exclude index
+        const indexPage = BLOG_ARTICLES.find(a => a.path === '/articles');
+        const allLatest = BLOG_ARTICLES.map(a => a.snapshots[a.snapshots.length - 1]);
+        const totalClicks = allLatest.reduce((s, snap) => s + snap.clicks, 0);
+        const totalImpr = allLatest.reduce((s, snap) => s + snap.impressions, 0);
+        const onPage1 = articles.filter(a => a.snapshots[a.snapshots.length - 1].position <= 10).length;
+        const latestDate = allLatest[0]?.date || '';
 
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
-          <div style={{ flex: 1, minWidth: 140, background: `#9C27B008`, borderRadius: 8, padding: 12, border: `1px solid #9C27B020`, textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: '#888' }}>Articles Indexed</div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: '#9C27B0' }}>33</div>
-          </div>
-          <div style={{ flex: 1, minWidth: 140, background: `#9C27B008`, borderRadius: 8, padding: 12, border: `1px solid #9C27B020`, textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: '#888' }}>Total Article Clicks</div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: '#9C27B0' }}>126</div>
-          </div>
-          <div style={{ flex: 1, minWidth: 140, background: `#9C27B008`, borderRadius: 8, padding: 12, border: `1px solid #9C27B020`, textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: '#888' }}>Total Article Impressions</div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: '#9C27B0' }}>13.8K</div>
-          </div>
-        </div>
+        // Sort articles by impressions (highest opportunity first)
+        const sorted = [...articles].sort((a, b) => {
+          const aSnap = a.snapshots[a.snapshots.length - 1];
+          const bSnap = b.snapshots[b.snapshots.length - 1];
+          return bSnap.impressions - aSnap.impressions;
+        });
 
-        <div style={{ fontSize: 13, fontWeight: 600, color: TP.navy, marginBottom: 8 }}>Top Article Pages</div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-            <thead>
-              <tr style={{ borderBottom: `2px solid ${TP.navy}` }}>
-                <th style={{ padding: '6px 10px', textAlign: 'left', color: TP.navy }}>Article</th>
-                <th style={{ padding: '6px 10px', textAlign: 'right', color: TP.navy }}>Clicks</th>
-                <th style={{ padding: '6px 10px', textAlign: 'right', color: TP.navy }}>Impr</th>
-                <th style={{ padding: '6px 10px', textAlign: 'right', color: TP.navy }}>Position</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ARTICLE_PAGES.map((a, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : '#fff' }}>
-                  <td style={{ padding: '6px 10px', fontWeight: 500 }}>
-                    {a.label}
-                    {a.position <= 10 && <span style={{ marginLeft: 6, fontSize: 9, background: TP.green, color: '#fff', borderRadius: 3, padding: '1px 5px', fontWeight: 700 }}>Page 1</span>}
-                  </td>
-                  <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 600 }}>{a.clicks}</td>
-                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>{a.impressions.toLocaleString()}</td>
-                  <td style={{ padding: '6px 10px', textAlign: 'right', color: a.position <= 10 ? TP.green : TP.yellow, fontWeight: 600 }}>{a.position.toFixed(1)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        return (
+          <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: `2px solid ${PP}20` }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ background: PP, color: '#fff', borderRadius: 4, padding: '2px 8px', fontSize: 10, fontWeight: 700 }}>BLOG</span>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, margin: 0 }}>Article Performance Tracker</h3>
+              </div>
+              <div style={{ fontSize: 11, color: '#999' }}>Last pull: {latestDate}</div>
+            </div>
+            <p style={{ fontSize: 12, color: '#888', margin: '4px 0 16px 0' }}>
+              Blog launched Aug 6, 2026. Tracking {articles.length} articles + index page. {BLOG_TOTAL_INDEXED} total pages indexed.
+            </p>
 
-        <div style={{ marginTop: 12, padding: '10px 14px', background: `#9C27B008`, borderRadius: 8, border: `1px solid #9C27B020`, fontSize: 12, color: '#555', lineHeight: 1.6 }}>
-          <strong style={{ color: '#9C27B0' }}>Key signal:</strong> &quot;Mouth Breathing Face&quot; (target keyword, 22,200 monthly searches) is already at position 8.0 with 736 impressions
-          after just 2 days live. &quot;Is Your Child a Mouth Breather&quot; has 4,468 impressions at position 7.1. These pages are already on page 1 for high-volume
-          non-branded keywords — the first time Toothpillow has ranked for discovery terms at this scale.
-        </div>
-      </div>
+            {/* Summary cards */}
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
+              <div style={{ flex: 1, minWidth: 120, background: `${PP}08`, borderRadius: 8, padding: 12, border: `1px solid ${PP}20`, textAlign: 'center' }}>
+                <div style={{ fontSize: 11, color: '#888' }}>Indexed</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: PP }}>{BLOG_TOTAL_INDEXED}</div>
+              </div>
+              <div style={{ flex: 1, minWidth: 120, background: `${PP}08`, borderRadius: 8, padding: 12, border: `1px solid ${PP}20`, textAlign: 'center' }}>
+                <div style={{ fontSize: 11, color: '#888' }}>On Page 1</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: TP.green }}>{onPage1}<span style={{ fontSize: 13, color: '#999' }}>/{articles.length}</span></div>
+              </div>
+              <div style={{ flex: 1, minWidth: 120, background: `${PP}08`, borderRadius: 8, padding: 12, border: `1px solid ${PP}20`, textAlign: 'center' }}>
+                <div style={{ fontSize: 11, color: '#888' }}>Total Clicks</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: PP }}>{totalClicks}</div>
+              </div>
+              <div style={{ flex: 1, minWidth: 120, background: `${PP}08`, borderRadius: 8, padding: 12, border: `1px solid ${PP}20`, textAlign: 'center' }}>
+                <div style={{ fontSize: 11, color: '#888' }}>Total Impressions</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: PP }}>{fmtK(totalImpr)}</div>
+              </div>
+            </div>
+
+            {/* Per-article cards */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {sorted.map((art, i) => {
+                const snap = art.snapshots[art.snapshots.length - 1];
+                const prevSnap = art.snapshots.length > 1 ? art.snapshots[art.snapshots.length - 2] : null;
+                const posDelta = prevSnap ? prevSnap.position - snap.position : null; // positive = improved
+                const clickDelta = prevSnap ? snap.clicks - prevSnap.clicks : null;
+                const imprDelta = prevSnap ? snap.impressions - prevSnap.impressions : null;
+                const daysLive = Math.floor((new Date(snap.date).getTime() - new Date(art.publishDate).getTime()) / 86400000);
+                const posColor = snap.position <= 10 ? TP.green : snap.position <= 20 ? TP.yellow : TP.red;
+                const posBg = snap.position <= 10 ? `${TP.green}12` : snap.position <= 20 ? `${TP.yellow}15` : `${TP.red}10`;
+                const pageNum = Math.ceil(snap.position / 10);
+
+                return (
+                  <div key={i} style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 14, background: i % 2 === 0 ? '#fafafa' : '#fff' }}>
+                    {/* Article header row */}
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: 14, fontWeight: 700, color: TP.navy }}>{art.label}</span>
+                          {snap.position <= 10 && (
+                            <span style={{ fontSize: 9, background: TP.green, color: '#fff', borderRadius: 3, padding: '2px 6px', fontWeight: 700 }}>Page 1</span>
+                          )}
+                          {art.snapshots.length === 1 && (
+                            <span style={{ fontSize: 9, background: TP.blue, color: '#fff', borderRadius: 3, padding: '2px 6px', fontWeight: 700 }}>First Reading</span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: 11, color: '#888', marginTop: 3 }}>
+                          <span style={{ color: TP.blue, fontWeight: 500 }}>{art.targetKeyword}</span>
+                          {art.monthlyVol > 0 && <span> · {art.monthlyVol.toLocaleString()}/mo</span>}
+                          {art.kd > 0 && <span> · KD {art.kd}</span>}
+                          <span> · {daysLive} days live</span>
+                        </div>
+                      </div>
+                      {/* Position badge */}
+                      <div style={{ textAlign: 'center', minWidth: 70, padding: '6px 10px', borderRadius: 8, background: posBg, border: `1px solid ${posColor}30` }}>
+                        <div style={{ fontSize: 9, color: '#888', marginBottom: 2 }}>Position</div>
+                        <div style={{ fontSize: 22, fontWeight: 800, color: posColor }}>{snap.position.toFixed(1)}</div>
+                        {posDelta !== null ? (
+                          <div style={{ fontSize: 10, fontWeight: 600, color: posDelta > 0 ? TP.green : posDelta < 0 ? TP.red : '#888' }}>
+                            {posDelta > 0 ? `▲ +${posDelta.toFixed(1)}` : posDelta < 0 ? `▼ ${posDelta.toFixed(1)}` : '—'}
+                          </div>
+                        ) : (
+                          <div style={{ fontSize: 9, color: '#aaa' }}>Pg {pageNum}</div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Metrics row */}
+                    <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                      <div style={{ minWidth: 80 }}>
+                        <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5 }}>Clicks</div>
+                        <div style={{ fontSize: 16, fontWeight: 700, color: TP.navy }}>
+                          {snap.clicks}
+                          {clickDelta !== null && (
+                            <span style={{ fontSize: 11, marginLeft: 4, color: clickDelta >= 0 ? TP.green : TP.red }}>
+                              {clickDelta >= 0 ? '+' : ''}{clickDelta}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div style={{ minWidth: 100 }}>
+                        <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5 }}>Impressions</div>
+                        <div style={{ fontSize: 16, fontWeight: 700, color: TP.navy }}>
+                          {snap.impressions.toLocaleString()}
+                          {imprDelta !== null && (
+                            <span style={{ fontSize: 11, marginLeft: 4, color: imprDelta >= 0 ? TP.green : TP.red }}>
+                              {imprDelta >= 0 ? '+' : ''}{imprDelta.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div style={{ minWidth: 60 }}>
+                        <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5 }}>CTR</div>
+                        <div style={{ fontSize: 16, fontWeight: 700, color: TP.navy }}>{snap.ctr.toFixed(1)}%</div>
+                      </div>
+                      {/* Position history sparkline (when we have 2+ snapshots) */}
+                      {art.snapshots.length >= 2 && (
+                        <div style={{ flex: 1, minWidth: 120 }}>
+                          <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Position History</div>
+                          <div style={{ display: 'flex', alignItems: 'end', gap: 2, height: 30 }}>
+                            {art.snapshots.map((s, si) => {
+                              // Invert so lower position = taller bar (better rank)
+                              const maxPos = Math.max(...art.snapshots.map(x => x.position), 30);
+                              const barH = Math.max(4, Math.round((1 - s.position / maxPos) * 28));
+                              const barColor = s.position <= 10 ? TP.green : s.position <= 20 ? TP.yellow : TP.red;
+                              return (
+                                <div key={si} title={`${s.date}: pos ${s.position.toFixed(1)}`}
+                                  style={{ width: 8, height: barH, borderRadius: 2, background: barColor, opacity: si === art.snapshots.length - 1 ? 1 : 0.5 }} />
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Index page (collapsed) */}
+              {indexPage && (() => {
+                const snap = indexPage.snapshots[indexPage.snapshots.length - 1];
+                return (
+                  <div style={{ border: '1px dashed #d0d0d0', borderRadius: 8, padding: '10px 14px', background: '#fafafa' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: '#888' }}>Articles Index (/articles)</span>
+                        <span style={{ fontSize: 11, color: '#aaa', marginLeft: 8 }}>Pos {snap.position.toFixed(1)} · {snap.clicks} clicks · {snap.impressions.toLocaleString()} impr</span>
+                      </div>
+                      {snap.position <= 10 && <span style={{ fontSize: 9, background: TP.green, color: '#fff', borderRadius: 3, padding: '2px 6px', fontWeight: 700 }}>Page 1</span>}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Data note */}
+            <div style={{ marginTop: 14, fontSize: 11, color: '#aaa', textAlign: 'center' }}>
+              Snapshots taken each GSC pull. Deltas appear after 2+ readings. Position history bars appear after 2+ snapshots.
+            </div>
+          </div>
+        );
+      })()}
 
       {(() => {
         const items = [
