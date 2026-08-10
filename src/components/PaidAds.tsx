@@ -711,6 +711,121 @@ export default function PaidAds() {
         * Months with 0 checkouts are estimated using the checkout rate from older months ({Math.round((() => { const mm = SF_MONTHLY.filter(sf => { const p = sf.monthKey.split(' '); const mi = MONTH_SHORT.indexOf(p[0]); const yr = parseInt(p[1]); const mid = new Date(yr, mi - 1, 15); return Math.floor((new Date().getTime() - mid.getTime()) / 86400000) >= 60 && sf.completed > 0; }); return mm.length > 0 ? mm.reduce((s, m) => s + m.checkouts, 0) / mm.reduce((s, m) => s + m.completed, 0) * 100 : 0; })())}% of completed submissions eventually check out) instead of the maturity curve. This is a rougher estimate.
       </div>
 
+      {/* ═══════ COST PER CONVERSION TREND ═══════ */}
+      <SectionHeader>Cost per Conversion Over Time</SectionHeader>
+      <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>
+        Monthly Google Ads spend ÷ Salesforce conversions at each funnel stage. August is partial ({(() => { const aug = SF_MONTHLY.find(s => s.monthKey === 'Aug 2026'); return aug ? `${aug.leads} leads` : 'in progress'; })()}).
+      </div>
+      <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', marginBottom: 32 }}>
+        <div style={{ height: 320 }}>
+          <Line
+            data={{
+              labels: (() => {
+                return monthlySpend.map(m => m.label);
+              })(),
+              datasets: [
+                {
+                  label: 'Cost / Form Open',
+                  data: monthlySpend.map(m => {
+                    const sf = SF_MONTHLY.find(s => s.monthKey === m.label);
+                    return sf && sf.leads > 0 ? Math.round(m.spend / sf.leads) : null;
+                  }),
+                  borderColor: '#42A5F5',
+                  backgroundColor: '#42A5F510',
+                  borderWidth: 2,
+                  pointRadius: 5,
+                  pointBackgroundColor: '#42A5F5',
+                  tension: 0.3,
+                },
+                {
+                  label: 'Cost / Completed Assessment',
+                  data: monthlySpend.map(m => {
+                    const sf = SF_MONTHLY.find(s => s.monthKey === m.label);
+                    return sf && sf.completed > 0 ? Math.round(m.spend / sf.completed) : null;
+                  }),
+                  borderColor: '#FF9800',
+                  backgroundColor: '#FF980010',
+                  borderWidth: 2,
+                  pointRadius: 5,
+                  pointBackgroundColor: '#FF9800',
+                  tension: 0.3,
+                },
+                {
+                  label: 'Cost / Checkout (CAC)',
+                  data: monthlySpend.map(m => {
+                    const sf = SF_MONTHLY.find(s => s.monthKey === m.label);
+                    return sf && sf.checkouts > 0 ? Math.round(m.spend / sf.checkouts) : null;
+                  }),
+                  borderColor: '#E53935',
+                  backgroundColor: '#E5393510',
+                  borderWidth: 2,
+                  pointRadius: 5,
+                  pointBackgroundColor: '#E53935',
+                  tension: 0.3,
+                },
+              ],
+            }}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              spanGaps: true,
+              plugins: {
+                legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+                tooltip: {
+                  callbacks: {
+                    label: (ctx) => `${ctx.dataset.label}: $${ctx.parsed.y?.toLocaleString() ?? '—'}`,
+                  },
+                },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: { callback: (v) => `$${Number(v).toLocaleString()}` },
+                  title: { display: true, text: 'Cost per conversion ($)' },
+                },
+              },
+            }}
+          />
+        </div>
+        <div style={{ marginTop: 12 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid #e2e8f0' }}>
+                <th style={{ padding: '6px 10px', textAlign: 'left' }}>Month</th>
+                <th style={{ padding: '6px 10px', textAlign: 'right' }}>Spend</th>
+                <th style={{ padding: '6px 10px', textAlign: 'right' }}>Form Opens</th>
+                <th style={{ padding: '6px 10px', textAlign: 'right', color: '#42A5F5' }}>$/Open</th>
+                <th style={{ padding: '6px 10px', textAlign: 'right' }}>Completed</th>
+                <th style={{ padding: '6px 10px', textAlign: 'right', color: '#FF9800' }}>$/Complete</th>
+                <th style={{ padding: '6px 10px', textAlign: 'right' }}>Checkouts</th>
+                <th style={{ padding: '6px 10px', textAlign: 'right', color: '#E53935' }}>$/Checkout</th>
+              </tr>
+            </thead>
+            <tbody>
+              {monthlySpend.map((m, idx) => {
+                const sf = SF_MONTHLY.find(s => s.monthKey === m.label);
+                if (!sf) return null;
+                const cpo = sf.leads > 0 ? Math.round(m.spend / sf.leads) : null;
+                const cpc2 = sf.completed > 0 ? Math.round(m.spend / sf.completed) : null;
+                const cac = sf.checkouts > 0 ? Math.round(m.spend / sf.checkouts) : null;
+                return (
+                  <tr key={m.label} style={{ background: idx % 2 === 0 ? '#f9f9f9' : '#fff', borderBottom: '1px solid #f0f0f0' }}>
+                    <td style={{ padding: '6px 10px', fontWeight: 600 }}>{m.label}</td>
+                    <td style={{ padding: '6px 10px', textAlign: 'right' }}>${Math.round(m.spend).toLocaleString()}</td>
+                    <td style={{ padding: '6px 10px', textAlign: 'right' }}>{sf.leads}</td>
+                    <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 600, color: '#42A5F5' }}>{cpo !== null ? `$${cpo}` : '—'}</td>
+                    <td style={{ padding: '6px 10px', textAlign: 'right' }}>{sf.completed}</td>
+                    <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 600, color: '#FF9800' }}>{cpc2 !== null ? `$${cpc2}` : '—'}</td>
+                    <td style={{ padding: '6px 10px', textAlign: 'right' }}>{sf.checkouts}</td>
+                    <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 600, color: '#E53935' }}>{cac !== null ? `$${cac.toLocaleString()}` : '—'}</td>
+                  </tr>
+                );
+              }).filter(Boolean)}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* ═══════ DAILY SPEND ═══════ */}
       <SectionHeader>Daily Spend</SectionHeader>
       <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>Source: Google Ads. June onward (no daily data for Apr/May).</div>
