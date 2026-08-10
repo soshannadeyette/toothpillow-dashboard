@@ -46,7 +46,7 @@ const infSubs: Record<string, number> = {
   '2023-05':2,'2023-09':1,'2023-10':6,'2023-11':293,'2023-12':1035,
   '2024-01':431,'2024-02':313,'2024-03':1590,'2024-04':565,'2024-05':642,'2024-06':1231,'2024-07':480,'2024-08':553,'2024-09':1114,'2024-10':490,'2024-11':357,'2024-12':513,
   '2025-01':514,'2025-02':601,'2025-03':515,'2025-04':504,'2025-05':428,'2025-06':328,'2025-07':897,'2025-08':434,'2025-09':285,'2025-10':267,'2025-11':486,'2025-12':272,
-  '2026-01':309,'2026-02':511,'2026-03':462,'2026-04':233,'2026-05':269,'2026-06':307,'2026-07':598,'2026-08':75,
+  '2026-01':334,'2026-02':325,'2026-03':400,'2026-04':440,'2026-05':424,'2026-06':307,'2026-07':598,'2026-08':82,
 };
 
 const newAddsAmb: Record<string, number> = {
@@ -61,8 +61,8 @@ const newAddsInf: Record<string, number> = {
 };
 
 const ambSubsYear: Record<number, number> = {2023:465, 2024:443, 2025:574, 2026:448};
-const infSubsYear: Record<number, number> = {2023:1337, 2024:8279, 2025:5531, 2026:2764};
-const combSubsYear: Record<number, number> = {2023:1802, 2024:8722, 2025:6105, 2026:3212};
+const infSubsYear: Record<number, number> = {2023:1337, 2024:8279, 2025:5531, 2026:2910};
+const combSubsYear: Record<number, number> = {2023:1802, 2024:8722, 2025:6105, 2026:3358};
 const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:147};
 const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:24};
 const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:179};
@@ -71,13 +71,13 @@ const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:
 // Active ambassadors with ≥1 submission per year (from Salesforce)
 const activeInfByYear: Record<number, number> = {2023:6, 2024:60, 2025:82, 2026:79};
 const activeAmbByYear: Record<number, number> = {2023:24, 2024:85, 2025:127, 2026:141};
-const activeTotalByYear: Record<number, number> = {2023:30, 2024:145, 2025:209, 2026:221};
+const activeTotalByYear: Record<number, number> = {2023:30, 2024:145, 2025:209, 2026:220};
 
 const halfCarriedBy: Record<number, number> = {2023:1, 2024:2, 2025:5, 2026:7};
 const tenPlusByYear: Record<number, number> = {2023:8, 2024:40, 2025:55, 2026:43};
 // Mega-3 = Lauren Johnson + Kendra Needham + Ginny Yurich (top recruited-ambassador producers)
-const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:783};
-const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:2429};
+const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:786};
+const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:2572};
 
 // Dynamic annualization: complete months + fractional current month
 const _now = new Date();
@@ -106,21 +106,21 @@ const concRows = [
   {y:'2026', n:8, color:'#8CD1C8', names:'Shannon, Sosh, Lauren, Kendra, Jeff, Amy B., Ginny, Melody'},
 ];
 
-// Updated from Salesforce Launch Bonus Tracker export 2026-08-07
+// Updated from Salesforce Launch Bonus Tracker export 2026-08-10
 const moversData: Record<string, {y25:number; y26:number; type:string}> = {
-  'Shannon Tripp':        {y25:866,  y26:320, type:'Inf'},
-  'Soshanna Salsman':     {y25:914,  y26:242, type:'Inf'},
-  'Lauren Johnson NNM':   {y25:831,  y26:510, type:'Inf'},
-  'Kendra Needham':       {y25:386,  y26:172, type:'Inf'},
+  'Shannon Tripp':        {y25:866,  y26:321, type:'Inf'},
+  'Soshanna Salsman':     {y25:914,  y26:243, type:'Inf'},
+  'Lauren Johnson NNM':   {y25:831,  y26:511, type:'Inf'},
+  'Kendra Needham':       {y25:386,  y26:174, type:'Inf'},
   'Jeff Cruz':            {y25:84,   y26:137, type:'Inf'},
   'Amy Bernhard':         {y25:112,  y26:132, type:'Inf'},
   'Melody Brandon':       {y25:123,  y26:114, type:'Inf'},
   'Ginny Yurich':         {y25:291,  y26:101, type:'Inf'},
   'Jasyra Santiago-Hines':{y25:57,   y26:96,  type:'Inf'},
-  'Eden Lee':             {y25:185,  y26:98,  type:'Inf'},
+  'Eden Lee':             {y25:185,  y26:99,  type:'Inf'},
   'Ellen Fisher':         {y25:53,   y26:71,  type:'Inf'},
   'Emily Boazman':        {y25:0,    y26:74,  type:'Inf'},
-  'Taylor Kulik':         {y25:103,  y26:66,  type:'Inf'},
+  'Taylor Kulik':         {y25:103,  y26:67,  type:'Inf'},
   'Amy Erickson':         {y25:51,   y26:45,  type:'Inf'},
   'Lauren Stadler':       {y25:93,   y26:44,  type:'Inf'},
   'Carly Brown':          {y25:0,    y26:43,  type:'Inf'},
@@ -166,14 +166,14 @@ const moversData: Record<string, {y25:number; y26:number; type:string}> = {
   'Cy Tidwell':           {y25:0,    y26:5,   type:'Amb'},
 };
 
-// Launch Bonus Tracker — updated from Salesforce export 2026-08-07
+// Launch Bonus Tracker — updated from Salesforce export 2026-08-10
 // 138 ambassadors with ≥1 WINDOW submission (counted from window start, not YTD).
 // Daily columns through 07/19/2026 (200 col max). Pre-2026 onboards: window starts 04/01/2026.
 // 2026 onboards: window starts at onboard date. Tier: Tier 2 = 50+, Tier 1 = 25-49.
 // paid = cumulative amount paid out so far. Payouts happen on 1st of each month for prior month earnings.
 
 // Monthly payout history (source of truth for paid amounts)
-const LAUNCH_BONUS_PAYOUTS: {month:string; payouts:{name:string;amount:number;tier:string}[]}[] = [
+const LAUNCH_BONUS_PAYOUTS: {month:string; payouts:{name:string;amount:number;tier:string;pending?:boolean;note?:string}[]}[] = [
   { month: 'May 2026', payouts: [
     { name: 'Shannon Tripp', amount: 1250, tier: 'Tier 2' },
     { name: 'Lauren Johnson NNM', amount: 250, tier: 'Tier 1' },
@@ -190,6 +190,11 @@ const LAUNCH_BONUS_PAYOUTS: {month:string; payouts:{name:string;amount:number;ti
     { name: 'Jasyra Santiago-Hines', amount: 250, tier: 'Tier 1' },
     { name: 'Melody Brandon', amount: 250, tier: 'Tier 1' },
     { name: 'Carly Brown', amount: 250, tier: 'Tier 1' },
+  ]},
+  { month: 'August 2026', payouts: [
+    { name: 'Kendra Needham', amount: 1000, tier: 'Tier 2', pending: true },
+    { name: 'Eden Lee loverlees', amount: 250, tier: 'Tier 1', pending: true },
+    { name: 'Hayley Lombard', amount: 250, tier: 'Tier 1', pending: true, note: 'Has balance — apply toward; commissions from July should help clear it' },
   ]},
 ];
 
@@ -1069,7 +1074,7 @@ export default function AmbassadorGrowth() {
       {/* ════════ SECTION 5c: Active Ambassadors Per Year ════════ */}
       <div>
         <h3 style={sectionHeader}>Active Ambassadors Per Year</h3>
-        <p style={sectionSub}>Ambassadors with at least 1 submission in the given year. 2026 is YTD through June.</p>
+        <p style={sectionSub}>Ambassadors with at least 1 submission in the given year. 2026 is YTD through August.</p>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.875rem', marginBottom: '1rem' }}>
           {([2023, 2024, 2025, 2026] as const).map((y) => {
@@ -1476,7 +1481,7 @@ export default function AmbassadorGrowth() {
         </div>
 
         <div style={{ fontSize: '0.7rem', color: '#888', marginTop: 8, textAlign: 'center' }}>
-          {launchBonusData.length} ambassadors with ≥1 submission. Source: Salesforce Launch Bonus Tracker, August 3 2026.
+          {launchBonusData.length} ambassadors with ≥1 submission. Source: Salesforce Launch Bonus Tracker, August 10 2026.
         </div>
       </div>
 
