@@ -23,11 +23,12 @@ const TP = {
 
 /* ════════════════════════════════════════════
    HARDCODED GSC DATA — Source of truth
-   Data pulled fresh from Google Search Console on August 2, 2026
+   Data pulled fresh from Google Search Console on August 10, 2026
    Property: https://www.toothpillow.com/ (URL prefix)
    Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
    SEO program reset date: May 19, 2026
    May 2026: full month (31 days). June 2026: full month (30 days). July 2026: full month (31 days).
+   August 2026: partial (8 days through Aug 8). Blog launched Aug 6, 2026.
    ════════════════════════════════════════════ */
 
 const SEO_START_DATE = '2026-05-19';
@@ -42,7 +43,7 @@ const SUBMISSIONS_2025: Record<string, number> = {
   '2025-10': 1508, '2025-11': 1608, '2025-12': 1253,
 };
 
-const GSC_MONTHLY = [
+const GSC_MONTHLY: Array<{ month: string; clicks: number; impressions: number; ctr: number; position: number; partial?: boolean; daysReported?: number }> = [
   { month: '2025-02', clicks: 18183, impressions: 541298, ctr: 3.4, position: 72.5 },
   { month: '2025-03', clicks: 19017, impressions: 867156, ctr: 2.2, position: 72.5 },
   { month: '2025-04', clicks: 13318, impressions: 652511, ctr: 2.0, position: 72.0 },
@@ -61,6 +62,7 @@ const GSC_MONTHLY = [
   { month: '2026-05', clicks: 10509, impressions: 53592, ctr: 19.6, position: 17.8 },
   { month: '2026-06', clicks: 11550, impressions: 54729, ctr: 21.1, position: 10.1 },
   { month: '2026-07', clicks: 11163, impressions: 52738, ctr: 21.2, position: 9.5 },
+  { month: '2026-08', clicks: 2447, impressions: 13449, ctr: 18.2, position: 9.0, partial: true, daysReported: 8 },
 ];
 
 const GSC_WEEKLY = [
@@ -142,11 +144,11 @@ const GSC_WEEKLY = [
   { week: '2026-07-13', clicks: 2721, impressions: 12681, ctr: 21.5, position: 9.7 },
   { week: '2026-07-20', clicks: 2917, impressions: 12654, ctr: 23.1, position: 9.1 },
   { week: '2026-07-27', clicks: 2738, impressions: 12532, ctr: 21.8, position: 9.4 },
-  { week: '2026-08-03', clicks: 269, impressions: 1610, ctr: 16.7, position: 16.4 },
+  { week: '2026-08-03', clicks: 1867, impressions: 10280, ctr: 18.2, position: 8.8 },
 ];
 
-// Full-year daily GSC data — Jan 1 to Jul 31, 2026
-// Source: Google Search Console DAYS view, updated August 4, 2026
+// Full-year daily GSC data — Jan 1 to Aug 8, 2026
+// Source: Google Search Console DAYS view, updated August 10, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -198,7 +200,7 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
     [26,293,1525],[27,395,1957],[28,412,1722],[29,391,1790],[30,384,1714],[31,552,2265],
   ],
   Aug: [
-    [1,311,1559],[2,269,1610],
+    [1,311,1559],[2,269,1610],[3,343,1836],[4,387,1667],[5,338,1692],[6,341,1629],[7,264,1678],[8,194,1778],
   ],
 };
 
@@ -208,49 +210,51 @@ for (const [d, c, i] of GSC_DAILY_2026.May) { GSC_DAILY_MAY_2026[d] = { clicks: 
 
 /* ════════════════════════════════════════════
    KEYWORD MOVERS — Non-branded keywords showing movement
-   GSC comparison: Jun 25–Jul 22, 2026 (28d)
+   GSC comparison: Jul 12–Aug 8, 2026 (28d)
    Only keywords verified as appearing in recent GSC data are included.
    Excludes all branded variations (toothpillow, tooth pillow, mouth pillow, etc.)
-   Updated August 2, 2026
+   Updated August 10, 2026
    ════════════════════════════════════════════ */
 
 // Position climbers with monthly position history from GSC
 // posHistory: monthly average position (from GSC DAYS breakdown, verified Jul 6 2026)
 // startedClimbing: first month position improved meaningfully and sustained
 const KEYWORD_CLIMBERS = [
-  { query: 'mouth breathing', posNow: 34.0, posPrev: 61.0, change: -27.0, imprNow: 10,
-    startedClimbing: 'Dec 2025', posHistory: [89,92,82,82,92,93,89,89,84,86,74,79,57,75,61,40,34] },
-  { query: 'airway dentist near me', posNow: 9.1, posPrev: 32.1, change: -23.0, imprNow: 37,
-    startedClimbing: 'Apr 2026', posHistory: null },
-  { query: 'kids airway dentist', posNow: 16.7, posPrev: 29.7, change: -13.0, imprNow: 78,
-    startedClimbing: 'Apr 2026', posHistory: null },
-  { query: 'mouth breathing treatment kids', posNow: 3.8, posPrev: 7.8, change: -4.0, imprNow: 85,
+  { query: 'mouth breather face', posNow: 8.7, posPrev: 40.0, change: -31.3, imprNow: 271,
+    startedClimbing: 'Aug 2026', posHistory: null },
+  { query: 'mouth breathing treatment kids', posNow: 4.0, posPrev: 7.8, change: -3.8, imprNow: 74,
     startedClimbing: 'May 2026', posHistory: null },
-  { query: 'kids mouth breathing treatment', posNow: 3.1, posPrev: 6.6, change: -3.5, imprNow: 7,
-    startedClimbing: 'May 2026', posHistory: null },
-  { query: 'pillow for mouth breathers', posNow: 8.8, posPrev: 11.8, change: -3.0, imprNow: 117,
-    startedClimbing: 'May 2026', posHistory: null },
-  { query: 'child mouth breathing treatment', posNow: 4.5, posPrev: 7.5, change: -3.0, imprNow: 65,
+  { query: 'child mouth breathing treatment', posNow: 5.0, posPrev: 7.5, change: -2.5, imprNow: 61,
     startedClimbing: 'Jun 2026', posHistory: null },
+  { query: 'airway doctor', posNow: 9.5, posPrev: 30.0, change: -20.5, imprNow: 110,
+    startedClimbing: 'Apr 2026', posHistory: null },
+  { query: 'pillow for mouth breathers', posNow: 7.6, posPrev: 11.8, change: -4.2, imprNow: 89,
+    startedClimbing: 'May 2026', posHistory: null },
+  { query: 'best kids pillow for mouth breathing', posNow: 3.7, posPrev: 5.5, change: -1.8, imprNow: 80,
+    startedClimbing: 'Jun 2026', posHistory: null },
+  { query: 'kids posture pillow for mouth breathing', posNow: 2.1, posPrev: 3.5, change: -1.4, imprNow: 120,
+    startedClimbing: 'May 2026', posHistory: null },
   { query: 'how to avoid braces', posNow: 5.1, posPrev: 5.5, change: -0.4, imprNow: 32,
     startedClimbing: 'May 2026', posHistory: null },
 ];
 // posHistory is 17 values: Feb'25..Jun'26 monthly avg position, null = no data that month
 
 // Non-branded keywords already driving clicks (sorted by clicks, last 28 days)
-// Source: GSC 28-day data (Jun 25–Jul 22, 2026), pulled July 24, 2026
+// Source: GSC 28-day data (Jul 12–Aug 8, 2026), pulled August 10, 2026
 const CLICK_DRIVING_KEYWORDS = [
-  { query: 'kids pillow for mouth breathing', posNow: 1.5, clicksNow: 37, imprNow: 157, status: 'Page 1' },
-  { query: 'recovery kids pillow mouth breathing', posNow: 1.5, clicksNow: 11, imprNow: 26, status: 'Page 1' },
-  { query: 'best kids pillow for mouth breathing', posNow: 2.9, clicksNow: 10, imprNow: 79, status: 'Page 1' },
-  { query: 'kids mouth breathing pillow', posNow: 1.4, clicksNow: 10, imprNow: 52, status: 'Page 1' },
-  { query: 'mouth pillow for adults', posNow: 8.6, clicksNow: 8, imprNow: 87, status: 'Near page 1' },
-  { query: 'pillow for mouth breathers kids', posNow: 1.5, clicksNow: 7, imprNow: 45, status: 'Page 1' },
-  { query: 'pillow for mouth breathers', posNow: 8.0, clicksNow: 6, imprNow: 102, status: 'Near page 1' },
-  { query: 'kids posture pillow for mouth breathing', posNow: 3.5, clicksNow: 6, imprNow: 42, status: 'Page 1' },
-  { query: 'mouth breathing pillow', posNow: 1.8, clicksNow: 5, imprNow: 62, status: 'Page 1' },
-  { query: 'mouth breathing pillow kids', posNow: 1.4, clicksNow: 5, imprNow: 33, status: 'Page 1' },
-  { query: 'tongue pillow for kids', posNow: 1.0, clicksNow: 3, imprNow: 15, status: 'Page 1' },
+  { query: 'kids pillow for mouth breathing', posNow: 1.8, clicksNow: 30, imprNow: 171, status: 'Page 1' },
+  { query: 'mouth pillow kids', posNow: 1.0, clicksNow: 28, imprNow: 98, status: 'Page 1' },
+  { query: 'kids posture pillow for mouth breathing', posNow: 2.1, clicksNow: 19, imprNow: 120, status: 'Page 1' },
+  { query: 'tongue pillow', posNow: 13.8, clicksNow: 13, imprNow: 86, status: 'Page 2' },
+  { query: 'best kids pillow for mouth breathing', posNow: 3.7, clicksNow: 11, imprNow: 80, status: 'Page 1' },
+  { query: 'kids mouth breathing pillow', posNow: 1.4, clicksNow: 10, imprNow: 32, status: 'Page 1' },
+  { query: 'pillow for mouth breathing child', posNow: 1.3, clicksNow: 10, imprNow: 28, status: 'Page 1' },
+  { query: 'pillow for kids mouth breathing', posNow: 1.4, clicksNow: 9, imprNow: 75, status: 'Page 1' },
+  { query: 'mouth breathing pillow kids', posNow: 1.6, clicksNow: 9, imprNow: 42, status: 'Page 1' },
+  { query: 'mouth pillow for adults', posNow: 8.6, clicksNow: 8, imprNow: 91, status: 'Near page 1' },
+  { query: 'pillow for mouth breathers kids', posNow: 1.6, clicksNow: 8, imprNow: 58, status: 'Page 1' },
+  { query: 'mouth breathing pillow', posNow: 1.7, clicksNow: 8, imprNow: 56, status: 'Page 1' },
+  { query: 'pillow for mouth breathers', posNow: 7.6, clicksNow: 6, imprNow: 89, status: 'Near page 1' },
 ];
 // Source: GSC 16-month aggregate (Mar 20 2025 – Jul 22 2026), pulled July 24, 2026
 // "mouth pillow", "mouth pillow kids", "teeth pillow" = quasi-branded (people searching
@@ -287,7 +291,7 @@ const TOP_QUERIES = [
    "mouth pillow" reclassified as quasi-branded per Sosh (people searching by name variant).
    Product NB = pillow-related searches (tongue pillow, mouth breathing pillow, etc.)
    Discovery NB = problem/treatment searches (airway dentist, mouth breathing treatment, etc.)
-   Updated August 2, 2026
+   Updated August 10, 2026
    ════════════════════════════════════════════ */
 const YOY_JUNE = {
   jun25: { total: 14288, nonBranded: 313, productNB: 281, discoveryNB: 32, days: 30 },
@@ -299,20 +303,44 @@ const YOY_JULY = {
   jul26: { total: 11163, nonBranded: 648, productNB: 510, discoveryNB: 138, days: 31 },
 };
 
+// Aug 1-8 comparison (partial month, same 8-day window)
+const YOY_AUGUST = {
+  aug25: { total: 6125, nonBranded: 180, productNB: 140, discoveryNB: 40, days: 8 },
+  aug26: { total: 2447, nonBranded: 293, productNB: 210, discoveryNB: 83, days: 8 },
+};
+
 /* ════════════════════════════════════════════
    TOP PAGES — Which pages get organic clicks
-   Source: GSC 12-month aggregate (Aug 2025 – Jul 2026), pulled August 2, 2026
+   Source: GSC 3-month aggregate (May 9 – Aug 8, 2026), pulled August 10, 2026
+   Note: page URLs changed since last pull (/program → /toothpillow-program, /assessment → /is-my-child-a-candidate)
    ════════════════════════════════════════════ */
 const TOP_PAGES = [
-  { page: '/', label: 'Homepage', clicks: 25496, impressions: 117812 },
-  { page: '/teens-adult', label: 'Teens & Adults', clicks: 2374, impressions: 32454 },
-  { page: '/pricing', label: 'Pricing', clicks: 1359, impressions: 56317 },
-  { page: '/program', label: 'Program', clicks: 1181, impressions: 37164 },
-  { page: '/assessment', label: 'Assessment', clicks: 1169, impressions: 57532 },
-  { page: '/our-doctors', label: 'Our Doctors', clicks: 867, impressions: 58838 },
-  { page: '/faqs', label: 'FAQs', clicks: 735, impressions: 54981 },
-  { page: '/premium', label: 'Premium', clicks: 228, impressions: 10920 },
-  { page: '/symptoms', label: 'Symptoms', clicks: 169, impressions: 27907 },
+  { page: '/', label: 'Homepage', clicks: 25663, impressions: 109874 },
+  { page: '/teens-adult', label: 'Teens & Adults', clicks: 2399, impressions: 33241 },
+  { page: '/toothpillow-program', label: 'Program', clicks: 1386, impressions: 43067 },
+  { page: '/pricing', label: 'Pricing', clicks: 1228, impressions: 54374 },
+  { page: '/is-my-child-a-candidate', label: 'Assessment', clicks: 1077, impressions: 57170 },
+  { page: '/our-doctors', label: 'Our Doctors', clicks: 872, impressions: 57817 },
+  { page: '/faqs', label: 'FAQs', clicks: 705, impressions: 53663 },
+  { page: '/premium', label: 'Premium', clicks: 225, impressions: 10355 },
+  { page: '/symptoms', label: 'Symptoms', clicks: 159, impressions: 24091 },
+];
+
+/* ════════════════════════════════════════════
+   BLOG / ARTICLE PAGES — New content indexed since blog launch Aug 6
+   Source: GSC 3-month aggregate (May 9 – Aug 8, 2026), pulled August 10, 2026
+   33 article pages indexed, 126 total clicks, 13,806 total impressions
+   ════════════════════════════════════════════ */
+const ARTICLE_PAGES = [
+  { path: '/articles', label: 'Articles Index', clicks: 35, impressions: 3496, position: 9.9 },
+  { path: '/articles/rapid-palatal-expansion', label: 'Rapid Palatal Expansion', clicks: 34, impressions: 907, position: 9.3 },
+  { path: '/articles/the-human-airway', label: 'The Human Airway', clicks: 26, impressions: 2443, position: 12.0 },
+  { path: '/articles/is-your-child-a-mouth-breather...', label: 'Mouth Breather — New Help', clicks: 18, impressions: 4468, position: 7.1 },
+  { path: '/articles/snoring-can-be-a-danger-sign', label: 'Snoring Danger Sign', clicks: 4, impressions: 93, position: 8.8 },
+  { path: '/articles/craniofacial-changes...', label: 'Craniofacial Changes & SDB', clicks: 2, impressions: 579, position: 9.3 },
+  { path: '/articles/mouth-breathing-face', label: 'Mouth Breathing Face', clicks: 1, impressions: 736, position: 8.0 },
+  { path: '/articles/association-oral-habits...', label: 'Oral Habits & Mouth Breathing', clicks: 0, impressions: 277, position: 11.3 },
+  { path: '/articles/pediatric-orthodontic-expansion...', label: 'Pediatric Expansion for SDB', clicks: 0, impressions: 256, position: 27.0 },
 ];
 
 
@@ -376,10 +404,13 @@ export default function OrganicGrowth() {
   // Merge 2025 hardcoded + 2026 from daily tracker
   const SUBMISSIONS_BY_MONTH: Record<string, number> = { ...SUBMISSIONS_2025, ...subs2026 };
 
+  const latestFullMonth = GSC_MONTHLY.find(m => m.month === '2026-07')!;
   const latestMonth = GSC_MONTHLY[GSC_MONTHLY.length - 1];
-  const latestDaysReported = 31; // July 1-31 (full month)
-  const julClickPace = latestMonth.clicks; // full month, no projection needed
-  const julImprPace = latestMonth.impressions;
+  const augPartial = GSC_MONTHLY.find(m => m.month === '2026-08');
+  const latestDaysReported = augPartial?.daysReported || 31;
+  void latestDaysReported; // used for future pacing calculations
+  const julClickPace = latestFullMonth.clicks;
+  const julImprPace = latestFullMonth.impressions;
 
   const jul2025 = GSC_MONTHLY.find(m => m.month === '2025-07')!;
 
@@ -788,6 +819,8 @@ export default function OrganicGrowth() {
   // ── YoY July comparison ──
   const yoyJulNbPctChg = ((YOY_JULY.jul26.nonBranded - YOY_JULY.jul25.nonBranded) / YOY_JULY.jul25.nonBranded * 100);
   const yoyJulDiscChg = ((YOY_JULY.jul26.discoveryNB - YOY_JULY.jul25.discoveryNB) / YOY_JULY.jul25.discoveryNB * 100);
+  const yoyAugNbPctChg = ((YOY_AUGUST.aug26.nonBranded - YOY_AUGUST.aug25.nonBranded) / YOY_AUGUST.aug25.nonBranded * 100);
+  const yoyAugDiscChg = ((YOY_AUGUST.aug26.discoveryNB - YOY_AUGUST.aug25.discoveryNB) / YOY_AUGUST.aug25.discoveryNB * 100);
 
   // ── Normalized clicks/day chart data ──
   const normalizedChartData = useMemo(() => {
@@ -1168,11 +1201,42 @@ export default function OrganicGrowth() {
           <Bar data={yoyChartData as any} options={yoyChartOpts as object} />
         </div>
 
+        {/* August YoY (partial — first 8 days) */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: TP.navy, marginBottom: 8 }}>August 1–8, 2025 vs August 1–8, 2026</div>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <div style={cardStyle}>
+              <div style={labelStyle}>Non-Branded Clicks</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>{YOY_AUGUST.aug26.nonBranded}</div>
+              <div style={{ fontSize: 12, color: '#888' }}>vs {YOY_AUGUST.aug25.nonBranded} last year</div>
+              <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4, color: TP.green }}>
+                ▲ +{yoyAugNbPctChg.toFixed(0)}%
+              </div>
+            </div>
+            <div style={cardStyle}>
+              <div style={labelStyle}>Discovery Keywords</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: TP.green }}>{YOY_AUGUST.aug26.discoveryNB}</div>
+              <div style={{ fontSize: 12, color: '#888' }}>vs {YOY_AUGUST.aug25.discoveryNB} last year</div>
+              <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4, color: TP.green }}>
+                ▲ +{yoyAugDiscChg.toFixed(0)}%
+              </div>
+            </div>
+            <div style={cardStyle}>
+              <div style={labelStyle}>Total Clicks (All)</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: TP.navy }}>{fmtK(YOY_AUGUST.aug26.total)}</div>
+              <div style={{ fontSize: 12, color: '#888' }}>vs {fmtK(YOY_AUGUST.aug25.total)} last year</div>
+              <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4, color: TP.red }}>
+                ▼ {delta(YOY_AUGUST.aug26.total, YOY_AUGUST.aug25.total)}
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div style={{ marginTop: 16, padding: '12px 16px', background: `${TP.green}08`, borderRadius: 8, border: `1px solid ${TP.green}20`, fontSize: 12, color: '#555', lineHeight: 1.7 }}>
-          Non-branded discovery clicks grew +{yoyJulNbPctChg.toFixed(0)}% YoY in July, with discovery keywords (treatment, airway, condition searches)
-          up +{yoyJulDiscChg.toFixed(0)}% — parents searching for solutions who didn&apos;t know Toothpillow existed. Total clicks are down YoY because
-          July 2025 had inflated impression counts from Google testing broader queries (493K impressions, 4.7% CTR vs 53K impressions, 21.2% CTR in July 2026).
-          The site is reaching fewer people but far more relevant ones.
+          Non-branded discovery clicks grew +{yoyAugNbPctChg.toFixed(0)}% YoY in Aug 1–8, with discovery keywords
+          up +{yoyAugDiscChg.toFixed(0)}%. The blog launched Aug 6 — &quot;mouth breather face&quot; (22K monthly search volume)
+          already has 271 impressions at position 8.7. Total clicks are down YoY because Aug 2025 had inflated
+          impression counts (188K vs 13K) from irrelevant queries at position 68+ (3.3% CTR vs 18.2% CTR in 2026).
         </div>
       </div>
 
@@ -1213,7 +1277,7 @@ export default function OrganicGrowth() {
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
         <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4, marginTop: 0 }}>Where Organic Traffic Lands</h3>
         <p style={{ fontSize: 12, color: '#888', margin: '0 0 16px 0' }}>
-          Clicks by page, last 12 months (Aug 2025 – Jul 2026). Shows which pages Google sends people to.
+          Clicks by page, 3-month aggregate (May 9 – Aug 8, 2026). Shows which pages Google sends people to.
         </p>
         <div style={{ height: Math.max(280, TOP_PAGES.length * 40 + 40) }}>
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
@@ -1258,7 +1322,7 @@ export default function OrganicGrowth() {
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
         <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4, marginTop: 0 }}>Non-Branded Keyword Positions: Then vs Now</h3>
         <p style={{ fontSize: 12, color: '#888', margin: '0 0 16px 0' }}>
-          Gray = previous position (Mar–May avg). Green = current position (Jun 7–Jul 4). Shorter bar = better ranking. Red line = Page 1 cutoff.
+          Gray = previous position (pre-SEO baseline). Green = current position (Jul 12–Aug 8). Shorter bar = better ranking. Red line = Page 1 cutoff.
         </p>
         <div style={{ height: Math.max(250, KEYWORD_CLIMBERS.length * 50 + 60) }}>
           <Bar
@@ -1266,7 +1330,7 @@ export default function OrganicGrowth() {
               labels: KEYWORD_CLIMBERS.map(k => k.query),
               datasets: [
                 {
-                  label: 'Previous (Mar–May)',
+                  label: 'Previous (baseline)',
                   data: KEYWORD_CLIMBERS.map(k => k.posPrev),
                   backgroundColor: '#D1D5DB',
                   borderRadius: 3,
@@ -1274,7 +1338,7 @@ export default function OrganicGrowth() {
                   categoryPercentage: 0.8,
                 },
                 {
-                  label: 'Current (Jun)',
+                  label: 'Current (Jul–Aug)',
                   data: KEYWORD_CLIMBERS.map(k => k.posNow),
                   backgroundColor: TP.green,
                   borderRadius: 3,
@@ -1337,7 +1401,7 @@ export default function OrganicGrowth() {
       <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: '1px solid #e5e7eb' }}>
         <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, marginBottom: 4, marginTop: 0 }}>Non-Branded Clicks This Month</h3>
         <p style={{ fontSize: 12, color: '#888', margin: '0 0 12px 0' }}>
-          Keywords where people found Toothpillow without searching for it by name (Jun 7–Jul 4, 2026)
+          Keywords where people found Toothpillow without searching for it by name (Jul 12–Aug 8, 2026)
         </p>
         {CLICK_DRIVING_KEYWORDS.filter(k => k.clicksNow > 0).map((k, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #f5f5f5' }}>
@@ -1352,6 +1416,65 @@ export default function OrganicGrowth() {
         ))}
         <div style={{ fontSize: 11, color: '#aaa', marginTop: 10 }}>
           Green dot = page 1 (position 1–10). Yellow dot = page 2–3.
+        </div>
+      </div>
+
+      {/* ═══════ SECTION 7: BLOG ARTICLE PERFORMANCE ═══════ */}
+      <div style={{ background: '#fff', borderRadius: 10, padding: 20, border: `2px solid #9C27B020` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <span style={{ background: '#9C27B0', color: '#fff', borderRadius: 4, padding: '2px 8px', fontSize: 10, fontWeight: 700 }}>NEW</span>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: TP.navy, margin: 0 }}>Blog Article Performance</h3>
+        </div>
+        <p style={{ fontSize: 12, color: '#888', margin: '4px 0 16px 0' }}>
+          Blog launched Aug 6, 2026. 33 article pages indexed. {ARTICLE_PAGES.reduce((s, a) => s + a.clicks, 0)} clicks from {ARTICLE_PAGES.reduce((s, a) => s + a.impressions, 0).toLocaleString()} impressions across all articles (3-month window).
+        </p>
+
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
+          <div style={{ flex: 1, minWidth: 140, background: `#9C27B008`, borderRadius: 8, padding: 12, border: `1px solid #9C27B020`, textAlign: 'center' }}>
+            <div style={{ fontSize: 11, color: '#888' }}>Articles Indexed</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: '#9C27B0' }}>33</div>
+          </div>
+          <div style={{ flex: 1, minWidth: 140, background: `#9C27B008`, borderRadius: 8, padding: 12, border: `1px solid #9C27B020`, textAlign: 'center' }}>
+            <div style={{ fontSize: 11, color: '#888' }}>Total Article Clicks</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: '#9C27B0' }}>126</div>
+          </div>
+          <div style={{ flex: 1, minWidth: 140, background: `#9C27B008`, borderRadius: 8, padding: 12, border: `1px solid #9C27B020`, textAlign: 'center' }}>
+            <div style={{ fontSize: 11, color: '#888' }}>Total Article Impressions</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: '#9C27B0' }}>13.8K</div>
+          </div>
+        </div>
+
+        <div style={{ fontSize: 13, fontWeight: 600, color: TP.navy, marginBottom: 8 }}>Top Article Pages</div>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+            <thead>
+              <tr style={{ borderBottom: `2px solid ${TP.navy}` }}>
+                <th style={{ padding: '6px 10px', textAlign: 'left', color: TP.navy }}>Article</th>
+                <th style={{ padding: '6px 10px', textAlign: 'right', color: TP.navy }}>Clicks</th>
+                <th style={{ padding: '6px 10px', textAlign: 'right', color: TP.navy }}>Impr</th>
+                <th style={{ padding: '6px 10px', textAlign: 'right', color: TP.navy }}>Position</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ARTICLE_PAGES.map((a, i) => (
+                <tr key={i} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : '#fff' }}>
+                  <td style={{ padding: '6px 10px', fontWeight: 500 }}>
+                    {a.label}
+                    {a.position <= 10 && <span style={{ marginLeft: 6, fontSize: 9, background: TP.green, color: '#fff', borderRadius: 3, padding: '1px 5px', fontWeight: 700 }}>Page 1</span>}
+                  </td>
+                  <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 600 }}>{a.clicks}</td>
+                  <td style={{ padding: '6px 10px', textAlign: 'right' }}>{a.impressions.toLocaleString()}</td>
+                  <td style={{ padding: '6px 10px', textAlign: 'right', color: a.position <= 10 ? TP.green : TP.yellow, fontWeight: 600 }}>{a.position.toFixed(1)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div style={{ marginTop: 12, padding: '10px 14px', background: `#9C27B008`, borderRadius: 8, border: `1px solid #9C27B020`, fontSize: 12, color: '#555', lineHeight: 1.6 }}>
+          <strong style={{ color: '#9C27B0' }}>Key signal:</strong> &quot;Mouth Breathing Face&quot; (target keyword, 22,200 monthly searches) is already at position 8.0 with 736 impressions
+          after just 2 days live. &quot;Is Your Child a Mouth Breather&quot; has 4,468 impressions at position 7.1. These pages are already on page 1 for high-volume
+          non-branded keywords — the first time Toothpillow has ranked for discovery terms at this scale.
         </div>
       </div>
 
@@ -1431,7 +1554,7 @@ export default function OrganicGrowth() {
 
       {/* Data source */}
       <div style={{ fontSize: 11, color: '#aaa', textAlign: 'center', padding: '8px 0' }}>
-        Google Search Console (18 months). Data pulled August 2, 2026. SEO implemented May 19, 2026.
+        Google Search Console (18 months). Data pulled August 10, 2026. SEO implemented May 19, 2026. Blog launched August 6, 2026.
       </div>
     </div>
   );
