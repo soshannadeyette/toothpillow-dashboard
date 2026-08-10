@@ -1599,6 +1599,110 @@ export default function OrganicGrowth() {
               </div>
             </div>
 
+            {/* Position tracking chart */}
+            {(() => {
+              // Collect all unique snapshot dates across all articles
+              const allDates = [...new Set(articles.flatMap(a => a.snapshots.map(s => s.date)))].sort();
+              // Color palette for article lines
+              const lineColors = [TP.red, TP.blue, TP.green, TP.darkPurple, TP.yellow, TP.bubblegum, '#FF6B35', '#004E89'];
+              const chartDatasets = sorted.map((art, idx) => {
+                const color = lineColors[idx % lineColors.length];
+                // Map data to each date (null if no snapshot for that date)
+                const data = allDates.map(d => {
+                  const snap = art.snapshots.find(s => s.date === d);
+                  return snap ? snap.position : null;
+                });
+                return {
+                  label: art.label.length > 25 ? art.label.substring(0, 22) + '...' : art.label,
+                  data,
+                  borderColor: color,
+                  backgroundColor: color,
+                  pointRadius: 5,
+                  pointHoverRadius: 7,
+                  borderWidth: 2.5,
+                  tension: 0.3,
+                  spanGaps: true,
+                };
+              });
+
+              return (
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: TP.navy, marginBottom: 4 }}>Article Position Tracking</div>
+                  <p style={{ fontSize: 11, color: '#888', margin: '0 0 8px 0' }}>
+                    Lower position = higher on Google. Dashed line = Page 1 cutoff (position 10). Each GSC pull adds a data point.
+                  </p>
+                  <div style={{ height: 300 }}>
+                    <Line
+                      data={{
+                        labels: allDates.map(d => { const [,m,day] = d.split('-'); const mo = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][Number(m)]; return `${mo} ${Number(day)}`; }),
+                        datasets: chartDatasets,
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                          y: {
+                            reverse: true,
+                            min: 1,
+                            max: Math.max(30, ...articles.flatMap(a => a.snapshots.map(s => s.position))) + 2,
+                            title: { display: true, text: 'Google Position (lower = better)', font: { size: 11 } },
+                            grid: { color: '#f0f0f0' },
+                            ticks: { stepSize: 5 },
+                          },
+                          x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 11 } },
+                          },
+                        },
+                        plugins: {
+                          legend: {
+                            position: 'bottom' as const,
+                            labels: { usePointStyle: true, boxWidth: 8, padding: 12, font: { size: 10 } },
+                          },
+                          tooltip: {
+                            callbacks: {
+                              label: (ctx: { dataset: { label?: string }; parsed: { y: number | null } }) =>
+                                ctx.parsed.y != null ? `${ctx.dataset.label}: pos ${ctx.parsed.y.toFixed(1)}` : '',
+                            },
+                          },
+                          annotation: {
+                            annotations: {
+                              page1Line: {
+                                type: 'line' as const,
+                                yMin: 10,
+                                yMax: 10,
+                                borderColor: `${TP.green}80`,
+                                borderWidth: 2,
+                                borderDash: [8, 4],
+                                label: {
+                                  display: true,
+                                  content: 'Page 1 cutoff',
+                                  position: 'end' as const,
+                                  backgroundColor: `${TP.green}B0`,
+                                  color: '#fff',
+                                  font: { size: 9, weight: 'bold' as const },
+                                  padding: { top: 2, bottom: 2, left: 5, right: 5 },
+                                  borderRadius: 3,
+                                },
+                              },
+                              page2Line: {
+                                type: 'line' as const,
+                                yMin: 20,
+                                yMax: 20,
+                                borderColor: `${TP.yellow}60`,
+                                borderWidth: 1,
+                                borderDash: [4, 4],
+                              },
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Per-article cards */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {sorted.map((art, i) => {
