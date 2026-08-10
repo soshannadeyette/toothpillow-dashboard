@@ -392,7 +392,7 @@ export default function ReferrerView() {
             padding: '14px 16px', marginTop: 0,
           }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: TP.text, marginBottom: 10, borderBottom: '1px solid #e2e8f0', paddingBottom: 8 }}>
-              Projected May
+              Projected {fmtMonthFull(CURRENT_MONTH_KEY)}
             </div>
             <div style={{ fontSize: 11, color: '#888', marginBottom: 10 }}>
               Based on {CURRENT_MONTH_DAYS_TRACKED}-day pace
