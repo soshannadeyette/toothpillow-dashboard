@@ -123,22 +123,22 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-07-22', spend: 643.76, clicks: 161, impressions: 2536, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-07-23', spend: 605.30, clicks: 144, impressions: 2383, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-07-24', spend: 545.50, clicks: 147, impressions: 2107, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-07-25', spend: 462.41, clicks: 145, impressions: 2090, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-07-26', spend: 502.61, clicks: 147, impressions: 1997, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-07-27', spend: 493.26, clicks: 163, impressions: 2183, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-07-28', spend: 279.01, clicks: 106, impressions: 1502, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-07-29', spend: 383.28, clicks: 124, impressions: 1686, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-07-30', spend: 237.62, clicks: 96, impressions: 1423, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-07-31', spend: 160.32, clicks: 60, impressions: 1232, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-08-01', spend: 146.94, clicks: 66, impressions: 964, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-08-02', spend: 295.43, clicks: 111, impressions: 1384, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-08-03', spend: 357.80, clicks: 122, impressions: 1879, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-08-04', spend: 566.39, clicks: 177, impressions: 2662, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-08-05', spend: 696.78, clicks: 183, impressions: 2774, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-08-06', spend: 522.13, clicks: 149, impressions: 2837, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-08-07', spend: 589.83, clicks: 156, impressions: 2174, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-08-08', spend: 484.57, clicks: 145, impressions: 1895, submit: 0, started: 0, finished: 0, treatment: 0 },
-  { date: '2026-08-09', spend: 587.95, clicks: 168, impressions: 2554, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-07-25', spend: 462.41, clicks: 145, impressions: 2090, submit: 2, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-07-26', spend: 502.61, clicks: 147, impressions: 1997, submit: 18, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-07-27', spend: 493.26, clicks: 163, impressions: 2183, submit: 6, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-07-28', spend: 279.01, clicks: 106, impressions: 1502, submit: 5, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-07-29', spend: 383.28, clicks: 124, impressions: 1686, submit: 9, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-07-30', spend: 237.62, clicks: 96, impressions: 1423, submit: 18, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-07-31', spend: 160.32, clicks: 60, impressions: 1232, submit: 7, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-01', spend: 146.94, clicks: 66, impressions: 964, submit: 14, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-02', spend: 295.43, clicks: 111, impressions: 1384, submit: 15, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-03', spend: 357.80, clicks: 122, impressions: 1879, submit: 12, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-04', spend: 566.39, clicks: 177, impressions: 2662, submit: 27, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-05', spend: 696.78, clicks: 183, impressions: 2774, submit: 24, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-06', spend: 522.13, clicks: 149, impressions: 2837, submit: 24, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-07', spend: 589.83, clicks: 156, impressions: 2174, submit: 22, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-08', spend: 484.57, clicks: 145, impressions: 1895, submit: 22, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-09', spend: 587.95, clicks: 168, impressions: 2554, submit: 16, started: 0, finished: 0, treatment: 0 },
 ];
 
 // Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)
@@ -389,7 +389,8 @@ export default function PaidAds() {
         ctx.fillText('Tracking Blackout', (x0 + x1) / 2, yScale.top + 12);
         ctx.restore();
       }
-      // Conversion action change marker — July 22, 2026
+      // Conversion action broke ~July 14, 2026 (zeros in seed). Fixed ~July 25-26, 2026 (conversions resumed).
+      // Jul 25-Aug 9 conversion totals stored in submit field (per-action breakdown unavailable).
       const convIdx = chartLabels.indexOf('07/22');
       if (convIdx >= 0) {
         const cx = xScale.getPixelForValue(convIdx);
@@ -823,6 +824,64 @@ export default function PaidAds() {
               }).filter(Boolean)}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* ═══════ DAILY GOOGLE ADS CONVERSIONS ═══════ */}
+      <SectionHeader>Daily Google Ads Conversions</SectionHeader>
+      <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>
+        Total Google Ads conversions per day (all conversion actions combined). Conversion tracking broke ~Jul 14 and was fixed ~Jul 26.
+      </div>
+      <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', marginBottom: 32 }}>
+        <div style={{ height: 300 }}>
+          <Line
+            data={{
+              labels: sorted.map(e => { const [,m,d] = e.date.split('-'); return `${parseInt(m)}/${parseInt(d)}`; }),
+              datasets: [{
+                label: 'Conversions',
+                data: sorted.map(e => e.submit + e.started + e.finished + e.treatment),
+                borderColor: '#4CAF50',
+                backgroundColor: '#4CAF5020',
+                fill: true,
+                borderWidth: 2,
+                pointRadius: 2,
+                tension: 0.3,
+              }],
+            }}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: (ctx) => `${ctx.parsed.y} conversions` } },
+              },
+              scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Conversions' } },
+              },
+            }}
+          />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 12, fontSize: '0.82em' }}>
+          {(() => {
+            const aug = sorted.filter(e => e.date.startsWith('2026-08'));
+            const jul = sorted.filter(e => e.date.startsWith('2026-07'));
+            const jun = sorted.filter(e => e.date.startsWith('2026-06'));
+            const sum = (arr: typeof sorted) => arr.reduce((s, e) => s + e.submit + e.started + e.finished + e.treatment, 0);
+            const avg = (arr: typeof sorted) => arr.length > 0 ? (sum(arr) / arr.length).toFixed(1) : '—';
+            const spendArr = (arr: typeof sorted) => arr.reduce((s, e) => s + e.spend, 0);
+            const cpc = (arr: typeof sorted) => { const t = sum(arr); return t > 0 ? `$${Math.round(spendArr(arr) / t)}` : '—'; };
+            return [
+              { label: `Aug (${aug.length}d)`, total: sum(aug), avg: avg(aug), cpc: cpc(aug) },
+              { label: `Jul`, total: sum(jul), avg: avg(jul), cpc: cpc(jul) },
+              { label: `Jun`, total: sum(jun), avg: avg(jun), cpc: cpc(jun) },
+            ].map(m => (
+              <div key={m.label} style={{ background: '#f8f9fa', borderRadius: 8, padding: 12, textAlign: 'center' }}>
+                <div style={{ fontWeight: 700, fontSize: '1.3em' }}>{m.total}</div>
+                <div style={{ color: '#666' }}>{m.label} conversions</div>
+                <div style={{ color: '#888', fontSize: '0.9em', marginTop: 4 }}>{m.avg}/day avg · {m.cpc} CPC</div>
+              </div>
+            ));
+          })()}
         </div>
       </div>
 
