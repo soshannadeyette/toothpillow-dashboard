@@ -69,8 +69,8 @@ const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:
 // Note: adds counts are from ambassador program tracking, not Salesforce referral exports
 
 // Active ambassadors with ≥1 submission per year (from Salesforce)
-const activeInfByYear: Record<number, number> = {2023:6, 2024:60, 2025:82, 2026:73};
-const activeAmbByYear: Record<number, number> = {2023:24, 2024:85, 2025:127, 2026:147};
+const activeInfByYear: Record<number, number> = {2023:6, 2024:60, 2025:82, 2026:78};
+const activeAmbByYear: Record<number, number> = {2023:24, 2024:85, 2025:127, 2026:141};
 const activeTotalByYear: Record<number, number> = {2023:30, 2024:145, 2025:209, 2026:220};
 
 const halfCarriedBy: Record<number, number> = {2023:1, 2024:2, 2025:5, 2026:7};
