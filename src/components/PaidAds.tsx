@@ -157,31 +157,31 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
    so Meta contribution is negligible in those months.
    ════════════════════════════════════════════ */
 
-// Pipeline totals — Salesforce export Aug 10, 2026
+// Pipeline totals — Salesforce export Aug 11, 2026
 const GOOGLE_SF_PIPELINE = {
-  total: 560,           // leads created (started form)
-  completed: 260,       // all stages except Waiting-Info (46%)
-  waitingInfo: 300,     // incomplete submissions
-  sentCheckout: 175,    // Sent Checkout Link (147) + SCL-Temp Hold (2) + Checked Out (26)
-  sentToTxP: 20,        // at Sent to TxP stage
-  txpApproved: 7,
-  checkedOut: 26,
-  referredOut: 30,
-  closedLost: 25,       // 17 Closed Lost + 8 Do Not Contact
-  tempHold: 5,          // 3 Temp Hold + 2 SCL-Temp Hold
+  total: 549,           // leads created (started form)
+  completed: 250,       // all stages except Waiting-Info (46%)
+  waitingInfo: 299,     // incomplete submissions
+  sentCheckout: 172,    // Sent Checkout Link (146) + SCL-Temp Hold (1) + Checked Out (25)
+  sentToTxP: 19,        // at Sent to TxP stage
+  txpApproved: 6,
+  checkedOut: 25,
+  referredOut: 29,
+  closedLost: 22,       // 16 Closed Lost + 6 Do Not Contact
+  tempHold: 3,          // 2 Temp Hold + 1 SCL-Temp Hold
   formOpens: 1436,      // Google Ads conversions (form opens, Google-only)
 };
 
-// Revenue from checkouts — 26 checkouts at $44,991
+// Revenue from checkouts — 25 checkouts at $44,991
 const GOOGLE_REVENUE: number = 44991;
 
-// Monthly breakdown from Salesforce (by Created Date)
-// Used in the monthly summary table alongside Google Ads spend data
+// Monthly breakdown from Salesforce — leads/completed by created date,
+// checkouts/revenue by checkout date (when revenue was realized)
 const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: number; checkouts: number; revenue: number }[] = [
-  { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 23, checkouts: 2, revenue: 3291 },
-  { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 31, checkouts: 5, revenue: 8676 },
-  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 85, checkouts: 12, revenue: 14759 },
-  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 184, completed: 85, checkouts: 6, revenue: 21354 },
+  { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 24, checkouts: 2, revenue: 3291 },
+  { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 31, checkouts: 1, revenue: 1995 },
+  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 85, checkouts: 9, revenue: 14759 },
+  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 184, completed: 85, checkouts: 11, revenue: 21354 },
   { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 52, completed: 26, checkouts: 2, revenue: 3592 },
 ];
 
