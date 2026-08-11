@@ -75,9 +75,9 @@ const activeTotalByYear: Record<number, number> = {2023:30, 2024:145, 2025:209, 
 
 const halfCarriedBy: Record<number, number> = {2023:1, 2024:2, 2025:5, 2026:7};
 const tenPlusByYear: Record<number, number> = {2023:8, 2024:40, 2025:55, 2026:44};
-// Mega-3 = Lauren Johnson + Shannon Tripp + Soshanna (top 3 YTD producers, source: LB Tracker Aug 11)
-const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:1284};
-const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:2404};
+// Mega-3 = Lauren Johnson + Kendra Needham + Ginny Yurich (top recruited-ambassador producers)
+const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:958};
+const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:2730};
 
 // Dynamic annualization: complete months + fractional current month
 const _now = new Date();
