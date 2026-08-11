@@ -194,22 +194,24 @@ const LAUNCH_BONUS_PAYOUTS: {month:string; payouts:{name:string;amount:number;ti
   { month: 'August 2026', payouts: [
     { name: 'Kendra Needham', amount: 1000, tier: 'Tier 2', pending: true },
     { name: 'Eden Lee loverlees', amount: 1250, tier: 'Tier 2', pending: true, note: 'Hit T1 07/10 + T2 07/30, first payout' },
-    { name: 'Amy Bernhard', amount: 1000, tier: 'Tier 2', pending: true },
-    { name: 'Jeff Cruz Talia_likeitis', amount: 1000, tier: 'Tier 2', pending: true },
-    { name: 'Melody Brandon', amount: 1000, tier: 'Tier 2', pending: true },
-    { name: 'Taylor Kulik', amount: 250, tier: 'Tier 1', pending: true },
-    { name: 'Hilary Fritsch*', amount: 250, tier: 'Tier 1', pending: true },
     { name: 'Hayley Lombard', amount: 250, tier: 'Tier 1', pending: true, note: 'Has balance — apply toward' },
+  ]},
+  { month: 'September 2026', payouts: [
+    { name: 'Amy Bernhard', amount: 1000, tier: 'Tier 2', pending: true, note: 'Hit 50+ on 07/29' },
+    { name: 'Jeff Cruz Talia_likeitis', amount: 1000, tier: 'Tier 2', pending: true, note: 'Hit 50+ on 07/31' },
+    { name: 'Melody Brandon', amount: 1000, tier: 'Tier 2', pending: true, note: 'Hit 50+ on 08/03' },
+    { name: 'Taylor Kulik', amount: 250, tier: 'Tier 1', pending: true, note: 'Hit 25+ on 07/25' },
+    { name: 'Hilary Fritsch*', amount: 250, tier: 'Tier 1', pending: true, note: 'Hit 25+ on 07/31' },
   ]},
 ];
 
-const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;paid:number;winStart:string;winEnd:string;tier1Date?:string;tier2Date?:string;is2026?:boolean;omit?:boolean}[] = [
+const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;paid:number;winStart:string;winEnd:string;tier1Date?:string;tier2Date?:string;is2026?:boolean;omit?:boolean;pendingPayout?:boolean}[] = [
   {name:'Lauren Johnson NNM',bonusSubs:397,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/27',tier2Date:'06/11'},
   {name:'Soshanna Salsman',bonusSubs:123,tier:2,earned:1250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/25',tier2Date:'05/28',omit:true},
   {name:'Shannon Tripp',bonusSubs:116,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/21',tier2Date:'05/26'},
   {name:'Emily Boazman',bonusSubs:71,tier:2,earned:1250,paid:1250,winStart:'04/02/2026',winEnd:'12/31/2026',tier1Date:'05/24',tier2Date:'06/26',is2026:true},
-  {name:'Eden Lee loverlees',bonusSubs:68,tier:2,earned:1250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'07/10',tier2Date:'07/30'},
-  {name:'Kendra Needham',bonusSubs:63,tier:2,earned:1250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'05/22',tier2Date:'07/13'},
+  {name:'Eden Lee loverlees',bonusSubs:68,tier:2,earned:1250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'07/10',tier2Date:'07/30',pendingPayout:true},
+  {name:'Kendra Needham',bonusSubs:63,tier:2,earned:1250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'05/22',tier2Date:'07/13',pendingPayout:true},
   {name:'Amy Bernhard',bonusSubs:52,tier:2,earned:1250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/03',tier2Date:'07/29'},
   {name:'Jeff Cruz Talia_likeitis',bonusSubs:52,tier:2,earned:1250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'05/19',tier2Date:'07/31'},
   {name:'Melody Brandon',bonusSubs:52,tier:2,earned:1250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/08',tier2Date:'08/03'},
@@ -218,7 +220,7 @@ const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;p
   {name:'Carly Brown',bonusSubs:42,tier:1,earned:250,paid:250,winStart:'04/21/2026',winEnd:'12/31/2026',tier1Date:'06/26',is2026:true},
   {name:'Katelyn Alsop (James)',bonusSubs:40,tier:1,earned:250,paid:250,winStart:'01/19/2026',winEnd:'12/31/2026',tier1Date:'02/21',is2026:true},
   {name:'Taylor Kulik',bonusSubs:32,tier:1,earned:250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'07/25'},
-  {name:'Hayley Lombard',bonusSubs:26,tier:1,earned:250,paid:0,winStart:'05/19/2026',winEnd:'12/31/2026',tier1Date:'07/16',is2026:true},
+  {name:'Hayley Lombard',bonusSubs:26,tier:1,earned:250,paid:0,winStart:'05/19/2026',winEnd:'12/31/2026',tier1Date:'07/16',is2026:true,pendingPayout:true},
   {name:'Hilary Fritsch*',bonusSubs:26,tier:1,earned:250,paid:0,winStart:'05/08/2026',winEnd:'12/31/2026',tier1Date:'07/31',is2026:true},
   {name:'Amy Erickson',bonusSubs:24,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Ellen Fisher',bonusSubs:23,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
@@ -1431,6 +1433,7 @@ export default function AmbassadorGrowth() {
                     <td style={{ padding: '10px 12px', fontWeight: 600, color: row.omit ? '#999' : row.is2026 ? TP.purple : TP.navy, fontSize: '0.82rem', textDecoration: row.omit ? 'line-through' : 'none', textDecorationColor: '#E24B4A' }}>
                       {row.name}
                       {row.is2026 && <span style={{ fontSize: '0.6rem', background: '#f3e8f1', color: TP.purple, padding: '1px 6px', borderRadius: 4, marginLeft: 4 }}>2026</span>}
+                      {row.pendingPayout && <span style={{ fontSize: '0.6rem', background: '#FEF3C7', color: '#92400E', padding: '1px 6px', borderRadius: 4, marginLeft: 4 }}>pending</span>}
                     </td>
                     <td style={{ textAlign: 'center', padding: '10px 8px', fontWeight: 700, fontSize: '0.88rem', color: TP.navy }}>{row.bonusSubs}</td>
                     <td style={{ padding: '10px 8px' }}>
