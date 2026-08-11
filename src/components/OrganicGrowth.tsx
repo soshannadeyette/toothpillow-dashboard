@@ -62,7 +62,7 @@ const GSC_MONTHLY: Array<{ month: string; clicks: number; impressions: number; c
   { month: '2026-05', clicks: 10509, impressions: 53592, ctr: 19.6, position: 17.8 },
   { month: '2026-06', clicks: 11550, impressions: 54729, ctr: 21.1, position: 10.1 },
   { month: '2026-07', clicks: 11163, impressions: 52738, ctr: 21.2, position: 9.5 },
-  { month: '2026-08', clicks: 2447, impressions: 13449, ctr: 18.2, position: 9.0, partial: true, daysReported: 8 },
+  { month: '2026-08', clicks: 2637, impressions: 15182, ctr: 17.4, position: 10.7, partial: true, daysReported: 9 },
 ];
 
 const GSC_WEEKLY = [
@@ -144,11 +144,11 @@ const GSC_WEEKLY = [
   { week: '2026-07-13', clicks: 2721, impressions: 12681, ctr: 21.5, position: 9.7 },
   { week: '2026-07-20', clicks: 2917, impressions: 12654, ctr: 23.1, position: 9.1 },
   { week: '2026-07-27', clicks: 2738, impressions: 12532, ctr: 21.8, position: 9.4 },
-  { week: '2026-08-03', clicks: 1867, impressions: 10280, ctr: 18.2, position: 8.8 },
+  { week: '2026-08-03', clicks: 2057, impressions: 12013, ctr: 17.1, position: 9.4 },
 ];
 
-// Full-year daily GSC data — Jan 1 to Aug 8, 2026
-// Source: Google Search Console DAYS view, updated August 10, 2026
+// Full-year daily GSC data — Jan 1 to Aug 9, 2026
+// Source: Google Search Console DAYS view, updated August 11, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -200,7 +200,7 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
     [26,293,1525],[27,395,1957],[28,412,1722],[29,391,1790],[30,384,1714],[31,552,2265],
   ],
   Aug: [
-    [1,311,1559],[2,269,1610],[3,343,1836],[4,387,1667],[5,338,1692],[6,341,1629],[7,264,1678],[8,194,1778],
+    [1,311,1559],[2,269,1610],[3,343,1836],[4,387,1667],[5,338,1692],[6,341,1629],[7,264,1678],[8,194,1778],[9,190,1733],
   ],
 };
 
