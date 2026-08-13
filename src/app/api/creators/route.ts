@@ -75,6 +75,7 @@ export async function POST(request: NextRequest) {
       ig_id: typeof r.ig_id === 'string' && r.ig_id ? r.ig_id : null,
       followed_date: typeof r.followed_date === 'string' && r.followed_date ? r.followed_date : null,
       checked_at: typeof r.checked_at === 'string' && r.checked_at ? r.checked_at : null,
+      is_ambassador: r.is_ambassador === true,
       updated_at: new Date().toISOString(),
     }));
 
