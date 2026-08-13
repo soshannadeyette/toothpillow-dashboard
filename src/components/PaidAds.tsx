@@ -54,6 +54,29 @@ const GOOGLE_ADS_PRIOR_MONTHS: { month: string; year: number; monthIdx: number; 
   { month: 'May 2026', year: 2026, monthIdx: 5, spend: 9728.21, clicks: 3093, impressions: 49404 },
 ];
 
+// Google Ads daily Salesforce leads by submission date (source: Google Ads Salesforce export)
+// Source: SOSH Google Ads 2026-2026-08-13 export, "Date: Submission" column
+// Update this array each time a new Google Ads Salesforce export is uploaded
+const GOOGLE_ADS_DAILY_LEADS: Record<string, number> = {
+  '2026-04-07':2,'2026-04-10':1,'2026-04-11':1,'2026-04-13':2,'2026-04-18':2,'2026-04-19':2,'2026-04-20':1,
+  '2026-04-24':3,'2026-04-25':1,'2026-04-27':2,'2026-04-28':1,'2026-04-30':2,
+  '2026-05-01':1,'2026-05-03':1,'2026-05-04':1,'2026-05-05':3,'2026-05-07':1,'2026-05-08':3,'2026-05-09':1,
+  '2026-05-10':1,'2026-05-11':1,'2026-05-13':1,'2026-05-21':1,'2026-05-22':1,'2026-05-23':1,'2026-05-25':2,
+  '2026-05-26':1,'2026-05-27':2,'2026-05-28':2,'2026-05-29':2,'2026-05-30':2,
+  '2026-06-01':7,'2026-06-03':2,'2026-06-04':4,'2026-06-05':1,'2026-06-06':3,'2026-06-07':1,'2026-06-08':2,
+  '2026-06-09':3,'2026-06-10':4,'2026-06-11':1,'2026-06-12':3,'2026-06-13':3,'2026-06-14':3,'2026-06-15':1,
+  '2026-06-16':2,'2026-06-17':4,'2026-06-18':3,'2026-06-19':4,'2026-06-20':3,'2026-06-21':1,'2026-06-22':2,
+  '2026-06-23':4,'2026-06-24':6,'2026-06-25':3,'2026-06-26':2,'2026-06-27':2,'2026-06-28':3,'2026-06-29':1,
+  '2026-06-30':3,
+  '2026-07-01':1,'2026-07-02':1,'2026-07-03':3,'2026-07-04':1,'2026-07-05':5,'2026-07-06':5,'2026-07-07':1,
+  '2026-07-08':5,'2026-07-09':4,'2026-07-10':2,'2026-07-11':2,'2026-07-12':2,'2026-07-13':4,'2026-07-15':1,
+  '2026-07-16':1,'2026-07-17':1,'2026-07-18':2,'2026-07-19':2,'2026-07-20':6,'2026-07-21':5,'2026-07-22':8,
+  '2026-07-23':3,'2026-07-24':6,'2026-07-25':1,'2026-07-26':6,'2026-07-27':3,'2026-07-28':3,'2026-07-29':4,
+  '2026-07-30':3,
+  '2026-08-01':1,'2026-08-02':1,'2026-08-03':4,'2026-08-04':5,'2026-08-05':7,'2026-08-06':2,'2026-08-07':1,
+  '2026-08-08':3,'2026-08-09':3,'2026-08-10':2,'2026-08-11':2,'2026-08-12':2,'2026-08-13':2,
+};
+
 // Google Ads daily seed data (source of truth — merged with Supabase on load)
 // June 1-15 spend/clicks/impressions from Google Ads Report Editor, June 15, 2026
 // June 16-22 spend/clicks/impressions from Google Ads Report Editor, June 22, 2026
@@ -916,6 +939,49 @@ export default function PaidAds() {
               plugins={[blackoutAnnotation]}
             />
           ) : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999' }}>Not enough data yet</div>}
+        </div>
+      </div>
+
+      {/* ═══════ SPEND vs LEADS ═══════ */}
+      <SectionHeader>Daily Spend vs Leads</SectionHeader>
+      <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>Daily Google Ads spend (left axis) vs Salesforce leads by submission date (right axis) with 7-day moving averages.</div>
+      <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', marginBottom: 32 }}>
+        <div style={{ height: 320 }}>
+          {sorted.length > 1 ? (() => {
+            const labels = sorted.map(e => e.date.substring(5).replace('-', '/'));
+            const spendVals = sorted.map(e => e.spend || 0);
+            const leadVals = sorted.map(e => GOOGLE_ADS_DAILY_LEADS[e.date] || 0);
+            const ma = (arr: number[]) => arr.map((_, i) => {
+              const start = Math.max(0, i - 6);
+              const w = arr.slice(start, i + 1);
+              return parseFloat((w.reduce((s, v) => s + v, 0) / w.length).toFixed(2));
+            });
+            return (
+              <Line
+                data={{
+                  labels,
+                  datasets: [
+                    { label: 'Daily Spend', data: spendVals, borderColor: '#E57373', borderWidth: 1.5, tension: 0.3, fill: false, pointRadius: 1.5, pointBackgroundColor: '#E57373', yAxisID: 'spend' },
+                    { label: 'Spend 7d Avg', data: ma(spendVals), borderColor: '#E57373', borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 0, borderDash: [5, 3], yAxisID: 'spend' },
+                    { label: 'Daily Leads', data: leadVals, borderColor: TP.blue, borderWidth: 1.5, tension: 0.3, fill: false, pointRadius: 2, pointBackgroundColor: TP.blue, yAxisID: 'leads' },
+                    { label: 'Leads 7d Avg', data: ma(leadVals), borderColor: TP.blue, borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 0, borderDash: [5, 3], yAxisID: 'leads' },
+                  ],
+                }}
+                options={{
+                  responsive: true, maintainAspectRatio: false,
+                  plugins: {
+                    legend: { position: 'top', labels: { usePointStyle: true, padding: 14, font: { size: 11 } } },
+                    tooltip: { callbacks: { label: (ctx) => ctx.dataset.yAxisID === 'spend' ? `$${(ctx.parsed.y || 0).toFixed(0)}` : `${ctx.parsed.y} leads` } },
+                  },
+                  scales: {
+                    spend: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: (v) => `$${Number(v).toLocaleString()}` }, title: { display: true, text: 'Spend ($)', color: '#E57373' }, grid: { drawOnChartArea: true } },
+                    leads: { type: 'linear', position: 'right', beginAtZero: true, title: { display: true, text: 'Leads', color: TP.blue }, grid: { drawOnChartArea: false } },
+                    x: { ticks: { maxTicksLimit: 12, font: { size: 10 } } },
+                  },
+                }}
+              />
+            );
+          })() : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999' }}>Not enough data yet</div>}
         </div>
       </div>
 
