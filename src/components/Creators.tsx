@@ -18,6 +18,7 @@ const TOTAL_FOLLOWERS = 132492; // follower export 2026-08-13
 interface Creator {
   username: string;
   status: string;
+  full_name: string | null;
   followers_count: number | null;
   media_count: number | null;
   followed_date: string | null;
@@ -73,7 +74,12 @@ export default function Creators() {
 
   const shown = creators
     .filter((c) => (c.followers_count ?? 0) >= minFollowers)
-    .filter((c) => !search || c.username.includes(search.toLowerCase()));
+    .filter(
+      (c) =>
+        !search ||
+        c.username.includes(search.toLowerCase()) ||
+        (c.full_name || '').toLowerCase().includes(search.toLowerCase())
+    );
 
   const pctCrawled = summary
     ? Math.min(100, (summary.totalChecked / TOTAL_FOLLOWERS) * 100)
@@ -164,6 +170,7 @@ export default function Creators() {
               <tr style={{ background: TP.navy, color: '#fff' }}>
                 <th style={{ padding: '9px 10px', textAlign: 'left' }}>#</th>
                 <th style={{ padding: '9px 10px', textAlign: 'left' }}>Handle</th>
+                <th style={{ padding: '9px 10px', textAlign: 'left' }}>Name</th>
                 <th style={{ padding: '9px 10px', textAlign: 'right' }}>Followers</th>
                 <th style={{ padding: '9px 10px', textAlign: 'right' }}>Posts</th>
                 <th style={{ padding: '9px 10px', textAlign: 'left' }}>Followed TP</th>
@@ -185,6 +192,7 @@ export default function Creators() {
                       @{c.username}
                     </a>
                   </td>
+                  <td style={{ padding: '8px 10px', color: TP.text }}>{c.full_name || '—'}</td>
                   <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 700, color: (c.followers_count ?? 0) >= 30000 ? TP.coral : TP.text }}>
                     {fmt(c.followers_count)}
                   </td>

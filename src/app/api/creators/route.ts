@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
       followed_date: typeof r.followed_date === 'string' && r.followed_date ? r.followed_date : null,
       checked_at: typeof r.checked_at === 'string' && r.checked_at ? r.checked_at : null,
       is_ambassador: r.is_ambassador === true,
+      full_name: typeof r.full_name === 'string' && r.full_name ? r.full_name : null,
       updated_at: new Date().toISOString(),
     }));
 
