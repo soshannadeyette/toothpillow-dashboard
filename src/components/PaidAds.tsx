@@ -919,9 +919,9 @@ export default function PaidAds() {
         </div>
       </div>
 
-      {/* ═══════ SPEND vs SUBMISSIONS ═══════ */}
-      <SectionHeader>Spend vs Submissions</SectionHeader>
-      <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>Daily spend (left axis) vs total conversions (right axis) with 7-day moving averages.</div>
+      {/* ═══════ SPEND vs CONVERSIONS ═══════ */}
+      <SectionHeader>Spend vs Conversions</SectionHeader>
+      <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>Daily spend (left axis) vs Google Ads conversion actions (right axis) with 7-day moving averages. Not submissions — these are ad platform conversion events.</div>
       <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', marginBottom: 32 }}>
         <div style={{ height: 320 }}>
           {sorted.length > 1 ? (() => {
