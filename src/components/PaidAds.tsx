@@ -159,11 +159,11 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
 
 // Pipeline totals — Salesforce export Aug 11, 2026
 const GOOGLE_SF_PIPELINE = {
-  total: 559,           // leads created (started form)
-  completed: 254,       // all stages except Waiting-Info (45%)
-  waitingInfo: 305,     // incomplete submissions
-  sentCheckout: 178,    // Sent Checkout Link (152) + SCL-Temp Hold (1) + Checked Out (25)
-  sentToTxP: 15,        // Sent to TxP (13) + Waiting for TxP Assignment (2)
+  total: 563,           // leads created (started form)
+  completed: 256,       // all stages except Waiting-Info (45%)
+  waitingInfo: 307,     // incomplete submissions
+  sentCheckout: 180,    // Sent Checkout Link (154) + SCL-Temp Hold (1) + Checked Out (25)
+  sentToTxP: 15,        // Sent to TxP (14) + Waiting for TxP Assignment (1)
   txpApproved: 7,
   checkedOut: 25,
   referredOut: 29,
@@ -173,7 +173,7 @@ const GOOGLE_SF_PIPELINE = {
 };
 
 // Revenue from checkouts — 25 checkouts at $44,991
-// Source: Salesforce "Google Ads 2026" export, August 12, 2026
+// Source: Salesforce "Google Ads 2026" export, August 13, 2026
 const GOOGLE_REVENUE: number = 44991;
 
 // Monthly breakdown from Salesforce — leads/completed by created date,
@@ -182,8 +182,8 @@ const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: n
   { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 23, checkouts: 2, revenue: 3291 },
   { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 31, checkouts: 1, revenue: 1995 },
   { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 85, checkouts: 9, revenue: 14759 },
-  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 184, completed: 85, checkouts: 11, revenue: 21354 },
-  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 62, completed: 30, checkouts: 2, revenue: 3592 },
+  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 184, completed: 86, checkouts: 11, revenue: 21354 },
+  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 66, completed: 31, checkouts: 2, revenue: 3592 },
 ];
 
 /* ════════════════════════════════════════════
