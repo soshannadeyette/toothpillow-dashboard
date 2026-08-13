@@ -372,7 +372,8 @@ export default function PaidAds() {
     id: 'blackoutAnnotation',
     afterDraw(chart: ChartJS) {
       const xScale = chart.scales.x;
-      const yScale = chart.scales.y;
+      const yScale = chart.scales.y || chart.scales.spend;
+      if (!xScale || !yScale) return;
       const ctx = chart.ctx;
       const chartLabels = (chart.data.labels || []) as string[];
       const blStart = chartLabels.indexOf('05/11');
