@@ -919,50 +919,6 @@ export default function PaidAds() {
         </div>
       </div>
 
-      {/* ═══════ SPEND vs CONVERSIONS ═══════ */}
-      <SectionHeader>Spend vs Conversions</SectionHeader>
-      <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>Daily spend (left axis) vs Google Ads conversion actions (right axis) with 7-day moving averages. Not submissions — these are ad platform conversion events.</div>
-      <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', marginBottom: 32 }}>
-        <div style={{ height: 320 }}>
-          {sorted.length > 1 ? (() => {
-            const labels = sorted.map(e => e.date.substring(5).replace('-', '/'));
-            const spendVals = sorted.map(e => e.spend || 0);
-            const subVals = sorted.map(e => (e.submit || 0) + (e.started || 0) + (e.finished || 0) + (e.treatment || 0));
-            const ma = (arr: number[]) => arr.map((_, i) => {
-              const start = Math.max(0, i - 6);
-              const w = arr.slice(start, i + 1);
-              return parseFloat((w.reduce((s, v) => s + v, 0) / w.length).toFixed(2));
-            });
-            return (
-              <Line
-                data={{
-                  labels,
-                  datasets: [
-                    { label: 'Daily Spend', data: spendVals, borderColor: '#E57373', borderWidth: 1.5, tension: 0.3, fill: false, pointRadius: 1.5, pointBackgroundColor: '#E57373', yAxisID: 'spend' },
-                    { label: 'Spend 7d Avg', data: ma(spendVals), borderColor: '#E57373', borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 0, borderDash: [5, 3], yAxisID: 'spend' },
-                    { label: 'Daily Conversions', data: subVals, borderColor: TP.blue, borderWidth: 1.5, tension: 0.3, fill: false, pointRadius: 1.5, pointBackgroundColor: TP.blue, yAxisID: 'subs' },
-                    { label: 'Conversions 7d Avg', data: ma(subVals), borderColor: TP.blue, borderWidth: 2.5, tension: 0.3, fill: false, pointRadius: 0, borderDash: [5, 3], yAxisID: 'subs' },
-                  ],
-                }}
-                options={{
-                  responsive: true, maintainAspectRatio: false,
-                  plugins: {
-                    legend: { position: 'top', labels: { usePointStyle: true, padding: 14, font: { size: 11 } } },
-                    tooltip: { callbacks: { label: (ctx) => ctx.dataset.yAxisID === 'spend' ? `$${(ctx.parsed.y || 0).toFixed(0)}` : `${ctx.parsed.y} conversions` } },
-                  },
-                  scales: {
-                    spend: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: (v) => `$${Number(v).toLocaleString()}` }, title: { display: true, text: 'Spend ($)', color: '#E57373' }, grid: { drawOnChartArea: true } },
-                    subs: { type: 'linear', position: 'right', beginAtZero: true, title: { display: true, text: 'Conversions', color: TP.blue }, grid: { drawOnChartArea: false } },
-                    x: { ticks: { maxTicksLimit: 12, font: { size: 10 } } },
-                  },
-                }}
-                plugins={[blackoutAnnotation]}
-              />
-            );
-          })() : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999' }}>Not enough data yet</div>}
-        </div>
-      </div>
-
       {/* ═══════ ADD / UPDATE DAY ═══════ */}
       <SectionHeader color="#E57373">Daily Entry</SectionHeader>
 
