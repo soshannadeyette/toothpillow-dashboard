@@ -12,6 +12,7 @@ import GoalEditor from '@/components/GoalEditor';
 import OrganicGrowth from '@/components/OrganicGrowth';
 import AVDiagnostics from '@/components/AVDiagnostics';
 import AccountStatus from '@/components/AccountStatus';
+import Creators from '@/components/Creators';
 const TABS = [
   { id: 'daily', label: 'Daily Tracker' },
   { id: 'weekly', label: 'Weekly Report' },
@@ -23,6 +24,7 @@ const TABS = [
   { id: 'organic', label: 'Organic Growth' },
   { id: 'avdiag', label: 'AV Diagnostics' },
   { id: 'accounts', label: 'Account Status' },
+  { id: 'creators', label: 'IG Creators' },
   { id: 'settings', label: 'Settings' },
 ] as const;
 
@@ -71,6 +73,7 @@ export default function Dashboard() {
         {activeTab === 'organic' && <OrganicGrowth />}
         {activeTab === 'avdiag' && <AVDiagnostics />}
         {activeTab === 'accounts' && <AccountStatus />}
+        {activeTab === 'creators' && <Creators />}
 
         {activeTab === 'settings' && <GoalEditor />}
       </main>
