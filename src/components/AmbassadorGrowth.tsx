@@ -106,6 +106,39 @@ const concRows = [
   {y:'2026', n:7, color:'#8CD1C8', names:'Shannon, Sosh, Lauren, Kendra, Jeff, Amy B., Melody'},
 ];
 
+// Top producers — 3-year history (2024 from H1+H2 LBT exports, 2025+2026 from moversData)
+// Source: 2024 H1 LBT (Jan 1-Jul 18) + H2 LBT (Jul 18-Dec 31), overlap deduped on 7/18
+const PRODUCER_HISTORY: {name:string; y24:number; y25:number; y26:number; type:string}[] = [
+  {name:'Lauren Johnson NNM',    y24:2956, y25:831,  y26:518,  type:'Inf'},
+  {name:'Kendra Needham',        y24:1851, y25:386,  y26:176,  type:'Inf'},
+  {name:'Ginny Yurich',          y24:1110, y25:291,  y26:102,  type:'Inf'},
+  {name:'Soshanna Salsman',      y24:299,  y25:914,  y26:248,  type:'Inf'},
+  {name:'Shannon Tripp',         y24:0,    y25:866,  y26:323,  type:'Inf'},
+  {name:'Thuy Improta',          y24:204,  y25:245,  y26:35,   type:'Inf'},
+  {name:'Jeff Cruz',             y24:259,  y25:84,   y26:138,  type:'Inf'},
+  {name:'Erin Wilkins',          y24:285,  y25:111,  y26:21,   type:'Inf'},
+  {name:'Melody Brandon',        y24:137,  y25:123,  y26:117,  type:'Inf'},
+  {name:'Taylor Kulik',          y24:156,  y25:103,  y26:67,   type:'Inf'},
+  {name:'Eden Lee',              y24:25,   y25:185,  y26:100,  type:'Inf'},
+  {name:'Eryn Carroll NMM',      y24:144,  y25:104,  y26:30,   type:'Inf'},
+  {name:'Jasyra Santiago-Hines', y24:100,  y25:57,   y26:99,   type:'Inf'},
+  {name:'Amy Bernhard',          y24:0,    y25:112,  y26:133,  type:'Inf'},
+  {name:'Amy Erickson',          y24:141,  y25:51,   y26:45,   type:'Inf'},
+  {name:'Devon Kuntzman',        y24:133,  y25:90,   y26:19,   type:'Inf'},
+  {name:'Lauren Stadler',        y24:46,   y25:93,   y26:45,   type:'Inf'},
+  {name:'Ellen Fisher',          y24:40,   y25:53,   y26:73,   type:'Inf'},
+  {name:'Wendy Ostapuk',         y24:85,   y25:104,  y26:18,   type:'Inf'},
+  {name:'Emily Boazman',         y24:0,    y25:0,    y26:74,   type:'Inf'},
+];
+
+// Top-5 concentration by year (% of total amb+inf submissions from top 5 producers)
+// 2024: 8,722 total → top 5 = 74.7%  2025: 6,105 total → top 5 = 64.9%  2026: 3,264 YTD → top 5 = 52.7%
+const TOP5_CONCENTRATION: {year:number; top5Pct:number; restPct:number; top5:number; rest:number; total:number; names:string}[] = [
+  {year:2024, top5Pct:74.7, restPct:25.3, top5:6513, rest:2209, total:8722, names:'Lauren, Kendra, Ginny, Sosh, Erin W.'},
+  {year:2025, top5Pct:64.9, restPct:35.1, top5:3962, rest:2143, total:6105, names:'Sosh, Shannon, Lauren, Kendra, Ginny'},
+  {year:2026, top5Pct:52.7, restPct:47.3, top5:1717, rest:1547, total:3264, names:'Lauren, Shannon, Sosh, Kendra, Jeff'},
+];
+
 // Updated from Salesforce Launch Bonus Tracker export 2026-08-13
 // Source: LB Tracker combined H1 (Jan-Jul19) + H2 (Jul20-Aug13), exported 2026-08-13
 const moversData: Record<string, {y25:number; y26:number; type:string}> = {
@@ -1372,6 +1405,93 @@ export default function AmbassadorGrowth() {
 
         <div style={{ fontSize: '0.7rem', color: '#888', marginTop: 8, textAlign: 'center' }}>
           Annualization factor: 12 / {_monthsElapsed.toFixed(1)} = {moverAnnFactor.toFixed(2)}x. Pace = YTD x {moverAnnFactor.toFixed(2)}. &quot;New&quot; = no 2025 submissions on record.
+        </div>
+      </div>
+
+      {/* ════════ SECTION 6c: Top Producers — 3 Year History ════════ */}
+      <div>
+        <h3 style={sectionHeader}>Top Producers — 3 Year History</h3>
+        <p style={sectionSub}>
+          How individual producers have cycled across 2024, 2025, and 2026 YTD. The program is diversifying: top-5 concentration dropped from 74.7% in 2024 to 52.7% in 2026.
+        </p>
+
+        {/* Concentration bars */}
+        <div style={{ ...card, marginBottom: '1.5rem' }}>
+          <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>
+            Top 5 Concentration — Declining
+          </h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {TOP5_CONCENTRATION.map(row => (
+              <div key={row.year}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <span style={{ fontWeight: 700, color: TP.navy, fontSize: '0.85rem' }}>{row.year}{row.year === 2026 ? ' YTD' : ''}</span>
+                  <span style={{ fontSize: '0.75rem', color: '#666' }}>{row.names}</span>
+                </div>
+                <div style={{ display: 'flex', borderRadius: 6, overflow: 'hidden', height: 28 }}>
+                  <div style={{
+                    width: `${row.top5Pct}%`,
+                    background: TP.red,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#fff', fontSize: '0.7rem', fontWeight: 700, minWidth: 60,
+                  }}>
+                    Top 5: {row.top5Pct}%
+                  </div>
+                  <div style={{
+                    width: `${row.restPct}%`,
+                    background: TP.teal,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#fff', fontSize: '0.7rem', fontWeight: 700, minWidth: 60,
+                  }}>
+                    Rest: {row.restPct}%
+                  </div>
+                </div>
+                <div style={{ fontSize: '0.65rem', color: '#999', marginTop: 2 }}>
+                  Top 5: {row.top5.toLocaleString()} · Rest: {row.rest.toLocaleString()} · Total: {row.total.toLocaleString()}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Producer history table */}
+        <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
+          <table style={{ width: '100%', fontSize: '0.75rem', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: TP.navy, color: '#fff' }}>
+                <th style={{ textAlign: 'left', padding: '10px 12px' }}>#</th>
+                <th style={{ textAlign: 'left', padding: '10px 12px' }}>Name</th>
+                <th style={{ textAlign: 'right', padding: '10px 8px' }}>2024</th>
+                <th style={{ textAlign: 'right', padding: '10px 8px' }}>2025</th>
+                <th style={{ textAlign: 'right', padding: '10px 8px' }}>2026 YTD</th>
+                <th style={{ textAlign: 'right', padding: '10px 8px' }}>Pace</th>
+                <th style={{ textAlign: 'right', padding: '10px 12px' }}>3-Year Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {PRODUCER_HISTORY.map((p, i) => {
+                const pace26 = Math.round(p.y26 * ANN);
+                const total = p.y24 + p.y25 + p.y26;
+                const trendColor = p.y26 > 0 && (p.y25 === 0 || pace26 > p.y25) ? '#16a34a' : pace26 < p.y25 ? TP.red : '#444';
+                return (
+                  <tr key={p.name} style={{ background: i % 2 === 0 ? '#f9fafb' : '#fff', borderBottom: '1px solid #e5e7eb' }}>
+                    <td style={{ padding: '6px 12px', color: '#999', fontWeight: 600 }}>{i + 1}</td>
+                    <td style={{ padding: '6px 12px', fontWeight: 600, color: TP.navy }}>
+                      {p.name.replace(' NNM', '').replace(' essentiallyerin', '')}
+                    </td>
+                    <td style={{ textAlign: 'right', padding: '6px 8px', color: p.y24 > 0 ? '#444' : '#ccc' }}>{p.y24 > 0 ? p.y24.toLocaleString() : '—'}</td>
+                    <td style={{ textAlign: 'right', padding: '6px 8px', color: p.y25 > 0 ? '#444' : '#ccc' }}>{p.y25 > 0 ? p.y25.toLocaleString() : '—'}</td>
+                    <td style={{ textAlign: 'right', padding: '6px 8px', color: '#444' }}>{p.y26.toLocaleString()}</td>
+                    <td style={{ textAlign: 'right', padding: '6px 8px', color: trendColor, fontWeight: 600 }}>~{pace26.toLocaleString()}</td>
+                    <td style={{ textAlign: 'right', padding: '6px 12px', fontWeight: 800, color: TP.navy }}>{total.toLocaleString()}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <div style={{ fontSize: '0.7rem', color: '#888', padding: '8px 12px', background: '#f9fafb', borderTop: '1px solid #e5e7eb' }}>
+            2024 data from H1+H2 Launch Bonus Tracker exports (full year). 2026 pace annualized at {ANN.toFixed(2)}x.
+            Green = on pace to beat 2025. Red = trailing 2025. Dash = no recorded submissions.
+          </div>
         </div>
       </div>
 
