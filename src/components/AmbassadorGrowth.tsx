@@ -1412,11 +1412,146 @@ export default function AmbassadorGrowth() {
       <div>
         <h3 style={sectionHeader}>Top Producers — 3 Year History</h3>
         <p style={sectionSub}>
-          How individual producers have cycled across 2024, 2025, and 2026 YTD. The program is diversifying: top-5 concentration dropped from 74.7% in 2024 to 52.7% in 2026.
+          The top 5 producers dropped by {((1 - TOP5_CONCENTRATION[2].top5 * ANN / TOP5_CONCENTRATION[0].top5) * 100).toFixed(0)}% (annualized) from 2024 to 2026.
+          But the rest of the program grew — more producers contributing, less concentration risk.
         </p>
 
+        {/* KPI cards — the headline numbers */}
+        <div style={{ ...gridRow(4), marginBottom: '1.5rem' }}>
+          <div style={statCard(TP.red)}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: 1 }}>Top 5 Drop</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: TP.red }}>
+              {TOP5_CONCENTRATION[0].top5.toLocaleString()} → ~{Math.round(TOP5_CONCENTRATION[2].top5 * ANN).toLocaleString()}
+            </div>
+            <div style={{ fontSize: '0.7rem', color: TP.red, fontWeight: 600 }}>
+              {((1 - TOP5_CONCENTRATION[2].top5 * ANN / TOP5_CONCENTRATION[0].top5) * -100).toFixed(0)}% annualized 2024→2026
+            </div>
+          </div>
+          <div style={statCard(TP.teal)}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: 1 }}>Base (Rest) Growth</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: TP.teal }}>
+              {TOP5_CONCENTRATION[0].rest.toLocaleString()} → ~{Math.round(TOP5_CONCENTRATION[2].rest * ANN).toLocaleString()}
+            </div>
+            <div style={{ fontSize: '0.7rem', color: '#16a34a', fontWeight: 600 }}>
+              +{((TOP5_CONCENTRATION[2].rest * ANN / TOP5_CONCENTRATION[0].rest - 1) * 100).toFixed(0)}% annualized 2024→2026
+            </div>
+          </div>
+          <div style={statCard(TP.blue)}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: 1 }}>Active Producers</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: TP.blue }}>
+              {activeTotalByYear[2024]} → {activeTotalByYear[2026]}
+            </div>
+            <div style={{ fontSize: '0.7rem', color: '#16a34a', fontWeight: 600 }}>
+              +{((activeTotalByYear[2026] / activeTotalByYear[2024] - 1) * 100).toFixed(0)}% more producers
+            </div>
+          </div>
+          <div style={statCard(TP.gold)}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: 1 }}>Top 5 Share</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: TP.navy }}>
+              {TOP5_CONCENTRATION[0].top5Pct}% → {TOP5_CONCENTRATION[2].top5Pct}%
+            </div>
+            <div style={{ fontSize: '0.7rem', color: '#16a34a', fontWeight: 600 }}>
+              Concentration cut nearly in half
+            </div>
+          </div>
+        </div>
+
+        {/* Stacked bar chart — Top 5 vs Rest */}
+        <div style={chartWrap}>
+          <div style={{ height: 320 }}>
+            <Bar
+              data={{
+                labels: TOP5_CONCENTRATION.map(r => r.year === 2026 ? `2026 (ann.)` : String(r.year)),
+                datasets: [
+                  {
+                    label: 'Top 5 Producers',
+                    data: TOP5_CONCENTRATION.map(r => r.year === 2026 ? Math.round(r.top5 * ANN) : r.top5),
+                    backgroundColor: TP.red + 'CC',
+                    borderRadius: 4,
+                  },
+                  {
+                    label: 'Rest of Program',
+                    data: TOP5_CONCENTRATION.map(r => r.year === 2026 ? Math.round(r.rest * ANN) : r.rest),
+                    backgroundColor: TP.teal,
+                    borderRadius: 4,
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+                  tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                      afterBody: (items) => {
+                        const total = items.reduce((s, i) => s + (i.raw as number), 0);
+                        return `Total: ${total.toLocaleString()}`;
+                      },
+                    },
+                  },
+                },
+                scales: {
+                  x: { stacked: true },
+                  y: { stacked: true, beginAtZero: true, ticks: { callback: (v) => Number(v).toLocaleString() } },
+                },
+              }}
+              plugins={[{
+                id: 'stackedTotalLabel',
+                afterDatasetsDraw(chart) {
+                  const ctx = chart.ctx;
+                  const meta0 = chart.getDatasetMeta(0);
+                  const meta1 = chart.getDatasetMeta(1);
+                  ctx.save();
+                  ctx.font = 'bold 13px system-ui';
+                  ctx.textAlign = 'center';
+                  ctx.fillStyle = TP.navy;
+                  for (let i = 0; i < meta1.data.length; i++) {
+                    const bar = meta1.data[i];
+                    const v0 = chart.data.datasets[0].data[i] as number;
+                    const v1 = chart.data.datasets[1].data[i] as number;
+                    ctx.fillText((v0 + v1).toLocaleString(), bar.x, bar.y - 6);
+                  }
+                  // Draw rest % inside teal bar
+                  ctx.font = 'bold 12px system-ui';
+                  ctx.fillStyle = '#fff';
+                  for (let i = 0; i < meta1.data.length; i++) {
+                    const el1 = meta1.data[i];
+                    const bar1 = el1 as unknown as {x:number; y:number; height:number; base:number};
+                    const v0 = chart.data.datasets[0].data[i] as number;
+                    const v1 = chart.data.datasets[1].data[i] as number;
+                    const pct = ((v1 / (v0 + v1)) * 100).toFixed(0);
+                    const midY = (bar1.y + bar1.base) / 2;
+                    if (bar1.base - bar1.y > 20) {
+                      ctx.fillText(`${pct}%`, bar1.x, midY + 4);
+                    }
+                  }
+                  // Draw top5 % inside red bar
+                  for (let i = 0; i < meta0.data.length; i++) {
+                    const el0 = meta0.data[i];
+                    const bar0 = el0 as unknown as {x:number; y:number; height:number; base:number};
+                    const v0 = chart.data.datasets[0].data[i] as number;
+                    const v1 = chart.data.datasets[1].data[i] as number;
+                    const pct = ((v0 / (v0 + v1)) * 100).toFixed(0);
+                    const midY = (bar0.y + bar0.base) / 2;
+                    if (bar0.base - bar0.y > 20) {
+                      ctx.fillText(`${pct}%`, bar0.x, midY + 4);
+                    }
+                  }
+                  ctx.restore();
+                },
+              }]}
+            />
+          </div>
+          <div style={{ fontSize: '0.7rem', color: '#888', marginTop: 8, textAlign: 'center' }}>
+            2026 annualized at {ANN.toFixed(2)}x. The base grew {((TOP5_CONCENTRATION[1].rest / TOP5_CONCENTRATION[0].rest - 1) * 100).toFixed(0)}% from 2024→2025 even as top 5 dropped {((1 - TOP5_CONCENTRATION[1].top5 / TOP5_CONCENTRATION[0].top5) * 100).toFixed(0)}%.
+          </div>
+        </div>
+
         {/* Concentration bars */}
-        <div style={{ ...card, marginBottom: '1.5rem' }}>
+        <div style={{ ...card, marginTop: '1.5rem', marginBottom: '1.5rem' }}>
           <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>
             Top 5 Concentration — Declining
           </h4>
@@ -1430,7 +1565,7 @@ export default function AmbassadorGrowth() {
                 <div style={{ display: 'flex', borderRadius: 6, overflow: 'hidden', height: 28 }}>
                   <div style={{
                     width: `${row.top5Pct}%`,
-                    background: TP.red,
+                    background: TP.red + 'CC',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     color: '#fff', fontSize: '0.7rem', fontWeight: 700, minWidth: 60,
                   }}>
