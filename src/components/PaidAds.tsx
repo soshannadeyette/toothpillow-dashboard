@@ -74,7 +74,8 @@ const GOOGLE_ADS_DAILY_LEADS: Record<string, number> = {
   '2026-07-23':3,'2026-07-24':6,'2026-07-25':1,'2026-07-26':6,'2026-07-27':3,'2026-07-28':3,'2026-07-29':4,
   '2026-07-30':3,
   '2026-08-01':1,'2026-08-02':1,'2026-08-03':4,'2026-08-04':5,'2026-08-05':7,'2026-08-06':2,'2026-08-07':1,
-  '2026-08-08':3,'2026-08-09':3,'2026-08-10':2,'2026-08-11':2,'2026-08-12':2,'2026-08-13':2,
+  '2026-08-08':3,'2026-08-09':3,'2026-08-10':2,'2026-08-11':2,'2026-08-12':2,'2026-08-13':3,
+  '2026-08-14':2,'2026-08-15':6,'2026-08-16':2,'2026-08-17':2,
 };
 
 // Google Ads daily seed data (source of truth — merged with Supabase on load)
@@ -180,33 +181,35 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
    so Meta contribution is negligible in those months.
    ════════════════════════════════════════════ */
 
-// Pipeline totals — Salesforce export Aug 11, 2026
+// Pipeline totals — Salesforce export Aug 17, 2026
 const GOOGLE_SF_PIPELINE = {
-  total: 563,           // leads created (started form)
-  completed: 256,       // all stages except Waiting-Info (45%)
-  waitingInfo: 307,     // incomplete submissions
-  sentCheckout: 180,    // Sent Checkout Link (154) + SCL-Temp Hold (1) + Checked Out (25)
-  sentToTxP: 15,        // Sent to TxP (14) + Waiting for TxP Assignment (1)
-  txpApproved: 7,
-  checkedOut: 25,
-  referredOut: 29,
+  total: 594,           // leads created (started form)
+  completed: 269,       // all stages except Waiting-Info (45%)
+  waitingInfo: 325,     // incomplete submissions (WAITING - Needs info)
+  sentCheckout: 188,    // Sent Checkout Link (161) + SCL-Temp Hold (1) + Checked Out (26)
+  sentToTxP: 22,        // Sent to TxP (20) + Waiting for TxP Assignment (2)
+  txpApproved: 4,
+  checkedOut: 26,
+  referredOut: 30,
   closedLost: 22,       // 15 Closed Lost + 7 Do Not Contact
   tempHold: 4,          // 3 Temp Hold + 1 SCL-Temp Hold
   formOpens: 1436,      // Google Ads conversions (form opens, Google-only)
 };
 
-// Revenue from checkouts — 25 checkouts at $44,991
-// Source: Salesforce "Google Ads 2026" export, August 13, 2026
-const GOOGLE_REVENUE: number = 44991;
+// Revenue from checkouts — 26 checkouts at $46,986
+// Source: Salesforce "Google Ads 2026" export, August 17, 2026
+const GOOGLE_REVENUE: number = 46986;
 
-// Monthly breakdown from Salesforce — leads/completed by created date,
-// checkouts/revenue by checkout date (when revenue was realized)
+// Monthly breakdown from Salesforce — ALL columns grouped by SUBMISSION month (cohort).
+// Checkouts/revenue = leads from that submission month that have checked out to date,
+// regardless of when the checkout happened. This is correct for CAC analysis.
+// Source: Salesforce "Google Ads 2026" export, August 17, 2026
 const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: number; checkouts: number; revenue: number }[] = [
-  { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 23, checkouts: 2, revenue: 3291 },
-  { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 31, checkouts: 1, revenue: 1995 },
-  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 85, checkouts: 9, revenue: 14759 },
-  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 184, completed: 86, checkouts: 11, revenue: 21354 },
-  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 66, completed: 31, checkouts: 2, revenue: 3592 },
+  { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 20, checkouts: 2, revenue: 3291 },
+  { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 28, checkouts: 5, revenue: 8676 },
+  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 81, checkouts: 12, revenue: 20999 },
+  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 184, completed: 91, checkouts: 7, revenue: 14020 },
+  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 97, completed: 46, checkouts: 0, revenue: 0 },
 ];
 
 /* ════════════════════════════════════════════

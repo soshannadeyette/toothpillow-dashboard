@@ -24,6 +24,11 @@ const GOOGLE_ADS_SEED: {date:string;spend:number;clicks:number;impressions:numbe
   { date: '2026-07-22', spend: 643.76, clicks: 161, impressions: 2536 },
   { date: '2026-07-23', spend: 605.30, clicks: 144, impressions: 2383 },
   { date: '2026-07-24', spend: 340.22, clicks: 86, impressions: 1327 },
+  // Aug 14-17, 2026 — from Google Ads Overview, pulled Aug 17
+  { date: '2026-08-14', spend: 554, clicks: 146, impressions: 2670 },
+  { date: '2026-08-15', spend: 442, clicks: 115, impressions: 1840 },
+  { date: '2026-08-16', spend: 778, clicks: 175, impressions: 2940 },
+  { date: '2026-08-17', spend: 494, clicks: 104, impressions: 1730 },
 ];
 
 async function seedGoogleAdsData() {
