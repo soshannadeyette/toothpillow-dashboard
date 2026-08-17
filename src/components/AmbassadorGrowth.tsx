@@ -236,7 +236,7 @@ const LAUNCH_BONUS_PAYOUTS: {month:string; payouts:{name:string;amount:number;ti
   ]},
   { month: 'August 2026', payouts: [
     { name: 'Kendra Needham', amount: 1000, tier: 'Tier 2' },
-    { name: 'Eden Lee loverlees', amount: 1250, tier: 'Tier 2', note: 'Hit T1 07/10 + T2 07/30, first payout' },
+    { name: 'Eden Lee loverlees', amount: 250, tier: 'Tier 1', note: 'Hit T1 07/10 + T2 07/30, T1 payout' },
     { name: 'Hayley Lombard', amount: 250, tier: 'Tier 1', note: 'Has balance — applied toward' },
   ]},
   { month: 'September 2026', payouts: [
@@ -253,7 +253,7 @@ const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;p
   {name:'Soshanna Salsman',bonusSubs:127,tier:2,earned:1250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/25',tier2Date:'05/28',omit:true},
   {name:'Shannon Tripp',bonusSubs:116,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/21',tier2Date:'05/26'},
   {name:'Emily Boazman',bonusSubs:71,tier:2,earned:1250,paid:1250,winStart:'04/02/2026',winEnd:'12/31/2026',tier1Date:'05/24',tier2Date:'06/26',is2026:true},
-  {name:'Eden Lee loverlees',bonusSubs:69,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'07/10',tier2Date:'07/30'},
+  {name:'Eden Lee loverlees',bonusSubs:69,tier:2,earned:1250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'07/10',tier2Date:'07/30'},
   {name:'Kendra Needham',bonusSubs:65,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'05/22',tier2Date:'07/13'},
   {name:'Amy Bernhard',bonusSubs:52,tier:2,earned:1250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/03',tier2Date:'07/29'},
   {name:'Jeff Cruz Talia_likeitis',bonusSubs:53,tier:2,earned:1250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'05/19',tier2Date:'07/31'},
