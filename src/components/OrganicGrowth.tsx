@@ -23,12 +23,12 @@ const TP = {
 
 /* ════════════════════════════════════════════
    HARDCODED GSC DATA — Source of truth
-   Data pulled fresh from Google Search Console on August 10, 2026
+   Data pulled fresh from Google Search Console on August 18, 2026
    Property: https://www.toothpillow.com/ (URL prefix)
    Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
    SEO program reset date: May 19, 2026
    May 2026: full month (31 days). June 2026: full month (30 days). July 2026: full month (31 days).
-   August 2026: partial (8 days through Aug 8). Blog launched Aug 6, 2026.
+   August 2026: partial (16 days through Aug 16). Blog launched Aug 6, 2026.
    ════════════════════════════════════════════ */
 
 const SEO_START_DATE = '2026-05-19';
@@ -61,8 +61,8 @@ const GSC_MONTHLY: Array<{ month: string; clicks: number; impressions: number; c
   { month: '2026-04', clicks: 11180, impressions: 105758, ctr: 10.6, position: 37.4 },
   { month: '2026-05', clicks: 10509, impressions: 53592, ctr: 19.6, position: 17.8 },
   { month: '2026-06', clicks: 11550, impressions: 54729, ctr: 21.1, position: 10.1 },
-  { month: '2026-07', clicks: 11163, impressions: 52738, ctr: 21.2, position: 9.5 },
-  { month: '2026-08', clicks: 2937, impressions: 17319, ctr: 17.0, position: 10.7, partial: true, daysReported: 10 },
+  { month: '2026-07', clicks: 11163, impressions: 52738, ctr: 21.2, position: 9.3 },
+  { month: '2026-08', clicks: 4903, impressions: 29439, ctr: 16.7, position: 10.4, partial: true, daysReported: 16 },
 ];
 
 const GSC_WEEKLY = [
@@ -137,19 +137,19 @@ const GSC_WEEKLY = [
   { week: '2026-05-25', clicks: 3153, impressions: 12473, ctr: 25.3, position: 14.2 },
   { week: '2026-06-01', clicks: 3533, impressions: 13754, ctr: 25.7, position: 9.5 },
   { week: '2026-06-08', clicks: 2789, impressions: 12777, ctr: 21.8, position: 9.3 },
-  { week: '2026-06-15', clicks: 2182, impressions: 12279, ctr: 17.8, position: 13.0 },
-  { week: '2026-06-22', clicks: 2346, impressions: 12638, ctr: 18.6, position: 12.6 },
-  { week: '2026-06-29', clicks: 1862, impressions: 10096, ctr: 18.4, position: 8.6 },
-  { week: '2026-07-06', clicks: 2133, impressions: 11264, ctr: 18.9, position: 9.4 },
-  { week: '2026-07-13', clicks: 2721, impressions: 12681, ctr: 21.5, position: 9.7 },
-  { week: '2026-07-20', clicks: 2917, impressions: 12654, ctr: 23.1, position: 9.1 },
-  { week: '2026-07-27', clicks: 2738, impressions: 12532, ctr: 21.8, position: 9.4 },
-  { week: '2026-08-03', clicks: 2057, impressions: 12013, ctr: 17.1, position: 9.4 },
-  { week: '2026-08-10', clicks: 300, impressions: 2137, ctr: 14.0, position: 10.4 },
+  { week: '2026-06-15', clicks: 2182, impressions: 12279, ctr: 17.8, position: 13.4 },
+  { week: '2026-06-22', clicks: 2396, impressions: 12319, ctr: 19.4, position: 9.6 },
+  { week: '2026-06-29', clicks: 1831, impressions: 9952, ctr: 18.4, position: 8.8 },
+  { week: '2026-07-06', clicks: 2132, impressions: 11471, ctr: 18.6, position: 9.8 },
+  { week: '2026-07-13', clicks: 2767, impressions: 12827, ctr: 21.6, position: 10.1 },
+  { week: '2026-07-20', clicks: 2949, impressions: 12640, ctr: 23.3, position: 9.1 },
+  { week: '2026-07-27', clicks: 2714, impressions: 12617, ctr: 21.5, position: 10.0 },
+  { week: '2026-08-03', clicks: 2057, impressions: 12013, ctr: 17.1, position: 9.3 },
+  { week: '2026-08-10', clicks: 2266, impressions: 14257, ctr: 15.9, position: 9.9 },
 ];
 
-// Full-year daily GSC data — Jan 1 to Aug 10, 2026
-// Source: Google Search Console DAYS view, updated August 12, 2026
+// Full-year daily GSC data — Jan 1 to Aug 16, 2026
+// Source: Google Search Console DAYS view, updated August 18, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -202,6 +202,7 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   ],
   Aug: [
     [1,311,1559],[2,269,1610],[3,343,1836],[4,387,1667],[5,338,1692],[6,341,1629],[7,264,1678],[8,194,1778],[9,190,1733],[10,300,2137],
+    [11,371,2180],[12,361,2336],[13,337,2421],[14,361,2013],[15,286,1408],[16,250,1762],
   ],
 };
 
