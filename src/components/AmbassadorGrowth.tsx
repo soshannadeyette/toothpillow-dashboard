@@ -40,13 +40,15 @@ const ambSubs: Record<string, number> = {
   '2023-01':9,'2023-02':20,'2023-03':10,'2023-04':16,'2023-05':14,'2023-06':218,'2023-07':81,'2023-08':15,'2023-09':22,'2023-10':16,'2023-11':23,'2023-12':21,
   '2024-01':14,'2024-02':16,'2024-03':29,'2024-04':33,'2024-05':32,'2024-06':24,'2024-07':36,'2024-08':48,'2024-09':72,'2024-10':32,'2024-11':40,'2024-12':67,
   '2025-01':60,'2025-02':69,'2025-03':67,'2025-04':59,'2025-05':48,'2025-06':46,'2025-07':29,'2025-08':48,'2025-09':39,'2025-10':41,'2025-11':39,'2025-12':29,
-  '2026-01':53,'2026-02':60,'2026-03':70,'2026-04':68,'2026-05':53,'2026-06':46,'2026-07':85,'2026-08':37,
+  // 2026 corrected for retroactive reclassification: pre-onboard ambassador submissions attributed back to Parent
+  '2026-01':37,'2026-02':43,'2026-03':43,'2026-04':44,'2026-05':41,'2026-06':38,'2026-07':68,'2026-08':31,
 };
 const infSubs: Record<string, number> = {
   '2023-05':2,'2023-09':1,'2023-10':6,'2023-11':293,'2023-12':1035,
   '2024-01':431,'2024-02':313,'2024-03':1590,'2024-04':565,'2024-05':642,'2024-06':1231,'2024-07':480,'2024-08':553,'2024-09':1114,'2024-10':490,'2024-11':357,'2024-12':513,
   '2025-01':514,'2025-02':601,'2025-03':515,'2025-04':504,'2025-05':428,'2025-06':328,'2025-07':897,'2025-08':434,'2025-09':285,'2025-10':267,'2025-11':486,'2025-12':272,
-  '2026-01':309,'2026-02':510,'2026-03':461,'2026-04':232,'2026-05':269,'2026-06':306,'2026-07':598,'2026-08':164,
+  // 2026 corrected for retroactive reclassification: pre-onboard influencer submissions attributed back to Parent
+  '2026-01':307,'2026-02':504,'2026-03':441,'2026-04':228,'2026-05':268,'2026-06':303,'2026-07':597,'2026-08':161,
 };
 
 const newAddsAmb: Record<string, number> = {
@@ -60,9 +62,9 @@ const newAddsInf: Record<string, number> = {
   '2026-01':3,'2026-02':2,'2026-03':2,'2026-04':5,'2026-05':6,'2026-06':4,'2026-07':2,'2026-08':1,
 };
 
-const ambSubsYear: Record<number, number> = {2023:465, 2024:443, 2025:574, 2026:472};
-const infSubsYear: Record<number, number> = {2023:1337, 2024:8279, 2025:5531, 2026:2849};
-const combSubsYear: Record<number, number> = {2023:1802, 2024:8722, 2025:6105, 2026:3321};
+const ambSubsYear: Record<number, number> = {2023:465, 2024:443, 2025:574, 2026:345};
+const infSubsYear: Record<number, number> = {2023:1337, 2024:8279, 2025:5531, 2026:2809};
+const combSubsYear: Record<number, number> = {2023:1802, 2024:8722, 2025:6105, 2026:3154};
 const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:156};
 const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:25};
 const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:189};
@@ -104,6 +106,53 @@ const concRows = [
   {y:'2024', n:2, color:'#FDBE67', names:'Lauren, Kendra'},
   {y:'2025', n:5, color:'#8CD1C8', names:'Sosh, Shannon, Lauren, Kendra, Ginny'},
   {y:'2026', n:10, color:'#8CD1C8', names:'Lauren, Shannon, Sosh, Kendra, Jeff, Amy B., Melody, Ginny, Eden, Jasyra'},
+];
+
+// Top 3 producers by month — from LBT H1+H2 exports for each year
+// Source: LBT 2024 H1+H2, 2025 H1+H2, 2026 H1+H2, all exported 2026-08-20
+type Top3Entry = {
+  month: string; label: string; total: number;
+  p1: {name: string; count: number};
+  p2: {name: string; count: number};
+  p3: {name: string; count: number};
+  rest: number;
+};
+const TOP3_MONTHLY: Top3Entry[] = [
+  // 2024
+  {month:'2024-01',label:'Jan 24',total:445,p1:{name:'Kendra Needham',count:395},p2:{name:'Amy Erickson',count:26},p3:{name:'Lauren Johnson',count:5},rest:19},
+  {month:'2024-02',label:'Feb',total:328,p1:{name:'Kendra Needham',count:271},p2:{name:'Amy Erickson',count:13},p3:{name:'Taylor Kulik',count:13},rest:31},
+  {month:'2024-03',label:'Mar',total:1617,p1:{name:'Lauren Johnson',count:1185},p2:{name:'Kendra Needham',count:373},p3:{name:'Amy Erickson',count:14},rest:45},
+  {month:'2024-04',label:'Apr',total:596,p1:{name:'Lauren Johnson',count:262},p2:{name:'Kendra Needham',count:157},p3:{name:'Melody Brandon',count:44},rest:133},
+  {month:'2024-05',label:'May',total:672,p1:{name:'Lauren Johnson',count:268},p2:{name:'Kendra Needham',count:164},p3:{name:'Erin Wilkins',count:129},rest:111},
+  {month:'2024-06',label:'Jun',total:1255,p1:{name:'Ginny Yurich',count:457},p2:{name:'Lauren Johnson',count:449},p3:{name:'Kendra Needham',count:138},rest:211},
+  {month:'2024-07',label:'Jul',total:516,p1:{name:'Lauren Johnson',count:199},p2:{name:'Ginny Yurich',count:97},p3:{name:'Kendra Needham',count:80},rest:140},
+  {month:'2024-08',label:'Aug',total:598,p1:{name:'Lauren Johnson',count:147},p2:{name:'Jeff Cruz',count:122},p3:{name:'Soshanna Salsman',count:98},rest:231},
+  {month:'2024-09',label:'Sep',total:1184,p1:{name:'Ginny Yurich',count:321},p2:{name:'Lauren Johnson',count:166},p3:{name:'Kendra Needham',count:92},rest:605},
+  {month:'2024-10',label:'Oct',total:519,p1:{name:'Ginny Yurich',count:118},p2:{name:'Lauren Johnson',count:88},p3:{name:'Jeff Cruz',count:59},rest:254},
+  {month:'2024-11',label:'Nov',total:397,p1:{name:'Lauren Johnson',count:99},p2:{name:'Ginny Yurich',count:43},p3:{name:'Kendra Needham',count:36},rest:219},
+  {month:'2024-12',label:'Dec',total:574,p1:{name:'Thuy Improta',count:124},p2:{name:'Soshanna Salsman',count:89},p3:{name:'Lauren Johnson',count:85},rest:276},
+  // 2025
+  {month:'2025-01',label:'Jan 25',total:570,p1:{name:'Lauren Johnson',count:119},p2:{name:'Soshanna Salsman',count:78},p3:{name:'Thuy Improta',count:55},rest:318},
+  {month:'2025-02',label:'Feb',total:667,p1:{name:'Soshanna Salsman',count:182},p2:{name:'Lauren Johnson',count:95},p3:{name:'Thuy Improta',count:46},rest:344},
+  {month:'2025-03',label:'Mar',total:578,p1:{name:'Soshanna Salsman',count:128},p2:{name:'Lauren Johnson',count:86},p3:{name:'Thuy Improta',count:52},rest:312},
+  {month:'2025-04',label:'Apr',total:563,p1:{name:'Lauren Johnson',count:129},p2:{name:'Soshanna Salsman',count:72},p3:{name:'Kendra Needham',count:59},rest:303},
+  {month:'2025-05',label:'May',total:476,p1:{name:'Soshanna Salsman',count:103},p2:{name:'Lauren Johnson',count:66},p3:{name:'Devon Kuntzman',count:55},rest:252},
+  {month:'2025-06',label:'Jun',total:373,p1:{name:'Soshanna Salsman',count:65},p2:{name:'Dr. Ameet Trivedi',count:41},p3:{name:'Kendra Needham',count:39},rest:228},
+  {month:'2025-07',label:'Jul',total:925,p1:{name:'Shannon Tripp',count:467},p2:{name:'Lauren Johnson',count:88},p3:{name:'Soshanna Salsman',count:84},rest:286},
+  {month:'2025-08',label:'Aug',total:479,p1:{name:'Shannon Tripp',count:71},p2:{name:'Lauren Johnson',count:67},p3:{name:'Soshanna Salsman',count:60},rest:281},
+  {month:'2025-09',label:'Sep',total:323,p1:{name:'Lauren Johnson',count:48},p2:{name:'Shannon Tripp',count:28},p3:{name:'Amy Bernhard',count:27},rest:220},
+  {month:'2025-10',label:'Oct',total:306,p1:{name:'Lauren Johnson',count:39},p2:{name:'Kendra Needham',count:33},p3:{name:'Shannon Tripp',count:31},rest:203},
+  {month:'2025-11',label:'Nov',total:523,p1:{name:'Shannon Tripp',count:197},p2:{name:'Soshanna Salsman',count:50},p3:{name:'Ginny Yurich',count:46},rest:230},
+  {month:'2025-12',label:'Dec',total:295,p1:{name:'Shannon Tripp',count:54},p2:{name:'Soshanna Salsman',count:42},p3:{name:'Lauren Johnson',count:31},rest:168},
+  // 2026
+  {month:'2026-01',label:'Jan 26',total:362,p1:{name:'Lauren Johnson',count:46},p2:{name:'Shannon Tripp',count:39},p3:{name:'Ginny Yurich',count:31},rest:246},
+  {month:'2026-02',label:'Feb',total:570,p1:{name:'Shannon Tripp',count:112},p2:{name:'Kendra Needham',count:45},p3:{name:'Soshanna Salsman',count:43},rest:370},
+  {month:'2026-03',label:'Mar',total:531,p1:{name:'Shannon Tripp',count:56},p2:{name:'Soshanna Salsman',count:52},p3:{name:'Jeff Cruz',count:41},rest:382},
+  {month:'2026-04',label:'Apr',total:300,p1:{name:'Shannon Tripp',count:35},p2:{name:'Soshanna Salsman',count:28},p3:{name:'Lauren Johnson',count:25},rest:212},
+  {month:'2026-05',label:'May',total:322,p1:{name:'Soshanna Salsman',count:31},p2:{name:'Emily Boazman',count:28},p3:{name:'Shannon Tripp',count:21},rest:242},
+  {month:'2026-06',label:'Jun',total:352,p1:{name:'Amy Bernhard',count:30},p2:{name:'Shannon Tripp',count:30},p3:{name:'Soshanna Salsman',count:28},rest:264},
+  {month:'2026-07',label:'Jul',total:683,p1:{name:'Lauren Johnson',count:314},p2:{name:'Eden Lee',count:49},p3:{name:'Soshanna Salsman',count:26},rest:294},
+  {month:'2026-08',label:'Aug*',total:201,p1:{name:'Lauren Johnson',count:36},p2:{name:'Soshanna Salsman',count:15},p3:{name:'Shannon Tripp',count:15},rest:135},
 ];
 
 // Top producers — 3-year history (2024 from H1+H2 LBT exports, 2025+2026 from moversData)
@@ -1603,6 +1652,76 @@ export default function AmbassadorGrowth() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Top 3 producers by month — stacked bar chart */}
+        <div style={{ ...card, marginTop: '1.5rem', marginBottom: '1.5rem' }}>
+          <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>
+            Top 3 Producers by Month
+          </h4>
+          <div style={{ fontSize: '0.7rem', color: '#888', marginBottom: 16 }}>
+            Who drove the Influencer + Ambassador line each month. Hover for names. Aug 2026 = 20 days.
+          </div>
+          <div style={{ display: 'flex', gap: 16, marginBottom: 12, fontSize: '0.7rem', color: '#666' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: TP.blue, display: 'inline-block' }} />#1</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: TP.gold, display: 'inline-block' }} />#2</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: TP.teal, display: 'inline-block' }} />#3</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: '#e5e7eb', display: 'inline-block' }} />Everyone else</span>
+          </div>
+          <div style={{ position: 'relative', height: 320 }}>
+            <Bar
+              data={{
+                labels: TOP3_MONTHLY.map(d => d.label),
+                datasets: [
+                  { label: 'Everyone else', data: TOP3_MONTHLY.map(d => d.rest), backgroundColor: '#e5e7eb', borderRadius: 0 },
+                  { label: '#3', data: TOP3_MONTHLY.map(d => d.p3.count), backgroundColor: TP.teal, borderRadius: 0 },
+                  { label: '#2', data: TOP3_MONTHLY.map(d => d.p2.count), backgroundColor: TP.gold, borderRadius: 0 },
+                  { label: '#1', data: TOP3_MONTHLY.map(d => d.p1.count), backgroundColor: TP.blue, borderRadius: { topLeft: 3, topRight: 3, bottomLeft: 0, bottomRight: 0 } as unknown as number },
+                ],
+              }}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    stacked: true,
+                    ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 0 },
+                    grid: { display: false },
+                  },
+                  y: {
+                    stacked: true,
+                    title: { display: true, text: 'Submissions', font: { size: 11 } },
+                    grid: { color: '#f0f0f0' },
+                  },
+                },
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    callbacks: {
+                      title: (ctx) => {
+                        const i = ctx[0].dataIndex;
+                        const d = TOP3_MONTHLY[i];
+                        return `${d.month} — ${d.total.toLocaleString()} total`;
+                      },
+                      label: (ctx) => {
+                        const i = ctx.dataIndex;
+                        const si = ctx.datasetIndex;
+                        const d = TOP3_MONTHLY[i];
+                        const pct = (v: number) => Math.round(v / d.total * 100);
+                        if (si === 0) return `Everyone else: ${d.rest} (${pct(d.rest)}%)`;
+                        if (si === 1) return `#3 ${d.p3.name}: ${d.p3.count} (${pct(d.p3.count)}%)`;
+                        if (si === 2) return `#2 ${d.p2.name}: ${d.p2.count} (${pct(d.p2.count)}%)`;
+                        return `#1 ${d.p1.name}: ${d.p1.count} (${pct(d.p1.count)}%)`;
+                      },
+                    },
+                  },
+                },
+              }}
+            />
+          </div>
+          <div style={{ fontSize: '0.65rem', color: '#999', marginTop: 8, textAlign: 'center' }}>
+            Source: Launch Bonus Tracker daily exports (2024 H1+H2, 2025 H1+H2, 2026 H1+H2). Jan–Feb 2024 was ~90% Kendra Needham. Mar 2024 = 73% Lauren Johnson. Concentration has steadily declined.
           </div>
         </div>
 
