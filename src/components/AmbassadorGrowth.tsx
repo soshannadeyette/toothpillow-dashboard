@@ -1721,7 +1721,63 @@ export default function AmbassadorGrowth() {
             />
           </div>
           <div style={{ fontSize: '0.65rem', color: '#999', marginTop: 8, textAlign: 'center' }}>
-            Source: Launch Bonus Tracker daily exports (2024 H1+H2, 2025 H1+H2, 2026 H1+H2). Jan–Feb 2024 was ~90% Kendra Needham. Mar 2024 = 73% Lauren Johnson. Concentration has steadily declined.
+            Source: Launch Bonus Tracker daily exports (2024 H1+H2, 2025 H1+H2, 2026 H1+H2).
+          </div>
+
+          {/* Reference table — names visible without hover */}
+          <div style={{ marginTop: 16, overflowX: 'auto' }}>
+            <table style={{ width: '100%', fontSize: '0.7rem', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: `2px solid ${TP.navy}` }}>
+                  <th style={{ textAlign: 'left', padding: '6px 8px', color: TP.navy, fontWeight: 700, fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>Month</th>
+                  <th style={{ textAlign: 'right', padding: '6px 6px', color: TP.navy, fontWeight: 700, fontSize: '0.65rem' }}>Total</th>
+                  <th style={{ textAlign: 'left', padding: '6px 8px', color: TP.blue, fontWeight: 700, fontSize: '0.65rem' }}>#1</th>
+                  <th style={{ textAlign: 'left', padding: '6px 8px', color: '#B8860B', fontWeight: 700, fontSize: '0.65rem' }}>#2</th>
+                  <th style={{ textAlign: 'left', padding: '6px 8px', color: '#0E8A6D', fontWeight: 700, fontSize: '0.65rem' }}>#3</th>
+                  <th style={{ textAlign: 'right', padding: '6px 8px', color: TP.navy, fontWeight: 700, fontSize: '0.65rem' }}>Top 3 %</th>
+                </tr>
+              </thead>
+              <tbody>
+                {TOP3_MONTHLY.map((d, i) => {
+                  const top3sum = d.p1.count + d.p2.count + d.p3.count;
+                  const top3pct = Math.round(top3sum / d.total * 100);
+                  const isYearStart = d.month.endsWith('-01');
+                  const firstName = (n: string) => n.split(' ')[0];
+                  const lastName = (n: string) => { const parts = n.split(' '); return parts.length > 1 ? parts[parts.length - 1] : ''; };
+                  const shortName = (n: string) => {
+                    const f = firstName(n);
+                    const l = lastName(n);
+                    return l ? `${f} ${l.charAt(0)}.` : f;
+                  };
+                  return (
+                    <tr key={d.month} style={{
+                      borderBottom: '1px solid #f0f0f0',
+                      background: i % 2 === 0 ? '#fff' : '#fafafa',
+                      borderTop: isYearStart && i > 0 ? `2px solid ${TP.lightBlue}` : undefined,
+                    }}>
+                      <td style={{ padding: '4px 8px', fontWeight: isYearStart ? 700 : 400, color: TP.navy, whiteSpace: 'nowrap' }}>{d.label}</td>
+                      <td style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 700, color: TP.navy }}>{d.total.toLocaleString()}</td>
+                      <td style={{ padding: '4px 8px', color: TP.blue }}>
+                        <span style={{ fontWeight: 600 }}>{shortName(d.p1.name)}</span>
+                        <span style={{ color: '#999', marginLeft: 4 }}>{d.p1.count}</span>
+                      </td>
+                      <td style={{ padding: '4px 8px', color: '#B8860B' }}>
+                        <span style={{ fontWeight: 600 }}>{shortName(d.p2.name)}</span>
+                        <span style={{ color: '#999', marginLeft: 4 }}>{d.p2.count}</span>
+                      </td>
+                      <td style={{ padding: '4px 8px', color: '#0E8A6D' }}>
+                        <span style={{ fontWeight: 600 }}>{shortName(d.p3.name)}</span>
+                        <span style={{ color: '#999', marginLeft: 4 }}>{d.p3.count}</span>
+                      </td>
+                      <td style={{
+                        padding: '4px 8px', textAlign: 'right', fontWeight: 600,
+                        color: top3pct >= 70 ? TP.red : top3pct >= 50 ? '#B8860B' : '#16a34a',
+                      }}>{top3pct}%</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
 
