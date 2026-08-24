@@ -183,33 +183,33 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
 
 // Pipeline totals — Salesforce export Aug 17, 2026
 const GOOGLE_SF_PIPELINE = {
-  total: 594,           // leads created (started form)
-  completed: 269,       // all stages except Waiting-Info (45%)
-  waitingInfo: 325,     // incomplete submissions (WAITING - Needs info)
-  sentCheckout: 188,    // Sent Checkout Link (161) + SCL-Temp Hold (1) + Checked Out (26)
-  sentToTxP: 22,        // Sent to TxP (20) + Waiting for TxP Assignment (2)
-  txpApproved: 4,
+  total: 632,           // leads created (started form)
+  completed: 288,       // all stages except Waiting-Info (46%)
+  waitingInfo: 344,     // incomplete submissions (WAITING - Needs info)
+  sentCheckout: 198,    // Sent Checkout Link (172) + Checked Out (26)
+  sentToTxP: 23,        // Sent to TxP (20) + Waiting for TxP Assignment (3)
+  txpApproved: 6,
   checkedOut: 26,
-  referredOut: 30,
-  closedLost: 22,       // 15 Closed Lost + 7 Do Not Contact
-  tempHold: 4,          // 3 Temp Hold + 1 SCL-Temp Hold
+  referredOut: 33,
+  closedLost: 25,       // 16 Closed Lost + 9 Do Not Contact
+  tempHold: 3,
   formOpens: 1436,      // Google Ads conversions (form opens, Google-only)
 };
 
 // Revenue from checkouts — 26 checkouts at $46,986
-// Source: Salesforce "Google Ads 2026" export, August 17, 2026
+// Source: Salesforce "Google Ads 2026" export, August 24, 2026
 const GOOGLE_REVENUE: number = 46986;
 
-// Monthly breakdown from Salesforce — ALL columns grouped by SUBMISSION month (cohort).
-// Checkouts/revenue = leads from that submission month that have checked out to date,
+// Monthly breakdown from Salesforce — ALL columns grouped by CREATED month (cohort).
+// Checkouts/revenue = leads from that created month that have checked out to date,
 // regardless of when the checkout happened. This is correct for CAC analysis.
-// Source: Salesforce "Google Ads 2026" export, August 17, 2026
+// Source: Salesforce "Google Ads 2026" export, August 24, 2026
 const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: number; checkouts: number; revenue: number }[] = [
-  { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 20, checkouts: 2, revenue: 3291 },
-  { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 28, checkouts: 5, revenue: 8676 },
-  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 81, checkouts: 12, revenue: 20999 },
-  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 184, completed: 91, checkouts: 7, revenue: 14020 },
-  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 97, completed: 46, checkouts: 0, revenue: 0 },
+  { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 23, checkouts: 2, revenue: 3291 },
+  { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 31, checkouts: 5, revenue: 8676 },
+  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 85, checkouts: 13, revenue: 22995 },
+  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 184, completed: 86, checkouts: 6, revenue: 12024 },
+  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 135, completed: 63, checkouts: 0, revenue: 0 },
 ];
 
 /* ════════════════════════════════════════════
