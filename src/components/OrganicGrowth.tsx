@@ -144,8 +144,9 @@ const GSC_WEEKLY = [
   { week: '2026-07-13', clicks: 2767, impressions: 12827, ctr: 21.6, position: 10.1 },
   { week: '2026-07-20', clicks: 2949, impressions: 12640, ctr: 23.3, position: 9.1 },
   { week: '2026-07-27', clicks: 2714, impressions: 12617, ctr: 21.5, position: 10.0 },
-  { week: '2026-08-03', clicks: 2057, impressions: 12013, ctr: 17.1, position: 9.3 },
-  { week: '2026-08-10', clicks: 2266, impressions: 14257, ctr: 15.9, position: 9.9 },
+  { week: '2026-08-03', clicks: 2136, impressions: 11890, ctr: 18.0, position: 10.1 },
+  { week: '2026-08-10', clicks: 2241, impressions: 14355, ctr: 15.6, position: 9.7 },
+  { week: '2026-08-17', clicks: 2128, impressions: 11772, ctr: 18.1, position: 10.7 },
 ];
 
 // Full-year daily GSC data — Jan 1 to Aug 16, 2026

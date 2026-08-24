@@ -163,6 +163,21 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-08-07', spend: 589.83, clicks: 156, impressions: 2174, submit: 22, started: 0, finished: 0, treatment: 0 },
   { date: '2026-08-08', spend: 484.57, clicks: 145, impressions: 1895, submit: 22, started: 0, finished: 0, treatment: 0 },
   { date: '2026-08-09', spend: 587.95, clicks: 168, impressions: 2554, submit: 16, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-10', spend: 702, clicks: 195, impressions: 2970, submit: 21, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-11', spend: 718, clicks: 189, impressions: 3420, submit: 25, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-12', spend: 780, clicks: 193, impressions: 3070, submit: 29, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-13', spend: 626, clicks: 158, impressions: 2910, submit: 31, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-14', spend: 554, clicks: 146, impressions: 2670, submit: 24, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-15', spend: 442, clicks: 115, impressions: 1840, submit: 23, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-16', spend: 778, clicks: 175, impressions: 2940, submit: 35, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-17', spend: 760, clicks: 159, impressions: 2910, submit: 25, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-18', spend: 860, clicks: 180, impressions: 3110, submit: 22, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-19', spend: 936, clicks: 175, impressions: 2940, submit: 23, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-20', spend: 569, clicks: 135, impressions: 1580, submit: 21, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-21', spend: 596, clicks: 149, impressions: 2420, submit: 13, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-22', spend: 531, clicks: 135, impressions: 2210, submit: 24, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-23', spend: 640, clicks: 163, impressions: 3000, submit: 23, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-08-24', spend: 397, clicks: 103, impressions: 1380, submit: 2, started: 0, finished: 0, treatment: 0 },
 ];
 
 // Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)
