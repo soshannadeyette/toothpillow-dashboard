@@ -272,9 +272,10 @@ export default function ReferrerView() {
   const trendColor6 = gapNarrowed > 0 ? '#0F6E56' : gapNarrowed < 0 ? '#A32D2D' : '#666';
   const trendWord6 = gapNarrowed > 0 ? `Narrowed by ${gapNarrowed}` : gapNarrowed < 0 ? `Widened by ${Math.abs(gapNarrowed)}` : 'No change';
 
-  // Parent vs Ambassador chart — last 15 months
+  // Parent vs Ambassador chart — last 15 months (use corrected data)
   const pvAmbSlice = allMonths.slice(-15);
   const pvAmbLabels = pvAmbSlice.map(fmtMonth);
+  const pvAmbChartData = pvAmbData.slice(-15);
 
   /* ──── Per-source deep dives ──── */
   const perSourceSections = useMemo(() => {
@@ -431,8 +432,8 @@ export default function ReferrerView() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
         <StatCard label={`${fmtMonthFull(CURRENT_MONTH_KEY)} So Far (${CURRENT_MONTH_DAYS_TRACKED} days)`} color={TP.text}
-          value={`Parent ${currentMonthActual.Parent} · Amb ${currentMonthActual['Airway Ambassador']}`}
-          sub={`On pace for Parent ${latestGap.parent} · Amb ${latestGap.amb}`}
+          value={`Parent ${latestGap.parent} · Amb ${latestGap.amb}`}
+          sub={`Raw Salesforce: Parent ${currentMonthActual.Parent} · Amb ${currentMonthActual['Airway Ambassador']} (pre-onboard subs reclassified)`}
           isText
         />
         <StatCard label="6-Month Trend" color={trendColor6}
@@ -455,13 +456,13 @@ export default function ReferrerView() {
               datasets: [
                 {
                   label: 'Parent',
-                  data: pvAmbSlice.map((m) => ALL_DATA[m].Parent || 0),
+                  data: pvAmbChartData.map((d) => d.parent),
                   borderColor: '#7BAFD4', backgroundColor: '#7BAFD420',
                   tension: 0.4, borderWidth: 3, fill: true, pointRadius: 4, pointBackgroundColor: '#7BAFD4',
                 },
                 {
                   label: 'Airway Ambassador',
-                  data: pvAmbSlice.map((m) => ALL_DATA[m]['Airway Ambassador'] || 0),
+                  data: pvAmbChartData.map((d) => d.amb),
                   borderColor: '#5BA88C', backgroundColor: '#5BA88C20',
                   tension: 0.4, borderWidth: 3, fill: true, pointRadius: 4, pointBackgroundColor: '#5BA88C',
                 },
