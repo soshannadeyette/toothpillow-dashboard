@@ -40,15 +40,15 @@ const ambSubs: Record<string, number> = {
   '2023-01':9,'2023-02':20,'2023-03':10,'2023-04':16,'2023-05':14,'2023-06':218,'2023-07':81,'2023-08':15,'2023-09':22,'2023-10':16,'2023-11':23,'2023-12':21,
   '2024-01':14,'2024-02':16,'2024-03':29,'2024-04':33,'2024-05':32,'2024-06':24,'2024-07':36,'2024-08':48,'2024-09':72,'2024-10':32,'2024-11':40,'2024-12':67,
   '2025-01':60,'2025-02':69,'2025-03':67,'2025-04':59,'2025-05':48,'2025-06':46,'2025-07':29,'2025-08':48,'2025-09':39,'2025-10':41,'2025-11':39,'2025-12':29,
-  // 2026 corrected for retroactive reclassification: pre-onboard ambassador submissions attributed back to Parent
-  '2026-01':37,'2026-02':43,'2026-03':43,'2026-04':44,'2026-05':41,'2026-06':38,'2026-07':69,'2026-08':37,
+  // 2026: raw Salesforce values (correction for retroactive reclassification lives in ReferrerView only)
+  '2026-01':53,'2026-02':61,'2026-03':70,'2026-04':68,'2026-05':53,'2026-06':46,'2026-07':87,'2026-08':43,
 };
 const infSubs: Record<string, number> = {
   '2023-05':2,'2023-09':1,'2023-10':6,'2023-11':293,'2023-12':1035,
   '2024-01':431,'2024-02':313,'2024-03':1590,'2024-04':565,'2024-05':642,'2024-06':1231,'2024-07':480,'2024-08':553,'2024-09':1114,'2024-10':490,'2024-11':357,'2024-12':513,
   '2025-01':514,'2025-02':601,'2025-03':515,'2025-04':504,'2025-05':428,'2025-06':328,'2025-07':897,'2025-08':434,'2025-09':285,'2025-10':267,'2025-11':486,'2025-12':272,
-  // 2026 corrected for retroactive reclassification: pre-onboard influencer submissions attributed back to Parent
-  '2026-01':307,'2026-02':503,'2026-03':441,'2026-04':228,'2026-05':268,'2026-06':303,'2026-07':594,'2026-08':192,
+  // 2026: raw Salesforce values (correction for retroactive reclassification lives in ReferrerView only)
+  '2026-01':309,'2026-02':511,'2026-03':462,'2026-04':233,'2026-05':269,'2026-06':306,'2026-07':598,'2026-08':196,
 };
 
 const newAddsAmb: Record<string, number> = {
@@ -62,9 +62,9 @@ const newAddsInf: Record<string, number> = {
   '2026-01':3,'2026-02':2,'2026-03':2,'2026-04':5,'2026-05':6,'2026-06':4,'2026-07':2,'2026-08':1,
 };
 
-const ambSubsYear: Record<number, number> = {2023:465, 2024:443, 2025:574, 2026:352};
-const infSubsYear: Record<number, number> = {2023:1337, 2024:8279, 2025:5531, 2026:2836};
-const combSubsYear: Record<number, number> = {2023:1802, 2024:8722, 2025:6105, 2026:3188};
+const ambSubsYear: Record<number, number> = {2023:465, 2024:443, 2025:574, 2026:481};
+const infSubsYear: Record<number, number> = {2023:1337, 2024:8279, 2025:5531, 2026:2884};
+const combSubsYear: Record<number, number> = {2023:1802, 2024:8722, 2025:6105, 2026:3365};
 const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:163};
 const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:25};
 const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:196};
@@ -78,8 +78,10 @@ const activeTotalByYear: Record<number, number> = {2023:30, 2024:145, 2025:209, 
 const halfCarriedBy: Record<number, number> = {2023:1, 2024:2, 2025:5, 2026:7};
 const tenPlusByYear: Record<number, number> = {2023:8, 2024:40, 2025:55, 2026:45};
 // Mega-3 = Lauren Johnson + Kendra Needham + Ginny Yurich (top recruited-ambassador producers)
-const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:1104};
-const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:2256};
+// Mega-3 = Lauren Johnson + Kendra Needham + Ginny Yurich (specific named producers, not top-3-by-volume)
+// 2026: Lauren 527 + Kendra 181 + Ginny 105 = 813; base = LBT total 3360 - 813
+const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:813};
+const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:2547};
 
 // Dynamic annualization: complete months + fractional current month
 const _now = new Date();
