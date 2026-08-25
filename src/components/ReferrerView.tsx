@@ -50,7 +50,7 @@ interface RefMonth {
 }
 
 const REFERRER_DATA: Record<string, RefMonth> = {
-  // Source: Salesforce "Monthly Submissions by Referral Type" export, August 24, 2026
+  // Source: Salesforce "Monthly Submissions by Referral Type" export, August 25, 2026
   "2023-01": {total:24, Parent:8, "Dental Office":6, "Airway Ambassador":9, Influencer:0, Podcast:0, Instagram:0, TikTok:0, Facebook:0, "Meta Ad":0, "Online Search":0, "Unknown Referral":0, "Unknown Professional Referral":0, Other:0, MYO:1},
   "2023-02": {total:60, Parent:19, "Dental Office":19, "Airway Ambassador":20, Influencer:0, Podcast:0, Instagram:0, TikTok:0, Facebook:0, "Meta Ad":0, "Online Search":1, "Unknown Referral":0, "Unknown Professional Referral":0, Other:0, MYO:1},
   "2023-03": {total:51, Parent:18, "Dental Office":18, "Airway Ambassador":10, Influencer:0, Podcast:0, Instagram:0, TikTok:0, Facebook:0, "Meta Ad":0, "Online Search":1, "Unknown Referral":0, "Unknown Professional Referral":0, Other:1, MYO:3},
@@ -94,13 +94,13 @@ const REFERRER_DATA: Record<string, RefMonth> = {
   "2026-05": {total:1125, Parent:49, "Dental Office":213, "Airway Ambassador":53, Influencer:269, Podcast:127, Instagram:55, TikTok:4, Facebook:13, "Meta Ad":1, "Online Search":250, "Unknown Referral":46, "Unknown Professional Referral":10, Other:0, "Google Ad":28, MYO:4, "Health Care Professional":3},
   "2026-06": {total:1475, Parent:85, "Dental Office":228, "Airway Ambassador":46, Influencer:306, Podcast:279, Instagram:54, TikTok:1, Facebook:3, "Meta Ad":0, "Online Search":327, "Unknown Referral":44, "Unknown Professional Referral":14, Other:0, "Google Ad":81, MYO:5, "Health Care Professional":2},
   "2026-07": {total:1965, Parent:108, "Dental Office":389, "Airway Ambassador":87, Influencer:598, Podcast:161, Instagram:78, TikTok:1, Facebook:22, "Meta Ad":4, "Online Search":329, "Unknown Referral":68, "Unknown Professional Referral":18, Other:0, "Google Ad":93, MYO:3, "Health Care Professional":2, "Brand Ambassador":4},
-  "2026-08": {total:1028, Parent:40, "Dental Office":284, "Airway Ambassador":43, Influencer:195, Podcast:129, Instagram:38, TikTok:0, Facebook:1, "Meta Ad":0, "Online Search":191, "Unknown Referral":31, "Unknown Professional Referral":7, Other:0, "Google Ad":67, "Brand Ambassador":2},
+  "2026-08": {total:1045, Parent:40, "Dental Office":288, "Airway Ambassador":43, Influencer:196, Podcast:131, Instagram:40, TikTok:0, Facebook:4, "Meta Ad":0, "Online Search":194, "Unknown Referral":31, "Unknown Professional Referral":8, Other:0, "Google Ad":68, "Brand Ambassador":2},
 };
 
 /* ────── Current month projection ────── */
 // Update these when changing the current partial month
 const CURRENT_MONTH_KEY = '2026-08';
-const CURRENT_MONTH_DAYS_TRACKED = 24;
+const CURRENT_MONTH_DAYS_TRACKED = 25;
 const CURRENT_MONTH_DAYS_TOTAL = 31;
 
 function buildProjected(monthKey: string, daysTracked: number, daysTotal: number): { actual: RefMonth; projected: RefMonth } {
@@ -250,7 +250,7 @@ export default function ReferrerView() {
   // Corrected ambassador counts for 2026: pre-onboard submissions attributed back to Parent
   // Source: AmbassadorGrowth.tsx ambSubs (cross-referenced Full List onboard dates with Launch Bonus Tracker)
   const AMB_CORRECTED_2026: Record<string, number> = {
-    '2026-01':35,'2026-02':42,'2026-03':40,'2026-04':40,'2026-05':35,'2026-06':37,'2026-07':61,'2026-08':32,
+    '2026-01':37,'2026-02':43,'2026-03':43,'2026-04':44,'2026-05':41,'2026-06':38,'2026-07':69,'2026-08':37,
   };
   const pvAmbData = useMemo(() => {
     return allMonths.map((m) => {
