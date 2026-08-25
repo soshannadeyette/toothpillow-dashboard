@@ -1052,21 +1052,22 @@ export default function AmbassadorGrowth() {
         <p style={sectionSub}>Month-by-month submission volume for each channel since the program started.</p>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          {/* Influencer monthly — Jan 2024+ (2023 had only 2 months of data) */}
+          {/* Influencer monthly */}
           <div style={chartWrap}>
             <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>
-              Influencer — Monthly Submissions (Jan 2024+)
+              Influencer — Monthly Submissions
             </h4>
-            <div style={{ height: 340 }}>
+            <div style={{ height: 260 }}>
               <Bar
                 data={{
-                  labels: MONTHS_JAN24_MAY26.map(fmtMonthLabel),
+                  labels: ALL_MONTHS.map(fmtMonthLabel),
                   datasets: [{
                     label: 'Influencer Submissions',
-                    data: MONTHS_JAN24_MAY26.map(k => infSubs[k] ?? 0),
-                    backgroundColor: MONTHS_JAN24_MAY26.map(k => {
+                    data: ALL_MONTHS.map(k => infSubs[k] ?? 0),
+                    borderRadius: 2,
+                    backgroundColor: ALL_MONTHS.map(k => {
                       const y = parseInt(k.split('-')[0]);
-                      return y === 2026 ? TP.teal : y === 2025 ? TP.teal + 'B0' : TP.teal + '80';
+                      return y === 2026 ? TP.teal : y === 2025 ? TP.teal + 'B0' : y === 2024 ? TP.teal + '80' : TP.teal + '50';
                     }),
                   }],
                 }}
@@ -1078,7 +1079,7 @@ export default function AmbassadorGrowth() {
                     tooltip: { mode: 'nearest', intersect: true },
                   },
                   scales: {
-                    x: { ticks: { autoSkip: false, maxRotation: 90, font: { size: 9 }, callback: function(value) { const k = MONTHS_JAN24_MAY26[value as number]; return k?.endsWith('-01') ? k?.split('-')[0] : ''; } } },
+                    x: { ticks: { autoSkip: false, maxRotation: 90, font: { size: 9 }, callback: function(value) { const k = ALL_MONTHS[value as number]; return k?.endsWith('-01') ? k?.split('-')[0] : ''; } } },
                     y: { beginAtZero: true, title: { display: true, text: 'Submissions', font: { size: 10 } } },
                   },
                 } satisfies ChartOptions<'bar'>}
@@ -1086,21 +1087,22 @@ export default function AmbassadorGrowth() {
             </div>
           </div>
 
-          {/* Ambassador monthly — Jan 2024+ (removes Jun '23 outlier that crushed the Y-axis scale) */}
+          {/* Ambassador monthly */}
           <div style={chartWrap}>
             <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>
-              Ambassador — Monthly Submissions (Jan 2024+)
+              Ambassador — Monthly Submissions
             </h4>
-            <div style={{ height: 340 }}>
+            <div style={{ height: 260 }}>
               <Bar
                 data={{
-                  labels: MONTHS_JAN24_MAY26.map(fmtMonthLabel),
+                  labels: ALL_MONTHS.map(fmtMonthLabel),
                   datasets: [{
                     label: 'Ambassador Submissions',
-                    data: MONTHS_JAN24_MAY26.map(k => ambSubs[k] ?? 0),
-                    backgroundColor: MONTHS_JAN24_MAY26.map(k => {
+                    data: ALL_MONTHS.map(k => ambSubs[k] ?? 0),
+                    borderRadius: 2,
+                    backgroundColor: ALL_MONTHS.map(k => {
                       const y = parseInt(k.split('-')[0]);
-                      return y === 2026 ? TP.blue : y === 2025 ? TP.blue + 'B0' : TP.blue + '80';
+                      return y === 2026 ? TP.blue : y === 2025 ? TP.blue + 'B0' : y === 2024 ? TP.blue + '80' : TP.blue + '50';
                     }),
                   }],
                 }}
@@ -1112,7 +1114,7 @@ export default function AmbassadorGrowth() {
                     tooltip: { mode: 'nearest', intersect: true },
                   },
                   scales: {
-                    x: { ticks: { autoSkip: false, maxRotation: 90, font: { size: 9 }, callback: function(value) { const k = MONTHS_JAN24_MAY26[value as number]; return k?.endsWith('-01') ? k?.split('-')[0] : ''; } } },
+                    x: { ticks: { autoSkip: false, maxRotation: 90, font: { size: 9 }, callback: function(value) { const k = ALL_MONTHS[value as number]; return k?.endsWith('-01') ? k?.split('-')[0] : ''; } } },
                     y: { beginAtZero: true, title: { display: true, text: 'Submissions', font: { size: 10 } } },
                   },
                 } satisfies ChartOptions<'bar'>}
