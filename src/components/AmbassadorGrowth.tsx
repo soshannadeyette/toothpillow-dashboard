@@ -1068,7 +1068,6 @@ export default function AmbassadorGrowth() {
                       const y = parseInt(k.split('-')[0]);
                       return y === 2026 ? TP.teal : y === 2025 ? TP.teal + 'B0' : y === 2024 ? TP.teal + '80' : TP.teal + '50';
                     }),
-                    borderRadius: 2,
                   }],
                 }}
                 options={{
@@ -1103,7 +1102,6 @@ export default function AmbassadorGrowth() {
                       const y = parseInt(k.split('-')[0]);
                       return y === 2026 ? TP.blue : y === 2025 ? TP.blue + 'B0' : y === 2024 ? TP.blue + '80' : TP.blue + '50';
                     }),
-                    borderRadius: 2,
                   }],
                 }}
                 options={{
