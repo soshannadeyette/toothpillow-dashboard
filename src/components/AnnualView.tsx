@@ -78,6 +78,20 @@ const SUBS_2025: Record<number, number> = {
   7: 2588, 8: 2478, 9: 1550, 10: 1475, 11: 1591, 12: 1226,
 };
 
+// 2025 monthly breakdowns — source: OnlineTrends.tsx hardcoded arrays
+const ONLINE_2025: Record<number, number> = {
+  1: 1327, 2: 1464, 3: 1279, 4: 1186, 5: 1031, 6: 787,
+  7: 2386, 8: 2178, 9: 1180, 10: 975, 11: 1135, 12: 776,
+};
+const HYBRID_2025: Record<number, number> = {
+  1: 81, 2: 77, 3: 214, 4: 461, 5: 319, 6: 288,
+  7: 292, 8: 351, 9: 406, 10: 526, 11: 460, 12: 452,
+};
+const PRIME_2025: Record<number, number> = {
+  1: 25, 2: 20, 3: 19, 4: 18, 5: 9, 6: 23,
+  7: 11, 8: 13, 9: 14, 10: 7, 11: 13, 12: 25,
+};
+
 function pct(val: number, total: number): string {
   if (!total) return '0%';
   return (val / total * 100).toFixed(1) + '%';
@@ -602,13 +616,83 @@ export default function AnnualView() {
               </tr>
             </thead>
             <tbody>
+              {/* ----- 2025 ----- */}
+              <tr>
+                <td colSpan={13} className="py-2 px-2 font-bold text-xs uppercase tracking-wider" style={{ color: TP.darkPurple, backgroundColor: '#f9f5fb' }}>
+                  2025
+                </td>
+              </tr>
+              {(() => {
+                const months25 = Array.from({ length: 12 }, (_, i) => i + 1);
+                const tot25 = { online: 0, hybrid: 0, prime: 0, total: 0, visitors: 0 };
+                const rows = months25.map(mo => {
+                  const online = ONLINE_2025[mo] || 0;
+                  const hybrid = HYBRID_2025[mo] || 0;
+                  const prime = PRIME_2025[mo] || 0;
+                  const total = SUBS_2025[mo] || (online + hybrid + prime);
+                  const visitors = TRAFFIC_2025[mo] || 0;
+                  const conv = visitors > 0 ? (online / visitors) * 100 : 0;
+                  const daysInMonth = new Date(2025, mo, 0).getDate();
+                  const dailyAvg = total / daysInMonth;
+                  tot25.online += online;
+                  tot25.hybrid += hybrid;
+                  tot25.prime += prime;
+                  tot25.total += total;
+                  tot25.visitors += visitors;
+                  return (
+                    <tr key={`2025-${mo}`} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-2 px-2 font-medium">{allMonthLabels[mo - 1]}</td>
+                      <td className="py-2 px-2" style={{ color: TP.blue }}>{online.toLocaleString()}</td>
+                      <td className="py-2 px-2" style={{ color: '#d97706' }}>{hybrid.toLocaleString()}</td>
+                      <td className="py-2 px-2" style={{ color: TP.red }}>{prime.toLocaleString()}</td>
+                      <td className="py-2 px-2 font-semibold">{total.toLocaleString()}</td>
+                      <td className="py-2 px-2 text-gray-400">--</td>
+                      <td className="py-2 px-2 text-gray-400">--</td>
+                      <td className="py-2 px-2 text-gray-400">--</td>
+                      <td className="py-2 px-2">{visitors.toLocaleString()}</td>
+                      <td className="py-2 px-2">{conv > 0 ? conv.toFixed(2) + '%' : '--'}</td>
+                      <td className="py-2 px-2 text-gray-400">--</td>
+                      <td className="py-2 px-2 text-gray-400">--</td>
+                      <td className="py-2 px-2">{dailyAvg.toFixed(1)}</td>
+                    </tr>
+                  );
+                });
+                const conv25 = tot25.visitors > 0 ? (tot25.online / tot25.visitors) * 100 : 0;
+                return (
+                  <>
+                    {rows}
+                    <tr className="font-bold" style={{ backgroundColor: '#f9f5fb' }}>
+                      <td className="py-2 px-2">2025 TOTAL</td>
+                      <td className="py-2 px-2" style={{ color: TP.blue }}>{tot25.online.toLocaleString()}</td>
+                      <td className="py-2 px-2" style={{ color: '#d97706' }}>{tot25.hybrid.toLocaleString()}</td>
+                      <td className="py-2 px-2" style={{ color: TP.red }}>{tot25.prime.toLocaleString()}</td>
+                      <td className="py-2 px-2">{tot25.total.toLocaleString()}</td>
+                      <td className="py-2 px-2 text-gray-400">--</td>
+                      <td className="py-2 px-2 text-gray-400">--</td>
+                      <td className="py-2 px-2 text-gray-400">--</td>
+                      <td className="py-2 px-2">{tot25.visitors.toLocaleString()}</td>
+                      <td className="py-2 px-2">{conv25.toFixed(2)}%</td>
+                      <td className="py-2 px-2 text-gray-400">--</td>
+                      <td className="py-2 px-2 text-gray-400">--</td>
+                      <td className="py-2 px-2">{(tot25.total / 365).toFixed(1)}</td>
+                    </tr>
+                  </>
+                );
+              })()}
+
+              {/* ----- 2026 ----- */}
+              <tr>
+                <td colSpan={13} className="py-2 px-2 font-bold text-xs uppercase tracking-wider" style={{ color: TP.blue, backgroundColor: '#f0f5fb' }}>
+                  2026
+                </td>
+              </tr>
               {months2026.map(m => {
                 const goalObj = (MONTHLY_GOALS_2026 as { month: number; total: number }[]).find(g => g.month === m.month);
                 const goal = m.goal || goalObj?.total || 0;
                 const gap = (m.total_submissions || 0) - goal;
                 const gpct = goal > 0 ? (m.total_submissions || 0) / goal * 100 : 0;
                 return (
-                  <tr key={m.month} className="border-b border-gray-100 hover:bg-gray-50">
+                  <tr key={`2026-${m.month}`} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-2 px-2 font-medium">{m.month_name || allMonthLabels[m.month - 1]}</td>
                     <td className="py-2 px-2" style={{ color: TP.blue }}>
                       {(m.online_submissions || 0).toLocaleString()}
@@ -645,8 +729,8 @@ export default function AnnualView() {
               })}
             </tbody>
             <tfoot>
-              <tr className="font-bold bg-gray-50">
-                <td className="py-2 px-2">TOTAL</td>
+              <tr className="font-bold" style={{ backgroundColor: '#f0f5fb' }}>
+                <td className="py-2 px-2">2026 YTD</td>
                 <td className="py-2 px-2" style={{ color: TP.blue }}>
                   {ytdOnline.toLocaleString()}
                 </td>
