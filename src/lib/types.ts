@@ -165,6 +165,10 @@ export const TRAFFIC_2026: Record<number, number> = {
 };
 
 // GA4 Monthly Unique Users — USA only
+export const TRAFFIC_USA_2025: Record<number, number> = {
+  1: 43740, 2: 43572, 3: 47135, 4: 27546, 5: 24572, 6: 25642,
+  7: 64002, 8: 31657, 9: 24974, 10: 23243, 11: 48102, 12: 31095,
+};
 export const TRAFFIC_USA_2026: Record<number, number> = {
   1: 33544, 2: 44756, 3: 33417, 4: 25521, 5: 28559, 6: 32007,
 };

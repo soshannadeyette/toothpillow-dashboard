@@ -16,7 +16,7 @@ import {
 import { Bar, Line } from 'react-chartjs-2';
 import { fetchAnnualSummaries, upsertMonthlySummary, fetchSubmissions, currentMonth, currentYear } from '@/lib/api';
 import type { MonthlySummary, DailySubmission } from '@/lib/types';
-import { MONTHLY_GOALS_2026, MONTH_NAMES, TRAFFIC_2025, TRAFFIC_2026, TRAFFIC_USA_2026 } from '@/lib/types';
+import { MONTHLY_GOALS_2026, MONTH_NAMES, TRAFFIC_2025, TRAFFIC_2026, TRAFFIC_USA_2025, TRAFFIC_USA_2026 } from '@/lib/types';
 
 ChartJS.register(
   CategoryScale,
@@ -624,14 +624,16 @@ export default function AnnualView() {
               </tr>
               {(() => {
                 const months25 = Array.from({ length: 12 }, (_, i) => i + 1);
-                const tot25 = { online: 0, hybrid: 0, prime: 0, total: 0, visitors: 0 };
+                const tot25 = { online: 0, hybrid: 0, prime: 0, total: 0, visitors: 0, usaVisitors: 0 };
                 const rows = months25.map(mo => {
                   const online = ONLINE_2025[mo] || 0;
                   const hybrid = HYBRID_2025[mo] || 0;
                   const prime = PRIME_2025[mo] || 0;
                   const total = SUBS_2025[mo] || (online + hybrid + prime);
                   const visitors = TRAFFIC_2025[mo] || 0;
+                  const usaVis = TRAFFIC_USA_2025[mo] || 0;
                   const conv = visitors > 0 ? (online / visitors) * 100 : 0;
+                  const usaConv = usaVis > 0 ? (online / usaVis) * 100 : 0;
                   const daysInMonth = new Date(2025, mo, 0).getDate();
                   const dailyAvg = total / daysInMonth;
                   tot25.online += online;
@@ -639,6 +641,7 @@ export default function AnnualView() {
                   tot25.prime += prime;
                   tot25.total += total;
                   tot25.visitors += visitors;
+                  tot25.usaVisitors += usaVis;
                   return (
                     <tr key={`2025-${mo}`} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="py-2 px-2 font-medium">{allMonthLabels[mo - 1]}</td>
@@ -651,13 +654,14 @@ export default function AnnualView() {
                       <td className="py-2 px-2 text-gray-400">--</td>
                       <td className="py-2 px-2">{visitors.toLocaleString()}</td>
                       <td className="py-2 px-2">{conv > 0 ? conv.toFixed(2) + '%' : '--'}</td>
-                      <td className="py-2 px-2 text-gray-400">--</td>
-                      <td className="py-2 px-2 text-gray-400">--</td>
+                      <td className="py-2 px-2">{usaVis.toLocaleString()}</td>
+                      <td className="py-2 px-2">{usaConv > 0 ? usaConv.toFixed(2) + '%' : '--'}</td>
                       <td className="py-2 px-2">{dailyAvg.toFixed(1)}</td>
                     </tr>
                   );
                 });
                 const conv25 = tot25.visitors > 0 ? (tot25.online / tot25.visitors) * 100 : 0;
+                const usaConv25 = tot25.usaVisitors > 0 ? (tot25.online / tot25.usaVisitors) * 100 : 0;
                 return (
                   <>
                     {rows}
@@ -672,8 +676,8 @@ export default function AnnualView() {
                       <td className="py-2 px-2 text-gray-400">--</td>
                       <td className="py-2 px-2">{tot25.visitors.toLocaleString()}</td>
                       <td className="py-2 px-2">{conv25.toFixed(2)}%</td>
-                      <td className="py-2 px-2 text-gray-400">--</td>
-                      <td className="py-2 px-2 text-gray-400">--</td>
+                      <td className="py-2 px-2">{tot25.usaVisitors.toLocaleString()}</td>
+                      <td className="py-2 px-2">{usaConv25.toFixed(2)}%</td>
                       <td className="py-2 px-2">{(tot25.total / 365).toFixed(1)}</td>
                     </tr>
                   </>
