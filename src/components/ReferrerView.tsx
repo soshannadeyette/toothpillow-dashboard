@@ -247,10 +247,18 @@ export default function ReferrerView() {
   }));
 
   /* ──── Parent vs Ambassador gap tracking ──── */
+  // Corrected ambassador counts for 2026: pre-onboard submissions attributed back to Parent
+  // Source: AmbassadorGrowth.tsx ambSubs (cross-referenced Full List onboard dates with Launch Bonus Tracker)
+  const AMB_CORRECTED_2026: Record<string, number> = {
+    '2026-01':35,'2026-02':42,'2026-03':40,'2026-04':40,'2026-05':35,'2026-06':37,'2026-07':61,'2026-08':32,
+  };
   const pvAmbData = useMemo(() => {
     return allMonths.map((m) => {
-      const p = ALL_DATA[m].Parent || 0;
-      const a = ALL_DATA[m]['Airway Ambassador'] || 0;
+      const rawAmb = ALL_DATA[m]?.['Airway Ambassador'] || 0;
+      const correctedAmb = AMB_CORRECTED_2026[m];
+      const a = correctedAmb !== undefined ? correctedAmb : rawAmb;
+      const ambDiff = rawAmb - a; // submissions reclassified back to Parent
+      const p = (ALL_DATA[m]?.Parent || 0) + ambDiff;
       const gap = p - a;
       const pct = p > 0 ? Math.round((a / p) * 100) : (a > 0 ? 999 : 0);
       return { parent: p, amb: a, gap, pct, crossed: a >= p };
