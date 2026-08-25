@@ -1052,21 +1052,21 @@ export default function AmbassadorGrowth() {
         <p style={sectionSub}>Month-by-month submission volume for each channel since the program started.</p>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          {/* Influencer monthly */}
+          {/* Influencer monthly — Jan 2024+ (2023 had only 2 months of data) */}
           <div style={chartWrap}>
             <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>
-              Influencer — Monthly Submissions
+              Influencer — Monthly Submissions (Jan 2024+)
             </h4>
-            <div style={{ height: 260 }}>
+            <div style={{ height: 340 }}>
               <Bar
                 data={{
-                  labels: ALL_MONTHS.map(fmtMonthLabel),
+                  labels: MONTHS_JAN24_MAY26.map(fmtMonthLabel),
                   datasets: [{
                     label: 'Influencer Submissions',
-                    data: ALL_MONTHS.map(k => infSubs[k] ?? 0),
-                    backgroundColor: ALL_MONTHS.map(k => {
+                    data: MONTHS_JAN24_MAY26.map(k => infSubs[k] ?? 0),
+                    backgroundColor: MONTHS_JAN24_MAY26.map(k => {
                       const y = parseInt(k.split('-')[0]);
-                      return y === 2026 ? TP.teal : y === 2025 ? TP.teal + 'B0' : y === 2024 ? TP.teal + '80' : TP.teal + '50';
+                      return y === 2026 ? TP.teal : y === 2025 ? TP.teal + 'B0' : TP.teal + '80';
                     }),
                   }],
                 }}
@@ -1078,7 +1078,7 @@ export default function AmbassadorGrowth() {
                     tooltip: { mode: 'index', intersect: false },
                   },
                   scales: {
-                    x: { ticks: { maxRotation: 90, font: { size: 8 }, callback: function(_, i) { const k = ALL_MONTHS[i]; return k?.endsWith('-01') ? k?.split('-')[0] : ''; } } },
+                    x: { ticks: { maxRotation: 90, font: { size: 9 }, callback: function(_, i) { const k = MONTHS_JAN24_MAY26[i]; return k?.endsWith('-01') ? k?.split('-')[0] : ''; } } },
                     y: { beginAtZero: true, title: { display: true, text: 'Submissions', font: { size: 10 } } },
                   },
                 } satisfies ChartOptions<'bar'>}
@@ -1086,21 +1086,21 @@ export default function AmbassadorGrowth() {
             </div>
           </div>
 
-          {/* Ambassador monthly */}
+          {/* Ambassador monthly — Jan 2024+ (removes Jun '23 outlier that crushed the Y-axis scale) */}
           <div style={chartWrap}>
             <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: TP.navy, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>
-              Ambassador — Monthly Submissions
+              Ambassador — Monthly Submissions (Jan 2024+)
             </h4>
-            <div style={{ height: 260 }}>
+            <div style={{ height: 340 }}>
               <Bar
                 data={{
-                  labels: ALL_MONTHS.map(fmtMonthLabel),
+                  labels: MONTHS_JAN24_MAY26.map(fmtMonthLabel),
                   datasets: [{
                     label: 'Ambassador Submissions',
-                    data: ALL_MONTHS.map(k => ambSubs[k] ?? 0),
-                    backgroundColor: ALL_MONTHS.map(k => {
+                    data: MONTHS_JAN24_MAY26.map(k => ambSubs[k] ?? 0),
+                    backgroundColor: MONTHS_JAN24_MAY26.map(k => {
                       const y = parseInt(k.split('-')[0]);
-                      return y === 2026 ? TP.blue : y === 2025 ? TP.blue + 'B0' : y === 2024 ? TP.blue + '80' : TP.blue + '50';
+                      return y === 2026 ? TP.blue : y === 2025 ? TP.blue + 'B0' : TP.blue + '80';
                     }),
                   }],
                 }}
@@ -1112,7 +1112,7 @@ export default function AmbassadorGrowth() {
                     tooltip: { mode: 'index', intersect: false },
                   },
                   scales: {
-                    x: { ticks: { maxRotation: 90, font: { size: 8 }, callback: function(_, i) { const k = ALL_MONTHS[i]; return k?.endsWith('-01') ? k?.split('-')[0] : ''; } } },
+                    x: { ticks: { maxRotation: 90, font: { size: 9 }, callback: function(_, i) { const k = MONTHS_JAN24_MAY26[i]; return k?.endsWith('-01') ? k?.split('-')[0] : ''; } } },
                     y: { beginAtZero: true, title: { display: true, text: 'Submissions', font: { size: 10 } } },
                   },
                 } satisfies ChartOptions<'bar'>}
