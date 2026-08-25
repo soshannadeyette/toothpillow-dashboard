@@ -755,12 +755,12 @@ export default function AnnualView() {
                   {goalPctVal.toFixed(1)}%
                 </td>
                 <td className="py-2 px-2">{ytdVisitors.toLocaleString()}</td>
-                <td className="py-2 px-2">--</td>
+                <td className="py-2 px-2">{ytdVisitors > 0 ? ((ytdOnline / ytdVisitors) * 100).toFixed(2) + '%' : '--'}</td>
                 <td className="py-2 px-2">
                   {months2026.reduce((s, m) => s + (m.usa_visitors || 0), 0).toLocaleString()}
                 </td>
-                <td className="py-2 px-2">--</td>
-                <td className="py-2 px-2">--</td>
+                <td className="py-2 px-2">{(() => { const usaV = months2026.reduce((s, m) => s + (m.usa_visitors || 0), 0); return usaV > 0 ? ((ytdOnline / usaV) * 100).toFixed(2) + '%' : '--'; })()}</td>
+                <td className="py-2 px-2">{monthsTracked > 0 ? (ytdSubs / months2026.reduce((s, m) => s + (m.days_tracked || 0), 0)).toFixed(1) : '--'}</td>
               </tr>
             </tfoot>
           </table>
