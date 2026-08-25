@@ -1075,10 +1075,10 @@ export default function AmbassadorGrowth() {
                   maintainAspectRatio: false,
                   plugins: {
                     legend: { display: false },
-                    tooltip: { mode: 'index', intersect: false },
+                    tooltip: { mode: 'nearest', intersect: true },
                   },
                   scales: {
-                    x: { ticks: { maxRotation: 90, font: { size: 9 }, callback: function(_, i) { const k = MONTHS_JAN24_MAY26[i]; return k?.endsWith('-01') ? k?.split('-')[0] : ''; } } },
+                    x: { ticks: { autoSkip: false, maxRotation: 90, font: { size: 9 }, callback: function(value) { const k = MONTHS_JAN24_MAY26[value as number]; return k?.endsWith('-01') ? k?.split('-')[0] : ''; } } },
                     y: { beginAtZero: true, title: { display: true, text: 'Submissions', font: { size: 10 } } },
                   },
                 } satisfies ChartOptions<'bar'>}
@@ -1109,10 +1109,10 @@ export default function AmbassadorGrowth() {
                   maintainAspectRatio: false,
                   plugins: {
                     legend: { display: false },
-                    tooltip: { mode: 'index', intersect: false },
+                    tooltip: { mode: 'nearest', intersect: true },
                   },
                   scales: {
-                    x: { ticks: { maxRotation: 90, font: { size: 9 }, callback: function(_, i) { const k = MONTHS_JAN24_MAY26[i]; return k?.endsWith('-01') ? k?.split('-')[0] : ''; } } },
+                    x: { ticks: { autoSkip: false, maxRotation: 90, font: { size: 9 }, callback: function(value) { const k = MONTHS_JAN24_MAY26[value as number]; return k?.endsWith('-01') ? k?.split('-')[0] : ''; } } },
                     y: { beginAtZero: true, title: { display: true, text: 'Submissions', font: { size: 10 } } },
                   },
                 } satisfies ChartOptions<'bar'>}
