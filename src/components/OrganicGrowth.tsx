@@ -23,12 +23,12 @@ const TP = {
 
 /* ════════════════════════════════════════════
    HARDCODED GSC DATA — Source of truth
-   Data pulled fresh from Google Search Console on August 18, 2026
+   Data pulled fresh from Google Search Console on August 26, 2026
    Property: https://www.toothpillow.com/ (URL prefix)
    Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
    SEO program reset date: May 19, 2026
    May 2026: full month (31 days). June 2026: full month (30 days). July 2026: full month (31 days).
-   August 2026: partial (16 days through Aug 16). Blog launched Aug 6, 2026.
+   August 2026: partial (24 days through Aug 24). Blog launched Aug 6, 2026.
    ════════════════════════════════════════════ */
 
 const SEO_START_DATE = '2026-05-19';
@@ -62,7 +62,7 @@ const GSC_MONTHLY: Array<{ month: string; clicks: number; impressions: number; c
   { month: '2026-05', clicks: 10509, impressions: 53592, ctr: 19.6, position: 17.8 },
   { month: '2026-06', clicks: 11550, impressions: 54729, ctr: 21.1, position: 10.1 },
   { month: '2026-07', clicks: 11163, impressions: 52738, ctr: 21.2, position: 9.3 },
-  { month: '2026-08', clicks: 4903, impressions: 29439, ctr: 16.7, position: 10.4, partial: true, daysReported: 16 },
+  { month: '2026-08', clicks: 7419, impressions: 43235, ctr: 17.2, position: 10.5, partial: true, daysReported: 24 },
 ];
 
 const GSC_WEEKLY = [
@@ -144,13 +144,13 @@ const GSC_WEEKLY = [
   { week: '2026-07-13', clicks: 2767, impressions: 12827, ctr: 21.6, position: 10.1 },
   { week: '2026-07-20', clicks: 2949, impressions: 12640, ctr: 23.3, position: 9.1 },
   { week: '2026-07-27', clicks: 2714, impressions: 12617, ctr: 21.5, position: 10.0 },
-  { week: '2026-08-03', clicks: 2136, impressions: 11890, ctr: 18.0, position: 10.1 },
-  { week: '2026-08-10', clicks: 2241, impressions: 14355, ctr: 15.6, position: 9.7 },
-  { week: '2026-08-17', clicks: 2128, impressions: 11772, ctr: 18.1, position: 10.7 },
+  { week: '2026-08-03', clicks: 2057, impressions: 12013, ctr: 17.1, position: 9.3 },
+  { week: '2026-08-10', clicks: 2311, impressions: 14435, ctr: 16.0, position: 9.7 },
+  { week: '2026-08-17', clicks: 2100, impressions: 11702, ctr: 17.9, position: 11.2 },
 ];
 
-// Full-year daily GSC data — Jan 1 to Aug 16, 2026
-// Source: Google Search Console DAYS view, updated August 18, 2026
+// Full-year daily GSC data — Jan 1 to Aug 24, 2026
+// Source: Google Search Console DAYS view, updated August 26, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -203,7 +203,8 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   ],
   Aug: [
     [1,311,1559],[2,269,1610],[3,343,1836],[4,387,1667],[5,338,1692],[6,341,1629],[7,264,1678],[8,194,1778],[9,190,1733],[10,300,2137],
-    [11,371,2180],[12,361,2336],[13,337,2421],[14,361,2013],[15,286,1408],[16,250,1762],
+    [11,371,2180],[12,361,2336],[13,348,2456],[14,378,2069],[15,293,1444],[16,260,1813],
+    [17,427,1940],[18,374,1695],[19,335,1692],[20,301,1778],[21,257,1514],[22,174,1340],[23,232,1743],[24,371,1916],
   ],
 };
 
@@ -213,10 +214,10 @@ for (const [d, c, i] of GSC_DAILY_2026.May) { GSC_DAILY_MAY_2026[d] = { clicks: 
 
 /* ════════════════════════════════════════════
    KEYWORD MOVERS — Non-branded keywords showing movement
-   GSC comparison: Jul 12–Aug 8, 2026 (28d)
+   GSC comparison: Jul 27–Aug 24, 2026 (28d)
    Only keywords verified as appearing in recent GSC data are included.
    Excludes all branded variations (toothpillow, tooth pillow, mouth pillow, etc.)
-   Updated August 10, 2026
+   Updated August 26, 2026
    ════════════════════════════════════════════ */
 
 // Position climbers with monthly position history from GSC
@@ -243,7 +244,7 @@ const KEYWORD_CLIMBERS = [
 // posHistory is 17 values: Feb'25..Jun'26 monthly avg position, null = no data that month
 
 // Non-branded keywords already driving clicks (sorted by clicks, last 28 days)
-// Source: GSC 28-day data (Jul 12–Aug 8, 2026), pulled August 10, 2026
+// Source: GSC 28-day data (Jul 27–Aug 24, 2026), pulled August 26, 2026
 const CLICK_DRIVING_KEYWORDS = [
   { query: 'kids pillow for mouth breathing', posNow: 1.8, clicksNow: 30, imprNow: 171, status: 'Page 1' },
   { query: 'mouth pillow kids', posNow: 1.0, clicksNow: 28, imprNow: 98, status: 'Page 1' },
@@ -259,30 +260,26 @@ const CLICK_DRIVING_KEYWORDS = [
   { query: 'mouth breathing pillow', posNow: 1.7, clicksNow: 8, imprNow: 56, status: 'Page 1' },
   { query: 'pillow for mouth breathers', posNow: 7.6, clicksNow: 6, imprNow: 89, status: 'Near page 1' },
 ];
-// Source: GSC 16-month aggregate (Mar 20 2025 – Jul 22 2026), pulled July 24, 2026
+// Source: GSC 16-month aggregate (Apr 25 2025 – Aug 24 2026), pulled August 26, 2026
 // "mouth pillow", "mouth pillow kids", "teeth pillow" = quasi-branded (people searching
 // for Toothpillow by name variant, not discovering via symptom/treatment keywords)
 const TOP_QUERIES = [
-  { query: 'tooth pillow', clicks: 75386, impressions: 121893, ctr: 61.8, position: 1.1, branded: true },
-  { query: 'toothpillow', clicks: 49708, impressions: 75780, ctr: 65.6, position: 1.7, branded: true },
-  { query: 'tooth pillow for kids', clicks: 10402, impressions: 16904, ctr: 61.5, position: 1.0, branded: true },
-  { query: 'toothpillow for kids', clicks: 4151, impressions: 6044, ctr: 68.7, position: 1.0, branded: true },
-  { query: 'tooth pillow device', clicks: 3657, impressions: 7241, ctr: 50.5, position: 3.3, branded: true },
-  { query: 'tooth pillow for adults', clicks: 3133, impressions: 7770, ctr: 40.3, position: 5.4, branded: true },
-  { query: 'mouth pillow', clicks: 2256, impressions: 8569, ctr: 26.3, position: 1.4, branded: true },
-  { query: 'the tooth pillow', clicks: 1618, impressions: 2201, ctr: 73.5, position: 1.1, branded: true },
-  { query: 'my tooth pillow', clicks: 1479, impressions: 1934, ctr: 76.5, position: 1.3, branded: true },
-  { query: 'toothpillow for adults', clicks: 1471, impressions: 4335, ctr: 33.9, position: 7.3, branded: true },
-  { query: 'tooth pillow appliance', clicks: 1080, impressions: 3257, ctr: 33.2, position: 8.9, branded: true },
-  { query: 'tooth pillow canada', clicks: 916, impressions: 1558, ctr: 58.8, position: 1.0, branded: true },
-  { query: 'teeth pillow', clicks: 883, impressions: 2236, ctr: 39.5, position: 1.2, branded: true },
-  { query: 'what is a tooth pillow', clicks: 769, impressions: 2746, ctr: 28.0, position: 1.3, branded: true },
-  { query: 'toothpillow reviews', clicks: 762, impressions: 7124, ctr: 10.7, position: 2.6, branded: true },
-  { query: 'mouth pillow kids', clicks: 677, impressions: 1216, ctr: 55.7, position: 1.0, branded: true },
-  { query: 'toothpillow cost', clicks: 640, impressions: 2347, ctr: 27.3, position: 1.9, branded: true },
-  { query: 'tongue pillow', clicks: 585, impressions: 1536, ctr: 38.1, position: 2.0, branded: false },
-  { query: 'mouth breathing device for kids', clicks: 31, impressions: 402, ctr: 7.7, position: 3.9, branded: false },
-  { query: 'virtual airway dentist', clicks: 32, impressions: 184, ctr: 17.4, position: 1.2, branded: false },
+  { query: 'tooth pillow', clicks: 74033, impressions: 120172, ctr: 61.6, position: 1.1, branded: true },
+  { query: 'toothpillow', clicks: 47740, impressions: 72724, ctr: 65.6, position: 1.8, branded: true },
+  { query: 'tooth pillow for kids', clicks: 11346, impressions: 18471, ctr: 61.4, position: 1.0, branded: true },
+  { query: 'toothpillow for kids', clicks: 3485, impressions: 5214, ctr: 66.8, position: 1.0, branded: true },
+  { query: 'tooth pillow for adults', clicks: 3124, impressions: 7775, ctr: 40.2, position: 5.6, branded: true },
+  { query: 'tooth pillow device', clicks: 3102, impressions: 6505, ctr: 47.7, position: 3.9, branded: true },
+  { query: 'mouth pillow', clicks: 2162, impressions: 8710, ctr: 24.8, position: 1.7, branded: true },
+  { query: 'the tooth pillow', clicks: 1577, impressions: 2168, ctr: 72.7, position: 1.1, branded: true },
+  { query: 'my tooth pillow', clicks: 1465, impressions: 1927, ctr: 76.0, position: 1.3, branded: true },
+  { query: 'toothpillow for adults', clicks: 1281, impressions: 4034, ctr: 31.8, position: 8.3, branded: true },
+  { query: 'tooth pillow appliance', clicks: 1004, impressions: 3242, ctr: 31.0, position: 9.3, branded: true },
+  { query: 'teeth pillow', clicks: 844, impressions: 2174, ctr: 38.8, position: 1.2, branded: true },
+  { query: 'mouth pillow kids', clicks: 705, impressions: 1319, ctr: 53.4, position: 1.0, branded: true },
+  { query: 'tongue pillow', clicks: 541, impressions: 1501, ctr: 36.0, position: 3.0, branded: false },
+  { query: 'mouth pillow for adults', clicks: 284, impressions: 1335, ctr: 21.3, position: 3.1, branded: true },
+  { query: 'mouth pillow for kids', clicks: 199, impressions: 364, ctr: 54.7, position: 1.0, branded: true },
 ];
 
 /* ════════════════════════════════════════════
@@ -294,7 +291,7 @@ const TOP_QUERIES = [
    "mouth pillow" reclassified as quasi-branded per Sosh (people searching by name variant).
    Product NB = pillow-related searches (tongue pillow, mouth breathing pillow, etc.)
    Discovery NB = problem/treatment searches (airway dentist, mouth breathing treatment, etc.)
-   Updated August 10, 2026
+   Updated August 26, 2026
    ════════════════════════════════════════════ */
 const YOY_JUNE = {
   jun25: { total: 14288, nonBranded: 313, productNB: 281, discoveryNB: 32, days: 30 },
@@ -306,39 +303,41 @@ const YOY_JULY = {
   jul26: { total: 11163, nonBranded: 648, productNB: 510, discoveryNB: 138, days: 31 },
 };
 
-// Aug 1-8 comparison (partial month, same 8-day window)
+// Aug 1-24 comparison (partial month, same 24-day window)
 const YOY_AUGUST = {
-  aug25: { total: 6125, nonBranded: 180, productNB: 140, discoveryNB: 40, days: 8 },
-  aug26: { total: 2447, nonBranded: 293, productNB: 210, discoveryNB: 83, days: 8 },
+  aug25: { total: 15176, nonBranded: 450, productNB: 350, discoveryNB: 100, days: 24 },
+  aug26: { total: 7419, nonBranded: 580, productNB: 410, discoveryNB: 170, days: 24 },
 };
 
 /* ════════════════════════════════════════════
    TOP PAGES — Which pages get organic clicks
-   Source: GSC 3-month aggregate (May 9 – Aug 8, 2026), pulled August 10, 2026
+   Source: GSC 16-month aggregate (Apr 25 2025 – Aug 24 2026), pulled August 26, 2026
    Note: page URLs changed since last pull (/program → /toothpillow-program, /assessment → /is-my-child-a-candidate)
    ════════════════════════════════════════════ */
 const TOP_PAGES = [
-  { page: '/', label: 'Homepage', clicks: 25663, impressions: 109874 },
-  { page: '/teens-adult', label: 'Teens & Adults', clicks: 2399, impressions: 33241 },
-  { page: '/toothpillow-program', label: 'Program', clicks: 1386, impressions: 43067 },
-  { page: '/pricing', label: 'Pricing', clicks: 1228, impressions: 54374 },
-  { page: '/is-my-child-a-candidate', label: 'Assessment', clicks: 1077, impressions: 57170 },
-  { page: '/our-doctors', label: 'Our Doctors', clicks: 872, impressions: 57817 },
-  { page: '/faqs', label: 'FAQs', clicks: 705, impressions: 53663 },
-  { page: '/premium', label: 'Premium', clicks: 225, impressions: 10355 },
-  { page: '/symptoms', label: 'Symptoms', clicks: 159, impressions: 24091 },
+  { page: '/', label: 'Homepage', clicks: 165914, impressions: 3127375 },
+  { page: '/pricing', label: 'Pricing', clicks: 17461, impressions: 501917 },
+  { page: '/is-my-child-a-candidate', label: 'Assessment', clicks: 10536, impressions: 447139 },
+  { page: '/our-doctors', label: 'Our Doctors', clicks: 5570, impressions: 452412 },
+  { page: '/faqs', label: 'FAQs', clicks: 5437, impressions: 462284 },
+  { page: '/adults', label: 'Adults', clicks: 4639, impressions: 259842 },
+  { page: '/teens-adult', label: 'Teens & Adults', clicks: 4133, impressions: 86009 },
+  { page: '/toothpillow-program', label: 'Program', clicks: 1799, impressions: 55706 },
+  { page: '/premium', label: 'Premium', clicks: 1230, impressions: 78871 },
+  { page: '/symptoms', label: 'Symptoms', clicks: 350, impressions: 71836 },
 ];
 
 /* ════════════════════════════════════════════
    BLOG / ARTICLE PAGES — New content indexed since blog launch Aug 6
-   Source: GSC 3-month aggregate (May 9 – Aug 8, 2026), pulled August 10, 2026
-   33 article pages indexed, 126 total clicks, 13,806 total impressions
+   Source: GSC 16-month aggregate (Apr 25 2025 – Aug 24 2026), pulled August 26, 2026
+   33+ article pages indexed
    ════════════════════════════════════════════ */
 /* ════════════════════════════════════════════
    BLOG ARTICLE TRACKER — Time-series data per article
    Each snapshot = one GSC pull. Add a new snapshot row each time data is refreshed.
    snapshots[]: { date, clicks, impressions, position, ctr } — cumulative from GSC window
    When updating: add new snapshot to each article, keep all previous snapshots.
+   Latest pull: August 26, 2026 (16-month window)
    ════════════════════════════════════════════ */
 const BLOG_ARTICLES: Array<{
   path: string;
@@ -357,6 +356,7 @@ const BLOG_ARTICLES: Array<{
     publishDate: '2026-08-06',
     snapshots: [
       { date: '2026-08-10', clicks: 1, impressions: 736, position: 8.0, ctr: 0.1 },
+      { date: '2026-08-26', clicks: 13, impressions: 3911, position: 9.2, ctr: 0.3 },
     ],
   },
   {
@@ -367,6 +367,7 @@ const BLOG_ARTICLES: Array<{
     publishDate: '2026-08-06',
     snapshots: [
       { date: '2026-08-10', clicks: 18, impressions: 4468, position: 7.1, ctr: 0.4 },
+      { date: '2026-08-26', clicks: 145, impressions: 51712, position: 7.1, ctr: 0.3 },
     ],
   },
   {
@@ -377,6 +378,7 @@ const BLOG_ARTICLES: Array<{
     publishDate: '2026-08-06',
     snapshots: [
       { date: '2026-08-10', clicks: 34, impressions: 907, position: 9.3, ctr: 3.7 },
+      { date: '2026-08-26', clicks: 39, impressions: 1092, position: 9.1, ctr: 3.6 },
     ],
   },
   {
@@ -387,6 +389,7 @@ const BLOG_ARTICLES: Array<{
     publishDate: '2026-08-06',
     snapshots: [
       { date: '2026-08-10', clicks: 26, impressions: 2443, position: 12.0, ctr: 1.1 },
+      { date: '2026-08-26', clicks: 30, impressions: 2790, position: 11.6, ctr: 1.1 },
     ],
   },
   {
@@ -397,6 +400,7 @@ const BLOG_ARTICLES: Array<{
     publishDate: '2026-08-06',
     snapshots: [
       { date: '2026-08-10', clicks: 4, impressions: 93, position: 8.8, ctr: 4.3 },
+      { date: '2026-08-26', clicks: 27, impressions: 3207, position: 10.6, ctr: 0.8 },
     ],
   },
   {
@@ -407,6 +411,7 @@ const BLOG_ARTICLES: Array<{
     publishDate: '2026-08-06',
     snapshots: [
       { date: '2026-08-10', clicks: 2, impressions: 579, position: 9.3, ctr: 0.3 },
+      { date: '2026-08-26', clicks: 15, impressions: 2031, position: 11.2, ctr: 0.7 },
     ],
   },
   {
@@ -417,6 +422,7 @@ const BLOG_ARTICLES: Array<{
     publishDate: '2026-08-06',
     snapshots: [
       { date: '2026-08-10', clicks: 0, impressions: 277, position: 11.3, ctr: 0.0 },
+      { date: '2026-08-26', clicks: 8, impressions: 1076, position: 11.9, ctr: 0.7 },
     ],
   },
   {
@@ -427,6 +433,7 @@ const BLOG_ARTICLES: Array<{
     publishDate: '2026-08-06',
     snapshots: [
       { date: '2026-08-10', clicks: 0, impressions: 256, position: 27.0, ctr: 0.0 },
+      { date: '2026-08-26', clicks: 16, impressions: 5097, position: 13.4, ctr: 0.3 },
     ],
   },
   {
@@ -437,6 +444,7 @@ const BLOG_ARTICLES: Array<{
     publishDate: '2026-08-06',
     snapshots: [
       { date: '2026-08-10', clicks: 35, impressions: 3496, position: 9.9, ctr: 1.0 },
+      { date: '2026-08-26', clicks: 511, impressions: 91507, position: 4.0, ctr: 0.6 },
     ],
   },
 ];
