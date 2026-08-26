@@ -629,6 +629,50 @@ export default function OnlineTrends() {
                 </tr>
               );
             })}
+            {/* Running total row */}
+            {(() => {
+              const hasInProg = onlineDiff.some(r => r.isInProgress);
+              let cum24 = 0, cum25 = 0, cum26 = 0;
+              onlineDiff.forEach(r => {
+                cum24 += r.v2024;
+                cum25 += r.v2025;
+                cum26 += r.isInProgress ? projOnline : r.v2026;
+              });
+              const cumDiff25 = cum26 - cum25;
+              const cumDiff24 = cum26 - cum24;
+              return (
+                <tr style={{ borderTop: '2px solid #e5e7eb', background: '#f9fafb' }}>
+                  <td style={{ padding: '8px 12px', fontWeight: 700, color: TP.text, fontSize: 13 }}>
+                    YTD Total{hasInProg ? ' *' : ''}
+                  </td>
+                  <td style={{ padding: '8px 12px', textAlign: 'right', color: '#999', fontWeight: 600 }}>
+                    {cum24.toLocaleString()}
+                  </td>
+                  <td style={{ padding: '8px 12px', textAlign: 'right', color: TP.text, fontWeight: 600 }}>
+                    {cum25.toLocaleString()}
+                  </td>
+                  <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 700, color: TP.text }}>
+                    {cum26.toLocaleString()}
+                  </td>
+                  <td style={{
+                    padding: '8px 12px',
+                    textAlign: 'right',
+                    fontWeight: 700,
+                    color: cumDiff25 >= 0 ? '#28a745' : TP.red,
+                  }}>
+                    {cumDiff25 >= 0 ? '+' : ''}{cumDiff25.toLocaleString()}{hasInProg ? '*' : ''}
+                  </td>
+                  <td style={{
+                    padding: '8px 12px',
+                    textAlign: 'right',
+                    fontWeight: 700,
+                    color: cumDiff24 >= 0 ? '#28a745' : TP.red,
+                  }}>
+                    {cumDiff24 >= 0 ? '+' : ''}{cumDiff24.toLocaleString()}{hasInProg ? '*' : ''}
+                  </td>
+                </tr>
+              );
+            })()}
           </tbody>
           {onlineDiff.some((r) => r.isInProgress) && (
             <tfoot>
