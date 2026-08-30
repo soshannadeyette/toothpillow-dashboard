@@ -131,6 +131,7 @@ export default function AnnualView() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
+  const [showAllYears, setShowAllYears] = useState(false);
   // Traffic chart is always weekly, no toggle needed
 
   const thisMonth = currentMonth();
@@ -280,66 +281,27 @@ export default function AnnualView() {
     return row ? (row[field] as number) || 0 : 0;
   }
 
-  // Monthly perf chart
-  const monthlyChartData = {
+  // Monthly perf chart — 2026-only (default)
+  const monthlyChartData2026 = {
     labels: allMonthLabels,
     datasets: [
-      // 2024 stacked bars (left — muted colors)
       {
-        label: '2024 Online',
-        data: allMonthLabels.map((_, i) => ONLINE_2024[i + 1] || 0),
-        backgroundColor: TP.blue + '55',
-        stack: 'y2024',
-      },
-      {
-        label: '2024 Hybrid',
-        data: allMonthLabels.map((_, i) => HYBRID_2024[i + 1] || 0),
-        backgroundColor: TP.yellow + '55',
-        stack: 'y2024',
-      },
-      {
-        label: '2024 Prime',
-        data: allMonthLabels.map((_, i) => PRIME_2024[i + 1] || 0),
-        backgroundColor: TP.red + '55',
-        stack: 'y2024',
-      },
-      // 2025 stacked bars (middle — semi-transparent)
-      {
-        label: '2025 Online',
-        data: allMonthLabels.map((_, i) => ONLINE_2025[i + 1] || 0),
-        backgroundColor: TP.blue + '99',
-        stack: 'y2025',
-      },
-      {
-        label: '2025 Hybrid',
-        data: allMonthLabels.map((_, i) => HYBRID_2025[i + 1] || 0),
-        backgroundColor: TP.yellow + '99',
-        stack: 'y2025',
-      },
-      {
-        label: '2025 Prime',
-        data: allMonthLabels.map((_, i) => PRIME_2025[i + 1] || 0),
-        backgroundColor: TP.red + '99',
-        stack: 'y2025',
-      },
-      // 2026 stacked bars (right — full color)
-      {
-        label: '2026 Online',
+        label: 'Online',
         data: allMonthLabels.map((_, i) => getMonthVal(months2026, i, 'online_submissions')),
         backgroundColor: TP.blue,
-        stack: 'y2026',
+        stack: 'stack0',
       },
       {
-        label: '2026 Hybrid',
+        label: 'Hybrid',
         data: allMonthLabels.map((_, i) => getMonthVal(months2026, i, 'hybrid_submissions')),
         backgroundColor: TP.yellow,
-        stack: 'y2026',
+        stack: 'stack0',
       },
       {
-        label: '2026 Prime',
+        label: 'Prime',
         data: allMonthLabels.map((_, i) => getMonthVal(months2026, i, 'prime_submissions')),
         backgroundColor: TP.red,
-        stack: 'y2026',
+        stack: 'stack0',
       },
       {
         label: 'Goal',
@@ -379,11 +341,11 @@ export default function AnnualView() {
     ],
   };
 
-  const monthlyChartOptions = {
+  const monthlyChartOptions2026 = {
     responsive: true,
     plugins: {
       legend: { position: 'top' as const },
-      title: { display: true, text: 'Monthly Submissions vs Goal & Traffic (2024–2026)' },
+      title: { display: true, text: '2026 Monthly Submissions vs Goal & Traffic' },
     },
     scales: {
       x: { stacked: true },
@@ -402,6 +364,86 @@ export default function AnnualView() {
       },
     },
   };
+
+  // 36-month timeline (expanded view)
+  const ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const timelineLabels: string[] = [];
+  const timelineOnline: number[] = [];
+  const timelineHybrid: number[] = [];
+  const timelinePrime: number[] = [];
+  const timelineBgOnline: string[] = [];
+  const timelineBgHybrid: string[] = [];
+  const timelineBgPrime: string[] = [];
+  for (let m = 1; m <= 12; m++) {
+    timelineLabels.push(`${ABBR[m - 1]} '24`);
+    timelineOnline.push(ONLINE_2024[m] || 0);
+    timelineHybrid.push(HYBRID_2024[m] || 0);
+    timelinePrime.push(PRIME_2024[m] || 0);
+    timelineBgOnline.push(TP.blue + '66');
+    timelineBgHybrid.push(TP.yellow + '66');
+    timelineBgPrime.push(TP.red + '66');
+  }
+  for (let m = 1; m <= 12; m++) {
+    timelineLabels.push(`${ABBR[m - 1]} '25`);
+    timelineOnline.push(ONLINE_2025[m] || 0);
+    timelineHybrid.push(HYBRID_2025[m] || 0);
+    timelinePrime.push(PRIME_2025[m] || 0);
+    timelineBgOnline.push(TP.blue + 'AA');
+    timelineBgHybrid.push(TP.yellow + 'AA');
+    timelineBgPrime.push(TP.red + 'AA');
+  }
+  for (let m = 1; m <= 12; m++) {
+    timelineLabels.push(`${ABBR[m - 1]} '26`);
+    const row = months2026.find(r => r.month === m);
+    timelineOnline.push(row?.online_submissions || 0);
+    timelineHybrid.push(row?.hybrid_submissions || 0);
+    timelinePrime.push(row?.prime_submissions || 0);
+    timelineBgOnline.push(TP.blue);
+    timelineBgHybrid.push(TP.yellow);
+    timelineBgPrime.push(TP.red);
+  }
+
+  const timelineChartData = {
+    labels: timelineLabels,
+    datasets: [
+      {
+        label: 'Online',
+        data: timelineOnline,
+        backgroundColor: timelineBgOnline,
+        stack: 'stack0',
+      },
+      {
+        label: 'Hybrid',
+        data: timelineHybrid,
+        backgroundColor: timelineBgHybrid,
+        stack: 'stack0',
+      },
+      {
+        label: 'Prime',
+        data: timelinePrime,
+        backgroundColor: timelineBgPrime,
+        stack: 'stack0',
+      },
+    ],
+  };
+
+  const timelineChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' as const },
+      title: { display: true, text: 'Monthly Submissions — Jan 2024 through Dec 2026' },
+    },
+    scales: {
+      x: {
+        stacked: true,
+        ticks: { maxRotation: 60, minRotation: 45, font: { size: 10 } },
+      },
+      y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Submissions' } },
+    },
+  };
+
+  const monthlyChartData = showAllYears ? timelineChartData : monthlyChartData2026;
+  const monthlyChartOptions = showAllYears ? timelineChartOptions : monthlyChartOptions2026;
 
   // Conversion line charts
   const convChartData = {
@@ -649,6 +691,19 @@ export default function AnnualView() {
 
       {/* ===== 3. Monthly Performance Chart ===== */}
       <section className="bg-white rounded-xl shadow p-5">
+        <div className="flex justify-end mb-2">
+          <button
+            onClick={() => setShowAllYears(v => !v)}
+            className="text-xs px-3 py-1 rounded-full border transition-colors"
+            style={{
+              borderColor: showAllYears ? TP.blue : '#d1d5db',
+              backgroundColor: showAllYears ? TP.blue + '15' : 'transparent',
+              color: showAllYears ? TP.blue : '#6b7280',
+            }}
+          >
+            {showAllYears ? '← 2026 Only' : 'Show 2024–2026 Timeline →'}
+          </button>
+        </div>
         <Bar data={monthlyChartData as any} options={monthlyChartOptions} />
       </section>
 
