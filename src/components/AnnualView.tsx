@@ -72,6 +72,23 @@ const GA4_DAILY_MAY_2026: Record<number, number> = {
 };
 
 
+// 2024 submissions — source: OnlineTrends.tsx hardcoded arrays
+const ONLINE_2024: Record<number, number> = {
+  1: 623, 2: 476, 3: 1875, 4: 889, 5: 995, 6: 1659,
+  7: 865, 8: 1080, 9: 1654, 10: 830, 11: 828, 12: 1069,
+};
+const HYBRID_2024: Record<number, number> = {
+  1: 0, 2: 0, 3: 0, 4: 0, 5: 6, 6: 6,
+  7: 48, 8: 148, 9: 129, 10: 105, 11: 91, 12: 76,
+};
+const PRIME_2024: Record<number, number> = {
+  1: 0, 2: 0, 3: 1, 4: 1, 5: 3, 6: 1,
+  7: 0, 8: 2, 9: 16, 10: 19, 11: 24, 12: 13,
+};
+const SUBS_2024: Record<number, number> = Object.fromEntries(
+  Array.from({ length: 12 }, (_, i) => [i + 1, (ONLINE_2024[i + 1] || 0) + (HYBRID_2024[i + 1] || 0) + (PRIME_2024[i + 1] || 0)])
+) as Record<number, number>;
+
 // 2025 submissions (for conversion calc)
 const SUBS_2025: Record<number, number> = {
   1: 1434, 2: 1560, 3: 1510, 4: 1663, 5: 1328, 6: 1039,
@@ -268,22 +285,69 @@ export default function AnnualView() {
     labels: allMonthLabels,
     datasets: [
       {
-        label: 'Online',
+        label: '2026 Online',
         data: allMonthLabels.map((_, i) => getMonthVal(months2026, i, 'online_submissions')),
         backgroundColor: TP.blue,
-        stack: 'stack0',
+        stack: 'y2026',
+        order: 1,
       },
       {
-        label: 'Hybrid',
+        label: '2026 Hybrid',
         data: allMonthLabels.map((_, i) => getMonthVal(months2026, i, 'hybrid_submissions')),
         backgroundColor: TP.yellow,
-        stack: 'stack0',
+        stack: 'y2026',
+        order: 1,
       },
       {
-        label: 'Prime',
+        label: '2026 Prime',
         data: allMonthLabels.map((_, i) => getMonthVal(months2026, i, 'prime_submissions')),
         backgroundColor: TP.red,
-        stack: 'stack0',
+        stack: 'y2026',
+        order: 1,
+      },
+      // 2024 stacked bars (muted colors)
+      {
+        label: '2024 Online',
+        data: allMonthLabels.map((_, i) => ONLINE_2024[i + 1] || 0),
+        backgroundColor: TP.blue + '55',
+        stack: 'y2024',
+        order: 3,
+      },
+      {
+        label: '2024 Hybrid',
+        data: allMonthLabels.map((_, i) => HYBRID_2024[i + 1] || 0),
+        backgroundColor: TP.yellow + '55',
+        stack: 'y2024',
+        order: 3,
+      },
+      {
+        label: '2024 Prime',
+        data: allMonthLabels.map((_, i) => PRIME_2024[i + 1] || 0),
+        backgroundColor: TP.red + '55',
+        stack: 'y2024',
+        order: 3,
+      },
+      // 2025 stacked bars (semi-transparent)
+      {
+        label: '2025 Online',
+        data: allMonthLabels.map((_, i) => ONLINE_2025[i + 1] || 0),
+        backgroundColor: TP.blue + '99',
+        stack: 'y2025',
+        order: 2,
+      },
+      {
+        label: '2025 Hybrid',
+        data: allMonthLabels.map((_, i) => HYBRID_2025[i + 1] || 0),
+        backgroundColor: TP.yellow + '99',
+        stack: 'y2025',
+        order: 2,
+      },
+      {
+        label: '2025 Prime',
+        data: allMonthLabels.map((_, i) => PRIME_2025[i + 1] || 0),
+        backgroundColor: TP.red + '99',
+        stack: 'y2025',
+        order: 2,
       },
       {
         label: 'Goal',
@@ -327,7 +391,7 @@ export default function AnnualView() {
     responsive: true,
     plugins: {
       legend: { position: 'top' as const },
-      title: { display: true, text: '2026 Monthly Submissions vs Goal & Traffic' },
+      title: { display: true, text: 'Monthly Submissions vs Goal & Traffic (2024–2026)' },
     },
     scales: {
       x: { stacked: true },
