@@ -284,70 +284,62 @@ export default function AnnualView() {
   const monthlyChartData = {
     labels: allMonthLabels,
     datasets: [
-      {
-        label: '2026 Online',
-        data: allMonthLabels.map((_, i) => getMonthVal(months2026, i, 'online_submissions')),
-        backgroundColor: TP.blue,
-        stack: 'y2026',
-        order: 1,
-      },
-      {
-        label: '2026 Hybrid',
-        data: allMonthLabels.map((_, i) => getMonthVal(months2026, i, 'hybrid_submissions')),
-        backgroundColor: TP.yellow,
-        stack: 'y2026',
-        order: 1,
-      },
-      {
-        label: '2026 Prime',
-        data: allMonthLabels.map((_, i) => getMonthVal(months2026, i, 'prime_submissions')),
-        backgroundColor: TP.red,
-        stack: 'y2026',
-        order: 1,
-      },
-      // 2024 stacked bars (muted colors)
+      // 2024 stacked bars (left — muted colors)
       {
         label: '2024 Online',
         data: allMonthLabels.map((_, i) => ONLINE_2024[i + 1] || 0),
         backgroundColor: TP.blue + '55',
         stack: 'y2024',
-        order: 3,
       },
       {
         label: '2024 Hybrid',
         data: allMonthLabels.map((_, i) => HYBRID_2024[i + 1] || 0),
         backgroundColor: TP.yellow + '55',
         stack: 'y2024',
-        order: 3,
       },
       {
         label: '2024 Prime',
         data: allMonthLabels.map((_, i) => PRIME_2024[i + 1] || 0),
         backgroundColor: TP.red + '55',
         stack: 'y2024',
-        order: 3,
       },
-      // 2025 stacked bars (semi-transparent)
+      // 2025 stacked bars (middle — semi-transparent)
       {
         label: '2025 Online',
         data: allMonthLabels.map((_, i) => ONLINE_2025[i + 1] || 0),
         backgroundColor: TP.blue + '99',
         stack: 'y2025',
-        order: 2,
       },
       {
         label: '2025 Hybrid',
         data: allMonthLabels.map((_, i) => HYBRID_2025[i + 1] || 0),
         backgroundColor: TP.yellow + '99',
         stack: 'y2025',
-        order: 2,
       },
       {
         label: '2025 Prime',
         data: allMonthLabels.map((_, i) => PRIME_2025[i + 1] || 0),
         backgroundColor: TP.red + '99',
         stack: 'y2025',
-        order: 2,
+      },
+      // 2026 stacked bars (right — full color)
+      {
+        label: '2026 Online',
+        data: allMonthLabels.map((_, i) => getMonthVal(months2026, i, 'online_submissions')),
+        backgroundColor: TP.blue,
+        stack: 'y2026',
+      },
+      {
+        label: '2026 Hybrid',
+        data: allMonthLabels.map((_, i) => getMonthVal(months2026, i, 'hybrid_submissions')),
+        backgroundColor: TP.yellow,
+        stack: 'y2026',
+      },
+      {
+        label: '2026 Prime',
+        data: allMonthLabels.map((_, i) => getMonthVal(months2026, i, 'prime_submissions')),
+        backgroundColor: TP.red,
+        stack: 'y2026',
       },
       {
         label: 'Goal',
