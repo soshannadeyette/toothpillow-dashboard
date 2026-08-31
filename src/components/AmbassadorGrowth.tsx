@@ -56,16 +56,23 @@ const newAddsAmb: Record<string, number> = {
   '2026-01':5,'2026-02':12,'2026-03':11,'2026-04':28,'2026-05':20,'2026-06':28,'2026-07':30,'2026-08':35,
 };
 const newAddsInf: Record<string, number> = {
-  '2024-01':1,'2024-02':8,'2024-03':3,'2024-04':4,'2024-05':9,'2024-06':2,'2024-07':7,'2024-08':2,'2024-09':4,'2024-10':6,'2024-11':6,'2024-12':9,
+  '2024-01':1,'2024-02':8,'2024-03':3,'2024-04':4,'2024-05':9,'2024-06':2,'2024-07':7,'2024-08':1,'2024-09':4,'2024-10':6,'2024-11':6,'2024-12':9,
   '2025-01':11,'2025-02':3,'2025-03':7,'2025-04':2,'2025-05':0,'2025-06':3,'2025-07':0,'2025-08':1,'2025-09':0,'2025-10':0,'2025-11':1,'2025-12':1,
-  '2026-01':3,'2026-02':2,'2026-03':2,'2026-04':5,'2026-05':6,'2026-06':4,'2026-07':2,'2026-08':7,
+  '2026-01':3,'2026-02':2,'2026-03':1,'2026-04':5,'2026-05':6,'2026-06':4,'2026-07':1,'2026-08':1,
+};
+// Podcast-type adds tracked separately (split from Inf Aug 2026)
+const newAddsPod: Record<string, number> = {
+  '2024-08':1,
+  '2025-01':1,
+  '2026-03':1,'2026-07':1,'2026-08':6,
 };
 
 const ambSubsYear: Record<number, number> = {2023:465, 2024:442, 2025:574, 2026:487};
 const infSubsYear: Record<number, number> = {2023:1337, 2024:8275, 2025:5525, 2026:3139};
 const combSubsYear: Record<number, number> = {2023:1802, 2024:8717, 2025:6099, 2026:3626};
 const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:169};
-const addsInfYear: Record<number, number> = {2023:2, 2024:61, 2025:29, 2026:31};
+const addsInfYear: Record<number, number> = {2023:2, 2024:60, 2025:29, 2026:23};
+const addsPodYear: Record<number, number> = {2023:0, 2024:1, 2025:1, 2026:8};
 const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:200};
 // Note: adds counts are from ambassador program tracking, not Salesforce referral exports
 
@@ -91,15 +98,15 @@ const _partialMonth = _isIn2026 ? _now.getDate() / _daysInMonth : 0;
 const _monthsElapsed = Math.max(_completeMonths + _partialMonth, 1);
 const ANN = 12 / _monthsElapsed;
 
-const recruit26: {label:string; amb:number; inf:number; accent:string; tag?:string}[] = [
-  {label:'Jan', amb:5, inf:3, accent:'#B6CAE3'},
-  {label:'Feb', amb:12, inf:2, accent:'#8CD1C8'},
-  {label:'Mar', amb:11, inf:2, accent:'#3A6EA4'},
-  {label:'Apr', amb:28, inf:5, accent:'#FDBE67'},
-  {label:'May', amb:20, inf:6, accent:'#B26CA6'},
-  {label:'Jun', amb:28, inf:4, accent:'#DD5759'},
-  {label:'Jul', amb:30, inf:2, accent:'#F6AACB'},
-  {label:'Aug', amb:35, inf:7, accent:'#D6E5F7'},
+const recruit26: {label:string; amb:number; inf:number; pod:number; accent:string; tag?:string}[] = [
+  {label:'Jan', amb:5, inf:3, pod:0, accent:'#B6CAE3'},
+  {label:'Feb', amb:12, inf:2, pod:0, accent:'#8CD1C8'},
+  {label:'Mar', amb:11, inf:1, pod:1, accent:'#3A6EA4'},
+  {label:'Apr', amb:28, inf:5, pod:0, accent:'#FDBE67'},
+  {label:'May', amb:20, inf:6, pod:0, accent:'#B26CA6'},
+  {label:'Jun', amb:28, inf:4, pod:0, accent:'#DD5759'},
+  {label:'Jul', amb:30, inf:1, pod:1, accent:'#F6AACB'},
+  {label:'Aug', amb:35, inf:1, pod:6, accent:'#D6E5F7'},
 ];
 
 const concRows = [
@@ -514,6 +521,7 @@ export default function AmbassadorGrowth() {
   const basePace = annualize(baseByYear[2026]);
   const addsAmbPace = annualize(addsAmbYear[2026]);
   const infAddsPace = annualize(addsInfYear[2026]);
+  const podAddsPace = annualize(addsPodYear[2026]);
   const tenPlus2026Pace = annualize(tenPlusByYear[2026]);
   const ambSubsPace = annualize(ambSubsYear[2026]);
 
@@ -570,6 +578,12 @@ export default function AmbassadorGrowth() {
         backgroundColor: TP.gold,
         borderRadius: 4,
       },
+      {
+        label: 'Podcast',
+        data: recruit26.map(r => r.pod),
+        backgroundColor: TP.red,
+        borderRadius: 4,
+      },
     ],
   };
   const recruitChartOpts: ChartOptions<'bar'> = {
@@ -595,15 +609,17 @@ export default function AmbassadorGrowth() {
   const lastIdx26 = MONTHS_JAN24_MAY26.length - 1;
   const curAmbActual = newAddsAmb[currentMonthKey] ?? 0;
   const curInfActual = newAddsInf[currentMonthKey] ?? 0;
+  const curPodActual = newAddsPod[currentMonthKey] ?? 0;
   const curAmbProj = Math.round(curAmbActual * paceFactor);
   const curInfProj = Math.round(curInfActual * paceFactor);
+  const curPodProj = Math.round(curPodActual * paceFactor);
 
   const newAddsChartData: ChartData<'bar'> = {
     labels: MONTHS_JAN24_MAY26.map(fmtMonthLabel),
     datasets: [
       {
         label: 'Projected',
-        data: MONTHS_JAN24_MAY26.map((_, i) => i === lastIdx26 ? curAmbProj + curInfProj : 0),
+        data: MONTHS_JAN24_MAY26.map((_, i) => i === lastIdx26 ? curAmbProj + curInfProj + curPodProj : 0),
         backgroundColor: MONTHS_JAN24_MAY26.map((_, i) => i === lastIdx26 ? TP.blue + '20' : 'transparent'),
         borderColor: MONTHS_JAN24_MAY26.map((_, i) => i === lastIdx26 ? TP.blue + '40' : 'transparent'),
         borderWidth: 1,
@@ -623,6 +639,13 @@ export default function AmbassadorGrowth() {
         label: 'Influencer',
         data: MONTHS_JAN24_MAY26.map(k => newAddsInf[k] ?? 0),
         backgroundColor: TP.gold,
+        borderRadius: 4,
+        stack: 'actual',
+      },
+      {
+        label: 'Podcast',
+        data: MONTHS_JAN24_MAY26.map(k => newAddsPod[k] ?? 0),
+        backgroundColor: TP.red,
         borderRadius: 4,
         stack: 'actual',
       },
@@ -647,7 +670,7 @@ export default function AmbassadorGrowth() {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           afterBody: (items: any[]) => {
             if (items[0]?.dataIndex === lastIdx26) {
-              return `Projected full month: ${curAmbProj + curInfProj} (${curAmbProj} amb + ${curInfProj} inf)`;
+              return `Projected full month: ${curAmbProj + curInfProj + curPodProj} (${curAmbProj} amb + ${curInfProj} inf + ${curPodProj} pod)`;
             }
             return '';
           },
@@ -896,7 +919,7 @@ export default function AmbassadorGrowth() {
 
         <div style={{ ...gridRow(6), marginBottom: '1.5rem' }}>
           {recruit26.map(r => {
-            const total = r.amb + r.inf;
+            const total = r.amb + r.inf + r.pod;
             const hasTag = 'tag' in r && r.tag;
             return (
               <div key={r.label} style={{
@@ -922,9 +945,10 @@ export default function AmbassadorGrowth() {
                 <div style={{ fontSize: '0.65rem', color: TP.purple, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, marginTop: 2 }}>NEW ADDS</div>
                 <div style={{ fontSize: '2.25rem', fontWeight: 800, color: TP.navy, margin: '0.25rem 0' }}>{total}</div>
                 <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '0.5rem', marginTop: '0.25rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', fontSize: '0.75rem', color: '#666' }}>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', fontSize: '0.75rem', color: '#666', flexWrap: 'wrap' }}>
                     <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 4, background: TP.blue, marginRight: 4, verticalAlign: 'middle' }} />AMB {r.amb}</span>
                     <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 4, background: TP.gold, marginRight: 4, verticalAlign: 'middle' }} />INF {r.inf}</span>
+                    {r.pod > 0 && <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 4, background: TP.red, marginRight: 4, verticalAlign: 'middle' }} />POD {r.pod}</span>}
                   </div>
                 </div>
               </div>
@@ -942,20 +966,21 @@ export default function AmbassadorGrowth() {
       {/* ════════ SECTION 3: New Ambassadors Added Per Month ════════ */}
       <div>
         <h3 style={sectionHeader}>New Ambassadors Added Per Month</h3>
-        <p style={sectionSub}>Yearly totals and monthly breakdown of ambassador and influencer onboarding.</p>
+        <p style={sectionSub}>Yearly totals and monthly breakdown of ambassador, influencer, and podcast onboarding.</p>
 
         <div style={{ ...gridRow(4), marginBottom: '1.5rem' }}>
           {years.map(y => {
             const total = addsTotalYear[y];
             const amb = addsAmbYear[y];
             const inf = addsInfYear[y];
+            const pod = addsPodYear[y];
             const isPace = y === 2026;
             return (
               <div key={y} style={statCard(TP.blue)}>
                 <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#666' }}>{y}{isPace ? ' YTD' : ''}</div>
                 <div style={{ fontSize: '2rem', fontWeight: 800, color: TP.navy }}>{total}</div>
                 <div style={{ fontSize: '0.75rem', color: '#888' }}>
-                  {amb} amb / {inf} inf
+                  {amb} amb / {inf} inf{pod > 0 ? ` / ${pod} pod` : ''}
                 </div>
                 {isPace && (
                   <div style={{ fontSize: '0.7rem', color: TP.purple, fontWeight: 600, marginTop: 4 }}>
