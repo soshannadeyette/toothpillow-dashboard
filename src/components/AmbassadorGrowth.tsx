@@ -61,10 +61,11 @@ const newAddsInf: Record<string, number> = {
   '2026-01':3,'2026-02':2,'2026-03':1,'2026-04':5,'2026-05':6,'2026-06':4,'2026-07':1,'2026-08':1,
 };
 // Podcast-type adds tracked separately (split from Inf Aug 2026)
+// Note: "Podcast" (generic), "Alex Clark Newsletter", "Alex Clark Stories" are sub-entries, not separate adds
 const newAddsPod: Record<string, number> = {
   '2024-08':1,
-  '2025-01':1,
-  '2026-03':1,'2026-07':1,'2026-08':6,
+  '2025-01':1,'2025-02':1,'2025-05':1,'2025-09':1,
+  '2026-03':1,'2026-07':1,'2026-08':7,
 };
 
 const ambSubsYear: Record<number, number> = {2023:465, 2024:442, 2025:574, 2026:487};
@@ -72,8 +73,8 @@ const infSubsYear: Record<number, number> = {2023:1337, 2024:8275, 2025:5525, 20
 const combSubsYear: Record<number, number> = {2023:1802, 2024:8717, 2025:6099, 2026:3626};
 const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:169};
 const addsInfYear: Record<number, number> = {2023:2, 2024:60, 2025:29, 2026:23};
-const addsPodYear: Record<number, number> = {2023:0, 2024:1, 2025:1, 2026:8};
-const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:171, 2026:200};
+const addsPodYear: Record<number, number> = {2023:0, 2024:1, 2025:4, 2026:9};
+const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:174, 2026:201};
 // Note: adds counts are from ambassador program tracking, not Salesforce referral exports
 
 // Active ambassadors with ≥1 submission per year (from Salesforce)
@@ -106,7 +107,7 @@ const recruit26: {label:string; amb:number; inf:number; pod:number; accent:strin
   {label:'May', amb:20, inf:6, pod:0, accent:'#B26CA6'},
   {label:'Jun', amb:28, inf:4, pod:0, accent:'#DD5759'},
   {label:'Jul', amb:30, inf:1, pod:1, accent:'#F6AACB'},
-  {label:'Aug', amb:35, inf:1, pod:6, accent:'#D6E5F7'},
+  {label:'Aug', amb:35, inf:1, pod:7, accent:'#D6E5F7'},
 ];
 
 const concRows = [

@@ -198,33 +198,33 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
 
 // Pipeline totals — Salesforce export Aug 17, 2026
 const GOOGLE_SF_PIPELINE = {
-  total: 635,           // leads created (started form)
-  completed: 289,       // all stages except Waiting-Info (46%)
-  waitingInfo: 346,     // incomplete submissions (WAITING - Needs info)
-  sentCheckout: 199,    // Sent Checkout Link (173) + Checked Out (26)
-  sentToTxP: 20,        // Sent to TxP (16) + Waiting for TxP Assignment (4)
-  txpApproved: 9,
-  checkedOut: 26,
-  referredOut: 33,
-  closedLost: 25,       // 16 Closed Lost + 9 Do Not Contact
-  tempHold: 3,
+  total: 674,           // leads created (started form)
+  completed: 297,       // all stages except form opens (44%)
+  waitingInfo: 371,     // WAITING - Needs info (364) + Waiting for TxP Assignment (7)
+  sentCheckout: 208,    // Sent Checkout Link (177) + Checked Out (31)
+  sentToTxP: 16,        // Sent to TxP
+  txpApproved: 17,
+  checkedOut: 31,
+  referredOut: 32,
+  closedLost: 28,       // 18 Closed Lost + 10 Do Not Contact
+  tempHold: 2,
   formOpens: 1436,      // Google Ads conversions (form opens, Google-only)
 };
 
-// Revenue from checkouts — 26 checkouts at $46,986
-// Source: Salesforce "Google Ads 2026" export, August 25, 2026
-const GOOGLE_REVENUE: number = 46986;
+// Revenue from checkouts — 31 checkouts at $56,664
+// Source: Salesforce "Google Ads 2026" export, August 31, 2026
+const GOOGLE_REVENUE: number = 56664;
 
 // Monthly breakdown from Salesforce — ALL columns grouped by CREATED month (cohort).
 // Checkouts/revenue = leads from that created month that have checked out to date,
 // regardless of when the checkout happened. This is correct for CAC analysis.
-// Source: Salesforce "Google Ads 2026" export, August 25, 2026
+// Source: Salesforce "Google Ads 2026" export, August 31, 2026
 const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: number; checkouts: number; revenue: number }[] = [
-  { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 23, checkouts: 2, revenue: 3291 },
-  { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 31, checkouts: 5, revenue: 8676 },
-  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 80, checkouts: 13, revenue: 22995 },
-  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 184, completed: 82, checkouts: 6, revenue: 12024 },
-  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 138, completed: 64, checkouts: 0, revenue: 0 },
+  { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 22, checkouts: 2, revenue: 3291 },
+  { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 32, checkouts: 5, revenue: 8676 },
+  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 85, checkouts: 15, revenue: 26786 },
+  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 184, completed: 87, checkouts: 6, revenue: 12024 },
+  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 177, completed: 83, checkouts: 3, revenue: 5887 },
 ];
 
 /* ════════════════════════════════════════════
