@@ -50,7 +50,7 @@ interface RefMonth {
 }
 
 const REFERRER_DATA: Record<string, RefMonth> = {
-  // Source: Salesforce "Monthly Submissions by Referral Type" export, August 31, 2026
+  // Source: Salesforce "Monthly Submissions by Referral Type" export, September 1, 2026
   "2023-01": {total:24, Parent:8, "Dental Office":6, "Airway Ambassador":9, Influencer:0, Podcast:0, Instagram:0, TikTok:0, Facebook:0, "Meta Ad":0, "Online Search":0, "Unknown Referral":0, "Unknown Professional Referral":0, Other:0, MYO:1},
   "2023-02": {total:60, Parent:19, "Dental Office":19, "Airway Ambassador":20, Influencer:0, Podcast:0, Instagram:0, TikTok:0, Facebook:0, "Meta Ad":0, "Online Search":1, "Unknown Referral":0, "Unknown Professional Referral":0, Other:0, MYO:1},
   "2023-03": {total:51, Parent:18, "Dental Office":18, "Airway Ambassador":10, Influencer:0, Podcast:0, Instagram:0, TikTok:0, Facebook:0, "Meta Ad":0, "Online Search":1, "Unknown Referral":0, "Unknown Professional Referral":0, Other:1, MYO:3},
@@ -93,15 +93,16 @@ const REFERRER_DATA: Record<string, RefMonth> = {
   "2026-04": {total:1225, Parent:73, "Dental Office":255, "Airway Ambassador":68, Influencer:233, Podcast:129, Instagram:39, TikTok:1, Facebook:9, "Meta Ad":0, "Online Search":298, "Unknown Referral":66, "Unknown Professional Referral":24, Other:0, "Google Ad":20, MYO:3, "Health Care Professional":7},
   "2026-05": {total:1125, Parent:49, "Dental Office":213, "Airway Ambassador":53, Influencer:269, Podcast:127, Instagram:55, TikTok:4, Facebook:13, "Meta Ad":1, "Online Search":250, "Unknown Referral":46, "Unknown Professional Referral":10, Other:0, "Google Ad":28, MYO:4, "Health Care Professional":3},
   "2026-06": {total:1475, Parent:85, "Dental Office":228, "Airway Ambassador":46, Influencer:306, Podcast:279, Instagram:54, TikTok:1, Facebook:3, "Meta Ad":0, "Online Search":327, "Unknown Referral":44, "Unknown Professional Referral":14, Other:0, "Google Ad":81, MYO:5, "Health Care Professional":2},
-  "2026-07": {total:1968, Parent:108, "Dental Office":389, "Airway Ambassador":88, Influencer:600, Podcast:161, Instagram:78, TikTok:1, Facebook:22, "Meta Ad":4, "Online Search":329, "Unknown Referral":68, "Unknown Professional Referral":18, Other:0, "Google Ad":93, MYO:3, "Health Care Professional":2, "Brand Ambassador":4},
-  "2026-08": {total:1523, Parent:56, "Dental Office":350, "Airway Ambassador":48, Influencer:449, Podcast:160, Instagram:59, TikTok:0, Facebook:9, "Meta Ad":2, "Online Search":251, "Unknown Referral":37, "Unknown Professional Referral":10, Other:0, "Google Ad":89, "Brand Ambassador":2, "Health Care Professional":1},
+  "2026-07": {total:1966, Parent:108, "Dental Office":389, "Airway Ambassador":88, Influencer:599, Podcast:161, Instagram:78, TikTok:1, Facebook:22, "Meta Ad":4, "Online Search":329, "Unknown Referral":68, "Unknown Professional Referral":18, Other:0, "Google Ad":93, MYO:3, "Health Care Professional":2, "Brand Ambassador":3},
+  "2026-08": {total:1628, Parent:58, "Dental Office":364, "Airway Ambassador":48, Influencer:500, Podcast:163, Instagram:62, TikTok:0, Facebook:9, "Meta Ad":2, "Online Search":279, "Unknown Referral":42, "Unknown Professional Referral":11, Other:0, "Google Ad":89, "Brand Ambassador":3, "Health Care Professional":1},
+  "2026-09": {total:8, Parent:0, "Dental Office":1, "Airway Ambassador":0, Influencer:1, Podcast:0, Instagram:3, TikTok:0, Facebook:0, "Meta Ad":0, "Online Search":3, "Unknown Referral":0, "Unknown Professional Referral":0, Other:0},
 };
 
 /* ────── Current month projection ────── */
 // Update these when changing the current partial month
-const CURRENT_MONTH_KEY = '2026-08';
-const CURRENT_MONTH_DAYS_TRACKED = 31;
-const CURRENT_MONTH_DAYS_TOTAL = 31;
+const CURRENT_MONTH_KEY = '2026-09';
+const CURRENT_MONTH_DAYS_TRACKED = 1;
+const CURRENT_MONTH_DAYS_TOTAL = 30;
 
 function buildProjected(monthKey: string, daysTracked: number, daysTotal: number): { actual: RefMonth; projected: RefMonth } {
   const monthData = REFERRER_DATA[monthKey];
