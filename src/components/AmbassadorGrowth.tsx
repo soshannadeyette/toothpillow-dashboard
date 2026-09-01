@@ -41,19 +41,19 @@ const ambSubs: Record<string, number> = {
   '2023-01':9,'2023-02':20,'2023-03':10,'2023-04':15,'2023-05':14,'2023-06':218,'2023-07':81,'2023-08':15,'2023-09':22,'2023-10':16,'2023-11':23,'2023-12':22,
   '2024-01':14,'2024-02':15,'2024-03':29,'2024-04':33,'2024-05':32,'2024-06':24,'2024-07':36,'2024-08':48,'2024-09':72,'2024-10':32,'2024-11':40,'2024-12':67,
   '2025-01':60,'2025-02':70,'2025-03':66,'2025-04':59,'2025-05':48,'2025-06':46,'2025-07':29,'2025-08':48,'2025-09':39,'2025-10':41,'2025-11':39,'2025-12':29,
-  '2026-01':53,'2026-02':61,'2026-03':70,'2026-04':68,'2026-05':53,'2026-06':46,'2026-07':88,'2026-08':48,
+  '2026-01':53,'2026-02':61,'2026-03':70,'2026-04':68,'2026-05':53,'2026-06':46,'2026-07':88,'2026-08':51,
 };
 const infSubs: Record<string, number> = {
   '2023-05':2,'2023-09':1,'2023-10':6,'2023-11':293,'2023-12':1035,
   '2024-01':431,'2024-02':313,'2024-03':1589,'2024-04':564,'2024-05':642,'2024-06':1230,'2024-07':480,'2024-08':552,'2024-09':1114,'2024-10':490,'2024-11':357,'2024-12':513,
   '2025-01':513,'2025-02':601,'2025-03':515,'2025-04':504,'2025-05':428,'2025-06':327,'2025-07':895,'2025-08':433,'2025-09':285,'2025-10':267,'2025-11':486,'2025-12':271,
-  '2026-01':309,'2026-02':511,'2026-03':462,'2026-04':233,'2026-05':269,'2026-06':306,'2026-07':599,'2026-08':500,'2026-09':1,
+  '2026-01':309,'2026-02':511,'2026-03':462,'2026-04':233,'2026-05':269,'2026-06':306,'2026-07':599,'2026-08':508,'2026-09':4,
 };
 
 const newAddsAmb: Record<string, number> = {
   '2024-01':4,'2024-02':7,'2024-03':7,'2024-04':6,'2024-05':3,'2024-06':7,'2024-07':10,'2024-08':2,'2024-09':6,'2024-10':7,'2024-11':7,'2024-12':7,
   '2025-01':7,'2025-02':84,'2025-03':7,'2025-04':6,'2025-05':5,'2025-06':6,'2025-07':1,'2025-08':15,'2025-09':2,'2025-10':1,'2025-11':6,'2025-12':1,
-  '2026-01':5,'2026-02':12,'2026-03':11,'2026-04':28,'2026-05':20,'2026-06':28,'2026-07':30,'2026-08':35,
+  '2026-01':5,'2026-02':12,'2026-03':11,'2026-04':28,'2026-05':20,'2026-06':28,'2026-07':30,'2026-08':35,'2026-09':2,
 };
 const newAddsInf: Record<string, number> = {
   '2024-01':1,'2024-02':8,'2024-03':3,'2024-04':4,'2024-05':9,'2024-06':2,'2024-07':7,'2024-08':1,'2024-09':4,'2024-10':6,'2024-11':6,'2024-12':9,
@@ -68,13 +68,13 @@ const newAddsPod: Record<string, number> = {
   '2026-03':1,'2026-07':1,'2026-08':7,
 };
 
-const ambSubsYear: Record<number, number> = {2023:465, 2024:442, 2025:574, 2026:487};
-const infSubsYear: Record<number, number> = {2023:1337, 2024:8275, 2025:5525, 2026:3190};
-const combSubsYear: Record<number, number> = {2023:1802, 2024:8717, 2025:6099, 2026:3677};
-const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:169};
+const ambSubsYear: Record<number, number> = {2023:465, 2024:442, 2025:574, 2026:490};
+const infSubsYear: Record<number, number> = {2023:1337, 2024:8275, 2025:5525, 2026:3201};
+const combSubsYear: Record<number, number> = {2023:1802, 2024:8717, 2025:6099, 2026:3691};
+const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:141, 2026:171};
 const addsInfYear: Record<number, number> = {2023:2, 2024:60, 2025:29, 2026:23};
 const addsPodYear: Record<number, number> = {2023:0, 2024:1, 2025:4, 2026:9};
-const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:174, 2026:201};
+const addsTotalYear: Record<number, number> = {2023:6, 2024:133, 2025:174, 2026:203};
 // Note: adds counts are from ambassador program tracking, not Salesforce referral exports
 
 // Active ambassadors with ≥1 submission per year (from Salesforce)
@@ -83,12 +83,12 @@ const activeAmbByYear: Record<number, number> = {2023:24, 2024:85, 2025:127, 202
 const activeTotalByYear: Record<number, number> = {2023:30, 2024:145, 2025:209, 2026:227};
 
 const halfCarriedBy: Record<number, number> = {2023:1, 2024:2, 2025:5, 2026:10};
-const tenPlusByYear: Record<number, number> = {2023:8, 2024:40, 2025:55, 2026:45}; // 45 with >=10 subs as of Sep 1
+const tenPlusByYear: Record<number, number> = {2023:8, 2024:40, 2025:55, 2026:46}; // 46 with >=10 subs as of Sep 1
 // Mega-3 = Lauren Johnson + Kendra Needham + Ginny Yurich (top recruited-ambassador producers)
 // Mega-3 = Lauren Johnson + Kendra Needham + Ginny Yurich (specific named producers, not top-3-by-volume)
-// 2026: Lauren 535 + Kendra 181 + Ginny 107 = 823; base = LBT total 3672 - 823
+// 2026: Lauren 535 + Kendra 181 + Ginny 107 = 823; base = LBT total 3686 - 823
 const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:823};
-const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:2849};
+const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:2863};
 
 // Dynamic annualization: complete months + fractional current month
 const _now = new Date();
@@ -108,6 +108,7 @@ const recruit26: {label:string; amb:number; inf:number; pod:number; accent:strin
   {label:'Jun', amb:28, inf:4, pod:0, accent:'#DD5759'},
   {label:'Jul', amb:30, inf:1, pod:1, accent:'#F6AACB'},
   {label:'Aug', amb:35, inf:1, pod:7, accent:'#D6E5F7'},
+  {label:'Sep', amb:2, inf:0, pod:0, accent:'#8CD1C8'},
 ];
 
 const concRows = [
@@ -167,12 +168,12 @@ const TOP3_MONTHLY: Top3Entry[] = [
 // Top producers — 3-year history (2024 from H1+H2 LBT exports, 2025+2026 from moversData)
 // Source: 2024 H1 LBT (Jan 1-Jul 18) + H2 LBT (Jul 18-Dec 31), overlap deduped on 7/18
 const PRODUCER_HISTORY: {name:string; y24:number; y25:number; y26:number; type:string}[] = [
-  {name:'Shannon Tripp',         y24:0,    y25:866,  y26:591,  type:'Inf'},
+  {name:'Shannon Tripp',         y24:0,    y25:866,  y26:599,  type:'Inf'},
   {name:'Lauren Johnson NNM',    y24:2956, y25:831,  y26:535,  type:'Inf'},
   {name:'Soshanna Salsman',      y24:299,  y25:914,  y26:249,  type:'Inf'},
   {name:'Kendra Needham',        y24:1851, y25:386,  y26:181,  type:'Inf'},
   {name:'Jeff Cruz',             y24:259,  y25:84,   y26:143,  type:'Inf'},
-  {name:'Amy Bernhard',          y24:0,    y25:112,  y26:138,  type:'Inf'},
+  {name:'Amy Bernhard',          y24:0,    y25:112,  y26:139,  type:'Inf'},
   {name:'Melody Brandon',        y24:137,  y25:123,  y26:126,  type:'Inf'},
   {name:'Ginny Yurich',          y24:1110, y25:291,  y26:107,  type:'Inf'},
   {name:'Eden Lee',              y24:25,   y25:185,  y26:106,  type:'Inf'},
@@ -185,7 +186,7 @@ const PRODUCER_HISTORY: {name:string; y24:number; y25:number; y26:number; type:s
   {name:'Thuy Improta',          y24:204,  y25:245,  y26:35,   type:'Inf'},
   {name:'Eryn Carroll NMM',      y24:144,  y25:104,  y26:30,   type:'Inf'},
   {name:'Erin Wilkins',          y24:285,  y25:111,  y26:22,   type:'Inf'},
-  {name:'Devon Kuntzman',        y24:133,  y25:90,   y26:20,   type:'Inf'},
+  {name:'Devon Kuntzman',        y24:133,  y25:90,   y26:21,   type:'Inf'},
   {name:'Wendy Ostapuk',         y24:85,   y25:104,  y26:19,   type:'Inf'},
 ];
 
@@ -194,18 +195,18 @@ const PRODUCER_HISTORY: {name:string; y24:number; y25:number; y26:number; type:s
 const TOP5_CONCENTRATION: {year:number; top5Pct:number; restPct:number; top5:number; rest:number; total:number; names:string}[] = [
   {year:2024, top5Pct:74.7, restPct:25.3, top5:6513, rest:2209, total:8722, names:'Lauren, Kendra, Ginny, Sosh, Erin W.'},
   {year:2025, top5Pct:64.9, restPct:35.1, top5:3962, rest:2143, total:6105, names:'Sosh, Shannon, Lauren, Kendra, Ginny'},
-  {year:2026, top5Pct:46.3, restPct:53.7, top5:1699, rest:1973, total:3672, names:'Shannon, Lauren, Sosh, Kendra, Jeff'},
+  {year:2026, top5Pct:46.3, restPct:53.7, top5:1707, rest:1979, total:3686, names:'Shannon, Lauren, Sosh, Kendra, Jeff'},
 ];
 
 // Updated from Salesforce Launch Bonus Tracker export 2026-09-01
 // Source: LB Tracker combined H1 (Jan-Jul19) + H2 (Jul1-Sep1), exported 2026-09-01
 const moversData: Record<string, {y25:number; y26:number; type:string}> = {
-  'Shannon Tripp':        {y25:866,  y26:591, type:'Inf'},
+  'Shannon Tripp':        {y25:866,  y26:599, type:'Inf'},
   'Lauren Johnson NNM':   {y25:831,  y26:535, type:'Inf'},
   'Soshanna Salsman':     {y25:914,  y26:249, type:'Inf'},
   'Kendra Needham':       {y25:386,  y26:181, type:'Inf'},
   'Jeff Cruz Talia_likeitis': {y25:84, y26:143, type:'Inf'},
-  'Amy Bernhard':         {y25:112,  y26:138, type:'Inf'},
+  'Amy Bernhard':         {y25:112,  y26:139, type:'Inf'},
   'Melody Brandon':       {y25:123,  y26:126, type:'Inf'},
   'Ginny Yurich':         {y25:291,  y26:107, type:'Inf'},
   'Eden Lee loverlees':   {y25:185,  y26:106, type:'Inf'},
@@ -227,7 +228,7 @@ const moversData: Record<string, {y25:number; y26:number; type:string}> = {
   'Erin Wilkins':         {y25:111,  y26:22,  type:'Inf'},
   'Mary Catherine Oechslin':{y25:0,  y26:22,  type:'Inf'},
   'Alicia Nussbaum':      {y25:0,    y26:20,  type:'Amb'},
-  'Devon Kuntzman':       {y25:90,   y26:20,  type:'Inf'},
+  'Devon Kuntzman':       {y25:90,   y26:21,  type:'Inf'},
   'Taylor Moran':         {y25:62,   y26:20,  type:'Inf'},
   'Taylor Weimar':        {y25:0,    y26:19,  type:'Inf'},
   'Wendy Ostapuk':        {y25:104,  y26:19,  type:'Inf'},
@@ -311,12 +312,12 @@ const LAUNCH_BONUS_PAYOUTS: {month:string; payouts:{name:string;amount:number;ti
 const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;paid:number;winStart:string;winEnd:string;tier1Date?:string;tier2Date?:string;is2026?:boolean;omit?:boolean;pendingPayout?:boolean}[] = [
   {name:'Lauren Johnson NNM',bonusSubs:420,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/27',tier2Date:'06/11'},
   {name:'Soshanna Salsman',bonusSubs:128,tier:2,earned:1250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/25',tier2Date:'05/28',omit:true},
-  {name:'Shannon Tripp',bonusSubs:384,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/21',tier2Date:'05/26'},
+  {name:'Shannon Tripp',bonusSubs:392,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/21',tier2Date:'05/26'},
   {name:'Emily Boazman',bonusSubs:91,tier:2,earned:1250,paid:1250,winStart:'04/02/2026',winEnd:'12/31/2026',tier1Date:'05/24',tier2Date:'06/26',is2026:true},
   {name:'Eden Lee loverlees',bonusSubs:75,tier:2,earned:1250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'07/10',tier2Date:'07/30'},
   {name:'Kendra Needham',bonusSubs:70,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'05/22',tier2Date:'07/13'},
   {name:'Melody Brandon',bonusSubs:62,tier:2,earned:1250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/08',tier2Date:'08/03'},
-  {name:'Amy Bernhard',bonusSubs:57,tier:2,earned:1250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/03',tier2Date:'07/29'},
+  {name:'Amy Bernhard',bonusSubs:58,tier:2,earned:1250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/03',tier2Date:'07/29'},
   {name:'Jeff Cruz Talia_likeitis',bonusSubs:58,tier:2,earned:1250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'05/19',tier2Date:'07/31'},
   {name:'Jasyra Santiago-Hines',bonusSubs:50,tier:2,earned:1250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/10',tier2Date:'08/24'},
   {name:'Ginny Yurich',bonusSubs:49,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/02'},
