@@ -50,11 +50,11 @@ const TP = {
 // Per-month online/hybrid/prime goals derived from MONTHLY_GOALS_2026
 // Fallback in case the type only has total goals
 const ONLINE_GOALS_2026: Record<number, number> = {
-  1: 1067, 2: 1174, 3: 1291, 4: 1420, 5: 1562, 6: 1718,
-  7: 1890, 8: 2079, 9: 2287, 10: 2516, 11: 2767, 12: 3044,
+  1: 1475, 2: 1475, 3: 1475, 4: 1475, 5: 1475, 6: 1475,
+  7: 1475, 8: 1475, 9: 1475, 10: 1475, 11: 1475, 12: 1475,
 };
 const HYBRID_GOALS_2026: Record<number, number> = {
-  1: 363, 2: 401, 3: 444, 4: 355, 5: 405, 6: 460,
+  1: 500, 2: 500, 3: 500, 4: 500, 5: 500, 6: 500,
   7: 500, 8: 500, 9: 500, 10: 500, 11: 500, 12: 500,
 };
 const PRIME_GOAL = 25;

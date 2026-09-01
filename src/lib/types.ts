@@ -134,18 +134,18 @@ export interface MonthGoal {
 }
 
 export const MONTHLY_GOALS_2026: MonthGoal[] = [
-  { month: 1, year: 2026, online: 1067, hybrid: 363, prime: 25, total: 1455 },
-  { month: 2, year: 2026, online: 1174, hybrid: 401, prime: 25, total: 1600 },
-  { month: 3, year: 2026, online: 1291, hybrid: 444, prime: 25, total: 1760 },
-  { month: 4, year: 2026, online: 1420, hybrid: 355, prime: 25, total: 1800 },
-  { month: 5, year: 2026, online: 1562, hybrid: 405, prime: 25, total: 1992 },
-  { month: 6, year: 2026, online: 1718, hybrid: 460, prime: 25, total: 2203 },
-  { month: 7, year: 2026, online: 1890, hybrid: 500, prime: 25, total: 2415 },
-  { month: 8, year: 2026, online: 2079, hybrid: 500, prime: 25, total: 2604 },
-  { month: 9, year: 2026, online: 2287, hybrid: 500, prime: 25, total: 2812 },
-  { month: 10, year: 2026, online: 2516, hybrid: 500, prime: 25, total: 3041 },
-  { month: 11, year: 2026, online: 2767, hybrid: 500, prime: 25, total: 3292 },
-  { month: 12, year: 2026, online: 3044, hybrid: 500, prime: 25, total: 3569 },
+  { month: 1, year: 2026, online: 1475, hybrid: 500, prime: 25, total: 2000 },
+  { month: 2, year: 2026, online: 1475, hybrid: 500, prime: 25, total: 2000 },
+  { month: 3, year: 2026, online: 1475, hybrid: 500, prime: 25, total: 2000 },
+  { month: 4, year: 2026, online: 1475, hybrid: 500, prime: 25, total: 2000 },
+  { month: 5, year: 2026, online: 1475, hybrid: 500, prime: 25, total: 2000 },
+  { month: 6, year: 2026, online: 1475, hybrid: 500, prime: 25, total: 2000 },
+  { month: 7, year: 2026, online: 1475, hybrid: 500, prime: 25, total: 2000 },
+  { month: 8, year: 2026, online: 1475, hybrid: 500, prime: 25, total: 2000 },
+  { month: 9, year: 2026, online: 1475, hybrid: 500, prime: 25, total: 2000 },
+  { month: 10, year: 2026, online: 1475, hybrid: 500, prime: 25, total: 2000 },
+  { month: 11, year: 2026, online: 1475, hybrid: 500, prime: 25, total: 2000 },
+  { month: 12, year: 2026, online: 1475, hybrid: 500, prime: 25, total: 2000 },
 ];
 
 export const MONTH_NAMES = [
