@@ -38,7 +38,7 @@ const AV_DATA = [
   { label: 'Feb 26', month: 2, year: 2026, traffic: 51480, starts: 2186, waiting: 854, submitted: 1332, partial: false, period: 'full' as const },
   { label: 'Mar 26', month: 3, year: 2026, traffic: 39218, starts: 2258, waiting: 915, submitted: 1343, partial: false, period: 'full' as const },
   { label: 'Apr 26', month: 4, year: 2026, traffic: 30311, starts: 1427, waiting: 519, submitted: 908, partial: false, period: 'full' as const },
-  { label: 'May 26', month: 5, year: 2026, traffic: 33031, starts: 1603, waiting: 688, submitted: 915, partial: false, period: 'full' as const },
+  { label: 'May 26', month: 5, year: 2026, traffic: 33031, starts: 1602, waiting: 688, submitted: 914, partial: false, period: 'full' as const },
   { label: 'Jun 26', month: 6, year: 2026, traffic: 36468, starts: 1751, waiting: 555, submitted: 1196, partial: false, period: 'full' as const },
 ];
 
@@ -85,9 +85,9 @@ const FUNNEL_DATA = [
   { label: 'Jan 26', waiting: 105, inReview:   0, checkout:    7, checkedOut: 316, closed: 703, onHold: 16 },
   { label: 'Feb 26', waiting: 854, inReview:   4, checkout:   26, checkedOut: 357, closed: 919, onHold: 26 },
   { label: 'Mar 26', waiting: 915, inReview:   5, checkout:   63, checkedOut: 430, closed: 818, onHold: 27 },
-  { label: 'Apr 26', waiting: 519, inReview:   3, checkout:  124, checkedOut: 269, closed: 496, onHold: 16 },
-  { label: 'May 26', waiting: 688, inReview:  10, checkout:  506, checkedOut: 218, closed: 169, onHold: 12 },
-  { label: 'Jun 26', waiting: 555, inReview:  14, checkout:  671, checkedOut: 276, closed: 215, onHold: 20 },
+  { label: 'Apr 26', waiting: 519, inReview:   3, checkout:  123, checkedOut: 269, closed: 497, onHold: 16 },
+  { label: 'May 26', waiting: 688, inReview:   9, checkout:  505, checkedOut: 219, closed: 169, onHold: 12 },
+  { label: 'Jun 26', waiting: 555, inReview:  13, checkout:  671, checkedOut: 276, closed: 216, onHold: 20 },
 ];
 
 // ── May daily data (source of truth) ─────────────────────────────────
@@ -160,7 +160,7 @@ const COHORT_DATA = [
 //   completed (within 7d + days 8-14 + 15+) | waiting | other
 // These add up to starts. "mature" = every person has had that many days.
 // Weekly cohort aging — Feb through current
-// Source: Salesforce Waiting on Info Ratios export September 1, 2026
+// Source: Salesforce Waiting on Info Ratios export September 2, 2026
 const COHORT_AGING: {label:string; starts:number; within7d:number; d8to14:number; d15plus:number; waiting:number; daysElapsed:number; mature7d:boolean; mature14d:boolean; postUpdate:boolean; tag?:string}[] = [
   { label: 'Feb 02–08', starts: 284, within7d: 209, d8to14: 4, d15plus: 14, waiting: 57, daysElapsed: 211, mature7d: true, mature14d: true, postUpdate: false },
   { label: 'Feb 09–15', starts: 293, within7d: 197, d8to14: 5, d15plus: 9, waiting: 82, daysElapsed: 204, mature7d: true, mature14d: true, postUpdate: false },
@@ -188,16 +188,16 @@ const COHORT_AGING: {label:string; starts:number; within7d:number; d8to14:number
 
 // ── Aggregate waiting age distribution (source of truth) ────────────
 // How long the 3,636 waiting records have been waiting, bucketed by age
-// Source: Salesforce Waiting on Info Ratios export September 1, 2026
+// Source: Salesforce Waiting on Info Ratios export September 2, 2026
 const WAITING_AGE_BUCKETS = [
-  { label: '61–90 days', count: 502 },
-  { label: '91–120 days', count: 690 },
-  { label: '121–180 days', count: 1364 },
-  { label: '180+ days', count: 1080 },
+  { label: '61–90 days', count: 479 },
+  { label: '91–120 days', count: 689 },
+  { label: '121–180 days', count: 1373 },
+  { label: '180+ days', count: 1095 },
 ];
 
 // ── Post-update tracking ────────────────────────────────────────────
-const POST_UPDATE_DAYS_ELAPSED = 78; // Jun 15 – Sep 1 = 78 days
+const POST_UPDATE_DAYS_ELAPSED = 79; // Jun 15 – Sep 2 = 79 days
 
 function num(v: number): string { return v.toLocaleString(); }
 
