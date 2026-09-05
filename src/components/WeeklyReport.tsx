@@ -455,8 +455,8 @@ export default function WeeklyReport() {
         }] : []),
         {
           type: 'line' as const,
-          label: 'Avg / day',
-          data: chartWeeks.map(w => w.dailyAvg),
+          label: 'Website Traffic',
+          data: chartWeeks.map(w => w.visitorsWorld || null),
           borderColor: TP.green,
           backgroundColor: TP.green,
           borderWidth: 2.5,
@@ -464,6 +464,7 @@ export default function WeeklyReport() {
           tension: 0.3,
           yAxisID: 'y1',
           order: 1,
+          spanGaps: true,
         },
       ],
     };
@@ -607,7 +608,7 @@ export default function WeeklyReport() {
               scales: {
                 x: { stacked: true, grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 14 } },
                 y: { position: 'left', beginAtZero: true, title: { display: true, text: 'Total / week' } },
-                y1: { position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, title: { display: true, text: 'Avg / day' } },
+                y1: { position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, title: { display: true, text: 'Website Traffic' } },
               },
             }}
           />
