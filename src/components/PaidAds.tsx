@@ -224,7 +224,7 @@ const GOOGLE_REVENUE: number = 56664;
 
 // Monthly breakdown from Salesforce — ALL columns grouped by CREATED month (cohort).
 // Checkouts/revenue = leads from that created month that have checked out to date,
-// regardless of when the checkout happened. This is correct for CAC analysis.
+// regardless of when the checkout happened.
 // Source: Salesforce "Google Ads 2026" export, September 1, 2026
 const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: number; checkouts: number; revenue: number }[] = [
   { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 23, checkouts: 2, revenue: 3291 },
@@ -234,29 +234,6 @@ const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: n
   { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 178, completed: 83, checkouts: 3, revenue: 5887 },
   { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 2, completed: 0, checkouts: 0, revenue: 0 },
 ];
-
-/* ════════════════════════════════════════════
-   PIPELINE-BASED PROJECTIONS
-   Instead of time-based maturity (unrealistic for a slow funnel),
-   project checkouts using actual pipeline: actual checkouts + leads
-   still processing × blended win rate.
-   Win rate = checkouts / (checkouts + non-checkout terminal) from May–Aug.
-   Apr excluded (anomalous 11.8%). Sep too new.
-   Source: Salesforce "Google Ads 2026" export, September 1, 2026
-   ════════════════════════════════════════════ */
-const SF_PIPELINE_BY_MONTH: Record<string, { checkouts: number; terminal: number; processing: number; revenue: number }> = {
-  'Apr 2026': { checkouts: 2, terminal: 17, processing: 6, revenue: 3291 },
-  'May 2026': { checkouts: 5, terminal: 12, processing: 20, revenue: 8676 },
-  'Jun 2026': { checkouts: 15, terminal: 35, processing: 50, revenue: 26786 },
-  'Jul 2026': { checkouts: 6, terminal: 23, processing: 64, revenue: 12024 },
-  'Aug 2026': { checkouts: 3, terminal: 6, processing: 77, revenue: 5887 },
-  'Sep 2026': { checkouts: 0, terminal: 0, processing: 0, revenue: 0 },
-};
-
-// Blended win rate: May–Aug checkouts / (checkouts + non-checkout terminal) = 29/76 = 38.2%
-const PIPELINE_WIN_RATE = 29 / 76; // 0.3816
-
-const CAC_TARGET = 500;
 
 /* ════════════════════════════════════════════
    META ADS (Paused — Historical)
@@ -459,22 +436,6 @@ export default function PaidAds() {
   const net = GOOGLE_REVENUE - googleTotalSpend;
   const costPerCheckout = GOOGLE_SF_PIPELINE.checkedOut > 0 ? googleTotalSpend / GOOGLE_SF_PIPELINE.checkedOut : 0;
 
-  /* ──── Pipeline-projected CAC ──── */
-  const maturityAdjCAC = useMemo(() => {
-    let totalProjected = 0;
-    let totalSpendForProj = 0;
-
-    monthlySpend.forEach(m => {
-      const pipeline = SF_PIPELINE_BY_MONTH[m.label];
-      if (!pipeline) return;
-      const projected = pipeline.checkouts + pipeline.processing * PIPELINE_WIN_RATE;
-      totalProjected += projected;
-      totalSpendForProj += m.spend;
-    });
-
-    return totalProjected > 0 ? totalSpendForProj / totalProjected : null;
-  }, [monthlySpend]);
-
   /* ──── RENDER ──── */
 
   if (loading) {
@@ -517,15 +478,8 @@ export default function PaidAds() {
           sub={net >= 0 ? 'Revenue exceeds spend' : 'Spend exceeds revenue'}
         />
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 32 }}>
-        <SummaryCard label="Raw CAC" value={costPerCheckout > 0 ? `$${Math.round(costPerCheckout).toLocaleString()}` : '—'} color="#E57373" sub={`${GOOGLE_SF_PIPELINE.checkedOut} checkouts so far`} />
-        <SummaryCard
-          label="Adjusted CAC"
-          value={maturityAdjCAC ? `$${Math.round(maturityAdjCAC).toLocaleString()}` : '—'}
-          color={maturityAdjCAC && maturityAdjCAC <= CAC_TARGET ? '#00C853' : '#FF9800'}
-          sub="Pipeline-projected"
-        />
-        <SummaryCard label="Target CAC" value={`$${CAC_TARGET}`} color={TP.navy} sub={`Need ${Math.round(googleTotalSpend / CAC_TARGET)} checkouts at current spend`} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 32 }}>
+        <SummaryCard label="Cost / Checkout" value={costPerCheckout > 0 ? `$${Math.round(costPerCheckout).toLocaleString()}` : '—'} color="#E57373" sub={`${GOOGLE_SF_PIPELINE.checkedOut} checkouts so far`} />
         <SummaryCard label="Completion Rate" value={`${Math.round(GOOGLE_SF_PIPELINE.completed / GOOGLE_SF_PIPELINE.total * 100)}%`} color={TP.navy} sub={`${GOOGLE_SF_PIPELINE.completed} of ${GOOGLE_SF_PIPELINE.total} finished the form`} />
       </div>
 
@@ -629,62 +583,6 @@ export default function PaidAds() {
             </tr>
           </tbody>
         </table>
-      </div>
-
-      {/* ═══════ PIPELINE-PROJECTED CAC ═══════ */}
-      <SectionHeader>What Google Ads Actually Costs (Pipeline-Projected)</SectionHeader>
-      <div style={{ fontSize: '0.85em', color: '#555', marginBottom: 16, lineHeight: 1.6 }}>
-        Raw CAC overstates cost because newer months still have leads in the pipeline. Instead of a time-based maturity curve, this uses actual pipeline data: projected checkouts = current checkouts + leads still processing × {Math.round(PIPELINE_WIN_RATE * 100)}% win rate. <strong style={{ color: TP.navy }}>Target: ${CAC_TARGET} CAC.</strong>
-      </div>
-
-      <div style={{ overflowX: 'auto', marginBottom: 16 }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
-          <thead>
-            <tr style={{ background: TP.navy }}>
-              {['Month', 'Spend', 'Checkouts', 'Processing', '% Settled', 'Projected', 'Revenue', 'Raw CAC', 'Proj CAC'].map(h => (
-                <th key={h} style={{ padding: '10px 12px', textAlign: h === 'Month' ? 'left' : 'right', color: '#fff', fontSize: '0.9em' }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {monthlySpend.map((m, idx) => {
-              const sf = SF_MONTHLY.find(s => s.monthKey === m.label);
-              const pipeline = SF_PIPELINE_BY_MONTH[m.label];
-              if (!sf || !pipeline) return null;
-
-              const projected = pipeline.checkouts + pipeline.processing * PIPELINE_WIN_RATE;
-              const settled = pipeline.terminal + pipeline.checkouts;
-              const unsettled = settled + pipeline.processing;
-              const pctSettled = unsettled > 0 ? Math.round((settled / unsettled) * 100) : 0;
-              const rawCAC = sf.checkouts > 0 ? m.spend / sf.checkouts : null;
-              const projCAC = projected > 0 ? m.spend / projected : null;
-
-              return (
-                <tr key={m.label} style={{ background: idx % 2 === 0 ? '#f9f9f9' : '#fff' }}>
-                  <td style={{ padding: '8px 12px', fontWeight: 600 }}>{m.label}</td>
-                  <td style={{ padding: '8px 12px', textAlign: 'right' }}>${Math.round(m.spend).toLocaleString()}</td>
-                  <td style={{ padding: '8px 12px', textAlign: 'right' }}>{pipeline.checkouts}</td>
-                  <td style={{ padding: '8px 12px', textAlign: 'right', color: pipeline.processing > 0 ? TP.blue : '#888' }}>{pipeline.processing}</td>
-                  <td style={{ padding: '8px 12px', textAlign: 'right', color: '#888' }}>{pctSettled}%</td>
-                  <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 600 }}>~{projected.toFixed(1)}</td>
-                  <td style={{ padding: '8px 12px', textAlign: 'right', color: sf.revenue > 0 ? '#00C853' : '#888' }}>{sf.revenue > 0 ? `$${sf.revenue.toLocaleString()}` : '—'}</td>
-                  <td style={{ padding: '8px 12px', textAlign: 'right', color: '#888' }}>
-                    {rawCAC !== null ? `$${Math.round(rawCAC).toLocaleString()}` : '—'}
-                  </td>
-                  <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 700, color: projCAC !== null && projCAC <= CAC_TARGET ? '#00C853' : projCAC !== null && projCAC <= CAC_TARGET * 2 ? '#FF9800' : TP.navy }}>
-                    {projCAC !== null ? `~$${Math.round(projCAC).toLocaleString()}` : '—'}
-                  </td>
-                </tr>
-              );
-            }).filter(Boolean)}
-          </tbody>
-        </table>
-      </div>
-
-      <div style={{ background: '#f0f4ff', borderLeft: '4px solid ' + TP.blue, borderRadius: 8, padding: '14px 18px', marginBottom: 32, fontSize: '0.82em', color: '#555', lineHeight: 1.6 }}>
-        <strong>How to read this:</strong> &quot;Processing&quot; = leads at Sent Checkout Link, Sent to TxP, TxP Approved, or Waiting for TxP (still in the funnel, not yet terminal). &quot;% Settled&quot; = what fraction of non-waiting leads have reached a terminal stage (checkout, closed, referred out). &quot;Projected&quot; = actual checkouts + processing × {Math.round(PIPELINE_WIN_RATE * 100)}% win rate. Green = at or below ${CAC_TARGET} target. Orange = within 2x of target.
-        <br /><br />
-        Win rate of {Math.round(PIPELINE_WIN_RATE * 100)}% is from May–Aug: 29 checkouts out of 76 leads that reached a terminal stage. April excluded (anomalous 11.8%). As more leads settle, win rate and projections will update.
       </div>
 
       {/* ═══════ COST PER CONVERSION TREND ═══════ */}
