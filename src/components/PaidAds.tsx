@@ -185,6 +185,13 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-08-29', spend: 348, clicks: 81, impressions: 1078, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-08-30', spend: 306, clicks: 57, impressions: 668, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-08-31', spend: 241, clicks: 43, impressions: 708, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-09-01', spend: 706.86, clicks: 153, impressions: 2279, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-09-02', spend: 693.84, clicks: 147, impressions: 1870, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-09-03', spend: 638.55, clicks: 135, impressions: 1672, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-09-04', spend: 564.92, clicks: 116, impressions: 1301, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-09-05', spend: 555.50, clicks: 101, impressions: 1601, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-09-06', spend: 571.64, clicks: 124, impressions: 1599, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-09-07', spend: 634.92, clicks: 143, impressions: 2024, submit: 0, started: 0, finished: 0, treatment: 0 },
 ];
 
 // Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)

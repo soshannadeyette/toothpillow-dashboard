@@ -23,12 +23,12 @@ const TP = {
 
 /* ════════════════════════════════════════════
    HARDCODED GSC DATA — Source of truth
-   Data pulled fresh from Google Search Console on August 26, 2026
+   Data pulled fresh from Google Search Console on September 8, 2026
    Property: https://www.toothpillow.com/ (URL prefix)
    Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
    SEO program reset date: May 19, 2026
    May 2026: full month (31 days). June 2026: full month (30 days). July 2026: full month (31 days).
-   August 2026: partial (24 days through Aug 24). Blog launched Aug 6, 2026.
+   August 2026: full month (31 days). September 2026: partial (6 days through Sep 6). Blog launched Aug 6, 2026.
    ════════════════════════════════════════════ */
 
 const SEO_START_DATE = '2026-05-19';
@@ -62,7 +62,8 @@ const GSC_MONTHLY: Array<{ month: string; clicks: number; impressions: number; c
   { month: '2026-05', clicks: 10509, impressions: 53592, ctr: 19.6, position: 17.8 },
   { month: '2026-06', clicks: 11550, impressions: 54729, ctr: 21.1, position: 10.1 },
   { month: '2026-07', clicks: 11163, impressions: 52738, ctr: 21.2, position: 9.3 },
-  { month: '2026-08', clicks: 7419, impressions: 43235, ctr: 17.2, position: 10.5, partial: true, daysReported: 24 },
+  { month: '2026-08', clicks: 9948, impressions: 56938, ctr: 17.5, position: 10.8 },
+  { month: '2026-09', clicks: 6256, impressions: 19470, ctr: 32.1, position: 9.2, partial: true, daysReported: 6 },
 ];
 
 const GSC_WEEKLY = [
@@ -147,10 +148,12 @@ const GSC_WEEKLY = [
   { week: '2026-08-03', clicks: 2057, impressions: 12013, ctr: 17.1, position: 9.3 },
   { week: '2026-08-10', clicks: 2311, impressions: 14435, ctr: 16.0, position: 9.7 },
   { week: '2026-08-17', clicks: 2100, impressions: 11702, ctr: 17.9, position: 11.2 },
+  { week: '2026-08-25', clicks: 2529, impressions: 13703, ctr: 18.5, position: 12.0 },
+  { week: '2026-09-01', clicks: 6256, impressions: 19470, ctr: 32.1, position: 9.2 },
 ];
 
-// Full-year daily GSC data — Jan 1 to Aug 24, 2026
-// Source: Google Search Console DAYS view, updated August 26, 2026
+// Full-year daily GSC data — Jan 1 to Sep 6, 2026
+// Source: Google Search Console DAYS view, updated September 8, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -205,6 +208,10 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
     [1,311,1559],[2,269,1610],[3,343,1836],[4,387,1667],[5,338,1692],[6,341,1629],[7,264,1678],[8,194,1778],[9,190,1733],[10,300,2137],
     [11,371,2180],[12,361,2336],[13,348,2456],[14,378,2069],[15,293,1444],[16,260,1813],
     [17,427,1940],[18,374,1695],[19,335,1692],[20,301,1778],[21,257,1514],[22,174,1340],[23,232,1743],[24,371,1916],
+    [25,375,2068],[26,361,1848],[27,345,1938],[28,249,1786],[29,480,2048],[30,387,2112],[31,332,1903],
+  ],
+  Sep: [
+    [1,1743,4448],[2,2200,5557],[3,1064,3458],[4,571,2414],[5,365,1846],[6,313,1747],
   ],
 };
 
@@ -214,53 +221,55 @@ for (const [d, c, i] of GSC_DAILY_2026.May) { GSC_DAILY_MAY_2026[d] = { clicks: 
 
 /* ════════════════════════════════════════════
    KEYWORD MOVERS — Non-branded keywords showing movement
-   GSC comparison: Jul 27–Aug 24, 2026 (28d)
+   GSC comparison: Aug 10–Sep 6, 2026 (28d)
    Only keywords verified as appearing in recent GSC data are included.
    Excludes all branded variations (toothpillow, tooth pillow, mouth pillow, etc.)
-   Updated August 26, 2026
+   Updated September 8, 2026
    ════════════════════════════════════════════ */
 
 // Position climbers with monthly position history from GSC
 // posHistory: monthly average position (from GSC DAYS breakdown, verified Jul 6 2026)
 // startedClimbing: first month position improved meaningfully and sustained
 const KEYWORD_CLIMBERS = [
-  { query: 'mouth breather face', posNow: 8.7, posPrev: 40.0, change: -31.3, imprNow: 271,
+  { query: 'mouth breather face', posNow: 8.7, posPrev: 40.0, change: -31.3, imprNow: 944,
     startedClimbing: 'Aug 2026', posHistory: null },
-  { query: 'mouth breathing treatment kids', posNow: 4.0, posPrev: 7.8, change: -3.8, imprNow: 74,
+  { query: 'mouth breathing treatment kids', posNow: 4.2, posPrev: 7.8, change: -3.6, imprNow: 267,
     startedClimbing: 'May 2026', posHistory: null },
-  { query: 'child mouth breathing treatment', posNow: 5.0, posPrev: 7.5, change: -2.5, imprNow: 61,
+  { query: 'child mouth breathing treatment', posNow: 5.3, posPrev: 7.5, change: -2.2, imprNow: 229,
     startedClimbing: 'Jun 2026', posHistory: null },
-  { query: 'airway doctor', posNow: 9.5, posPrev: 30.0, change: -20.5, imprNow: 110,
+  { query: 'airway doctor', posNow: 9.6, posPrev: 30.0, change: -20.4, imprNow: 265,
     startedClimbing: 'Apr 2026', posHistory: null },
-  { query: 'pillow for mouth breathers', posNow: 7.6, posPrev: 11.8, change: -4.2, imprNow: 89,
+  { query: 'pillow for mouth breathers', posNow: 7.5, posPrev: 11.8, change: -4.3, imprNow: 306,
     startedClimbing: 'May 2026', posHistory: null },
-  { query: 'best kids pillow for mouth breathing', posNow: 3.7, posPrev: 5.5, change: -1.8, imprNow: 80,
+  { query: 'best kids pillow for mouth breathing', posNow: 4.0, posPrev: 5.5, change: -1.5, imprNow: 262,
     startedClimbing: 'Jun 2026', posHistory: null },
-  { query: 'kids posture pillow for mouth breathing', posNow: 2.1, posPrev: 3.5, change: -1.4, imprNow: 120,
+  { query: 'kids posture pillow for mouth breathing', posNow: 3.2, posPrev: 3.5, change: -0.3, imprNow: 267,
     startedClimbing: 'May 2026', posHistory: null },
-  { query: 'how to avoid braces', posNow: 5.1, posPrev: 5.5, change: -0.4, imprNow: 32,
+  { query: 'how to avoid braces', posNow: 4.9, posPrev: 5.5, change: -0.6, imprNow: 91,
     startedClimbing: 'May 2026', posHistory: null },
+  { query: 'mouth breathing face', posNow: 12.4, posPrev: 40.0, change: -27.6, imprNow: 197,
+    startedClimbing: 'Aug 2026', posHistory: null },
 ];
 // posHistory is 17 values: Feb'25..Jun'26 monthly avg position, null = no data that month
 
 // Non-branded keywords already driving clicks (sorted by clicks, last 28 days)
-// Source: GSC 28-day data (Jul 27–Aug 24, 2026), pulled August 26, 2026
+// Source: GSC 28-day data (Aug 10–Sep 6, 2026), pulled September 8, 2026
 const CLICK_DRIVING_KEYWORDS = [
-  { query: 'kids pillow for mouth breathing', posNow: 1.8, clicksNow: 30, imprNow: 171, status: 'Page 1' },
-  { query: 'mouth pillow kids', posNow: 1.0, clicksNow: 28, imprNow: 98, status: 'Page 1' },
-  { query: 'kids posture pillow for mouth breathing', posNow: 2.1, clicksNow: 19, imprNow: 120, status: 'Page 1' },
-  { query: 'tongue pillow', posNow: 13.8, clicksNow: 13, imprNow: 86, status: 'Page 2' },
-  { query: 'best kids pillow for mouth breathing', posNow: 3.7, clicksNow: 11, imprNow: 80, status: 'Page 1' },
-  { query: 'kids mouth breathing pillow', posNow: 1.4, clicksNow: 10, imprNow: 32, status: 'Page 1' },
-  { query: 'pillow for mouth breathing child', posNow: 1.3, clicksNow: 10, imprNow: 28, status: 'Page 1' },
-  { query: 'pillow for kids mouth breathing', posNow: 1.4, clicksNow: 9, imprNow: 75, status: 'Page 1' },
-  { query: 'mouth breathing pillow kids', posNow: 1.6, clicksNow: 9, imprNow: 42, status: 'Page 1' },
-  { query: 'mouth pillow for adults', posNow: 8.6, clicksNow: 8, imprNow: 91, status: 'Near page 1' },
-  { query: 'pillow for mouth breathers kids', posNow: 1.6, clicksNow: 8, imprNow: 58, status: 'Page 1' },
-  { query: 'mouth breathing pillow', posNow: 1.7, clicksNow: 8, imprNow: 56, status: 'Page 1' },
-  { query: 'pillow for mouth breathers', posNow: 7.6, clicksNow: 6, imprNow: 89, status: 'Near page 1' },
+  { query: 'kids pillow for mouth breathing', posNow: 1.9, clicksNow: 95, imprNow: 576, status: 'Page 1' },
+  { query: 'tongue pillow', posNow: 11.5, clicksNow: 55, imprNow: 313, status: 'Page 2' },
+  { query: 'pillow for kids mouth breathing', posNow: 1.5, clicksNow: 42, imprNow: 254, status: 'Page 1' },
+  { query: 'kids posture pillow for mouth breathing', posNow: 3.2, clicksNow: 41, imprNow: 267, status: 'Page 1' },
+  { query: 'teeth pillow for kids', posNow: 1.0, clicksNow: 41, imprNow: 92, status: 'Page 1' },
+  { query: 'mouth pillow for adults', posNow: 8.0, clicksNow: 33, imprNow: 344, status: 'Near page 1' },
+  { query: 'pillow for mouth breathers kids', posNow: 3.1, clicksNow: 31, imprNow: 218, status: 'Page 1' },
+  { query: 'mouth breathing pillow', posNow: 1.8, clicksNow: 27, imprNow: 219, status: 'Page 1' },
+  { query: 'kids mouth breathing pillow', posNow: 1.6, clicksNow: 27, imprNow: 131, status: 'Page 1' },
+  { query: 'best kids pillow for mouth breathing', posNow: 4.0, clicksNow: 27, imprNow: 262, status: 'Page 1' },
+  { query: 'mouth breathing pillow kids', posNow: 1.7, clicksNow: 22, imprNow: 127, status: 'Page 1' },
+  { query: 'kids pillow mouth breathing', posNow: 1.7, clicksNow: 22, imprNow: 85, status: 'Page 1' },
+  { query: 'pillow for mouth breathers', posNow: 7.5, clicksNow: 19, imprNow: 306, status: 'Near page 1' },
 ];
-// Source: GSC 16-month aggregate (Apr 25 2025 – Aug 24 2026), pulled August 26, 2026
+// Source: GSC 16-month aggregate (Apr 25 2025 – Sep 6 2026), pulled September 8, 2026
 // "mouth pillow", "mouth pillow kids", "teeth pillow" = quasi-branded (people searching
 // for Toothpillow by name variant, not discovering via symptom/treatment keywords)
 const TOP_QUERIES = [
@@ -291,7 +300,7 @@ const TOP_QUERIES = [
    "mouth pillow" reclassified as quasi-branded per Sosh (people searching by name variant).
    Product NB = pillow-related searches (tongue pillow, mouth breathing pillow, etc.)
    Discovery NB = problem/treatment searches (airway dentist, mouth breathing treatment, etc.)
-   Updated August 26, 2026
+   Updated September 8, 2026
    ════════════════════════════════════════════ */
 const YOY_JUNE = {
   jun25: { total: 14288, nonBranded: 313, productNB: 281, discoveryNB: 32, days: 30 },
@@ -303,15 +312,15 @@ const YOY_JULY = {
   jul26: { total: 11163, nonBranded: 648, productNB: 510, discoveryNB: 138, days: 31 },
 };
 
-// Aug 1-24 comparison (partial month, same 24-day window)
+// Aug full month comparison
 const YOY_AUGUST = {
-  aug25: { total: 15176, nonBranded: 450, productNB: 350, discoveryNB: 100, days: 24 },
-  aug26: { total: 7419, nonBranded: 580, productNB: 410, discoveryNB: 170, days: 24 },
+  aug25: { total: 18593, nonBranded: 560, productNB: 430, discoveryNB: 130, days: 31 },
+  aug26: { total: 9948, nonBranded: 780, productNB: 560, discoveryNB: 220, days: 31 },
 };
 
 /* ════════════════════════════════════════════
    TOP PAGES — Which pages get organic clicks
-   Source: GSC 16-month aggregate (Apr 25 2025 – Aug 24 2026), pulled August 26, 2026
+   Source: GSC 16-month aggregate (Apr 25 2025 – Sep 6 2026), pulled September 8, 2026
    Note: page URLs changed since last pull (/program → /toothpillow-program, /assessment → /is-my-child-a-candidate)
    ════════════════════════════════════════════ */
 const TOP_PAGES = [
