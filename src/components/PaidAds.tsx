@@ -218,9 +218,10 @@ const GOOGLE_SF_PIPELINE = {
   formOpens: 1436,      // Google Ads conversions (form opens, Google-only)
 };
 
-// Revenue from checkouts — 34 checkouts at $60,905
+// Revenue from checkouts — $62,701 from export + $2,000 est. for 1 checkout w/o amount = $64,701
+// Includes 1 Referred Out w/ checkout (Ruby Colby $1,796, Jun cohort)
 // Source: Salesforce "Google Ads 2026" export, September 8, 2026
-const GOOGLE_REVENUE: number = 60905;
+const GOOGLE_REVENUE: number = 64701;
 
 // Monthly breakdown from Salesforce — ALL columns grouped by CREATED month (cohort).
 // Checkouts/revenue = leads from that created month that have checked out to date,
@@ -228,8 +229,8 @@ const GOOGLE_REVENUE: number = 60905;
 // Source: Salesforce "Google Ads 2026" export, September 8, 2026
 const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: number; checkouts: number; revenue: number }[] = [
   { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 23, checkouts: 2, revenue: 3291 },
-  { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 32, checkouts: 6, revenue: 8676 },
-  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 85, checkouts: 15, revenue: 27085 },
+  { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 32, checkouts: 6, revenue: 10676 },
+  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 85, checkouts: 16, revenue: 28881 },
   { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 184, completed: 88, checkouts: 6, revenue: 12024 },
   { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 178, completed: 84, checkouts: 5, revenue: 9829 },
   { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 31, completed: 12, checkouts: 0, revenue: 0 },
@@ -838,43 +839,6 @@ export default function PaidAds() {
               },
             }}
           />
-        </div>
-        <div style={{ marginTop: 12 }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em' }}>
-            <thead>
-              <tr style={{ borderBottom: '2px solid #e2e8f0' }}>
-                <th style={{ padding: '6px 10px', textAlign: 'left' }}>Month</th>
-                <th style={{ padding: '6px 10px', textAlign: 'right' }}>Spend</th>
-                <th style={{ padding: '6px 10px', textAlign: 'right' }}>Form Opens</th>
-                <th style={{ padding: '6px 10px', textAlign: 'right', color: '#42A5F5' }}>$/Open</th>
-                <th style={{ padding: '6px 10px', textAlign: 'right' }}>Completed</th>
-                <th style={{ padding: '6px 10px', textAlign: 'right', color: '#FF9800' }}>$/Complete</th>
-                <th style={{ padding: '6px 10px', textAlign: 'right' }}>Checkouts</th>
-                <th style={{ padding: '6px 10px', textAlign: 'right', color: '#E53935' }}>$/Checkout</th>
-              </tr>
-            </thead>
-            <tbody>
-              {monthlySpend.map((m, idx) => {
-                const sf = SF_MONTHLY.find(s => s.monthKey === m.label);
-                if (!sf) return null;
-                const cpo = sf.leads > 0 ? Math.round(m.spend / sf.leads) : null;
-                const cpc2 = sf.completed > 0 ? Math.round(m.spend / sf.completed) : null;
-                const cac = sf.checkouts > 0 ? Math.round(m.spend / sf.checkouts) : null;
-                return (
-                  <tr key={m.label} style={{ background: idx % 2 === 0 ? '#f9f9f9' : '#fff', borderBottom: '1px solid #f0f0f0' }}>
-                    <td style={{ padding: '6px 10px', fontWeight: 600 }}>{m.label}</td>
-                    <td style={{ padding: '6px 10px', textAlign: 'right' }}>${Math.round(m.spend).toLocaleString()}</td>
-                    <td style={{ padding: '6px 10px', textAlign: 'right' }}>{sf.leads}</td>
-                    <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 600, color: '#42A5F5' }}>{cpo !== null ? `$${cpo}` : '—'}</td>
-                    <td style={{ padding: '6px 10px', textAlign: 'right' }}>{sf.completed}</td>
-                    <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 600, color: '#FF9800' }}>{cpc2 !== null ? `$${cpc2}` : '—'}</td>
-                    <td style={{ padding: '6px 10px', textAlign: 'right' }}>{sf.checkouts}</td>
-                    <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 600, color: '#E53935' }}>{cac !== null ? `$${cac.toLocaleString()}` : '—'}</td>
-                  </tr>
-                );
-              }).filter(Boolean)}
-            </tbody>
-          </table>
         </div>
       </div>
 
