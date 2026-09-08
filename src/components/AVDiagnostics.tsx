@@ -31,15 +31,15 @@ const TP = {
 };
 
 // ── Hardcoded data (source of truth) ──────────────────────────────────
-// Source: Salesforce "Waiting on Info Ratios" exports, September 2, 2026
-// H1 (Jan-Jun): 10,372 records | H2 (Jul-Sep): 4,497 records | Total: 14,869 | Total waiting: 5,292
+// Source: Salesforce "Waiting on Info Ratios" exports, September 8, 2026
+// H1 (Jan-Jun): 10,372 records | H2 (Jul-Sep): 4,497+ records | Total: ~15,313 | Total waiting: ~5,289
 const AV_DATA = [
-  { label: 'Jan 26', month: 1, year: 2026, traffic: 37320, starts: 1147, waiting: 105, submitted: 1042, partial: false, period: 'full' as const },
-  { label: 'Feb 26', month: 2, year: 2026, traffic: 51480, starts: 2186, waiting: 854, submitted: 1332, partial: false, period: 'full' as const },
-  { label: 'Mar 26', month: 3, year: 2026, traffic: 39218, starts: 2258, waiting: 915, submitted: 1343, partial: false, period: 'full' as const },
-  { label: 'Apr 26', month: 4, year: 2026, traffic: 30311, starts: 1427, waiting: 519, submitted: 908, partial: false, period: 'full' as const },
-  { label: 'May 26', month: 5, year: 2026, traffic: 33031, starts: 1602, waiting: 688, submitted: 914, partial: false, period: 'full' as const },
-  { label: 'Jun 26', month: 6, year: 2026, traffic: 36468, starts: 1751, waiting: 555, submitted: 1196, partial: false, period: 'full' as const },
+  { label: 'Jan 26', month: 1, year: 2026, traffic: 37320, starts: 1147, waiting: 102, submitted: 1045, partial: false, period: 'full' as const },
+  { label: 'Feb 26', month: 2, year: 2026, traffic: 51480, starts: 2186, waiting: 852, submitted: 1334, partial: false, period: 'full' as const },
+  { label: 'Mar 26', month: 3, year: 2026, traffic: 39218, starts: 2258, waiting: 913, submitted: 1345, partial: false, period: 'full' as const },
+  { label: 'Apr 26', month: 4, year: 2026, traffic: 30311, starts: 1427, waiting: 515, submitted: 912, partial: false, period: 'full' as const },
+  { label: 'May 26', month: 5, year: 2026, traffic: 33031, starts: 1603, waiting: 688, submitted: 915, partial: false, period: 'full' as const },
+  { label: 'Jun 26', month: 6, year: 2026, traffic: 36468, starts: 1751, waiting: 553, submitted: 1198, partial: false, period: 'full' as const },
   { label: 'Jul 26', month: 7, year: 2026, traffic: 0, starts: 2211, waiting: 725, submitted: 1486, partial: false, period: 'full' as const },
   { label: 'Aug 26', month: 8, year: 2026, traffic: 0, starts: 2065, waiting: 835, submitted: 1230, partial: false, period: 'full' as const },
   { label: 'Sep 26', month: 9, year: 2026, traffic: 0, starts: 221, waiting: 96, submitted: 125, partial: true, period: 'partial' as const },
@@ -85,12 +85,12 @@ const EVENTS: { week: string; label: string; color: string }[] = [
 // Checkout (Sent Checkout Link), Checked Out (CHECKED OUT + Consult Complete + Myo Only),
 // Closed (Referred Out, Denied, Closed Lost, etc.), On Hold
 const FUNNEL_DATA = [
-  { label: 'Jan 26', waiting: 105, inReview:   0, checkout:    7, checkedOut: 316, closed: 703, onHold: 16 },
-  { label: 'Feb 26', waiting: 854, inReview:   4, checkout:   26, checkedOut: 357, closed: 919, onHold: 26 },
-  { label: 'Mar 26', waiting: 915, inReview:   5, checkout:   63, checkedOut: 430, closed: 818, onHold: 27 },
-  { label: 'Apr 26', waiting: 519, inReview:   3, checkout:  123, checkedOut: 269, closed: 497, onHold: 16 },
-  { label: 'May 26', waiting: 688, inReview:   9, checkout:  505, checkedOut: 219, closed: 169, onHold: 12 },
-  { label: 'Jun 26', waiting: 555, inReview:  13, checkout:  671, checkedOut: 276, closed: 216, onHold: 20 },
+  { label: 'Jan 26', waiting: 102, inReview:   0, checkout:    7, checkedOut: 316, closed: 706, onHold: 16 },
+  { label: 'Feb 26', waiting: 852, inReview:   4, checkout:   26, checkedOut: 357, closed: 921, onHold: 26 },
+  { label: 'Mar 26', waiting: 913, inReview:   5, checkout:   63, checkedOut: 430, closed: 820, onHold: 27 },
+  { label: 'Apr 26', waiting: 515, inReview:   3, checkout:  123, checkedOut: 269, closed: 501, onHold: 16 },
+  { label: 'May 26', waiting: 688, inReview:   9, checkout:  506, checkedOut: 219, closed: 169, onHold: 12 },
+  { label: 'Jun 26', waiting: 553, inReview:  13, checkout:  673, checkedOut: 276, closed: 216, onHold: 20 },
   { label: 'Jul 26', waiting: 725, inReview:  37, checkout:  896, checkedOut: 288, closed: 222, onHold: 43 },
   { label: 'Aug 26', waiting: 835, inReview: 514, checkout:  488, checkedOut: 106, closed:  85, onHold: 37 },
   { label: 'Sep 26', waiting:  96, inReview: 123, checkout:    0, checkedOut:   0, closed:   2, onHold:  0 },
@@ -166,44 +166,44 @@ const COHORT_DATA = [
 //   completed (within 7d + days 8-14 + 15+) | waiting | other
 // These add up to starts. "mature" = every person has had that many days.
 // Weekly cohort aging — Feb through current
-// Source: Salesforce Waiting on Info Ratios export September 2, 2026
+// Source: Salesforce Waiting on Info Ratios export September 8, 2026
 const COHORT_AGING: {label:string; starts:number; within7d:number; d8to14:number; d15plus:number; waiting:number; daysElapsed:number; mature7d:boolean; mature14d:boolean; postUpdate:boolean; tag?:string}[] = [
-  { label: 'Feb 02–08', starts: 284, within7d: 209, d8to14: 4, d15plus: 14, waiting: 57, daysElapsed: 211, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Feb 09–15', starts: 293, within7d: 197, d8to14: 5, d15plus: 9, waiting: 82, daysElapsed: 204, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Feb 16–22', starts: 687, within7d: 336, d8to14: 13, d15plus: 42, waiting: 296, daysElapsed: 197, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Feb 23–Mar 01', starts: 971, within7d: 459, d8to14: 14, d15plus: 54, waiting: 444, daysElapsed: 190, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Mar 02–08', starts: 486, within7d: 264, d8to14: 15, d15plus: 36, waiting: 170, daysElapsed: 183, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Mar 09–15', starts: 586, within7d: 273, d8to14: 6, d15plus: 31, waiting: 276, daysElapsed: 176, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Mar 16–22', starts: 505, within7d: 266, d8to14: 5, d15plus: 32, waiting: 202, daysElapsed: 169, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Mar 23–29', starts: 477, within7d: 247, d8to14: 5, d15plus: 33, waiting: 192, daysElapsed: 162, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Mar 30–Apr 05', starts: 328, within7d: 183, d8to14: 4, d15plus: 17, waiting: 125, daysElapsed: 155, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Apr 06–12', starts: 368, within7d: 209, d8to14: 1, d15plus: 25, waiting: 133, daysElapsed: 148, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Apr 13–19', starts: 324, within7d: 177, d8to14: 9, d15plus: 21, waiting: 117, daysElapsed: 141, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Apr 20–26', starts: 328, within7d: 193, d8to14: 4, d15plus: 13, waiting: 118, daysElapsed: 134, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'Apr 27–May 03', starts: 329, within7d: 175, d8to14: 7, d15plus: 20, waiting: 127, daysElapsed: 127, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'May 04–10', starts: 309, within7d: 159, d8to14: 5, d15plus: 14, waiting: 130, daysElapsed: 120, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'May 11–17', starts: 334, within7d: 170, d8to14: 6, d15plus: 10, waiting: 148, daysElapsed: 113, mature7d: true, mature14d: true, postUpdate: false },
-  { label: 'May 18–24', starts: 378, within7d: 167, d8to14: 7, d15plus: 14, waiting: 190, daysElapsed: 106, mature7d: true, mature14d: true, postUpdate: false, tag: 'Photo update ships' },
-  { label: 'May 25–31', starts: 464, within7d: 262, d8to14: 12, d15plus: 21, waiting: 169, daysElapsed: 99, mature7d: true, mature14d: true, postUpdate: true },
-  { label: 'Jun 01–07', starts: 493, within7d: 330, d8to14: 6, d15plus: 12, waiting: 145, daysElapsed: 92, mature7d: true, mature14d: true, postUpdate: true },
-  { label: 'Jun 08–14', starts: 485, within7d: 313, d8to14: 9, d15plus: 10, waiting: 153, daysElapsed: 85, mature7d: true, mature14d: true, postUpdate: true },
-  { label: 'Jun 15–21', starts: 270, within7d: 167, d8to14: 7, d15plus: 13, waiting: 83, daysElapsed: 78, mature7d: true, mature14d: true, postUpdate: true },
-  { label: 'Jun 22–28', starts: 395, within7d: 234, d8to14: 10, d15plus: 11, waiting: 140, daysElapsed: 71, mature7d: true, mature14d: true, postUpdate: true },
-  { label: 'Jun 29–Jul 05', starts: 230, within7d: 70, d8to14: 0, d15plus: 4, waiting: 87, daysElapsed: 65, mature7d: true, mature14d: true, postUpdate: true },
-  { label: 'Jul 06–12', starts: 392, within7d: 0, d8to14: 0, d15plus: 0, waiting: 119, daysElapsed: 58, mature7d: true, mature14d: true, postUpdate: true },
-  { label: 'Jul 13–19', starts: 732, within7d: 0, d8to14: 0, d15plus: 0, waiting: 235, daysElapsed: 51, mature7d: true, mature14d: true, postUpdate: true },
-  { label: 'Jul 20–26', starts: 591, within7d: 0, d8to14: 0, d15plus: 0, waiting: 207, daysElapsed: 44, mature7d: true, mature14d: true, postUpdate: true },
-  { label: 'Jul 27–Aug 02', starts: 457, within7d: 0, d8to14: 0, d15plus: 0, waiting: 144, daysElapsed: 37, mature7d: true, mature14d: true, postUpdate: true },
-  { label: 'Aug 03–09', starts: 291, within7d: 0, d8to14: 0, d15plus: 0, waiting: 97, daysElapsed: 30, mature7d: true, mature14d: true, postUpdate: true },
-  { label: 'Aug 10–16', starts: 360, within7d: 0, d8to14: 0, d15plus: 0, waiting: 113, daysElapsed: 23, mature7d: true, mature14d: true, postUpdate: true },
-  { label: 'Aug 17–23', starts: 314, within7d: 0, d8to14: 0, d15plus: 0, waiting: 104, daysElapsed: 16, mature7d: true, mature14d: true, postUpdate: true },
-  { label: 'Aug 24–30', starts: 905, within7d: 0, d8to14: 0, d15plus: 0, waiting: 456, daysElapsed: 9, mature7d: true, mature14d: false, postUpdate: true },
-  { label: 'Aug 31–Sep 06', starts: 333, within7d: 0, d8to14: 0, d15plus: 0, waiting: 128, daysElapsed: 2, mature7d: false, mature14d: false, postUpdate: true },
+  { label: 'Feb 02–08', starts: 284, within7d: 209, d8to14: 4, d15plus: 14, waiting: 57, daysElapsed: 217, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Feb 09–15', starts: 293, within7d: 197, d8to14: 5, d15plus: 9, waiting: 82, daysElapsed: 210, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Feb 16–22', starts: 687, within7d: 336, d8to14: 13, d15plus: 42, waiting: 296, daysElapsed: 203, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Feb 23–Mar 01', starts: 971, within7d: 459, d8to14: 14, d15plus: 54, waiting: 444, daysElapsed: 196, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Mar 02–08', starts: 486, within7d: 264, d8to14: 15, d15plus: 36, waiting: 170, daysElapsed: 189, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Mar 09–15', starts: 586, within7d: 273, d8to14: 6, d15plus: 31, waiting: 276, daysElapsed: 182, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Mar 16–22', starts: 505, within7d: 266, d8to14: 5, d15plus: 32, waiting: 202, daysElapsed: 175, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Mar 23–29', starts: 477, within7d: 247, d8to14: 5, d15plus: 33, waiting: 192, daysElapsed: 168, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Mar 30–Apr 05', starts: 328, within7d: 183, d8to14: 4, d15plus: 17, waiting: 125, daysElapsed: 161, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Apr 06–12', starts: 368, within7d: 209, d8to14: 1, d15plus: 25, waiting: 133, daysElapsed: 154, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Apr 13–19', starts: 324, within7d: 177, d8to14: 9, d15plus: 21, waiting: 117, daysElapsed: 147, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Apr 20–26', starts: 328, within7d: 193, d8to14: 4, d15plus: 13, waiting: 118, daysElapsed: 140, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'Apr 27–May 03', starts: 329, within7d: 175, d8to14: 7, d15plus: 20, waiting: 127, daysElapsed: 133, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'May 04–10', starts: 309, within7d: 159, d8to14: 5, d15plus: 14, waiting: 130, daysElapsed: 126, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'May 11–17', starts: 334, within7d: 170, d8to14: 6, d15plus: 10, waiting: 148, daysElapsed: 119, mature7d: true, mature14d: true, postUpdate: false },
+  { label: 'May 18–24', starts: 378, within7d: 167, d8to14: 7, d15plus: 14, waiting: 190, daysElapsed: 112, mature7d: true, mature14d: true, postUpdate: false, tag: 'Photo update ships' },
+  { label: 'May 25–31', starts: 464, within7d: 262, d8to14: 12, d15plus: 21, waiting: 169, daysElapsed: 105, mature7d: true, mature14d: true, postUpdate: true },
+  { label: 'Jun 01–07', starts: 493, within7d: 330, d8to14: 6, d15plus: 12, waiting: 145, daysElapsed: 98, mature7d: true, mature14d: true, postUpdate: true },
+  { label: 'Jun 08–14', starts: 485, within7d: 313, d8to14: 9, d15plus: 10, waiting: 153, daysElapsed: 91, mature7d: true, mature14d: true, postUpdate: true },
+  { label: 'Jun 15–21', starts: 270, within7d: 167, d8to14: 7, d15plus: 13, waiting: 83, daysElapsed: 84, mature7d: true, mature14d: true, postUpdate: true },
+  { label: 'Jun 22–28', starts: 395, within7d: 234, d8to14: 10, d15plus: 11, waiting: 140, daysElapsed: 77, mature7d: true, mature14d: true, postUpdate: true },
+  { label: 'Jun 29–Jul 05', starts: 230, within7d: 70, d8to14: 0, d15plus: 4, waiting: 87, daysElapsed: 71, mature7d: true, mature14d: true, postUpdate: true },
+  { label: 'Jul 06–12', starts: 392, within7d: 0, d8to14: 0, d15plus: 0, waiting: 119, daysElapsed: 64, mature7d: true, mature14d: true, postUpdate: true },
+  { label: 'Jul 13–19', starts: 732, within7d: 0, d8to14: 0, d15plus: 0, waiting: 235, daysElapsed: 57, mature7d: true, mature14d: true, postUpdate: true },
+  { label: 'Jul 20–26', starts: 591, within7d: 0, d8to14: 0, d15plus: 0, waiting: 207, daysElapsed: 50, mature7d: true, mature14d: true, postUpdate: true },
+  { label: 'Jul 27–Aug 02', starts: 457, within7d: 0, d8to14: 0, d15plus: 0, waiting: 144, daysElapsed: 43, mature7d: true, mature14d: true, postUpdate: true },
+  { label: 'Aug 03–09', starts: 291, within7d: 0, d8to14: 0, d15plus: 0, waiting: 97, daysElapsed: 36, mature7d: true, mature14d: true, postUpdate: true },
+  { label: 'Aug 10–16', starts: 360, within7d: 0, d8to14: 0, d15plus: 0, waiting: 113, daysElapsed: 29, mature7d: true, mature14d: true, postUpdate: true },
+  { label: 'Aug 17–23', starts: 314, within7d: 0, d8to14: 0, d15plus: 0, waiting: 104, daysElapsed: 22, mature7d: true, mature14d: true, postUpdate: true },
+  { label: 'Aug 24–30', starts: 905, within7d: 0, d8to14: 0, d15plus: 0, waiting: 456, daysElapsed: 15, mature7d: true, mature14d: true, postUpdate: true },
+  { label: 'Aug 31–Sep 06', starts: 333, within7d: 0, d8to14: 0, d15plus: 0, waiting: 128, daysElapsed: 8, mature7d: true, mature14d: false, postUpdate: true },
 ];
 
 // ── Aggregate waiting age distribution (source of truth) ────────────
-// How long the 5,292 waiting records have been waiting, bucketed by age
-// Source: Salesforce Waiting on Info Ratios exports (H1+H2) September 2, 2026
+// How long the waiting records have been waiting, bucketed by age
+// Source: Salesforce Waiting on Info Ratios exports (H1+H2) September 8, 2026
 const WAITING_AGE_BUCKETS = [
   { label: '0–7 days', count: 533 },
   { label: '8–14 days', count: 120 },
@@ -216,7 +216,7 @@ const WAITING_AGE_BUCKETS = [
 ];
 
 // ── Post-update tracking ────────────────────────────────────────────
-const POST_UPDATE_DAYS_ELAPSED = 79; // Jun 15 – Sep 2 = 79 days
+const POST_UPDATE_DAYS_ELAPSED = 85; // Jun 15 – Sep 8 = 85 days
 
 function num(v: number): string { return v.toLocaleString(); }
 
