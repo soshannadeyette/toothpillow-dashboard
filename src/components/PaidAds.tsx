@@ -229,18 +229,17 @@ const GOOGLE_SF_PIPELINE = {
 // Source: Salesforce "Google Ads 2026" export, September 9, 2026 (16:08)
 const GOOGLE_REVENUE: number = 68597;
 
-// Monthly breakdown from Salesforce — ALL columns grouped by CREATED month (cohort).
-// Checkouts/revenue = leads from that created month that have checked out to date,
-// regardless of when the checkout happened.
+// Monthly breakdown from Salesforce — grouped by SUBMISSION date.
+// Checkouts/revenue = leads submitted that month that have checked out to date.
 // Source: Salesforce "Google Ads 2026" export, September 9, 2026 (16:08)
-// $2K placeholders: Carter Paul (submitted 5/22) + Rose Chambers (submitted 7/22) — both $0 in export
+// $2K placeholders: Carter Paul (submitted 8/25) + Rose Chambers (submitted 8/29) — both $0 in export
 const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: number; checkouts: number; revenue: number }[] = [
-  { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 23, checkouts: 2, revenue: 3291 },
-  { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 32, checkouts: 6, revenue: 10676 },
-  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 85, checkouts: 16, revenue: 28881 },
-  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 184, completed: 88, checkouts: 7, revenue: 14024 },
-  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 178, completed: 83, checkouts: 6, revenue: 11725 },
-  { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 36, completed: 14, checkouts: 0, revenue: 0 },
+  { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 55, completed: 21, checkouts: 2, revenue: 3291 },
+  { month: 'May 2026', monthKey: 'May 2026', leads: 76, completed: 28, checkouts: 5, revenue: 8676 },
+  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 172, completed: 81, checkouts: 14, revenue: 24790 },
+  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 187, completed: 91, checkouts: 8, revenue: 16115 },
+  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 183, completed: 88, checkouts: 8, revenue: 15725 },
+  { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 38, completed: 16, checkouts: 0, revenue: 0 },
 ];
 
 /* ════════════════════════════════════════════
