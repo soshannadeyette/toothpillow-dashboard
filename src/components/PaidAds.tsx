@@ -210,36 +210,37 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
    so Meta contribution is negligible in those months.
    ════════════════════════════════════════════ */
 
-// Pipeline totals — Salesforce export September 8, 2026
+// Pipeline totals — Salesforce export September 9, 2026
 const GOOGLE_SF_PIPELINE = {
-  total: 707,           // leads created (started form)
-  completed: 325,       // all stages except WAITING - Needs info (46%)
-  waitingInfo: 382,     // WAITING - Needs info
+  total: 711,           // leads created (started form)
+  completed: 326,       // all stages except WAITING - Needs info (46%)
+  waitingInfo: 385,     // WAITING - Needs info
   sentCheckout: 188,    // Sent Checkout Link (187) + Sent Checkout Link - Temp Hold (1)
-  sentToTxP: 15,        // Sent to TxP (13) + Waiting for TxP Assignment (2)
+  sentToTxP: 13,        // Sent to TxP (11) + Waiting for TxP Assignment (2)
   txpApproved: 10,
-  checkedOut: 35,
-  referredOut: 35,
+  checkedOut: 37,
+  referredOut: 34,
   closedLost: 29,       // 19 Closed Lost + 10 Do Not Contact
   tempHold: 2,
   formOpens: 1436,      // Google Ads conversions (form opens, Google-only)
 };
 
-// Revenue from checkouts — $64,597 from export + $2,000 est. for Carter Paul (no amount) = $66,597
-// Source: Salesforce "Google Ads 2026" export, September 8, 2026 (15:58)
-const GOOGLE_REVENUE: number = 66597;
+// Revenue from checkouts — $64,597 from export + $2,000 est. Carter Paul + $2,000 est. Rose Chambers = $68,597
+// Source: Salesforce "Google Ads 2026" export, September 9, 2026 (16:08)
+const GOOGLE_REVENUE: number = 68597;
 
 // Monthly breakdown from Salesforce — ALL columns grouped by CREATED month (cohort).
 // Checkouts/revenue = leads from that created month that have checked out to date,
 // regardless of when the checkout happened.
-// Source: Salesforce "Google Ads 2026" export, September 8, 2026 (15:58)
+// Source: Salesforce "Google Ads 2026" export, September 9, 2026 (16:08)
+// $2K placeholders: Carter Paul (submitted 8/25, checkout 9/5) + Rose Chambers (submitted 8/29, checkout 9/9)
 const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: number; checkouts: number; revenue: number }[] = [
-  { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 23, checkouts: 2, revenue: 3291 },
-  { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 32, checkouts: 6, revenue: 10676 },
-  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 85, checkouts: 16, revenue: 28881 },
-  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 184, completed: 88, checkouts: 6, revenue: 12024 },
-  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 178, completed: 84, checkouts: 6, revenue: 11725 },
-  { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 32, completed: 13, checkouts: 0, revenue: 0 },
+  { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 57, completed: 21, checkouts: 2, revenue: 3291 },
+  { month: 'May 2026', monthKey: 'May 2026', leads: 80, completed: 28, checkouts: 5, revenue: 8676 },
+  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 176, completed: 81, checkouts: 14, revenue: 24790 },
+  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 184, completed: 91, checkouts: 8, revenue: 16115 },
+  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 178, completed: 89, checkouts: 8, revenue: 15725 },
+  { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 36, completed: 16, checkouts: 0, revenue: 0 },
 ];
 
 /* ════════════════════════════════════════════
