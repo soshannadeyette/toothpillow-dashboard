@@ -31,11 +31,11 @@ const TP = {
 };
 
 // ── Hardcoded data (source of truth) ──────────────────────────────────
-// Source: Salesforce "Waiting on Info Ratios" exports, September 8, 2026
+// Source: Salesforce "Waiting on Info Ratios" exports, September 10, 2026
 // H1 (Jan-Jun): 10,372 records | H2 (Jul-Sep): 4,497+ records | Total: ~15,313 | Total waiting: ~5,289
 const AV_DATA = [
-  { label: 'Jan 26', month: 1, year: 2026, traffic: 37320, starts: 1147, waiting: 102, submitted: 1045, partial: false, period: 'full' as const },
-  { label: 'Feb 26', month: 2, year: 2026, traffic: 51480, starts: 2186, waiting: 852, submitted: 1334, partial: false, period: 'full' as const },
+  { label: 'Jan 26', month: 1, year: 2026, traffic: 37320, starts: 1147, waiting: 105, submitted: 1042, partial: false, period: 'full' as const },
+  { label: 'Feb 26', month: 2, year: 2026, traffic: 51480, starts: 2186, waiting: 853, submitted: 1333, partial: false, period: 'full' as const },
   { label: 'Mar 26', month: 3, year: 2026, traffic: 39218, starts: 2258, waiting: 913, submitted: 1345, partial: false, period: 'full' as const },
   { label: 'Apr 26', month: 4, year: 2026, traffic: 30311, starts: 1427, waiting: 515, submitted: 912, partial: false, period: 'full' as const },
   { label: 'May 26', month: 5, year: 2026, traffic: 33031, starts: 1603, waiting: 688, submitted: 915, partial: false, period: 'full' as const },
@@ -85,12 +85,12 @@ const EVENTS: { week: string; label: string; color: string }[] = [
 // Checkout (Sent Checkout Link), Checked Out (CHECKED OUT + Consult Complete + Myo Only),
 // Closed (Referred Out, Denied, Closed Lost, etc.), On Hold
 const FUNNEL_DATA = [
-  { label: 'Jan 26', waiting: 102, inReview:   0, checkout:    7, checkedOut: 316, closed: 706, onHold: 16 },
-  { label: 'Feb 26', waiting: 852, inReview:   4, checkout:   26, checkedOut: 357, closed: 921, onHold: 26 },
-  { label: 'Mar 26', waiting: 913, inReview:   5, checkout:   63, checkedOut: 430, closed: 820, onHold: 27 },
-  { label: 'Apr 26', waiting: 515, inReview:   3, checkout:  123, checkedOut: 269, closed: 501, onHold: 16 },
-  { label: 'May 26', waiting: 688, inReview:   9, checkout:  506, checkedOut: 219, closed: 169, onHold: 12 },
-  { label: 'Jun 26', waiting: 553, inReview:  13, checkout:  673, checkedOut: 276, closed: 216, onHold: 20 },
+  { label: 'Jan 26', waiting: 105, inReview:   3, checkout:    7, checkedOut: 311, closed: 703, onHold: 18 },
+  { label: 'Feb 26', waiting: 853, inReview:   8, checkout:   26, checkedOut: 354, closed: 919, onHold: 26 },
+  { label: 'Mar 26', waiting: 913, inReview:  43, checkout:   63, checkedOut: 393, closed: 818, onHold: 28 },
+  { label: 'Apr 26', waiting: 515, inReview:   6, checkout:  124, checkedOut: 269, closed: 496, onHold: 17 },
+  { label: 'May 26', waiting: 688, inReview:   7, checkout:  505, checkedOut: 220, closed: 169, onHold: 14 },
+  { label: 'Jun 26', waiting: 553, inReview:  13, checkout:  668, checkedOut: 280, closed: 216, onHold: 21 },
   { label: 'Jul 26', waiting: 725, inReview:  37, checkout:  896, checkedOut: 288, closed: 222, onHold: 43 },
   { label: 'Aug 26', waiting: 835, inReview: 514, checkout:  488, checkedOut: 106, closed:  85, onHold: 37 },
   { label: 'Sep 26', waiting:  96, inReview: 123, checkout:    0, checkedOut:   0, closed:   2, onHold:  0 },
@@ -166,7 +166,7 @@ const COHORT_DATA = [
 //   completed (within 7d + days 8-14 + 15+) | waiting | other
 // These add up to starts. "mature" = every person has had that many days.
 // Weekly cohort aging — Feb through current
-// Source: Salesforce Waiting on Info Ratios export September 8, 2026
+// Source: Salesforce Waiting on Info Ratios export September 10, 2026
 const COHORT_AGING: {label:string; starts:number; within7d:number; d8to14:number; d15plus:number; waiting:number; daysElapsed:number; mature7d:boolean; mature14d:boolean; postUpdate:boolean; tag?:string}[] = [
   { label: 'Feb 02–08', starts: 284, within7d: 209, d8to14: 4, d15plus: 14, waiting: 57, daysElapsed: 217, mature7d: true, mature14d: true, postUpdate: false },
   { label: 'Feb 09–15', starts: 293, within7d: 197, d8to14: 5, d15plus: 9, waiting: 82, daysElapsed: 210, mature7d: true, mature14d: true, postUpdate: false },
@@ -203,7 +203,7 @@ const COHORT_AGING: {label:string; starts:number; within7d:number; d8to14:number
 
 // ── Aggregate waiting age distribution (source of truth) ────────────
 // How long the waiting records have been waiting, bucketed by age
-// Source: Salesforce Waiting on Info Ratios exports (H1+H2) September 8, 2026
+// Source: Salesforce Waiting on Info Ratios exports (H1+H2) September 10, 2026
 const WAITING_AGE_BUCKETS = [
   { label: '0–7 days', count: 533 },
   { label: '8–14 days', count: 120 },
@@ -216,7 +216,7 @@ const WAITING_AGE_BUCKETS = [
 ];
 
 // ── Post-update tracking ────────────────────────────────────────────
-const POST_UPDATE_DAYS_ELAPSED = 85; // Jun 15 – Sep 8 = 85 days
+const POST_UPDATE_DAYS_ELAPSED = 87; // Jun 15 – Sep 10 = 87 days
 
 function num(v: number): string { return v.toLocaleString(); }
 
