@@ -48,7 +48,7 @@ const AV_DATA = [
 // ── Same-week completion rate by weekly cohort (source of truth) ──────
 // For each week: of all records created, what % submitted within the same Mon-Sun window.
 // Hard stop — later submissions don't count. Apples-to-apples across all weeks.
-// Source: Salesforce "Waiting on Info Ratios" + "Google Ads" exports, August 12, 2026
+// Source: Salesforce "Waiting on Info Ratios" (H1 Sep 10, H2 Sep 2) + "Google Ads" exports, September 10, 2026
 const WEEKLY_COMPLETION: { label: string; total: number; submitted: number; pct: number; paidAds: number }[] = [
   { label: 'Feb 02', total: 284, submitted: 204, pct: 71.8, paidAds: 0 },
   { label: 'Feb 09', total: 293, submitted: 183, pct: 62.5, paidAds: 0 },
@@ -71,7 +71,15 @@ const WEEKLY_COMPLETION: { label: string; total: number; submitted: number; pct:
   { label: 'Jun 08', total: 486, submitted: 292, pct: 60.1, paidAds: 36 },
   { label: 'Jun 15', total: 270, submitted: 151, pct: 55.9, paidAds: 36 },
   { label: 'Jun 22', total: 395, submitted: 225, pct: 57.0, paidAds: 52 },
-  { label: 'Jun 29', total: 108, submitted: 67, pct: 62.0, paidAds: 29 },
+  { label: 'Jun 29', total: 230, submitted: 124, pct: 53.9, paidAds: 29 },
+  { label: 'Jul 06', total: 392, submitted: 234, pct: 59.7, paidAds: 43 },
+  { label: 'Jul 13', total: 732, submitted: 418, pct: 57.1, paidAds: 38 },
+  { label: 'Jul 20', total: 591, submitted: 342, pct: 57.9, paidAds: 59 },
+  { label: 'Jul 27', total: 457, submitted: 287, pct: 62.8, paidAds: 27 },
+  { label: 'Aug 03', total: 291, submitted: 177, pct: 60.8, paidAds: 44 },
+  { label: 'Aug 10', total: 360, submitted: 224, pct: 62.2, paidAds: 41 },
+  { label: 'Aug 17', total: 314, submitted: 191, pct: 60.8, paidAds: 40 },
+  { label: 'Aug 24', total: 905, submitted: 411, pct: 45.4, paidAds: 46 },
 ];
 
 // ── Event markers for same-week chart ──────────────────────────────────
@@ -155,7 +163,15 @@ const COHORT_DATA = [
   { label: 'Jun 8–14',  n: 485, sameDay: 54.0, within1d: 59.0, within3d: 61.9, within7d: 64.5 },
   { label: 'Jun 15–21', n: 270, sameDay: 51.1, within1d: 54.4, within3d: 57.8, within7d: 61.9 },
   { label: 'Jun 22–28', n: 395, sameDay: 49.1, within1d: 55.2, within3d: 56.7, within7d: 59.2 },
-  { label: 'Jun 29–Jul 5', n: 108, sameDay: 57.4, within1d: 59.3, within3d: 61.1, within7d: 64.8 },
+  { label: 'Jun 29–Jul 5', n: 230, sameDay: 50.4, within1d: 53.5, within3d: 54.8, within7d: 57.4 },
+  { label: 'Jul 6–12',  n: 392, sameDay: 51.8, within1d: 57.7, within3d: 60.2, within7d: 62.5 },
+  { label: 'Jul 13–19', n: 732, sameDay: 48.9, within1d: 54.6, within3d: 59.3, within7d: 63.4 },
+  { label: 'Jul 20–26', n: 591, sameDay: 52.1, within1d: 56.2, within3d: 59.1, within7d: 61.4 },
+  { label: 'Jul 27–Aug 2', n: 457, sameDay: 57.1, within1d: 60.6, within3d: 64.1, within7d: 67.4 },
+  { label: 'Aug 3–9',   n: 291, sameDay: 56.7, within1d: 61.5, within3d: 63.2, within7d: 64.9 },
+  { label: 'Aug 10–16', n: 360, sameDay: 57.2, within1d: 61.1, within3d: 62.8, within7d: 66.7 },
+  { label: 'Aug 17–23', n: 314, sameDay: 53.2, within1d: 58.9, within3d: 62.7, within7d: 65.3 },
+  { label: 'Aug 24–30', n: 905, sameDay: 39.9, within1d: 44.9, within3d: 47.6, within7d: 49.2 },
 ];
 
 // ── Daily cohorts archived ──────────────────────────────────────────
