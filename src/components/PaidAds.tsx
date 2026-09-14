@@ -82,6 +82,18 @@ const GOOGLE_ADS_DAILY_LEADS: Record<string, number> = {
   '2026-09-08':3,'2026-09-09':2,'2026-09-12':2,'2026-09-13':2,
 };
 
+// Google Ads daily form starts (Google's conversion tracking — HIPAA-limited, counts assessment starts)
+// Source: Google Ads Report Editor "When your ads showed" report, pulled via Chrome
+// These are NOT actual submissions — compare with GOOGLE_ADS_DAILY_LEADS for completion rate
+// Update: pull from Chrome each time you pull daily spend/clicks/impressions
+const GOOGLE_ADS_FORM_STARTS: Record<string, number> = {
+  // Aug 18–Sep 13, 2026 — from Chrome pull September 14, 2026
+  '2026-08-18':22,'2026-08-19':23,'2026-08-20':21,'2026-08-21':13,'2026-08-22':24,'2026-08-23':25,'2026-08-24':24,
+  '2026-08-25':18,'2026-08-26':19,'2026-08-27':16,'2026-08-28':15,'2026-08-29':15,'2026-08-30':19,'2026-08-31':10,
+  '2026-09-01':32,'2026-09-02':23,'2026-09-03':17,'2026-09-04':19,'2026-09-05':13,'2026-09-06':10,'2026-09-07':16,
+  '2026-09-08':19,'2026-09-09':17,'2026-09-10':9,'2026-09-11':10,'2026-09-12':14,'2026-09-13':13,
+};
+
 // Google Ads daily seed data (source of truth — merged with Supabase on load)
 // June 1-15 spend/clicks/impressions from Google Ads Report Editor, June 15, 2026
 // June 16-22 spend/clicks/impressions from Google Ads Report Editor, June 22, 2026
@@ -917,6 +929,133 @@ export default function PaidAds() {
           })()}
         </div>
       </div>
+
+      {/* ═══════ FORM STARTS vs SUBMISSIONS ═══════ */}
+      {(() => {
+        const dates = Object.keys(GOOGLE_ADS_FORM_STARTS).sort();
+        if (dates.length === 0) return null;
+        const labels = dates.map(d => { const [,m,dd] = d.split('-'); return `${parseInt(m)}/${parseInt(dd)}`; });
+        const formStarts = dates.map(d => GOOGLE_ADS_FORM_STARTS[d] || 0);
+        const submissions = dates.map(d => GOOGLE_ADS_DAILY_LEADS[d] || 0);
+        const totalStarts = formStarts.reduce((s, v) => s + v, 0);
+        const totalSubs = submissions.reduce((s, v) => s + v, 0);
+        const completionRate = totalStarts > 0 ? ((totalSubs / totalStarts) * 100).toFixed(1) : '—';
+        // Weekly aggregation
+        const weeks: { label: string; starts: number; subs: number }[] = [];
+        let wStart = 0;
+        while (wStart < dates.length) {
+          const wEnd = Math.min(wStart + 7, dates.length);
+          const wDates = dates.slice(wStart, wEnd);
+          const wStarts = wDates.reduce((s, d) => s + (GOOGLE_ADS_FORM_STARTS[d] || 0), 0);
+          const wSubs = wDates.reduce((s, d) => s + (GOOGLE_ADS_DAILY_LEADS[d] || 0), 0);
+          const [,m1,d1] = wDates[0].split('-');
+          const [,m2,d2] = wDates[wDates.length - 1].split('-');
+          weeks.push({ label: `${parseInt(m1)}/${parseInt(d1)}–${parseInt(m2)}/${parseInt(d2)}`, starts: wStarts, subs: wSubs });
+          wStart = wEnd;
+        }
+        return (
+          <>
+            <SectionHeader>Form Starts vs Completed Submissions</SectionHeader>
+            <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>
+              Google Ads tracks form starts (assessment begins). Salesforce tracks completed submissions. Due to HIPAA, form starts are the closest top-of-funnel metric available from Google.
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
+              <div style={{ background: '#f0f7ff', borderRadius: 8, padding: 12, textAlign: 'center' }}>
+                <div style={{ fontWeight: 700, fontSize: '1.4em', color: '#1565C0' }}>{totalStarts}</div>
+                <div style={{ color: '#666', fontSize: '0.85em' }}>Form starts ({dates.length}d)</div>
+              </div>
+              <div style={{ background: '#fff3e0', borderRadius: 8, padding: 12, textAlign: 'center' }}>
+                <div style={{ fontWeight: 700, fontSize: '1.4em', color: '#E65100' }}>{totalSubs}</div>
+                <div style={{ color: '#666', fontSize: '0.85em' }}>Completed submissions</div>
+              </div>
+              <div style={{ background: '#e8f5e9', borderRadius: 8, padding: 12, textAlign: 'center' }}>
+                <div style={{ fontWeight: 700, fontSize: '1.4em', color: '#2E7D32' }}>{completionRate}%</div>
+                <div style={{ color: '#666', fontSize: '0.85em' }}>Completion rate</div>
+              </div>
+            </div>
+            <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', marginBottom: 16 }}>
+              <div style={{ height: 280 }}>
+                <Line
+                  data={{
+                    labels,
+                    datasets: [
+                      {
+                        label: 'Form starts (Google)',
+                        data: formStarts,
+                        borderColor: '#42A5F5',
+                        backgroundColor: '#42A5F520',
+                        fill: true,
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#42A5F5',
+                        tension: 0.3,
+                      },
+                      {
+                        label: 'Submissions (Salesforce)',
+                        data: submissions,
+                        borderColor: '#FF7043',
+                        backgroundColor: '#FF704320',
+                        fill: true,
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#FF7043',
+                        tension: 0.3,
+                      },
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { position: 'top', labels: { usePointStyle: true, padding: 14 } },
+                      tooltip: {
+                        callbacks: {
+                          afterBody: (items) => {
+                            const idx = items[0]?.dataIndex;
+                            if (idx === undefined) return '';
+                            const fs = formStarts[idx];
+                            const sub = submissions[idx];
+                            return fs > 0 ? `Completion: ${Math.round((sub / fs) * 100)}%` : '';
+                          },
+                        },
+                      },
+                    },
+                    scales: {
+                      y: { beginAtZero: true, title: { display: true, text: 'Count' } },
+                      x: { ticks: { maxTicksLimit: 14, font: { size: 10 } } },
+                    },
+                  }}
+                />
+              </div>
+            </div>
+            <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', marginBottom: 32 }}>
+              <div style={{ fontSize: '0.85em', fontWeight: 600, marginBottom: 8 }}>Weekly breakdown</div>
+              <table style={{ width: '100%', fontSize: '0.82em', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid #e0e0e0' }}>
+                    <th style={{ textAlign: 'left', padding: '6px 8px' }}>Week</th>
+                    <th style={{ textAlign: 'right', padding: '6px 8px' }}>Form starts</th>
+                    <th style={{ textAlign: 'right', padding: '6px 8px' }}>Submissions</th>
+                    <th style={{ textAlign: 'right', padding: '6px 8px' }}>Rate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {weeks.map(w => (
+                    <tr key={w.label} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                      <td style={{ padding: '6px 8px' }}>{w.label}</td>
+                      <td style={{ textAlign: 'right', padding: '6px 8px', color: '#1565C0' }}>{w.starts}</td>
+                      <td style={{ textAlign: 'right', padding: '6px 8px', color: '#E65100' }}>{w.subs}</td>
+                      <td style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>
+                        {w.starts > 0 ? `${Math.round((w.subs / w.starts) * 100)}%` : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        );
+      })()}
 
       {/* ═══════ DAILY SPEND ═══════ */}
       <SectionHeader>Daily Spend</SectionHeader>
