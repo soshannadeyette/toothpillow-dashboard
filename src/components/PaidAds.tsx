@@ -215,6 +215,10 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-09-11', spend: 277.82, clicks: 79, impressions: 814, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-09-12', spend: 231.19, clicks: 61, impressions: 582, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-09-13', spend: 279.30, clicks: 78, impressions: 820, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-09-14', spend: 274.86, clicks: 64, impressions: 677, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-09-15', spend: 270.39, clicks: 72, impressions: 778, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-09-16', spend: 283.06, clicks: 65, impressions: 780, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-09-17', spend: 142.64, clicks: 29, impressions: 220, submit: 0, started: 0, finished: 0, treatment: 0 },
 ];
 
 // Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)
@@ -227,7 +231,7 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
 
 /* ════════════════════════════════════════════
    DATA SOURCE 2: SALESFORCE (hardcoded constants)
-   Source: Salesforce "Google Ads 2026" export, September 14, 2026.
+   Source: Salesforce "Google Ads 2026" export, September 17, 2026.
    Note: Export filter includes "Up 1 equals Google Ads,Meta Ads"
    but Apr–Jun numbers are unchanged from Google-only pulls,
    so Meta contribution is negligible in those months.
