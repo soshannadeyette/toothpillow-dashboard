@@ -55,7 +55,7 @@ const GOOGLE_ADS_PRIOR_MONTHS: { month: string; year: number; monthIdx: number; 
 ];
 
 // Google Ads daily Salesforce leads by submission date (source: Google Ads Salesforce export)
-// Source: SOSH Google Ads 2026-2026-09-14 export, "Date: Submission" column
+// Source: SOSH Google Ads 2026-2026-09-17 export, "Date: Submission" column
 // Update this array each time a new Google Ads Salesforce export is uploaded
 const GOOGLE_ADS_DAILY_LEADS: Record<string, number> = {
   '2026-04-07':2,'2026-04-10':1,'2026-04-11':1,'2026-04-13':2,'2026-04-18':2,'2026-04-19':2,'2026-04-20':1,
@@ -79,7 +79,7 @@ const GOOGLE_ADS_DAILY_LEADS: Record<string, number> = {
   '2026-08-18':3,'2026-08-19':4,'2026-08-20':4,'2026-08-21':1,'2026-08-22':2,'2026-08-23':1,'2026-08-24':2,
   '2026-08-25':6,'2026-08-26':3,'2026-08-27':1,'2026-08-28':1,'2026-08-29':4,'2026-08-30':7,
   '2026-09-01':6,'2026-09-02':2,'2026-09-03':5,
-  '2026-09-08':3,'2026-09-09':2,'2026-09-12':2,'2026-09-13':2,
+  '2026-09-08':3,'2026-09-09':2,'2026-09-12':2,'2026-09-13':2,'2026-09-14':1,'2026-09-15':1,
 };
 
 // Google Ads daily form starts (Google's conversion tracking — HIPAA-limited, counts assessment starts)
@@ -235,35 +235,35 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
 
 // Pipeline totals — Salesforce export September 14, 2026
 const GOOGLE_SF_PIPELINE = {
-  total: 725,           // leads created (started form)
-  completed: 331,       // all stages except WAITING - Needs info
-  waitingInfo: 393,     // WAITING - Needs info
-  sentCheckout: 176,    // Sent Checkout Link
-  sentToTxP: 15,        // Sent to TxP
-  txpApproved: 8,
-  checkedOut: 37,
+  total: 731,           // leads created (started form)
+  completed: 334,       // all stages except WAITING - Needs info
+  waitingInfo: 397,     // WAITING - Needs info
+  sentCheckout: 184,    // Sent Checkout Link (incl. Temp Hold)
+  sentToTxP: 9,         // Sent to TxP
+  txpApproved: 12,
+  checkedOut: 36,
   referredOut: 34,
   closedLost: 42,       // Closed Lost (includes Do Not Contact)
-  tempHold: 13,
+  tempHold: 13,         // Temp Hold + Assessment On Hold + ON HOLD - No Doctor
   denied: 0,
   formOpens: 394,       // Google Ads conversions (form opens, Google-only)
 };
 
-// Revenue from checkouts — $66,493 from export + $2,000 est. Carter Paul = $68,493
-// Source: Salesforce "Google Ads 2026" export, September 14, 2026
-const GOOGLE_REVENUE: number = 68493;
+// Revenue from checkouts — all 36 have non-zero amounts
+// Source: Salesforce "Google Ads 2026" export, September 17, 2026
+const GOOGLE_REVENUE: number = 66493;
 
 // Monthly breakdown from Salesforce — grouped by SUBMISSION date.
 // Checkouts/revenue = leads submitted that month that have checked out to date.
-// Source: Salesforce "Google Ads 2026" export, September 14, 2026
-// $2K placeholder: Carter Paul (submitted 8/25) — only remaining $0 record
+// Source: Salesforce "Google Ads 2026" export, September 17, 2026
+// No $0 checkout records remaining (Carter Paul no longer at CHECKED OUT)
 const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: number; checkouts: number; revenue: number }[] = [
   { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 20, completed: 20, checkouts: 2, revenue: 3291 },
   { month: 'May 2026', monthKey: 'May 2026', leads: 28, completed: 28, checkouts: 5, revenue: 8676 },
   { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 81, completed: 81, checkouts: 14, revenue: 24790 },
   { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 91, completed: 91, checkouts: 8, revenue: 16115 },
-  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 89, completed: 89, checkouts: 8, revenue: 15621 },
-  { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 22, completed: 22, checkouts: 0, revenue: 0 },
+  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 89, completed: 89, checkouts: 7, revenue: 13621 },
+  { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 24, completed: 24, checkouts: 0, revenue: 0 },
 ];
 
 /* ════════════════════════════════════════════
