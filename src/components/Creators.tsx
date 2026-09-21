@@ -15,6 +15,32 @@ const TP = {
 
 const TOTAL_FOLLOWERS = 132492; // follower export 2026-08-13
 
+/* ════════════════════════════════════════════════════════════════════════════
+   Outreach Log — Tania's DM outreach to IG creators
+   Add new entries as batches come in. Source of truth for outreach tracking.
+   ════════════════════════════════════════════════════════════════════════ */
+interface OutreachEntry {
+  name: string;
+  contactDate: string;
+  replied: boolean | null; // null = pending
+  interested: boolean | null; // null = pending/no reply
+  notes?: string;
+}
+
+const OUTREACH_LOG: OutreachEntry[] = [
+  // Batch 1 — 2026-09-21 (Tania)
+  { name: 'Lauren Johnson', contactDate: '2026-09-21', replied: true, interested: true, notes: 'Smaller following Lauren Johnson, NOT NNM' },
+  { name: 'Megan Dixon Smalley', contactDate: '2026-09-21', replied: true, interested: true },
+  { name: 'Carly Russ Peterson', contactDate: '2026-09-21', replied: true, interested: true },
+  { name: 'Daya Diaz', contactDate: '2026-09-21', replied: true, interested: true },
+  { name: 'Christine Hassler', contactDate: '2026-09-21', replied: true, interested: true },
+  { name: 'Jessica Duncan Propes', contactDate: '2026-09-21', replied: true, interested: false, notes: 'Found someone in person, already in expanders' },
+  { name: 'Autumn Lohman', contactDate: '2026-09-21', replied: null, interested: null },
+  { name: 'Ally Kendricks', contactDate: '2026-09-21', replied: null, interested: null },
+  { name: 'Molly Vollmer', contactDate: '2026-09-21', replied: null, interested: null },
+  { name: 'Chelsey Curtis', contactDate: '2026-09-21', replied: null, interested: null },
+];
+
 interface Creator {
   username: string;
   status: string;
@@ -127,6 +153,76 @@ export default function Creators() {
           }}
         />
       </div>
+
+      {/* ── Outreach Tracking ── */}
+      {(() => {
+        const totalSent = OUTREACH_LOG.length;
+        const replied = OUTREACH_LOG.filter(e => e.replied === true).length;
+        const interested = OUTREACH_LOG.filter(e => e.interested === true).length;
+        const notInterested = OUTREACH_LOG.filter(e => e.interested === false).length;
+        const pending = OUTREACH_LOG.filter(e => e.replied === null).length;
+        const replyRate = totalSent > 0 ? ((replied / totalSent) * 100).toFixed(0) : '0';
+        const interestRate = replied > 0 ? ((interested / replied) * 100).toFixed(0) : '0';
+
+        return (
+          <div style={{ marginBottom: 24 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, marginBottom: 10 }}>
+              DM Outreach — Tania
+            </h3>
+            <div style={{ display: 'flex', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
+              {card('Sent', String(totalSent), TP.navy)}
+              {card('Replied', String(replied), TP.teal, `${replyRate}% reply rate`)}
+              {card('Interested', String(interested), '#2d8a4e', `${interestRate}% of replies`)}
+              {card('Pending', String(pending), TP.gold, 'no reply yet')}
+            </div>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                <thead>
+                  <tr style={{ background: TP.navy, color: '#fff' }}>
+                    <th style={{ padding: '9px 10px', textAlign: 'left' }}>Name</th>
+                    <th style={{ padding: '9px 10px', textAlign: 'left' }}>Contacted</th>
+                    <th style={{ padding: '9px 10px', textAlign: 'center' }}>Replied</th>
+                    <th style={{ padding: '9px 10px', textAlign: 'center' }}>Interested</th>
+                    <th style={{ padding: '9px 10px', textAlign: 'left' }}>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {OUTREACH_LOG.map((e, i) => (
+                    <tr key={e.name + e.contactDate} style={{ borderBottom: '1px solid #eee', background: i % 2 ? '#fafafa' : '#fff' }}>
+                      <td style={{ padding: '8px 10px', fontWeight: 600, color: TP.text }}>{e.name}</td>
+                      <td style={{ padding: '8px 10px', color: '#666' }}>{e.contactDate}</td>
+                      <td style={{ padding: '8px 10px', textAlign: 'center' }}>
+                        {e.replied === true ? (
+                          <span style={{ color: TP.teal, fontWeight: 700 }}>Yes</span>
+                        ) : e.replied === false ? (
+                          <span style={{ color: TP.coral }}>No</span>
+                        ) : (
+                          <span style={{ color: TP.gold, fontWeight: 600 }}>Pending</span>
+                        )}
+                      </td>
+                      <td style={{ padding: '8px 10px', textAlign: 'center' }}>
+                        {e.interested === true ? (
+                          <span style={{ background: '#2d8a4e', color: '#fff', borderRadius: 10, padding: '2px 10px', fontSize: 11, fontWeight: 700 }}>Yes</span>
+                        ) : e.interested === false ? (
+                          <span style={{ background: '#ddd', color: '#666', borderRadius: 10, padding: '2px 10px', fontSize: 11 }}>No</span>
+                        ) : (
+                          <span style={{ color: '#bbb', fontSize: 11 }}>—</span>
+                        )}
+                      </td>
+                      <td style={{ padding: '8px 10px', color: '#888', fontSize: 12, maxWidth: 300 }}>{e.notes || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ── Creator Crawler Results ── */}
+      <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, marginBottom: 10 }}>
+        Follower Crawler Results
+      </h3>
 
       {/* Controls */}
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
