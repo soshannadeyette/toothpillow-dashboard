@@ -20,9 +20,8 @@ const TOTAL_FOLLOWERS = 132492; // follower export 2026-08-13
    Outreach statuses — the pipeline Tania tracks
    ════════════════════════════════════════════════════════════════════════ */
 const STATUSES = [
-  { value: 'contacted', label: 'Contacted', color: TP.navy, bg: '#e8edf4' },
-  { value: 'replied', label: 'Replied', color: TP.teal, bg: '#e0f5f1' },
-  { value: 'interested', label: 'Interested', color: TP.green, bg: '#e0f0e6' },
+  { value: 'initiated', label: 'Initiated Contact', color: TP.navy, bg: '#e8edf4' },
+  { value: 'sent_link', label: 'Sent Meeting Link', color: TP.teal, bg: '#e0f5f1' },
   { value: 'not_interested', label: 'Not Interested', color: '#888', bg: '#eee' },
   { value: 'submitted', label: 'Submitted', color: '#7c3aed', bg: '#ede9fe' },
   { value: 'onboarded', label: 'Onboarded', color: TP.coral, bg: '#fde8e3' },
@@ -243,7 +242,7 @@ export default function Creators() {
       name,
       username: username ? username.toLowerCase().replace('@', '') : null,
       contact_date: new Date().toISOString().slice(0, 10),
-      status: 'contacted',
+      status: 'initiated',
       notes: null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -305,13 +304,12 @@ export default function Creators() {
 
   /* ── Outreach KPIs ── */
   const totalSent = outreach.length;
-  const contacted = outreach.filter(r => r.status === 'contacted').length;
-  const replied = outreach.filter(r => r.status === 'replied').length;
-  const interested = outreach.filter(r => r.status === 'interested').length;
+  const initiated = outreach.filter(r => r.status === 'initiated').length;
+  const sentLink = outreach.filter(r => r.status === 'sent_link').length;
+  const notInterested = outreach.filter(r => r.status === 'not_interested').length;
   const submitted = outreach.filter(r => r.status === 'submitted').length;
   const onboarded = outreach.filter(r => r.status === 'onboarded').length;
-  const notInterested = outreach.filter(r => r.status === 'not_interested').length;
-  const activeCount = interested + submitted + onboarded;
+  const activeCount = sentLink + submitted + onboarded;
 
   const card = (label: string, value: string, color: string, sub?: string) => (
     <div
@@ -345,11 +343,12 @@ export default function Creators() {
 
       {/* KPI cards */}
       <div style={{ display: 'flex', gap: 10, margin: '0 0 14px', flexWrap: 'wrap' }}>
-        {card('Total sent', String(totalSent), TP.navy)}
-        {card('Interested', String(interested), TP.green)}
+        {card('Total', String(totalSent), TP.navy)}
+        {card('Initiated', String(initiated), TP.navy, 'contacted')}
+        {card('Sent Link', String(sentLink), TP.teal)}
         {card('Submitted', String(submitted), '#7c3aed')}
         {card('Onboarded', String(onboarded), TP.coral)}
-        {card('Pending', String(contacted), TP.gold, 'no reply yet')}
+        {card('Not Interested', String(notInterested), '#888')}
       </div>
 
       {/* Add manually */}
