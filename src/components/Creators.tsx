@@ -194,19 +194,19 @@ export default function Creators() {
     try { localStorage.setItem(LS_KEY, JSON.stringify(rows)); } catch { /* full */ }
   };
 
-  /* ── Load outreach data: try API first, fall back to localStorage ── */
+  /* ── Load outreach data: API is source of truth, localStorage is offline cache ── */
   const loadOutreach = useCallback(async () => {
     try {
       const res = await fetch('/api/outreach');
       const json = await res.json();
-      if (json.rows && json.rows.length > 0) {
+      if (json.rows) {
         setOutreach(json.rows);
-        writeLS(json.rows); // sync to localStorage
+        writeLS(json.rows); // cache locally
         setOutreachLoading(false);
         return;
       }
     } catch { /* API unavailable */ }
-    // Fall back to localStorage
+    // Fall back to localStorage only if API fails
     const local = readLS();
     setOutreach(local);
     setOutreachLoading(false);
@@ -217,7 +217,8 @@ export default function Creators() {
     loadCreators(minFollowers);
     loadOutreach();
     const t = setInterval(() => loadCreators(minFollowers), 60_000);
-    return () => clearInterval(t);
+    const t2 = setInterval(loadOutreach, 30_000); // refresh outreach every 30s to sync across users
+    return () => { clearInterval(t); clearInterval(t2); };
   }, [loadCreators, loadOutreach, minFollowers]);
 
   /* ── Outreach helpers: update localStorage immediately, try API in background ── */

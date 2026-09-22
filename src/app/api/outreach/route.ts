@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       name: (r.name as string).trim(),
       username: typeof r.username === 'string' && r.username ? r.username.toLowerCase().replace('@', '') : null,
       contact_date: typeof r.contact_date === 'string' ? r.contact_date : new Date().toISOString().slice(0, 10),
-      status: typeof r.status === 'string' ? r.status : 'contacted',
+      status: typeof r.status === 'string' ? r.status : 'initiated',
       notes: typeof r.notes === 'string' ? r.notes : null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
