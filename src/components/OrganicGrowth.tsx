@@ -63,7 +63,7 @@ const GSC_MONTHLY: Array<{ month: string; clicks: number; impressions: number; c
   { month: '2026-06', clicks: 11550, impressions: 54729, ctr: 21.1, position: 10.1 },
   { month: '2026-07', clicks: 11163, impressions: 52738, ctr: 21.2, position: 9.3 },
   { month: '2026-08', clicks: 9948, impressions: 56938, ctr: 17.5, position: 10.8 },
-  { month: '2026-09', clicks: 8074, impressions: 28123, ctr: 28.7, position: 8.9, partial: true, daysReported: 12 },
+  { month: '2026-09', clicks: 10362, impressions: 40356, ctr: 25.7, position: 8.8, partial: true, daysReported: 19 },
 ];
 
 const GSC_WEEKLY = [
@@ -149,12 +149,13 @@ const GSC_WEEKLY = [
   { week: '2026-08-10', clicks: 2311, impressions: 14435, ctr: 16.0, position: 9.7 },
   { week: '2026-08-17', clicks: 2100, impressions: 11702, ctr: 17.9, position: 11.2 },
   { week: '2026-08-25', clicks: 2529, impressions: 13703, ctr: 18.5, position: 12.0 },
-  { week: '2026-09-01', clicks: 6256, impressions: 19470, ctr: 32.1, position: 9.2 },
-  { week: '2026-09-08', clicks: 1818, impressions: 8653, ctr: 21.0, position: 8.4 }, // partial week: 5/7 days (Sep 8-12, GSC lag)
+  { week: '2026-09-01', clicks: 6615, impressions: 21071, ctr: 31.4, position: 9.0 },
+  { week: '2026-09-08', clicks: 2321, impressions: 12184, ctr: 19.0, position: 8.8 },
+  { week: '2026-09-15', clicks: 1426, impressions: 7101, ctr: 20.1, position: 9.0 }, // partial week: 5/7 days (Sep 15-19, GSC lag)
 ];
 
-// Full-year daily GSC data — Jan 1 to Sep 6, 2026
-// Source: Google Search Console DAYS view, updated September 14, 2026
+// Full-year daily GSC data — Jan 1 to Sep 19, 2026
+// Source: Google Search Console DAYS view, updated September 22, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -213,6 +214,8 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   ],
   Sep: [
     [1,1743,4448],[2,2200,5557],[3,1064,3458],[4,571,2414],[5,365,1846],[6,313,1747],
+    [7,359,1601],[8,438,1826],[9,362,1764],[10,456,2028],[11,309,1480],[12,253,1555],[13,218,1970],
+    [14,285,1561],[15,322,1635],[16,331,1582],[17,317,1363],[18,264,1417],[19,192,1104],
   ],
 };
 
