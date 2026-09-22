@@ -170,6 +170,7 @@ export default function Creators() {
   const [outreach, setOutreach] = useState<OutreachRow[]>([]);
   const [outreachLoading, setOutreachLoading] = useState(true);
   const [saving, setSaving] = useState<number | null>(null); // id currently saving
+  const [hideNotInterested, setHideNotInterested] = useState(false);
 
   /* ── Load crawler data ── */
   const loadCreators = useCallback(async (min: number) => {
@@ -354,6 +355,24 @@ export default function Creators() {
 
       {/* Track button on each creator row is the primary add method */}
 
+      {/* Filter toggle */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+        <button
+          onClick={() => setHideNotInterested(h => !h)}
+          style={{
+            fontSize: 12, fontWeight: 600, padding: '5px 14px', borderRadius: 8,
+            border: '1px solid #ddd', cursor: 'pointer',
+            background: hideNotInterested ? '#f3f4f6' : '#fff',
+            color: hideNotInterested ? TP.navy : '#666',
+          }}
+        >
+          {hideNotInterested ? 'Show All' : 'Hide Not Interested'}
+        </button>
+        {hideNotInterested && notInterested > 0 && (
+          <span style={{ fontSize: 12, color: '#888' }}>({notInterested} hidden)</span>
+        )}
+      </div>
+
       {/* Outreach table */}
       {outreachLoading ? (
         <p style={{ color: '#888', fontSize: 14 }}>Loading outreach data…</p>
@@ -375,11 +394,19 @@ export default function Creators() {
               </tr>
             </thead>
             <tbody>
-              {outreach.map((r, i) => {
+              {outreach
+                .filter(r => !(hideNotInterested && r.status === 'not_interested'))
+                .sort((a, b) => {
+                  const aNI = a.status === 'not_interested' ? 1 : 0;
+                  const bNI = b.status === 'not_interested' ? 1 : 0;
+                  return aNI - bNI;
+                })
+                .map((r, i) => {
                 const meta = statusMeta(r.status);
+                const isNI = r.status === 'not_interested';
                 return (
-                  <tr key={r.id} style={{ borderBottom: '1px solid #eee', background: i % 2 ? '#fafafa' : '#fff', opacity: saving === r.id ? 0.6 : 1 }}>
-                    <td style={{ padding: '8px 10px', fontWeight: 600, color: TP.text }}>{r.name}</td>
+                  <tr key={r.id} style={{ borderBottom: '1px solid #eee', background: isNI ? '#f7f7f7' : i % 2 ? '#fafafa' : '#fff', opacity: saving === r.id ? 0.5 : isNI ? 0.45 : 1 }}>
+                    <td style={{ padding: '8px 10px', fontWeight: 600, color: isNI ? '#aaa' : TP.text, textDecoration: isNI ? 'line-through' : 'none' }}>{r.name}</td>
                     <td style={{ padding: '8px 10px' }}>
                       {r.username ? (
                         <a
