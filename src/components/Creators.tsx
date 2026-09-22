@@ -422,12 +422,12 @@ export default function Creators() {
                     <td style={{ padding: '8px 10px', textAlign: 'center' }}>
                       <button
                         onClick={() => { if (confirm(`Remove ${r.name} from outreach?`)) removeOutreach(r.id); }}
-                        style={{ fontSize: 14, color: '#999', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 4 }}
+                        style={{ fontSize: 12, color: '#e53e3e', background: '#fef2f2', border: '1px solid #fecaca', cursor: 'pointer', padding: '4px 10px', borderRadius: 6, fontWeight: 600 }}
                         title="Remove from outreach"
-                        onMouseEnter={e => (e.currentTarget.style.color = '#e53e3e')}
-                        onMouseLeave={e => (e.currentTarget.style.color = '#999')}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#e53e3e'; e.currentTarget.style.color = '#fff'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.color = '#e53e3e'; }}
                       >
-                        ✕
+                        Remove
                       </button>
                     </td>
                   </tr>
