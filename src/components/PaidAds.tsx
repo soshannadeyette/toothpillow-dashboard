@@ -245,7 +245,7 @@ const GOOGLE_SF_PIPELINE = {
   sentCheckout: 188,    // Sent Checkout Link (incl. Temp Hold)
   sentToTxP: 21,        // Sent to TxP + Treatment Consult Scheduled
   txpApproved: 14,
-  checkedOut: 39,
+  checkedOut: 38,
   referredOut: 35,
   closedLost: 44,       // Closed Lost (includes Do Not Contact)
   tempHold: 17,         // Temp Hold + Assessment On Hold + ON HOLD - No Doctor
@@ -253,7 +253,7 @@ const GOOGLE_SF_PIPELINE = {
   formOpens: 422,       // Google Ads conversions (form opens, Google-only)
 };
 
-// Revenue from checkouts — 39 checkouts
+// Revenue from checkouts — 38 checkouts
 // Source: Salesforce "Google Ads 2026" export, September 22, 2026 (1:14pm)
 const GOOGLE_REVENUE: number = 70384;
 
