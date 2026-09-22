@@ -351,10 +351,7 @@ export default function Creators() {
         {card('Not Interested', String(notInterested), '#888')}
       </div>
 
-      {/* Add manually */}
-      <div style={{ marginBottom: 12 }}>
-        <AddManualForm onAdd={(name, username) => addToOutreach(name, username || undefined)} />
-      </div>
+      {/* Track button on each creator row is the primary add method */}
 
       {/* Outreach table */}
       {outreachLoading ? (
