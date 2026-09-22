@@ -186,14 +186,32 @@ export default function Creators() {
     finally { setLoading(false); }
   }, []);
 
-  /* ── Load outreach data ── */
+  /* ── localStorage helpers for outreach (primary store until Supabase table exists) ── */
+  const LS_KEY = 'ig_outreach_data';
+  const readLS = (): OutreachRow[] => {
+    try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch { return []; }
+  };
+  const writeLS = (rows: OutreachRow[]) => {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(rows)); } catch { /* full */ }
+  };
+
+  /* ── Load outreach data: try API first, fall back to localStorage ── */
   const loadOutreach = useCallback(async () => {
     try {
       const res = await fetch('/api/outreach');
       const json = await res.json();
-      if (json.rows) setOutreach(json.rows);
-    } catch { /* retry */ }
-    finally { setOutreachLoading(false); }
+      if (json.rows && json.rows.length > 0) {
+        setOutreach(json.rows);
+        writeLS(json.rows); // sync to localStorage
+        setOutreachLoading(false);
+        return;
+      }
+    } catch { /* API unavailable */ }
+    // Fall back to localStorage
+    const local = readLS();
+    setOutreach(local);
+    setOutreachLoading(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -203,35 +221,57 @@ export default function Creators() {
     return () => clearInterval(t);
   }, [loadCreators, loadOutreach, minFollowers]);
 
-  /* ── Outreach API helpers ── */
+  /* ── Outreach helpers: update localStorage immediately, try API in background ── */
   const updateOutreach = async (id: number, updates: Partial<OutreachRow>) => {
     setSaving(id);
+    const updated = outreach.map(r => r.id === id ? { ...r, ...updates, updated_at: new Date().toISOString() } as OutreachRow : r);
+    setOutreach(updated);
+    writeLS(updated);
     try {
       await fetch('/api/outreach', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, ...updates }),
       });
-      setOutreach(prev => prev.map(r => r.id === id ? { ...r, ...updates, updated_at: new Date().toISOString() } : r));
-    } catch { /* silent */ }
+    } catch { /* API unavailable — localStorage has the data */ }
     finally { setSaving(null); }
   };
 
   const addToOutreach = async (name: string, username?: string) => {
+    const newRow: OutreachRow = {
+      id: Date.now(), // local ID
+      name,
+      username: username ? username.toLowerCase().replace('@', '') : null,
+      contact_date: new Date().toISOString().slice(0, 10),
+      status: 'contacted',
+      notes: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    const updated = [newRow, ...outreach];
+    setOutreach(updated);
+    writeLS(updated);
+    // Try API in background
     try {
       const res = await fetch('/api/outreach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name,
-          username: username || null,
-          contact_date: new Date().toISOString().slice(0, 10),
-          status: 'contacted',
+          name: newRow.name,
+          username: newRow.username,
+          contact_date: newRow.contact_date,
+          status: newRow.status,
         }),
       });
       const json = await res.json();
-      if (json.ok) loadOutreach();
-    } catch { /* silent */ }
+      if (json.ok && json.rows?.[0]) {
+        // Replace local ID with server ID
+        const serverRow = json.rows[0];
+        const synced = updated.map(r => r.id === newRow.id ? { ...r, id: serverRow.id } : r);
+        setOutreach(synced);
+        writeLS(synced);
+      }
+    } catch { /* API unavailable — localStorage has the data */ }
   };
 
   const trackCreator = async (c: Creator) => {
@@ -239,10 +279,12 @@ export default function Creators() {
   };
 
   const removeOutreach = async (id: number) => {
+    const updated = outreach.filter(r => r.id !== id);
+    setOutreach(updated);
+    writeLS(updated);
     try {
       await fetch(`/api/outreach?id=${id}`, { method: 'DELETE' });
-      setOutreach(prev => prev.filter(r => r.id !== id));
-    } catch { /* silent */ }
+    } catch { /* API unavailable */ }
   };
 
   /* ── Derived data ── */
