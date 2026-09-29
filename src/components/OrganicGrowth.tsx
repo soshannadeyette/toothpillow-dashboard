@@ -23,12 +23,12 @@ const TP = {
 
 /* ════════════════════════════════════════════
    HARDCODED GSC DATA — Source of truth
-   Data pulled fresh from Google Search Console on September 8, 2026
+   Data pulled fresh from Google Search Console on September 29, 2026
    Property: https://www.toothpillow.com/ (URL prefix)
    Baseline period: Feb 8 2025 through May 18 2026 (all pre-SEO data)
    SEO program reset date: May 19, 2026
    May 2026: full month (31 days). June 2026: full month (30 days). July 2026: full month (31 days).
-   August 2026: full month (31 days). September 2026: partial (6 days through Sep 6). Blog launched Aug 6, 2026.
+   August 2026: full month (31 days). September 2026: partial (27 days through Sep 27). Blog launched Aug 6, 2026.
    ════════════════════════════════════════════ */
 
 const SEO_START_DATE = '2026-05-19';
@@ -63,7 +63,7 @@ const GSC_MONTHLY: Array<{ month: string; clicks: number; impressions: number; c
   { month: '2026-06', clicks: 11550, impressions: 54729, ctr: 21.1, position: 10.1 },
   { month: '2026-07', clicks: 11163, impressions: 52738, ctr: 21.2, position: 9.3 },
   { month: '2026-08', clicks: 9948, impressions: 56938, ctr: 17.5, position: 10.8 },
-  { month: '2026-09', clicks: 10362, impressions: 40356, ctr: 25.7, position: 8.8, partial: true, daysReported: 19 },
+  { month: '2026-09', clicks: 12621, impressions: 52716, ctr: 23.9, position: 7.6, partial: true, daysReported: 27 },
 ];
 
 const GSC_WEEKLY = [
@@ -151,11 +151,12 @@ const GSC_WEEKLY = [
   { week: '2026-08-25', clicks: 2529, impressions: 13703, ctr: 18.5, position: 12.0 },
   { week: '2026-09-01', clicks: 6615, impressions: 21071, ctr: 31.4, position: 9.0 },
   { week: '2026-09-08', clicks: 2321, impressions: 12184, ctr: 19.0, position: 8.8 },
-  { week: '2026-09-15', clicks: 1426, impressions: 7101, ctr: 20.1, position: 9.0 }, // partial week: 5/7 days (Sep 15-19, GSC lag)
+  { week: '2026-09-15', clicks: 1911, impressions: 9666, ctr: 19.8, position: 7.2 },
+  { week: '2026-09-22', clicks: 1774, impressions: 9795, ctr: 18.1, position: 5.8 }, // partial week: 6/7 days (Sep 22-27, GSC lag)
 ];
 
-// Full-year daily GSC data — Jan 1 to Sep 19, 2026
-// Source: Google Search Console DAYS view, updated September 22, 2026
+// Full-year daily GSC data — Jan 1 to Sep 27, 2026
+// Source: Google Search Console DAYS view, updated September 29, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -216,6 +217,7 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
     [1,1743,4448],[2,2200,5557],[3,1064,3458],[4,571,2414],[5,365,1846],[6,313,1747],
     [7,359,1601],[8,438,1826],[9,362,1764],[10,456,2028],[11,309,1480],[12,253,1555],[13,218,1970],
     [14,285,1561],[15,322,1635],[16,331,1582],[17,317,1363],[18,264,1417],[19,192,1104],
+    [20,179,1121],[21,306,1444],[22,319,1429],[23,309,1521],[24,400,1839],[25,303,1457],[26,235,1869],[27,208,1680],
   ],
 };
 
