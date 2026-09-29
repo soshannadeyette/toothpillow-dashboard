@@ -237,36 +237,36 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
    so Meta contribution is negligible in those months.
    ════════════════════════════════════════════ */
 
-// Pipeline totals — Salesforce export September 22, 2026 (1:14pm)
+// Pipeline totals — Salesforce export September 29, 2026
 const GOOGLE_SF_PIPELINE = {
-  total: 766,           // leads created (started form)
-  completed: 344,       // submitted (have submission date)
-  waitingInfo: 408,     // WAITING - Needs info
-  sentCheckout: 188,    // Sent Checkout Link (incl. Temp Hold)
-  sentToTxP: 21,        // Sent to TxP + Treatment Consult Scheduled
-  txpApproved: 14,
-  checkedOut: 38,
-  referredOut: 35,
-  closedLost: 44,       // Closed Lost (includes Do Not Contact)
+  total: 794,           // leads created (started form)
+  completed: 353,       // submitted (have submission date)
+  waitingInfo: 427,     // WAITING - Needs info
+  sentCheckout: 189,    // Sent Checkout Link (incl. Temp Hold)
+  sentToTxP: 20,        // Sent to TxP + Treatment Consult Scheduled
+  txpApproved: 17,
+  checkedOut: 39,
+  referredOut: 36,
+  closedLost: 47,       // Closed Lost (includes Do Not Contact)
   tempHold: 17,         // Temp Hold + Assessment On Hold + ON HOLD - No Doctor
   denied: 0,
-  formOpens: 422,       // Google Ads conversions (form opens, Google-only)
+  formOpens: 441,       // Google Ads conversions (form opens, Google-only)
 };
 
-// Revenue from checkouts — 38 checkouts
-// Source: Salesforce "Google Ads 2026" export, September 22, 2026 (1:14pm)
-const GOOGLE_REVENUE: number = 70384;
+// Revenue from checkouts — 39 checkouts
+// Source: Salesforce "Google Ads 2026" export, September 29, 2026
+const GOOGLE_REVENUE: number = 72579;
 
 // Monthly breakdown from Salesforce — grouped by SUBMISSION date.
 // Checkouts/revenue = leads submitted that month that have checked out to date.
-// Source: Salesforce "Google Ads 2026" export, September 22, 2026
+// Source: Salesforce "Google Ads 2026" export, September 29, 2026
 const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: number; checkouts: number; revenue: number }[] = [
   { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 20, completed: 20, checkouts: 2, revenue: 3291 },
   { month: 'May 2026', monthKey: 'May 2026', leads: 28, completed: 28, checkouts: 5, revenue: 8676 },
   { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 81, completed: 81, checkouts: 14, revenue: 24790 },
-  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 91, completed: 91, checkouts: 9, revenue: 18110 },
-  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 89, completed: 89, checkouts: 8, revenue: 15517 },
-  { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 35, completed: 35, checkouts: 0, revenue: 0 },
+  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 91, completed: 91, checkouts: 10, revenue: 20305 },
+  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 88, completed: 88, checkouts: 8, revenue: 15517 },
+  { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 45, completed: 45, checkouts: 0, revenue: 0 },
 ];
 
 /* ════════════════════════════════════════════
