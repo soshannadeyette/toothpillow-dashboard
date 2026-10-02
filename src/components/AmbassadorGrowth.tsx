@@ -338,7 +338,7 @@ const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;p
   {name:'Hilary Fritsch*',bonusSubs:32,tier:1,earned:250,paid:250,winStart:'05/08/2026',winEnd:'12/31/2026',tier1Date:'07/31',is2026:true},
   {name:'Hayley Lombard',bonusSubs:31,tier:1,earned:250,paid:250,winStart:'05/19/2026',winEnd:'12/31/2026',tier1Date:'07/16',is2026:true},
   {name:'Amy Erickson',bonusSubs:26,tier:1,earned:250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'09/14',pendingPayout:true},
-  {name:'Melina Moses',bonusSubs:25,tier:1,earned:250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'10/01',pendingPayout:true},
+  {name:'Melina Moses',bonusSubs:25,tier:1,earned:250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'10/01'},
   {name:'Lauren Stadler',bonusSubs:25,tier:1,earned:250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'09/11',pendingPayout:true},
   {name:'Eryn Carroll (natural minded momma)',bonusSubs:25,tier:1,earned:250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'09/27',pendingPayout:true},
   {name:'Ellen Fisher',bonusSubs:23,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
