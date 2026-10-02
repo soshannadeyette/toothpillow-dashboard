@@ -42,13 +42,14 @@ const AV_DATA = [
   { label: 'Jun 26', month: 6, year: 2026, traffic: 36468, starts: 1751, waiting: 550, submitted: 1201, partial: false, period: 'full' as const },
   { label: 'Jul 26', month: 7, year: 2026, traffic: 0, starts: 2210, waiting: 721, submitted: 1489, partial: false, period: 'full' as const },
   { label: 'Aug 26', month: 8, year: 2026, traffic: 0, starts: 2059, waiting: 801, submitted: 1258, partial: false, period: 'full' as const },
-  { label: 'Sep 26', month: 9, year: 2026, traffic: 0, starts: 1397, waiting: 488, submitted: 909, partial: true, period: 'partial' as const },
+  { label: 'Sep 26', month: 9, year: 2026, traffic: 0, starts: 1531, waiting: 539, submitted: 992, partial: false, period: 'full' as const },
+  { label: 'Oct 26', month: 10, year: 2026, traffic: 0, starts: 81, waiting: 46, submitted: 35, partial: true, period: 'partial' as const },
 ];
 
 // ── Same-week completion rate by weekly cohort (source of truth) ──────
 // For each week: of all records created, what % submitted within the same Mon-Sun window.
 // Hard stop — later submissions don't count. Apples-to-apples across all weeks.
-// Source: Salesforce "Waiting on Info Ratios" (H1 Sep 29, H2 Sep 29) + "Google Ads" exports, September 29, 2026
+// Source: Salesforce "Waiting on Info Ratios" (H1 Oct 2, H2 Oct 2) + "Google Ads" exports, October 2, 2026
 const WEEKLY_COMPLETION: { label: string; total: number; submitted: number; pct: number; paidAds: number }[] = [
   { label: 'Feb 02', total: 284, submitted: 204, pct: 71.8, paidAds: 0 },
   { label: 'Feb 09', total: 293, submitted: 184, pct: 62.8, paidAds: 0 },
@@ -81,10 +82,10 @@ const WEEKLY_COMPLETION: { label: string; total: number; submitted: number; pct:
   { label: 'Aug 17', total: 313, submitted: 190, pct: 60.7, paidAds: 40 },
   { label: 'Aug 24', total: 901, submitted: 408, pct: 45.3, paidAds: 46 },
   { label: 'Aug 31', total: 598, submitted: 379, pct: 63.4, paidAds: 31 },
-  { label: 'Sep 07', total: 329, submitted: 222, pct: 67.5, paidAds: 22 },
-  { label: 'Sep 14', total: 241, submitted: 149, pct: 61.8, paidAds: 23 },
-  { label: 'Sep 21', total: 296, submitted: 158, pct: 53.4, paidAds: 26 },
-  { label: 'Sep 28', total: 45, submitted: 27, pct: 60.0, paidAds: 7 },
+  { label: 'Sep 07', total: 329, submitted: 237, pct: 72.0, paidAds: 22 },
+  { label: 'Sep 14', total: 241, submitted: 158, pct: 65.6, paidAds: 23 },
+  { label: 'Sep 21', total: 296, submitted: 169, pct: 57.1, paidAds: 26 },
+  { label: 'Sep 28', total: 260, submitted: 142, pct: 54.6, paidAds: 7 },
 ];
 
 // ── Event markers for same-week chart ──────────────────────────────────
