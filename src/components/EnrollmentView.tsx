@@ -1,48 +1,92 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+import { monthly, weekly, byTC, bySegment, summary } from '@/data/enrollmentCheckouts';
 
-// Placeholder Enrollment section. Mirrors the Submissions side's tab pattern so it
-// can be filled in with real Supabase-backed data once Sosh + Erin define the metrics.
-const ENROLLMENT_TABS = [
-  {
-    id: 'funnel',
-    label: 'Funnel / Conversion',
-    blurb:
-      'The enrollment funnel end to end: lead → first contact → evaluation → plan & pricing → checkout link sent → checkout → case start. Headline metric here is checkout-link-to-checkout (Erin’s meaningful number), not submission-to-checkout.',
-  },
-  {
-    id: 'pods',
-    label: 'By Pod / Specialist',
-    blurb:
-      'Checkouts and case starts broken out by pod and by enrollment specialist, so you can see where conversion is strong vs. soft.',
-  },
-  {
-    id: 'pending',
-    label: 'Pending Reactivation',
-    blurb:
-      'The pending-checkout cohort (roughly day 21 to day 120) and reactivation recovery — how many stalled, how many came back, by stage of the reactivation cadence.',
-  },
-  {
-    id: 'source',
-    label: 'Lead Source',
-    blurb:
-      'Enrollment performance by lead source (marketing, webinars, partner practices, etc.) and by promotion timing.',
-  },
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+const TP = {
+  blue: '#3A6EA4',
+  skyBlue: '#B6CAE3',
+  green: '#8CD1C8',
+  yellow: '#FDBE67',
+  navy: '#1B2A4A',
+  text: '#333333',
+};
+
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const monLabel = (ym: string) => `${MON[parseInt(ym.slice(5, 7), 10) - 1]} ${ym.slice(0, 4)}`;
+const money = (n: number) => '$' + Math.round(n).toLocaleString();
+
+const TABS = [
+  { id: 'monthly', label: 'Monthly' },
+  { id: 'weekly', label: 'Weekly' },
+  { id: 'coordinator', label: 'By Coordinator' },
+  { id: 'revenue', label: 'Revenue' },
 ] as const;
+type TabId = (typeof TABS)[number]['id'];
 
-type EnrollTabId = (typeof ENROLLMENT_TABS)[number]['id'];
+const baseOpts = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: { y: { beginAtZero: true } },
+};
+
+function Card({ children }: { children: ReactNode }) {
+  return (
+    <div style={{ border: '1px solid #e5e7eb', borderRadius: 12, padding: 20, background: '#fff', marginBottom: 20 }}>
+      {children}
+    </div>
+  );
+}
+
+function Th({ children, right }: { children: ReactNode; right?: boolean }) {
+  return (
+    <th style={{ textAlign: right ? 'right' : 'left', padding: '8px 12px', borderBottom: '2px solid #e5e7eb', fontSize: 12, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+      {children}
+    </th>
+  );
+}
+function Td({ children, right, bold }: { children: ReactNode; right?: boolean; bold?: boolean }) {
+  return (
+    <td style={{ textAlign: right ? 'right' : 'left', padding: '8px 12px', borderBottom: '1px solid #f1f1f1', fontSize: 14, fontWeight: bold ? 600 : 400, color: TP.text }}>
+      {children}
+    </td>
+  );
+}
 
 export default function EnrollmentView() {
-  const [tab, setTab] = useState<EnrollTabId>('funnel');
-  const active = ENROLLMENT_TABS.find((t) => t.id === tab)!;
+  const [tab, setTab] = useState<TabId>('monthly');
 
   return (
     <div>
-      {/* Enrollment sub-tab bar */}
-      <nav className="bg-white" style={{ borderBottom: '2px solid #e0e0e0', marginBottom: 24 }}>
+      {/* Source line + summary */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 13, color: '#6b7280' }}>Checkouts · Jan 1 – Oct 5, 2026 · from Salesforce</div>
+        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', marginTop: 10 }}>
+          <Stat label="Checkouts (YTD)" value={summary.checkouts.toLocaleString()} />
+          <Stat label="Collected" value={money(summary.amountPaid)} />
+          <Stat label="Total plan value" value={money(summary.totalAmountPaid)} />
+          <Stat label="Avg deal (plan)" value={money(summary.totalAmountPaid / summary.checkouts)} />
+          <Stat label="Segment (Lava / Ice)" value={bySegment.map((s) => `${s.segment} ${s.checkouts}`).join(' · ')} />
+        </div>
+      </div>
+
+      {/* Sub-tab bar */}
+      <nav className="bg-white" style={{ borderBottom: '2px solid #e0e0e0', marginBottom: 20 }}>
         <div className="flex gap-1 overflow-x-auto">
-          {ENROLLMENT_TABS.map((t) => (
+          {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
@@ -58,42 +102,144 @@ export default function EnrollmentView() {
         </div>
       </nav>
 
-      {/* Placeholder content */}
-      <div
-        style={{
-          border: '1px dashed #c9d2e0',
-          borderRadius: 12,
-          padding: '40px 28px',
-          background: '#f7f9fc',
-          textAlign: 'center',
-        }}
-      >
-        <div
-          style={{
-            display: 'inline-block',
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            color: '#3A6EA4',
-            background: '#e7eef7',
-            borderRadius: 999,
-            padding: '4px 12px',
-            marginBottom: 14,
-          }}
-        >
-          Coming soon
-        </div>
-        <h2 style={{ fontSize: 22, fontWeight: 'bold', color: '#1B2A4A', margin: '0 0 10px' }}>
-          {active.label}
-        </h2>
-        <p style={{ maxWidth: 620, margin: '0 auto', color: '#4F4F4F', lineHeight: 1.6 }}>
-          {active.blurb}
-        </p>
-        <p style={{ marginTop: 18, fontSize: 13, color: '#6b7686' }}>
-          Placeholder — wiring this to Supabase once Sosh + Erin lock the exact metrics.
-        </p>
-      </div>
+      {tab === 'monthly' && <MonthlyTab />}
+      {tab === 'weekly' && <WeeklyTab />}
+      {tab === 'coordinator' && <CoordinatorTab />}
+      {tab === 'revenue' && <RevenueTab />}
     </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <div style={{ fontSize: 12, color: '#6b7280' }}>{label}</div>
+      <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy }}>{value}</div>
+    </div>
+  );
+}
+
+function MonthlyTab() {
+  const labels = monthly.map((m) => monLabel(m.month));
+  return (
+    <>
+      <Card>
+        <h3 style={{ margin: '0 0 12px', color: TP.navy, fontWeight: 600 }}>Checkouts by month</h3>
+        <div style={{ height: 320 }}>
+          <Bar
+            data={{ labels, datasets: [{ label: 'Checkouts', data: monthly.map((m) => m.checkouts), backgroundColor: TP.blue, borderRadius: 4 }] }}
+            options={baseOpts}
+          />
+        </div>
+      </Card>
+      <Card>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr><Th>Month</Th><Th right>Checkouts</Th><Th right>Collected</Th><Th right>Total plan value</Th><Th right>Avg deal (plan)</Th></tr>
+          </thead>
+          <tbody>
+            {monthly.map((m) => (
+              <tr key={m.month}>
+                <Td bold>{monLabel(m.month)}</Td>
+                <Td right>{m.checkouts}</Td>
+                <Td right>{money(m.amountPaid)}</Td>
+                <Td right>{money(m.totalAmountPaid)}</Td>
+                <Td right>{money(m.totalAmountPaid / m.checkouts)}</Td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
+    </>
+  );
+}
+
+function WeeklyTab() {
+  const labels = weekly.map((w) => w.weekStart.slice(5));
+  return (
+    <Card>
+      <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Checkouts by week</h3>
+      <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Week starting (Sunday), MM-DD</div>
+      <div style={{ height: 340 }}>
+        <Bar
+          data={{ labels, datasets: [{ label: 'Checkouts', data: weekly.map((w) => w.checkouts), backgroundColor: TP.blue, borderRadius: 3 }] }}
+          options={baseOpts}
+        />
+      </div>
+    </Card>
+  );
+}
+
+function CoordinatorTab() {
+  return (
+    <>
+      <Card>
+        <h3 style={{ margin: '0 0 12px', color: TP.navy, fontWeight: 600 }}>Checkouts by treatment coordinator</h3>
+        <div style={{ height: 320 }}>
+          <Bar
+            data={{ labels: byTC.map((t) => t.tc), datasets: [{ label: 'Checkouts', data: byTC.map((t) => t.checkouts), backgroundColor: TP.green, borderRadius: 4 }] }}
+            options={baseOpts}
+          />
+        </div>
+      </Card>
+      <Card>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr><Th>Treatment Coordinator</Th><Th right>Checkouts</Th><Th right>Collected</Th><Th right>Avg deal (plan)</Th><Th right>Avg days link→checkout</Th></tr>
+          </thead>
+          <tbody>
+            {byTC.map((t) => (
+              <tr key={t.tc}>
+                <Td bold>{t.tc}</Td>
+                <Td right>{t.checkouts}</Td>
+                <Td right>{money(t.amountPaid)}</Td>
+                <Td right>{money(t.totalAmountPaid / t.checkouts)}</Td>
+                <Td right>{t.avgDaysLinkSent.toFixed(1)}</Td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
+    </>
+  );
+}
+
+function RevenueTab() {
+  const labels = monthly.map((m) => monLabel(m.month));
+  return (
+    <>
+      <Card>
+        <h3 style={{ margin: '0 0 12px', color: TP.navy, fontWeight: 600 }}>Collected vs. total plan value, by month</h3>
+        <div style={{ height: 320 }}>
+          <Bar
+            data={{
+              labels,
+              datasets: [
+                { label: 'Collected', data: monthly.map((m) => m.amountPaid), backgroundColor: TP.blue, borderRadius: 4 },
+                { label: 'Total plan value', data: monthly.map((m) => m.totalAmountPaid), backgroundColor: TP.skyBlue, borderRadius: 4 },
+              ],
+            }}
+            options={{ ...baseOpts, plugins: { legend: { display: true, position: 'top' as const } } }}
+          />
+        </div>
+      </Card>
+      <Card>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr><Th>Month</Th><Th right>Collected</Th><Th right>Total plan value</Th><Th right>Avg deal (plan)</Th></tr>
+          </thead>
+          <tbody>
+            {monthly.map((m) => (
+              <tr key={m.month}>
+                <Td bold>{monLabel(m.month)}</Td>
+                <Td right>{money(m.amountPaid)}</Td>
+                <Td right>{money(m.totalAmountPaid)}</Td>
+                <Td right>{money(m.totalAmountPaid / m.checkouts)}</Td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
+    </>
   );
 }
