@@ -36,6 +36,7 @@ const heat = (v: number, max: number) => (v === 0 ? '#f8fafc' : `rgba(58,110,164
 const heatText = (v: number, max: number) => (v / max > 0.55 ? '#fff' : TP.text);
 
 const TABS = [
+  { id: 'overview', label: 'Overview' },
   { id: 'monthly', label: 'Monthly' },
   { id: 'weekly', label: 'Weekly' },
   { id: 'events', label: 'Events' },
@@ -79,7 +80,7 @@ function Td({ children, right, bold }: { children: ReactNode; right?: boolean; b
 }
 
 export default function EnrollmentView() {
-  const [tab, setTab] = useState<TabId>('monthly');
+  const [tab, setTab] = useState<TabId>('overview');
 
   return (
     <div>
@@ -114,6 +115,7 @@ export default function EnrollmentView() {
         </div>
       </nav>
 
+      {tab === 'overview' && <OverviewTab />}
       {tab === 'monthly' && <MonthlyTab />}
       {tab === 'weekly' && <WeeklyTab />}
       {tab === 'events' && <EventsTab />}
@@ -132,6 +134,125 @@ function Stat({ label, value }: { label: string; value: string }) {
     <div>
       <div style={{ fontSize: 12, color: '#6b7280' }}>{label}</div>
       <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy }}>{value}</div>
+    </div>
+  );
+}
+
+function OverviewTab() {
+  const overall = (100 * convSummary.checkouts) / convSummary.submissions;
+  const linkPct = (100 * convSummary.linkSent) / convSummary.submissions;
+  const linkToCO = (100 * convSummary.checkouts) / convSummary.linkSent;
+  const funnel = [
+    { label: 'Submitted (2026 leads)', n: convSummary.submissions, pct: 100, color: TP.navy },
+    { label: 'Got a checkout link', n: convSummary.linkSent, pct: linkPct, color: TP.blue },
+    { label: 'Checked out', n: convSummary.checkouts, pct: overall, color: TP.green },
+  ];
+  const top = [...conversionByReferrer].filter((r) => r.referrer !== '(blank)').sort((a, b) => b.rate - a.rate).slice(0, 4);
+  const bottom = [...conversionByReferrer].filter((r) => r.referrer !== '(blank)').sort((a, b) => a.rate - b.rate).slice(0, 4);
+  const mature = conversionMonthly.filter((m) => m.month <= conversionMatureThrough);
+
+  return (
+    <>
+      {/* KPI row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 18 }}>
+        <KPI label="Leads submitted (2026)" value={convSummary.submissions.toLocaleString()} />
+        <KPI label="Conversion rate" value={`${overall.toFixed(1)}%`} sub="submission → checkout" accent />
+        <KPI label="Checkouts (YTD)" value={summary.checkouts.toLocaleString()} />
+        <KPI label="Collected (YTD)" value={money(summary.amountPaid)} />
+        <KPI label="Avg deal" value={money(summary.totalAmountPaid / summary.checkouts)} />
+      </div>
+
+      {/* Hero funnel */}
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>The enrollment funnel</h3>
+        <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 18 }}>Of every 2026 lead, where they end up. The two gaps are where we lose people.</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {funnel.map((f, i) => (
+            <div key={f.label}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ width: 190, textAlign: 'right', fontSize: 14, color: TP.text, fontWeight: 600 }}>{f.label}</div>
+                <div style={{ flex: 1, background: '#f1f5f9', borderRadius: 6, overflow: 'hidden', height: 46 }}>
+                  <div style={{ width: `${f.pct}%`, minWidth: 90, background: f.color, height: '100%', display: 'flex', alignItems: 'center', paddingLeft: 14, color: '#fff', fontWeight: 700, fontSize: 16, borderRadius: 6, transition: 'width .3s' }}>
+                    {f.n.toLocaleString()} <span style={{ fontWeight: 500, fontSize: 12, marginLeft: 8, opacity: 0.85 }}>{f.pct.toFixed(0)}%</span>
+                  </div>
+                </div>
+              </div>
+              {i < funnel.length - 1 && (
+                <div style={{ marginLeft: 204, fontSize: 12, color: '#9ca3af', padding: '3px 0' }}>
+                  ↓ {i === 0 ? `${linkPct.toFixed(0)}% get a checkout link (the rest never reach the pay step)` : `${linkToCO.toFixed(0)}% of those who get a link actually check out`}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 14 }}>Those checkouts produced {money(summary.amountPaid)} collected YTD across {summary.checkouts.toLocaleString()} total checkouts (incl. some from pre-2026 leads).</div>
+      </Card>
+
+      {/* Two-up: trend + channels */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 16 }}>
+        <Card>
+          <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Is conversion healthy?</h3>
+          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Submission→checkout by month (mature months only). Drifted from ~28% early to ~22–24% by mid-year.</div>
+          <div style={{ height: 230 }}>
+            <Bar
+              data={{ labels: mature.map((m) => monLabel(m.month).replace(' 2026', '')), datasets: [{ type: 'bar' as const, label: 'Conversion %', data: mature.map((m) => m.subToCO), backgroundColor: TP.blue, borderRadius: 4 }] }}
+              options={{ ...baseOpts, scales: { y: { beginAtZero: true, title: { display: true, text: '%' } } } }}
+            />
+          </div>
+        </Card>
+        <Card>
+          <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Which channels convert?</h3>
+          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Warm/referral sources convert ~2× paid/cold. (Overall {overall.toFixed(1)}%.)</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#1a7f5a', marginBottom: 4 }}>BEST</div>
+          {top.map((r) => <ChannelRow key={r.referrer} r={r} good />)}
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#c0392b', margin: '10px 0 4px' }}>WORST (note the volume)</div>
+          {bottom.map((r) => <ChannelRow key={r.referrer} r={r} />)}
+        </Card>
+      </div>
+
+      {/* Narrative strip */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14, marginTop: 4 }}>
+        <StoryCard color="#1a7f5a" title="✅ What's working">
+          {money(summary.amountPaid)} collected across {summary.checkouts.toLocaleString()} checkouts. Warm channels — ambassadors (37%), parents (29%), the podcast (26%), influencers (26%) — convert ~2× cold/paid. Coordinators are closing faster (33→18 days) and collecting more upfront (74→79%).
+        </StoryCard>
+        <StoryCard color="#c0392b" title="⚠️ The problem">
+          Conversion is ~{overall.toFixed(0)}% and has drifted down from ~28% early in the year. Biggest leak: <b>Dental Office sends the 2nd-most leads (2,765) but converts at just 16.5%</b>; Google Ads is worst (11%). A quarter of all leads end Closed Lost, and 20% stall at the checkout-link step.
+        </StoryCard>
+        <StoryCard color={TP.blue} title="🎯 Highest-leverage moves">
+          Reinstate the &quot;schedule a call&quot; step (removed Jul 9 — the conversion dip and the win-back collapse both track to it). Shift spend from Google Ads toward warm channels. Fix the link→checkout handoff — that&apos;s the single biggest drop.
+        </StoryCard>
+      </div>
+    </>
+  );
+}
+
+function KPI({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: boolean }) {
+  return (
+    <div style={{ border: `1px solid ${accent ? TP.blue : '#e5e7eb'}`, borderRadius: 10, padding: '12px 16px', background: accent ? `${TP.blue}0D` : '#fff' }}>
+      <div style={{ fontSize: 12, color: '#6b7280' }}>{label}</div>
+      <div style={{ fontSize: 26, fontWeight: 800, color: TP.navy, lineHeight: 1.1 }}>{value}</div>
+      {sub && <div style={{ fontSize: 11, color: '#9ca3af' }}>{sub}</div>}
+    </div>
+  );
+}
+
+function ChannelRow({ r, good }: { r: { referrer: string; submissions: number; rate: number }; good?: boolean }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3px 0', fontSize: 13 }}>
+      <div style={{ flex: 1, color: TP.text }}>{r.referrer} <span style={{ color: '#9ca3af', fontSize: 11 }}>({r.submissions.toLocaleString()})</span></div>
+      <div style={{ width: 120, background: '#f1f5f9', borderRadius: 4, height: 16, overflow: 'hidden' }}>
+        <div style={{ width: `${Math.min(100, r.rate * 2.5)}%`, height: '100%', background: good ? TP.green : '#e06666', borderRadius: 4 }} />
+      </div>
+      <div style={{ width: 44, textAlign: 'right', fontWeight: 700, color: good ? '#1a7f5a' : '#c0392b' }}>{r.rate}%</div>
+    </div>
+  );
+}
+
+function StoryCard({ color, title, children }: { color: string; title: string; children: ReactNode }) {
+  return (
+    <div style={{ border: '1px solid #e5e7eb', borderTop: `4px solid ${color}`, borderRadius: 10, padding: '14px 16px', background: '#fff' }}>
+      <div style={{ fontWeight: 700, color: TP.navy, marginBottom: 6 }}>{title}</div>
+      <div style={{ fontSize: 13, color: TP.text, lineHeight: 1.5 }}>{children}</div>
     </div>
   );
 }
