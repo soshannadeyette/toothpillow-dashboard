@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
-import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, type EventRow } from '@/data/enrollmentCheckouts';
+import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, type EventRow } from '@/data/enrollmentCheckouts';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -84,17 +84,19 @@ export default function EnrollmentView() {
 
   return (
     <div>
-      {/* Source line + summary */}
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 13, color: '#6b7280' }}>Checkouts · Jan 1 – Oct 5, 2026 · from Salesforce</div>
-        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', marginTop: 10 }}>
-          <Stat label="Checkouts (YTD)" value={summary.checkouts.toLocaleString()} />
-          <Stat label="Collected" value={money(summary.amountPaid)} />
-          <Stat label="Total plan value" value={money(summary.totalAmountPaid)} />
-          <Stat label="Avg deal (plan)" value={money(summary.totalAmountPaid / summary.checkouts)} />
-          <Stat label="New (Lava) / Win-back (Ice)" value={`${segTotal('Lava')} / ${segTotal('Ice')}`} />
+      {/* Source line + summary — hidden on the Overview (it has its own exec KPIs) */}
+      {tab !== 'overview' && (
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 13, color: '#6b7280' }}>Checkouts · Jan 1 – Oct 5, 2026 · from Salesforce</div>
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', marginTop: 10 }}>
+            <Stat label="Checkouts (YTD)" value={summary.checkouts.toLocaleString()} />
+            <Stat label="Collected" value={money(summary.amountPaid)} />
+            <Stat label="Total plan value" value={money(summary.totalAmountPaid)} />
+            <Stat label="Avg deal (plan)" value={money(summary.totalAmountPaid / summary.checkouts)} />
+            <Stat label="New (Lava) / Win-back (Ice)" value={`${segTotal('Lava')} / ${segTotal('Ice')}`} />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Sub-tab bar */}
       <nav className="bg-white" style={{ borderBottom: '2px solid #e0e0e0', marginBottom: 20 }}>
@@ -142,17 +144,41 @@ function OverviewTab() {
   const overall = (100 * convSummary.checkouts) / convSummary.submissions;
   const linkPct = (100 * convSummary.linkSent) / convSummary.submissions;
   const linkToCO = (100 * convSummary.checkouts) / convSummary.linkSent;
+  const lostNoLink = convSummary.submissions - convSummary.linkSent;
+  const lostAtPay = convSummary.linkSent - convSummary.checkouts;
   const funnel = [
-    { label: 'Submitted (2026 leads)', n: convSummary.submissions, pct: 100, color: TP.navy },
-    { label: 'Got a checkout link', n: convSummary.linkSent, pct: linkPct, color: TP.blue },
-    { label: 'Checked out', n: convSummary.checkouts, pct: overall, color: TP.green },
+    { label: 'Submitted (2026 leads)', n: convSummary.submissions, pct: 100, color: TP.navy, lost: lostNoLink, lostNote: 'never got a checkout link' },
+    { label: 'Got a checkout link', n: convSummary.linkSent, pct: linkPct, color: TP.blue, lost: lostAtPay, lostNote: 'got a link but never checked out' },
+    { label: 'Checked out', n: convSummary.checkouts, pct: overall, color: TP.green, lost: 0, lostNote: '' },
   ];
   const top = [...conversionByReferrer].filter((r) => r.referrer !== '(blank)').sort((a, b) => b.rate - a.rate).slice(0, 4);
   const bottom = [...conversionByReferrer].filter((r) => r.referrer !== '(blank)').sort((a, b) => a.rate - b.rate).slice(0, 4);
   const mature = conversionMonthly.filter((m) => m.month <= conversionMatureThrough);
+  const matureLabels = mature.map((m) => monLabel(m.month).replace(' 2026', ''));
+
+  // Opportunity sizing (CEO hook) — conservative, on collected cash
+  const collectedPer = summary.amountPaid / summary.checkouts;
+  const perPoint = Math.round(convSummary.submissions / 100);
+  const earlyAvg = mature.slice(0, 4).reduce((s, m) => s + m.subToCO, 0) / 4;
+  const liftGain = Math.round(((earlyAvg - overall) / 100) * convSummary.submissions);
+  const dental = conversionByReferrer.find((r) => r.referrer === 'Dental Office');
+  const dentalGain = dental ? Math.round(((overall - dental.rate) / 100) * dental.submissions) : 0;
+  const mShort = (n: number) => (n >= 1e6 ? `$${(n / 1e6).toFixed(1)}M` : `$${Math.round(n / 1000)}K`);
+  const pctAxis = { ...baseOpts, scales: { y: { beginAtZero: true, max: 50, title: { display: true, text: '%' } } } };
+  const convLineAnnotations: Record<string, object> = {
+    mayDrop: { type: 'box', xMin: 3.5, xMax: 4.5, backgroundColor: 'rgba(224,102,102,0.12)', borderColor: 'rgba(224,102,102,0.5)', borderWidth: 1, label: { display: true, content: 'MAY: cause unknown', position: { x: 'center', y: 'start' } as const, color: '#c0392b', font: { size: 11, weight: 'bold' as const } } },
+    callAdded: { type: 'line', xMin: 3, xMax: 3, borderColor: '#9ca3af', borderWidth: 1.5, borderDash: [5, 3], label: { display: true, content: 'call step added', position: 'end' as const, backgroundColor: '#9ca3af', color: '#fff', font: { size: 9 }, padding: { x: 4, y: 2 } } },
+    callRemoved: { type: 'line', xMin: 6, xMax: 6, borderColor: '#9ca3af', borderWidth: 1.5, borderDash: [5, 3], label: { display: true, content: 'call step removed', position: 'end' as const, backgroundColor: '#9ca3af', color: '#fff', font: { size: 9 }, padding: { x: 4, y: 2 } } },
+  };
 
   return (
     <>
+      {/* Exec header */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 22, fontWeight: 800, color: TP.navy }}>Enrollment — Executive Summary</div>
+        <div style={{ fontSize: 12, color: '#9ca3af' }}>2026 year-to-date · as of Oct 5, 2026 · source: Salesforce</div>
+      </div>
+
       {/* KPI row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 18 }}>
         <KPI label="Leads submitted (2026)" value={convSummary.submissions.toLocaleString()} />
@@ -165,61 +191,109 @@ function OverviewTab() {
       {/* Hero funnel */}
       <Card>
         <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>The enrollment funnel</h3>
-        <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 18 }}>Of every 2026 lead, where they end up. The two gaps are where we lose people.</div>
+        <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 18 }}>Of every 2026 lead, where they end up. The red numbers are the people we lose at each step.</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {funnel.map((f, i) => (
             <div key={f.label}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                 <div style={{ width: 190, textAlign: 'right', fontSize: 14, color: TP.text, fontWeight: 600 }}>{f.label}</div>
                 <div style={{ flex: 1, background: '#f1f5f9', borderRadius: 6, overflow: 'hidden', height: 46 }}>
-                  <div style={{ width: `${f.pct}%`, minWidth: 90, background: f.color, height: '100%', display: 'flex', alignItems: 'center', paddingLeft: 14, color: '#fff', fontWeight: 700, fontSize: 16, borderRadius: 6, transition: 'width .3s' }}>
+                  <div style={{ width: `${f.pct}%`, minWidth: 110, background: f.color, height: '100%', display: 'flex', alignItems: 'center', paddingLeft: 14, color: '#fff', fontWeight: 700, fontSize: 16, borderRadius: 6, transition: 'width .3s' }}>
                     {f.n.toLocaleString()} <span style={{ fontWeight: 500, fontSize: 12, marginLeft: 8, opacity: 0.85 }}>{f.pct.toFixed(0)}%</span>
                   </div>
                 </div>
               </div>
               {i < funnel.length - 1 && (
-                <div style={{ marginLeft: 204, fontSize: 12, color: '#9ca3af', padding: '3px 0' }}>
-                  ↓ {i === 0 ? `${linkPct.toFixed(0)}% get a checkout link (the rest never reach the pay step)` : `${linkToCO.toFixed(0)}% of those who get a link actually check out`}
+                <div style={{ marginLeft: 204, fontSize: 12, padding: '3px 0' }}>
+                  <span style={{ color: '#c0392b', fontWeight: 700 }}>↓ −{f.lost.toLocaleString()}</span> <span style={{ color: '#9ca3af' }}>{f.lostNote}</span>
                 </div>
               )}
             </div>
           ))}
         </div>
-        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 14 }}>Those checkouts produced {money(summary.amountPaid)} collected YTD across {summary.checkouts.toLocaleString()} total checkouts (incl. some from pre-2026 leads).</div>
       </Card>
 
-      {/* Two-up: trend + channels */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 16 }}>
-        <Card>
-          <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Is conversion healthy?</h3>
-          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Submission→checkout by month (mature months only). Drifted from ~28% early to ~22–24% by mid-year.</div>
-          <div style={{ height: 230 }}>
+      {/* Opportunity banner — the $ prize */}
+      <div style={{ background: TP.navy, color: '#fff', borderRadius: 12, padding: '18px 22px', marginBottom: 20 }}>
+        <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 8 }}>💰 The size of the prize</div>
+        <div style={{ fontSize: 14, lineHeight: 1.6, opacity: 0.95 }}>
+          At ~{convSummary.submissions.toLocaleString()} leads a year, <b>every 1 point of conversion ≈ {perPoint} more checkouts ≈ ~{mShort(perPoint * collectedPer)} collected.</b> Conversion ran ~{earlyAvg.toFixed(0)}% Jan–Apr, then dropped ~5 points in May and never recovered. <b style={{ color: TP.green }}>Simply getting back to the April rate ≈ ~{liftGain.toLocaleString()} more checkouts — about {mShort(liftGain * collectedPer)}/yr</b> — with zero new ad spend. The leverage is in finding what broke in May, not in buying more leads.
+        </div>
+      </div>
+
+      {/* Conversion health: two side-by-side + combined */}
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Conversion health — two ways to read it</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>
+          <b>Submission→checkout</b> = overall funnel health (lead quality + nurture + close). <b>Checkout-link→checkout</b> = how well we close once a family is ready to pay. Both have slid this year — so it&apos;s not just lead quality; closing weakened too. Mature months only (Jan–Jul).
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: TP.blue, marginBottom: 6 }}>Submission → checkout</div>
+            <div style={{ height: 210 }}>
+              <Bar data={{ labels: matureLabels, datasets: [{ type: 'bar' as const, label: 'Sub→CO %', data: mature.map((m) => m.subToCO), backgroundColor: TP.blue, borderRadius: 4 }] }} options={pctAxis} />
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: TP.green, marginBottom: 6 }}>Checkout link → checkout</div>
+            <div style={{ height: 210 }}>
+              <Bar data={{ labels: matureLabels, datasets: [{ type: 'bar' as const, label: 'Link→CO %', data: mature.map((m) => m.linkToCO), backgroundColor: TP.green, borderRadius: 4 }] }} options={pctAxis} />
+            </div>
+          </div>
+        </div>
+        <div style={{ marginTop: 18 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: TP.navy, marginBottom: 6 }}>Both rates over time — with what changed, when</div>
+          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>The schedule-a-call step (added Apr, removed Jul) does <b>not</b> line up with the drop. Both rates fell in <b>May</b> — and there&apos;s no known cause on it yet. That&apos;s the thing to run down.</div>
+          <div style={{ height: 260 }}>
             <Bar
-              data={{ labels: mature.map((m) => monLabel(m.month).replace(' 2026', '')), datasets: [{ type: 'bar' as const, label: 'Conversion %', data: mature.map((m) => m.subToCO), backgroundColor: TP.blue, borderRadius: 4 }] }}
-              options={{ ...baseOpts, scales: { y: { beginAtZero: true, title: { display: true, text: '%' } } } }}
+              data={{
+                labels: matureLabels,
+                datasets: [
+                  // @ts-expect-error mixed line on Bar
+                  { type: 'line' as const, label: 'Submission → checkout %', data: mature.map((m) => m.subToCO), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 3, tension: 0.3 },
+                  // @ts-expect-error mixed line on Bar
+                  { type: 'line' as const, label: 'Checkout link → checkout %', data: mature.map((m) => m.linkToCO), borderColor: TP.green, backgroundColor: TP.green, borderWidth: 2.5, pointRadius: 3, tension: 0.3 },
+                ],
+              }}
+              options={{
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: true, position: 'top' as const },
+                  annotation: { annotations: convLineAnnotations },
+                },
+                scales: { y: { beginAtZero: true, max: 50, title: { display: true, text: '%' } } },
+              }}
             />
           </div>
-        </Card>
-        <Card>
-          <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Which channels convert?</h3>
-          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Warm/referral sources convert ~2× paid/cold. (Overall {overall.toFixed(1)}%.)</div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#1a7f5a', marginBottom: 4 }}>BEST</div>
-          {top.map((r) => <ChannelRow key={r.referrer} r={r} good />)}
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#c0392b', margin: '10px 0 4px' }}>WORST (note the volume)</div>
-          {bottom.map((r) => <ChannelRow key={r.referrer} r={r} />)}
-        </Card>
-      </div>
+        </div>
+      </Card>
+
+      {/* Channels (full width) */}
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Which channels convert?</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Warm/referral sources convert ~2× paid/cold ones. (Overall {overall.toFixed(1)}%. Count = leads sent.)</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#1a7f5a', marginBottom: 4 }}>BEST</div>
+            {top.map((r) => <ChannelRow key={r.referrer} r={r} good />)}
+          </div>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#c0392b', marginBottom: 4 }}>WORST (note the volume)</div>
+            {bottom.map((r) => <ChannelRow key={r.referrer} r={r} />)}
+          </div>
+        </div>
+      </Card>
 
       {/* Narrative strip */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14, marginTop: 4 }}>
         <StoryCard color="#1a7f5a" title="✅ What's working">
           {money(summary.amountPaid)} collected across {summary.checkouts.toLocaleString()} checkouts. Warm channels — ambassadors (37%), parents (29%), the podcast (26%), influencers (26%) — convert ~2× cold/paid. Coordinators are closing faster (33→18 days) and collecting more upfront (74→79%).
         </StoryCard>
-        <StoryCard color="#c0392b" title="⚠️ The problem">
-          Conversion is ~{overall.toFixed(0)}% and has drifted down from ~28% early in the year. Biggest leak: <b>Dental Office sends the 2nd-most leads (2,765) but converts at just 16.5%</b>; Google Ads is worst (11%). A quarter of all leads end Closed Lost, and 20% stall at the checkout-link step.
+        <StoryCard color="#c0392b" title="⚠️ The problem — May">
+          Conversion was healthy (~{earlyAvg.toFixed(0)}%) through April, then <b>dropped ~5 points in May and stayed down</b> — across <b>every channel and every coordinator</b>, concentrated at the payment step (link→checkout fell 46%→33% even as more people got links). That&apos;s not lead quality or one bad channel; <b>something changed in the checkout experience ~May 1</b>, and it&apos;s not logged anywhere.
         </StoryCard>
         <StoryCard color={TP.blue} title="🎯 Highest-leverage moves">
-          Reinstate the &quot;schedule a call&quot; step (removed Jul 9 — the conversion dip and the win-back collapse both track to it). Shift spend from Google Ads toward warm channels. Fix the link→checkout handoff — that&apos;s the single biggest drop.
+          <b>1. Find what changed at checkout in May</b> (price, checkout page, financing, discount, or script) and reverse it — worth ~{mShort(liftGain * collectedPer)}/yr. <b>2.</b> Fix the Dental Office channel (2,765 leads, 16.5%). <b>3.</b> Tighten the link→checkout handoff. (Reinstating schedule-a-call is worth testing, but the numbers don&apos;t make it the headline.)
         </StoryCard>
       </div>
     </>
@@ -586,11 +660,57 @@ function ConversionTab() {
 function LeadSourceTab() {
   const overall = (100 * convSummary.checkouts) / convSummary.submissions;
   const byRate = [...conversionByReferrer].sort((a, b) => b.rate - a.rate);
+  const matureSrc = sourceMonthly.filter((m) => m.month <= conversionMatureThrough);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const convSrcData: any = {
+    labels: matureSrc.map((m) => monLabel(m.month).replace(' 2026', '')),
+    datasets: ['Influencer', 'Dental Office', 'Online Search', 'Podcast'].map((src) => ({
+      type: 'line' as const,
+      label: src,
+      data: matureSrc.map((m) => (m.subs[src] ? Math.round((1000 * m.cos[src]) / m.subs[src]) / 10 : null)),
+      borderColor: sourceColors[src],
+      backgroundColor: sourceColors[src],
+      borderWidth: 2,
+      pointRadius: 2,
+      tension: 0.3,
+      spanGaps: true,
+    })),
+  };
   return (
     <>
       <div style={{ marginBottom: 14, fontSize: 13, color: TP.text, background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 8, padding: '10px 14px' }}>
-        Which channels actually convert (not just which send leads). Overall is <b>{overall.toFixed(1)}%</b>. Warm/referral sources (Ambassador, Parent) convert ~2× paid/cold ones. <b>Dental Office sends the 2nd-most leads but converts far below average; Google Ads is the weakest.</b>
+        Which channels actually convert (not just which send leads). Overall is <b>{overall.toFixed(1)}%</b>. Warm/referral sources (Ambassador, Parent) convert ~2× paid/cold ones. <b>Dental Office sends the 2nd-most leads but converts far below average; Google Ads is the weakest.</b> Note: <b>Google Ads is only ~3% of submissions</b> — even at 0% conversion it would move the overall rate by ~0.3 pts, so it can&apos;t explain the May drop.
       </div>
+
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Lead mix by submission month (share of submissions)</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>What we actually get each month. The low-converters (Google Ads, the pale sliver) are a small share — so a channel can&apos;t swing the overall rate unless it&apos;s big.</div>
+        <div style={{ height: 300 }}>
+          <Bar
+            data={{
+              labels: sourceMonthly.map((m) => monLabel(m.month).replace(' 2026', '')),
+              datasets: sourceOrder.map((src) => ({
+                label: src,
+                data: sourceMonthly.map((m) => {
+                  const tot = Object.values(m.subs).reduce((s, v) => s + v, 0) || 1;
+                  return Math.round((100 * m.subs[src]) / tot);
+                }),
+                backgroundColor: sourceColors[src],
+                stack: 'mix',
+              })),
+            }}
+            options={{ ...baseOpts, plugins: { legend: { display: true, position: 'bottom' as const } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, max: 100, title: { display: true, text: '% of submissions' } } } }}
+          />
+        </div>
+      </Card>
+
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Conversion by source, over time</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Mature months (Jan–Jul). The May drop shows up in <b>every</b> major source at once — that&apos;s the signature of a system/checkout change, not a channel problem.</div>
+        <div style={{ height: 300 }}>
+          <Bar data={convSrcData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom' as const } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Conversion %' } } } }} />
+        </div>
+      </Card>
       <Card>
         <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Conversion rate by lead source</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Sorted best → worst. Green = above the {overall.toFixed(1)}% overall rate, red = below.</div>
