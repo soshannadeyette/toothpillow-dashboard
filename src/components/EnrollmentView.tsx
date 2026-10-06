@@ -206,8 +206,29 @@ function DiagnosisTab() {
       { type: 'line' as const, label: 'Expanders First', data: expLine, borderColor: '#8B5CF6', backgroundColor: '#8B5CF6', borderWidth: 2.5, pointRadius: 3, tension: 0.3, spanGaps: false },
     ],
   };
+  // Shift-share decomposition of the Feb–Apr → Jun–Jul conversion change (both mature)
+  const wfData = [
+    [0, 27.7],       // baseline
+    [20.7, 27.7],    // standard pool converts worse: -7.0
+    [20.7, 22.9],    // mix shift (denials -> approvals/expanders) + other: +2.2
+    [0, 22.9],       // now
+  ];
   return (
     <>
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>What moved conversion: Feb–Apr → now (decomposition)</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Breaks the 4.8-pt conversion change into its parts. The <b>standard-approval pool converting worse</b> accounts for −7.0 pts (more than the whole drop); the <b>recommendation mix shift</b> (fewer denials, more expanders/approvals) is <b>+2.2 pts — it helped</b>. If the standard pool had held its rate, conversion today would be ~29.9%, above baseline.</div>
+        <div style={{ height: 300 }}>
+          <Bar
+            data={{
+              labels: ['Baseline (Feb–Apr) 27.7%', 'Standard pool converts worse  −7.0', 'Mix shift (denials→appr./exp.)  +2.2', 'Now (Jun–Jul) 22.9%'],
+              datasets: [{ label: 'Conversion %', data: wfData, backgroundColor: [TP.navy, '#e06666', '#6AA84F', TP.blue], borderRadius: 3 }],
+            }}
+            options={{ ...baseOpts, scales: { y: { beginAtZero: true, suggestedMax: 32, title: { display: true, text: 'Conversion %' } }, x: { ticks: { maxRotation: 0, autoSkip: false, font: { size: 10 } } } } }}
+          />
+        </div>
+      </Card>
+
       <Card>
         <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Submissions, enrollments &amp; conversion by month</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Bars = submissions &amp; enrollments (left axis). Line = conversion rate (right axis). Markers: the May conversion break and the July price increase.</div>
