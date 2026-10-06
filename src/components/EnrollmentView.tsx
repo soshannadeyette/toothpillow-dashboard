@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
-import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, type EventRow } from '@/data/enrollmentCheckouts';
+import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, simMonthly, type EventRow } from '@/data/enrollmentCheckouts';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -38,6 +38,7 @@ const heatText = (v: number, max: number) => (v / max > 0.55 ? '#fff' : TP.text)
 const TABS = [
   { id: 'overview', label: 'Overview' },
   { id: 'diagnosis', label: 'Why (May break)' },
+  { id: 'efsim', label: 'Expanders sim' },
   { id: 'monthly', label: 'Monthly' },
   { id: 'weekly', label: 'Weekly' },
   { id: 'events', label: 'Events' },
@@ -120,6 +121,7 @@ export default function EnrollmentView() {
 
       {tab === 'overview' && <OverviewTab />}
       {tab === 'diagnosis' && <DiagnosisTab />}
+      {tab === 'efsim' && <ExpandersSimTab />}
       {tab === 'monthly' && <MonthlyTab />}
       {tab === 'weekly' && <WeeklyTab />}
       {tab === 'events' && <EventsTab />}
@@ -139,6 +141,67 @@ function Stat({ label, value }: { label: string; value: string }) {
       <div style={{ fontSize: 12, color: '#6b7280' }}>{label}</div>
       <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy }}>{value}</div>
     </div>
+  );
+}
+
+function ExpandersSimTab() {
+  const [fPct, setFPct] = useState(10); // % of EF kids who would otherwise have been standard-approved
+  const f = fPct / 100;
+  const labels = simMonthly.map((s) => monLabel(s.month).replace(' 2026', ''));
+  const actual = simMonthly.map((s) => s.enroll);
+  // counterfactual: remove actual EF checkouts, add what the f-fraction would convert at standard
+  const noEF = simMonthly.map((s) => Math.round(s.enroll - s.efCo + s.efRec * f * (s.stdConv / 100)));
+  const actualYTD = actual.reduce((a, b) => a + b, 0);
+  const noEFYTD = noEF.reduce((a, b) => a + b, 0);
+  const delta = actualYTD - noEFYTD; // >0 = EF added enrollments
+  const breakeven = 85; // where delta crosses 0 (EF kids concentrated in low-stdConv months pushes this up from a flat-33% estimate)
+  return (
+    <>
+      <div style={{ marginBottom: 14, fontSize: 13, color: TP.text, background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 8, padding: '12px 16px', lineHeight: 1.55 }}>
+        <b>Did Expanders First cost us enrollments?</b> Move the slider to set your assumption: of the kids recommended Expanders First, what % would <i>otherwise</i> have been <b>standard-approved</b> (vs. denied)? The data says this is near 0 — the expanders rise matched the denial drop, and standard-approval share held — so EF mostly converted kids who&apos;d have been auto-zeros. <b>EF only costs enrollments above ~{breakeven}%.</b>
+      </div>
+
+      <Card>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 14 }}>
+          <label style={{ fontSize: 13, fontWeight: 600, color: TP.navy }}>
+            Assume <span style={{ color: TP.blue, fontSize: 18 }}>{fPct}%</span> of expander kids would&apos;ve been standard-approved
+          </label>
+          <input type="range" min={0} max={100} value={fPct} onChange={(e) => setFPct(parseInt(e.target.value, 10))} style={{ flex: 1, minWidth: 220, accentColor: TP.blue }} />
+        </div>
+        <div style={{ marginBottom: 12, fontSize: 14, fontWeight: 700, color: delta >= 0 ? '#1a7f5a' : '#c0392b' }}>
+          At {fPct}%: Expanders First {delta >= 0 ? 'ADDED' : 'COST'} ~{Math.abs(delta).toLocaleString()} enrollments YTD
+          <span style={{ fontWeight: 400, color: '#6b7280', fontSize: 12 }}> ({actualYTD.toLocaleString()} actual vs {noEFYTD.toLocaleString()} without EF). {delta >= 0 ? 'EF is net-positive here.' : 'EF is net-negative here.'} Data-supported assumption: ~0–10%.</span>
+        </div>
+        <div style={{ height: 340 }}>
+          <Bar
+            data={{
+              labels,
+              datasets: [
+                { type: 'bar' as const, label: 'Actual enrollments', data: actual, backgroundColor: `${TP.skyBlue}B3`, borderRadius: 3, order: 3 },
+                // @ts-expect-error mixed line
+                { type: 'line' as const, label: 'If no Expanders First', data: noEF, borderColor: '#8B5CF6', backgroundColor: '#8B5CF6', borderWidth: 2.5, pointRadius: 3, borderDash: [6, 3], tension: 0.3, order: 1 },
+                // @ts-expect-error mixed line
+                { type: 'line' as const, label: 'Actual (line)', data: actual, borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 3, tension: 0.3, order: 2 },
+              ],
+            }}
+            options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Enrollments / month' } } } }}
+          />
+        </div>
+        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>By submission cohort. Aug–Oct are still maturing (EF&apos;s contribution there is understated). Counterfactual assumes would-be-standard EF kids convert at that month&apos;s standard rate.</div>
+      </Card>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14 }}>
+        <StoryCard color="#1a7f5a" title="✅ Expanders came from denials, not approvals">
+          Apr→Aug: expanders share rose ~+10 pts, denials fell ~−10 pts, and <b>standard-approval share held flat (~78%)</b>. If approvals had been cannibalized, standard share would have dropped. It didn&apos;t — so EF absorbed kids we&apos;d have turned away.
+        </StoryCard>
+        <StoryCard color={TP.blue} title="➕ EF added ~197 enrollments">
+          Those ~840 expander kids convert at ~23% instead of the ~0% they&apos;d get as denials — about <b>+197 enrollments YTD.</b> EF grew volume; it only lowers the average <i>rate</i> as a mix effect.
+        </StoryCard>
+        <StoryCard color="#c0392b" title="⚠️ So EF isn't the enrollment problem">
+          The shortfall is the <b>May checkout break</b> (standard approvals fell 40%→31%). Fixing that recovers far more than anything about Expanders First. EF is a deliberate, roughly net-positive choice.
+        </StoryCard>
+      </div>
+    </>
   );
 }
 

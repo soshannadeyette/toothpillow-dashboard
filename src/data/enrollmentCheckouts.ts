@@ -76,6 +76,23 @@ export type DiagnosisRow = { month: string; submissions: number; convRate: numbe
 export const diagnosisMonthly: DiagnosisRow[] = [{"month": "2026-01", "submissions": 1416, "convRate": 26.7, "stdConv": 43.2, "expConv": 100.0, "expShare": 0.6, "rejectShare": 4.9}, {"month": "2026-02", "submissions": 1519, "convRate": 25.1, "stdConv": 40.2, "expConv": 100.0, "expShare": 0.2, "rejectShare": 16.2}, {"month": "2026-03", "submissions": 1606, "convRate": 29.2, "stdConv": 42.6, "expConv": 97.1, "expShare": 2.2, "rejectShare": 19.6}, {"month": "2026-04", "submissions": 1229, "convRate": 28.9, "stdConv": 40.5, "expConv": 70.4, "expShare": 2.2, "rejectShare": 14.9}, {"month": "2026-05", "submissions": 1131, "convRate": 23.9, "stdConv": 30.8, "expConv": 24.2, "expShare": 5.5, "rejectShare": 7.3}, {"month": "2026-06", "submissions": 1489, "convRate": 24.6, "stdConv": 31.9, "expConv": 19.0, "expShare": 9.5, "rejectShare": 8.5}, {"month": "2026-07", "submissions": 1997, "convRate": 21.6, "stdConv": 29.1, "expConv": 22.9, "expShare": 10.7, "rejectShare": 7.2}, {"month": "2026-08", "submissions": 1685, "convRate": 18.0, "stdConv": 25.0, "expConv": 14.7, "expShare": 12.1, "rejectShare": 6.2}, {"month": "2026-09", "submissions": 1378, "convRate": 11.1, "stdConv": 17.2, "expConv": 8.7, "expShare": 10.0, "rejectShare": 7.7}, {"month": "2026-10", "submissions": 174, "convRate": 0.6, "stdConv": 0.0, "expConv": 0.0, "expShare": 4.0, "rejectShare": 2.9}];
 export const priceIncreaseMonth = "2026-07";
 
+// Expanders-First simulation: per submission month, total enrollments (checkouts), expander recs & checkouts, standard conv.
+// Counterfactual "no EF": EF kids revert to what they'd have been — a fraction f would've been standard-approved
+// (convert at that month's stdConv), the rest would've been denied (0). Data says f is near 0 (standard share held).
+export type SimRow = { month: string; enroll: number; efRec: number; efCo: number; stdConv: number };
+export const simMonthly: SimRow[] = [
+  { month: '2026-01', enroll: 378, efRec: 8, efCo: 8, stdConv: 43.2 },
+  { month: '2026-02', enroll: 381, efRec: 3, efCo: 3, stdConv: 40.2 },
+  { month: '2026-03', enroll: 469, efRec: 35, efCo: 34, stdConv: 42.6 },
+  { month: '2026-04', enroll: 355, efRec: 27, efCo: 19, stdConv: 40.5 },
+  { month: '2026-05', enroll: 270, efRec: 62, efCo: 15, stdConv: 30.8 },
+  { month: '2026-06', enroll: 366, efRec: 142, efCo: 27, stdConv: 31.9 },
+  { month: '2026-07', enroll: 431, efRec: 214, efCo: 49, stdConv: 29.1 },
+  { month: '2026-08', enroll: 302, efRec: 204, efCo: 30, stdConv: 25.0 },
+  { month: '2026-09', enroll: 152, efRec: 138, efCo: 12, stdConv: 17.2 },
+  { month: '2026-10', enroll: 1, efRec: 7, efCo: 0, stdConv: 0 },
+];
+
 // Submissions + checkouts by submission month × lead source (for mix-over-time + conversion-by-source-by-month).
 export const sourceOrder = ['Influencer', 'Dental Office', 'Online Search', 'Podcast', 'Airway Ambassador', 'Parent', 'Google Ad', 'Other'];
 export type SourceMonthRow = { month: string; subs: Record<string, number>; cos: Record<string, number> };
