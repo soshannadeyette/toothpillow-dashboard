@@ -76,6 +76,23 @@ export type DiagnosisRow = { month: string; submissions: number; convRate: numbe
 export const diagnosisMonthly: DiagnosisRow[] = [{"month": "2026-01", "submissions": 1416, "convRate": 26.7, "stdConv": 43.2, "expConv": 100.0, "expShare": 0.6, "rejectShare": 4.9}, {"month": "2026-02", "submissions": 1519, "convRate": 25.1, "stdConv": 40.2, "expConv": 100.0, "expShare": 0.2, "rejectShare": 16.2}, {"month": "2026-03", "submissions": 1606, "convRate": 29.2, "stdConv": 42.6, "expConv": 97.1, "expShare": 2.2, "rejectShare": 19.6}, {"month": "2026-04", "submissions": 1229, "convRate": 28.9, "stdConv": 40.5, "expConv": 70.4, "expShare": 2.2, "rejectShare": 14.9}, {"month": "2026-05", "submissions": 1131, "convRate": 23.9, "stdConv": 30.8, "expConv": 24.2, "expShare": 5.5, "rejectShare": 7.3}, {"month": "2026-06", "submissions": 1489, "convRate": 24.6, "stdConv": 31.9, "expConv": 19.0, "expShare": 9.5, "rejectShare": 8.5}, {"month": "2026-07", "submissions": 1997, "convRate": 21.6, "stdConv": 29.1, "expConv": 22.9, "expShare": 10.7, "rejectShare": 7.2}, {"month": "2026-08", "submissions": 1685, "convRate": 18.0, "stdConv": 25.0, "expConv": 14.7, "expShare": 12.1, "rejectShare": 6.2}, {"month": "2026-09", "submissions": 1378, "convRate": 11.1, "stdConv": 17.2, "expConv": 8.7, "expShare": 10.0, "rejectShare": 7.7}, {"month": "2026-10", "submissions": 174, "convRate": 0.6, "stdConv": 0.0, "expConv": 0.0, "expShare": 4.0, "rejectShare": 2.9}];
 export const priceIncreaseMonth = "2026-07";
 
+// Fresh vs stale link->checkout. Fresh = link sent <=14 days after submission (brand-new lead).
+// Stale = re-sent to a 30+ day-old lead (promo blasts). freshConv = fresh link->checkout %; staleN = # stale re-sends.
+// Proves the May decline is REAL (fresh leads broke 38->30), not just blasting old leads. April's dip was the stale blast (328 re-sends).
+export type FreshStaleRow = { month: string; freshConv: number; staleN: number; staleConv: number | null };
+export const linkFreshStale: FreshStaleRow[] = [
+  { month: '2026-01', freshConv: 37.4, staleN: 0, staleConv: null },
+  { month: '2026-02', freshConv: 38.9, staleN: 14, staleConv: null },
+  { month: '2026-03', freshConv: 37.5, staleN: 16, staleConv: null },
+  { month: '2026-04', freshConv: 38.2, staleN: 328, staleConv: 8.8 },
+  { month: '2026-05', freshConv: 30.1, staleN: 31, staleConv: null },
+  { month: '2026-06', freshConv: 29.1, staleN: 45, staleConv: 33.3 },
+  { month: '2026-07', freshConv: 27.5, staleN: 35, staleConv: 31.4 },
+  { month: '2026-08', freshConv: 24.6, staleN: 50, staleConv: 30.0 },
+  { month: '2026-09', freshConv: 25.7, staleN: 47, staleConv: 17.0 },
+  { month: '2026-10', freshConv: 12.1, staleN: 12, staleConv: null },
+];
+
 // Expanders-First simulation: per submission month, total enrollments (checkouts), expander recs & checkouts, standard conv.
 // Counterfactual "no EF": EF kids revert to what they'd have been — a fraction f would've been standard-approved
 // (convert at that month's stdConv), the rest would've been denied (0). Data says f is near 0 (standard share held).

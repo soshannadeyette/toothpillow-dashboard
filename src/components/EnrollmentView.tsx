@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
-import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, type EventRow } from '@/data/enrollmentCheckouts';
+import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, type EventRow } from '@/data/enrollmentCheckouts';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -217,6 +217,31 @@ function DiagnosisTab() {
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Conversion of <b>standard (non-expander) approvals</b> vs <b>Expanders First</b>, by submission month. (Expanders line starts May; earlier months are too small to read.)</div>
         <div style={{ height: 300 }}>
           <Bar data={stdExpData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const }, annotation: { annotations: breakLines } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Conversion %' } } } }} />
+        </div>
+      </Card>
+
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>New (fresh) vs re-sent (stale) leads — link→checkout</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Line = conversion of <b>fresh</b> leads (link sent within 2 weeks of submitting — brand-new families). Bars = volume of <b>stale</b> re-sends (promo blasts to 30+ day-old leads). Fresh conversion held ~38% through April, then broke to ~30% in <b>May</b> — so the decline is real, not just blasting old leads. April&apos;s big stale bar (328 re-sends at ~9%) is what made April look worse than it was.</div>
+        <div style={{ height: 320 }}>
+          <Bar
+            data={{
+              labels: linkFreshStale.map((d) => monLabel(d.month).replace(' 2026', '')),
+              datasets: [
+                { type: 'bar' as const, label: 'Stale re-sends (count)', data: linkFreshStale.map((d) => d.staleN), backgroundColor: `${TP.yellow}99`, borderRadius: 3, yAxisID: 'y1', order: 3 },
+                // @ts-expect-error mixed line
+                { type: 'line' as const, label: 'Fresh lead → checkout %', data: linkFreshStale.map((d) => d.freshConv), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 3, pointRadius: 3, yAxisID: 'y', order: 1 },
+              ],
+            }}
+            options={{
+              responsive: true, maintainAspectRatio: false,
+              plugins: { legend: { display: true, position: 'top' as const }, annotation: { annotations: breakLines } },
+              scales: {
+                y: { beginAtZero: true, max: 50, position: 'left' as const, title: { display: true, text: 'Fresh link→checkout %' } },
+                y1: { beginAtZero: true, position: 'right' as const, grid: { drawOnChartArea: false }, title: { display: true, text: 'Stale re-sends' } },
+              },
+            }}
+          />
         </div>
       </Card>
 
