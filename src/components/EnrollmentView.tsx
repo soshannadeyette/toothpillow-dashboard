@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
-import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor } from '@/data/enrollmentCheckouts';
+import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow } from '@/data/enrollmentCheckouts';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -30,12 +30,18 @@ const TP = {
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const monLabel = (ym: string) => `${MON[parseInt(ym.slice(5, 7), 10) - 1]} ${ym.slice(0, 4)}`;
 const money = (n: number) => '$' + Math.round(n).toLocaleString();
+const segTotal = (seg: string) => bySegment.find((s) => s.segment === seg)?.checkouts ?? 0;
+// blue heat for the per-TC x month grid
+const heat = (v: number, max: number) => (v === 0 ? '#f8fafc' : `rgba(58,110,164,${0.12 + 0.78 * (v / max)})`);
+const heatText = (v: number, max: number) => (v / max > 0.55 ? '#fff' : TP.text);
 
 const TABS = [
   { id: 'monthly', label: 'Monthly' },
   { id: 'weekly', label: 'Weekly' },
   { id: 'events', label: 'Events' },
   { id: 'coordinator', label: 'By Coordinator' },
+  { id: 'speed', label: 'Speed' },
+  { id: 'segments', label: 'New vs Win-back' },
   { id: 'revenue', label: 'Revenue' },
 ] as const;
 type TabId = (typeof TABS)[number]['id'];
@@ -83,7 +89,7 @@ export default function EnrollmentView() {
           <Stat label="Collected" value={money(summary.amountPaid)} />
           <Stat label="Total plan value" value={money(summary.totalAmountPaid)} />
           <Stat label="Avg deal (plan)" value={money(summary.totalAmountPaid / summary.checkouts)} />
-          <Stat label="Segment (Lava / Ice)" value={bySegment.map((s) => `${s.segment} ${s.checkouts}`).join(' · ')} />
+          <Stat label="New (Lava) / Win-back (Ice)" value={`${segTotal('Lava')} / ${segTotal('Ice')}`} />
         </div>
       </div>
 
@@ -110,6 +116,8 @@ export default function EnrollmentView() {
       {tab === 'weekly' && <WeeklyTab />}
       {tab === 'events' && <EventsTab />}
       {tab === 'coordinator' && <CoordinatorTab />}
+      {tab === 'speed' && <SpeedTab />}
+      {tab === 'segments' && <SegmentsTab />}
       {tab === 'revenue' && <RevenueTab />}
     </div>
   );
@@ -162,16 +170,32 @@ function MonthlyTab() {
 function WeeklyTab() {
   const labels = weekly.map((w) => w.weekStart.slice(5));
   return (
-    <Card>
-      <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Checkouts by week</h3>
-      <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Week starting (Sunday), MM-DD</div>
-      <div style={{ height: 340 }}>
-        <Bar
-          data={{ labels, datasets: [{ label: 'Checkouts', data: weekly.map((w) => w.checkouts), backgroundColor: TP.blue, borderRadius: 3 }] }}
-          options={baseOpts}
-        />
-      </div>
-    </Card>
+    <>
+      <Card>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Checkouts by week</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          Week starting Sunday (MM-DD). Noisy week to week (partial weeks at month edges swing it) — the By Coordinator and Events tabs show the real trend.
+        </div>
+        <div style={{ height: 340 }}>
+          <Bar
+            data={{ labels, datasets: [{ label: 'Checkouts', data: weekly.map((w) => w.checkouts), backgroundColor: TP.blue, borderRadius: 3 }] }}
+            options={baseOpts}
+          />
+        </div>
+      </Card>
+      <Card>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Checkouts by day of week</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          Checkouts are a weekday, coordinator-driven business — Wed/Thu peak, weekends near zero. Staffing and link-send timing should follow this.
+        </div>
+        <div style={{ height: 260 }}>
+          <Bar
+            data={{ labels: dow.map((d) => d.day), datasets: [{ label: 'Checkouts', data: dow.map((d) => d.checkouts), backgroundColor: dow.map((d) => (d.day === 'Sat' || d.day === 'Sun' ? TP.skyBlue : TP.green)), borderRadius: 4 }] }}
+            options={baseOpts}
+          />
+        </div>
+      </Card>
+    </>
   );
 }
 
@@ -305,18 +329,75 @@ function Chip({ children, color }: { children: ReactNode; color: string }) {
 }
 
 function CoordinatorTab() {
+  const gridMax = Math.max(...tcMonthly.flatMap((t) => t.byMonth));
   return (
     <>
       <Card>
-        <h3 style={{ margin: '0 0 12px', color: TP.navy, fontWeight: 600 }}>Checkouts by treatment coordinator</h3>
-        <div style={{ height: 320 }}>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Checkouts by coordinator, by month</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          Darker = more checkouts. Shows when each TC started and who&apos;s rising vs. fading — a fair read when coordinators joined at different times.
+        </div>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr>
+                <Th>Coordinator</Th>
+                {MON.slice(0, 10).map((m) => (
+                  <th key={m} style={{ padding: '6px 4px', textAlign: 'center', fontSize: 11, color: '#6b7280' }}>{m}</th>
+                ))}
+                <Th right>Active</Th><Th right>Per active mo</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {tcMonthly.map((t) => (
+                <tr key={t.tc}>
+                  <Td bold>{t.tc}</Td>
+                  {t.byMonth.map((v, i) => (
+                    <td key={i} style={{ textAlign: 'center', padding: '6px 4px', background: heat(v, gridMax), color: heatText(v, gridMax), fontWeight: v > gridMax * 0.5 ? 600 : 400 }}>
+                      {v || ''}
+                    </td>
+                  ))}
+                  <Td right>{t.activeMonths}mo</Td>
+                  <Td right bold>{t.perActiveMonth}</Td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 10 }}>
+          Veterans (Desirea / Acuna / Jolee) have slid since June; the 4 TCs added from July are ramping. &quot;Per active mo&quot; normalizes for tenure.
+        </div>
+      </Card>
+
+      <Card>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Headcount vs. output</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          Active coordinators doubled (3 → 7); total checkouts didn&apos;t grow. Added headcount split the same pie rather than expanding it.
+        </div>
+        <div style={{ height: 300 }}>
           <Bar
-            data={{ labels: byTC.map((t) => t.tc), datasets: [{ label: 'Checkouts', data: byTC.map((t) => t.checkouts), backgroundColor: TP.green, borderRadius: 4 }] }}
-            options={baseOpts}
+            data={{
+              labels: capacity.map((c) => monLabel(c.month)),
+              datasets: [
+                { type: 'bar' as const, label: 'Checkouts', data: capacity.map((c) => c.checkouts), backgroundColor: `${TP.skyBlue}CC`, borderRadius: 4, yAxisID: 'y', order: 2 },
+                // @ts-expect-error mixed line on Bar
+                { type: 'line' as const, label: 'Active coordinators', data: capacity.map((c) => c.activeTCs), borderColor: TP.navy, backgroundColor: TP.navy, borderWidth: 2.5, pointRadius: 3, yAxisID: 'y1', order: 1 },
+              ],
+            }}
+            options={{
+              responsive: true, maintainAspectRatio: false,
+              plugins: { legend: { display: true, position: 'top' as const } },
+              scales: {
+                y: { beginAtZero: true, position: 'left' as const, title: { display: true, text: 'Checkouts' } },
+                y1: { beginAtZero: true, position: 'right' as const, grid: { drawOnChartArea: false }, title: { display: true, text: 'Active TCs' }, ticks: { stepSize: 1 } },
+              },
+            }}
           />
         </div>
       </Card>
+
       <Card>
+        <h3 style={{ margin: '0 0 12px', color: TP.navy, fontWeight: 600 }}>Coordinator totals</h3>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr><Th>Treatment Coordinator</Th><Th right>Checkouts</Th><Th right>Collected</Th><Th right>Avg deal (plan)</Th><Th right>Avg days link→checkout</Th></tr>
@@ -331,6 +412,88 @@ function CoordinatorTab() {
                 <Td right>{t.avgDaysLinkSent.toFixed(1)}</Td>
               </tr>
             ))}
+          </tbody>
+        </table>
+      </Card>
+    </>
+  );
+}
+
+function SpeedTab() {
+  const m = monthlyMetrics.filter((x) => x.month !== '2026-10'); // Oct partial is survivorship-skewed
+  return (
+    <>
+      <Card>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Days from checkout link → checkout, by month</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          How fast families pay once they get the link. Lower = faster. The team got faster all year (≈33 → 18 days). Oct omitted (partial-month skew).
+        </div>
+        <div style={{ height: 300 }}>
+          <Bar
+            data={{ labels: m.map((x) => monLabel(x.month)), datasets: [{ label: 'Avg days', data: m.map((x) => x.avgDays), backgroundColor: TP.yellow, borderRadius: 4 }] }}
+            options={{ ...baseOpts, scales: { y: { beginAtZero: true, title: { display: true, text: 'Days' } } } }}
+          />
+        </div>
+      </Card>
+      <Card>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Avg days to close, by coordinator</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          New TCs (Holland, Sam, Irina) close fastest; veterans carry older, slower-closing pipelines. Speed ≠ productivity — read alongside volume.
+        </div>
+        <div style={{ height: 300 }}>
+          <Bar
+            data={{ labels: byTC.filter((t) => t.checkouts >= 5).map((t) => t.tc), datasets: [{ label: 'Avg days', data: byTC.filter((t) => t.checkouts >= 5).map((t) => t.avgDaysLinkSent), backgroundColor: TP.blue, borderRadius: 4 }] }}
+            options={{ ...baseOpts, scales: { y: { beginAtZero: true, title: { display: true, text: 'Days' } } } }}
+          />
+        </div>
+      </Card>
+    </>
+  );
+}
+
+function SegmentsTab() {
+  const labels = segMonthly.map((s) => monLabel(s.month));
+  const icePct = segMonthly.map((s) => Math.round((100 * s.ice) / (s.lava + s.ice)));
+  return (
+    <>
+      <Card>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>New leads vs. win-backs, by month</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          <b>Lava</b> = checkout from a recently-arrived lead. <b>Ice</b> = a previously <b>closed-lost</b> lead won back. Win-backs are {Math.round((100 * segTotal('Ice')) / summary.checkouts)}% of all checkouts ({segTotal('Ice')}) — a real revenue stream.
+        </div>
+        <div style={{ height: 320 }}>
+          <Bar
+            data={{
+              labels,
+              datasets: [
+                { label: 'New (Lava)', data: segMonthly.map((s) => s.lava), backgroundColor: TP.blue, borderRadius: 3, stack: 's' },
+                { label: 'Win-back (Ice)', data: segMonthly.map((s) => s.ice), backgroundColor: TP.green, borderRadius: 3, stack: 's' },
+              ],
+            }}
+            options={{ ...baseOpts, plugins: { legend: { display: true, position: 'top' as const } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }}
+          />
+        </div>
+      </Card>
+      <Card>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Win-back share of checkouts (%)</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          Win-backs normally run ~25–30% of checkouts. In <b>July they cratered to 12%</b> (36 vs a ~100+ norm) — right when the &quot;schedule a call&quot; step was removed. That step was the win-back engine for closed-lost leads.
+        </div>
+        <div style={{ height: 280 }}>
+          <Bar
+            data={{ labels, datasets: [{ label: 'Win-back %', data: icePct, backgroundColor: icePct.map((p) => (p < 18 ? '#e06666' : TP.green)), borderRadius: 4 }] }}
+            options={{ ...baseOpts, scales: { y: { beginAtZero: true, title: { display: true, text: '% of checkouts' } } } }}
+          />
+        </div>
+      </Card>
+      <Card>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr><Th>Segment</Th><Th right>Checkouts</Th><Th right>Share</Th><Th right>Collected</Th></tr>
+          </thead>
+          <tbody>
+            <tr><Td bold>New lead (Lava)</Td><Td right>{segTotal('Lava')}</Td><Td right>{Math.round((100 * segTotal('Lava')) / summary.checkouts)}%</Td><Td right>{money(bySegment.find((s) => s.segment === 'Lava')?.amountPaid ?? 0)}</Td></tr>
+            <tr><Td bold>Win-back (Ice / closed-lost)</Td><Td right>{segTotal('Ice')}</Td><Td right>{Math.round((100 * segTotal('Ice')) / summary.checkouts)}%</Td><Td right>{money(bySegment.find((s) => s.segment === 'Ice')?.amountPaid ?? 0)}</Td></tr>
           </tbody>
         </table>
       </Card>
@@ -358,16 +521,43 @@ function RevenueTab() {
         </div>
       </Card>
       <Card>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Collection rate &amp; avg deal, by month</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          Collection rate = collected ÷ total plan value (how much of the plan is paid upfront). It stepped up from ~74% to ~79% starting in July — worth confirming what drove it (iCore processor? deposit policy?) so it&apos;s repeatable.
+        </div>
+        <div style={{ height: 300 }}>
+          <Bar
+            data={{
+              labels: monthlyMetrics.map((x) => monLabel(x.month)),
+              datasets: [
+                { type: 'bar' as const, label: 'Avg deal (plan)', data: monthlyMetrics.map((x) => x.avgPlan), backgroundColor: `${TP.skyBlue}CC`, borderRadius: 4, yAxisID: 'y', order: 2 },
+                // @ts-expect-error mixed line on Bar
+                { type: 'line' as const, label: 'Collection rate %', data: monthlyMetrics.map((x) => x.collectionRate), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 3, yAxisID: 'y1', order: 1 },
+              ],
+            }}
+            options={{
+              responsive: true, maintainAspectRatio: false,
+              plugins: { legend: { display: true, position: 'top' as const } },
+              scales: {
+                y: { beginAtZero: true, position: 'left' as const, title: { display: true, text: 'Avg deal $' } },
+                y1: { position: 'right' as const, grid: { drawOnChartArea: false }, min: 60, max: 90, title: { display: true, text: 'Collection %' } },
+              },
+            }}
+          />
+        </div>
+      </Card>
+      <Card>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr><Th>Month</Th><Th right>Collected</Th><Th right>Total plan value</Th><Th right>Avg deal (plan)</Th></tr>
+            <tr><Th>Month</Th><Th right>Collected</Th><Th right>Total plan value</Th><Th right>Collection %</Th><Th right>Avg deal (plan)</Th></tr>
           </thead>
           <tbody>
-            {monthly.map((m) => (
+            {monthly.map((m, i) => (
               <tr key={m.month}>
                 <Td bold>{monLabel(m.month)}</Td>
                 <Td right>{money(m.amountPaid)}</Td>
                 <Td right>{money(m.totalAmountPaid)}</Td>
+                <Td right>{monthlyMetrics[i]?.collectionRate}%</Td>
                 <Td right>{money(m.totalAmountPaid / m.checkouts)}</Td>
               </tr>
             ))}
