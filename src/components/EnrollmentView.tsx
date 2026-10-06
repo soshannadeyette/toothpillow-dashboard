@@ -424,14 +424,14 @@ function CoordinatorTab() {
           </table>
         </div>
         <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 10 }}>
-          Veterans (Desirea / Acuna / Jolee) have slid since June; the 4 TCs added from July are ramping. &quot;Per active mo&quot; normalizes for tenure.
+          Veterans (Desirea / Acuna / Jolee) have slid since June; the TCs added from August are ramping. &quot;Per active mo&quot; normalizes for tenure. Excludes Savannah Valadez (not a TC — misattributed) and trivial first-month ramp counts, so rows sum to 3,386, not the 3,396 header total.
         </div>
       </Card>
 
       <Card>
         <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Headcount vs. output</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Active coordinators doubled (3 → 7); total checkouts didn&apos;t grow. Added headcount split the same pie rather than expanding it.
+          Active coordinators grew (3 → 6); total checkouts didn&apos;t grow. Added headcount split the same pie rather than expanding it.
         </div>
         <div style={{ height: 300 }}>
           <Bar
