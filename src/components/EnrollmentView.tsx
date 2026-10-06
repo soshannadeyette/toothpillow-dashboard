@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
-import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, type EventRow } from '@/data/enrollmentCheckouts';
+import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, type EventRow } from '@/data/enrollmentCheckouts';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -37,6 +37,7 @@ const heatText = (v: number, max: number) => (v / max > 0.55 ? '#fff' : TP.text)
 
 const TABS = [
   { id: 'overview', label: 'Overview' },
+  { id: 'diagnosis', label: 'Why (May break)' },
   { id: 'monthly', label: 'Monthly' },
   { id: 'weekly', label: 'Weekly' },
   { id: 'events', label: 'Events' },
@@ -118,6 +119,7 @@ export default function EnrollmentView() {
       </nav>
 
       {tab === 'overview' && <OverviewTab />}
+      {tab === 'diagnosis' && <DiagnosisTab />}
       {tab === 'monthly' && <MonthlyTab />}
       {tab === 'weekly' && <WeeklyTab />}
       {tab === 'events' && <EventsTab />}
@@ -137,6 +139,88 @@ function Stat({ label, value }: { label: string; value: string }) {
       <div style={{ fontSize: 12, color: '#6b7280' }}>{label}</div>
       <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy }}>{value}</div>
     </div>
+  );
+}
+
+function DiagnosisTab() {
+  const labels = diagnosisMonthly.map((d) => monLabel(d.month).replace(' 2026', ''));
+  const mayIdx = diagnosisMonthly.findIndex((d) => d.month === '2026-05');
+  const julIdx = diagnosisMonthly.findIndex((d) => d.month === priceIncreaseMonth);
+  const breakLines: Record<string, object> = {
+    mayBreak: { type: 'line', xMin: mayIdx, xMax: mayIdx, borderColor: '#c0392b', borderWidth: 2, label: { display: true, content: 'conversion breaks (May)', position: 'start' as const, backgroundColor: '#c0392b', color: '#fff', font: { size: 10, weight: 'bold' as const }, padding: { x: 5, y: 2 } } },
+    priceInc: { type: 'line', xMin: julIdx, xMax: julIdx, borderColor: '#9ca3af', borderWidth: 2, borderDash: [5, 3], label: { display: true, content: 'price increase (Jul)', position: 'end' as const, backgroundColor: '#9ca3af', color: '#fff', font: { size: 10, weight: 'bold' as const }, padding: { x: 5, y: 2 } } },
+  };
+  // expander line: null out tiny-N early months so the noise doesn't show
+  const expLine = diagnosisMonthly.map((d) => (d.expShare >= 3 ? d.expConv : null));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const stdExpData: any = {
+    labels,
+    datasets: [
+      { type: 'line' as const, label: 'Standard approvals', data: diagnosisMonthly.map((d) => d.stdConv), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 3, tension: 0.3 },
+      { type: 'line' as const, label: 'Expanders First', data: expLine, borderColor: '#8B5CF6', backgroundColor: '#8B5CF6', borderWidth: 2.5, pointRadius: 3, tension: 0.3, spanGaps: false },
+    ],
+  };
+  return (
+    <>
+      <div style={{ marginBottom: 14, fontSize: 13, color: TP.text, background: '#fff5f5', border: '1px solid #f3c9c9', borderLeft: '4px solid #c0392b', borderRadius: 8, padding: '12px 16px', lineHeight: 1.55 }}>
+        <b>The enrollment shortfall is a conversion break that started in May — not the July price increase.</b> Leadership wants 400–500 enrollments/mo; we&apos;re in the 300s. But submissions are at record highs (July = 1,997, the most all year) — so it&apos;s not a lead problem. Conversion fell ~5 pts in May (29%→24%) and held, <b>two months before the July price increase.</b> At the old ~28% rate, July&apos;s 1,997 submissions would have produced ~550 enrollments.
+      </div>
+
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Enrollments stuck in the 300s — despite record submissions</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Bars = submissions (left) &amp; enrollments (left). Line = conversion rate (right). Submissions grew, conversion broke in May → enrollments flat. The price increase lands in July, on an already-depressed rate.</div>
+        <div style={{ height: 360 }}>
+          <Bar
+            data={{
+              labels,
+              datasets: [
+                { type: 'bar' as const, label: 'Submissions', data: diagnosisMonthly.map((d) => d.submissions), backgroundColor: `${TP.skyBlue}B3`, borderRadius: 3, yAxisID: 'y', order: 4 },
+                { type: 'bar' as const, label: 'Enrollments (checkouts)', data: monthly.map((m) => m.checkouts), backgroundColor: TP.blue, borderRadius: 3, yAxisID: 'y', order: 3 },
+                // @ts-expect-error mixed line
+                { type: 'line' as const, label: 'Conversion %', data: diagnosisMonthly.map((d) => d.convRate), borderColor: '#c0392b', backgroundColor: '#c0392b', borderWidth: 3, pointRadius: 3, yAxisID: 'y1', order: 1 },
+              ],
+            }}
+            options={{
+              responsive: true, maintainAspectRatio: false,
+              plugins: { legend: { display: true, position: 'top' as const }, annotation: { annotations: breakLines } },
+              scales: {
+                y: { beginAtZero: true, position: 'left' as const, title: { display: true, text: 'People' } },
+                y1: { beginAtZero: true, max: 50, position: 'right' as const, grid: { drawOnChartArea: false }, title: { display: true, text: 'Conversion %' } },
+              },
+            }}
+          />
+        </div>
+        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>Aug–Oct conversion is still maturing (recent cohorts); the May→July break is final.</div>
+      </Card>
+
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>It&apos;s not just Expanders — the clean pool broke too</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Conversion of <b>standard (non-expander) approvals</b> vs <b>Expanders First</b>. Standard approvals fell ~40%→31% in May — so the cause hit <b>everyone at checkout</b>, not only expander kids. (Expanders line starts May; earlier months are too small to read.)</div>
+        <div style={{ height: 300 }}>
+          <Bar data={stdExpData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const }, annotation: { annotations: breakLines } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Conversion %' } } } }} />
+        </div>
+      </Card>
+
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Denials halved in May (Expanders First absorbed them)</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Share of submissions referred out / denied. It dropped by half in May — people we&apos;d have turned away now get offered an alternative. A secondary, permanent drag on the average (expanders convert ~24% vs standard ~33%).</div>
+        <div style={{ height: 240 }}>
+          <Bar data={{ labels, datasets: [{ label: 'Referred / denied %', data: diagnosisMonthly.map((d) => d.rejectShare), backgroundColor: TP.yellow, borderRadius: 4 }] }} options={{ ...baseOpts, scales: { y: { beginAtZero: true, title: { display: true, text: '% of submissions' } } } }} />
+        </div>
+      </Card>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14 }}>
+        <StoryCard color="#1a7f5a" title="✅ What we've proven">
+          Conversion broke in <b>May</b> (~29%→24%) and held — <b>two months before</b> the July price increase. It hit <b>every channel, every coordinator, and even standard (non-expander) approvals</b> (40%→31%). So it&apos;s not lead quality, not Google Ads, not expanders alone, and not the July price increase.
+        </StoryCard>
+        <StoryCard color="#c0392b" title="🎯 The two real causes">
+          <b>1. A shared checkout problem in May</b> (drags even clean approvals) — the leading suspects are the 6-week public-price-vs-checkout mismatch and the checkout-link workflow change. <b>2. Expanders dilution</b> — a smaller, permanent drag from approving harder cases we used to refer out.
+        </StoryCard>
+        <StoryCard color={TP.blue} title="🔬 To prove & fix">
+          Pin exact dates from Leary&apos;s git (pricing-mismatch window, May checkout-link change). Pull <b>checkout-page abandonment by week</b> (iCore/Stripe). Then fix one lever and watch <b>link→checkout climb back toward the ~45% it ran Jan–April.</b> Recovery = proof.
+        </StoryCard>
+      </div>
+    </>
   );
 }
 
@@ -166,7 +250,7 @@ function OverviewTab() {
   const mShort = (n: number) => (n >= 1e6 ? `$${(n / 1e6).toFixed(1)}M` : `$${Math.round(n / 1000)}K`);
   const pctAxis = { ...baseOpts, scales: { y: { beginAtZero: true, max: 50, title: { display: true, text: '%' } } } };
   const convLineAnnotations: Record<string, object> = {
-    mayDrop: { type: 'box', xMin: 3.5, xMax: 4.5, backgroundColor: 'rgba(224,102,102,0.12)', borderColor: 'rgba(224,102,102,0.5)', borderWidth: 1, label: { display: true, content: 'MAY: cause unknown', position: { x: 'center', y: 'start' } as const, color: '#c0392b', font: { size: 11, weight: 'bold' as const } } },
+    mayDrop: { type: 'box', xMin: 3.5, xMax: 4.5, backgroundColor: 'rgba(224,102,102,0.12)', borderColor: 'rgba(224,102,102,0.5)', borderWidth: 1, label: { display: true, content: 'MAY break', position: { x: 'center', y: 'start' } as const, color: '#c0392b', font: { size: 11, weight: 'bold' as const } } },
     callAdded: { type: 'line', xMin: 3, xMax: 3, borderColor: '#9ca3af', borderWidth: 1.5, borderDash: [5, 3], label: { display: true, content: 'call step added', position: 'end' as const, backgroundColor: '#9ca3af', color: '#fff', font: { size: 9 }, padding: { x: 4, y: 2 } } },
     callRemoved: { type: 'line', xMin: 6, xMax: 6, borderColor: '#9ca3af', borderWidth: 1.5, borderDash: [5, 3], label: { display: true, content: 'call step removed', position: 'end' as const, backgroundColor: '#9ca3af', color: '#fff', font: { size: 9 }, padding: { x: 4, y: 2 } } },
   };
@@ -243,7 +327,7 @@ function OverviewTab() {
         </div>
         <div style={{ marginTop: 18 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: TP.navy, marginBottom: 6 }}>Both rates over time — with what changed, when</div>
-          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>The schedule-a-call step (added Apr, removed Jul) does <b>not</b> line up with the drop. Both rates fell in <b>May</b> — and there&apos;s no known cause on it yet. That&apos;s the thing to run down.</div>
+          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Both rates broke in <b>May</b> — two months <b>before</b> July&apos;s price increase, and the schedule-a-call step (added Apr, removed Jul) doesn&apos;t line up either. It&apos;s a shared checkout change in May. See the <b>&quot;Why (May break)&quot;</b> tab for the full diagnosis.</div>
           <div style={{ height: 260 }}>
             <Bar
               data={{

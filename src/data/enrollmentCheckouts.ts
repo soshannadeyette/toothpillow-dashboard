@@ -69,6 +69,13 @@ export const funnelStages: FunnelStageRow[] = [{"stage": "Closed Lost", "count":
 
 export const convSummary = { submissions: 13621, linkSent: 8523, checkouts: 3105 };
 
+// Diagnosis of the May break (from the funnel report w/ "Results of Exam" recommendation).
+// stdConv = conversion of STANDARD approvals (non-expander); expConv = expander recs; rejectShare = referred/denied share.
+// Key: the STANDARD pool also fell ~40%->31% in May => broad checkout cause, not just expanders. Jan-Mar expConv is tiny-N noise.
+export type DiagnosisRow = { month: string; submissions: number; convRate: number; stdConv: number; expConv: number; expShare: number; rejectShare: number };
+export const diagnosisMonthly: DiagnosisRow[] = [{"month": "2026-01", "submissions": 1416, "convRate": 26.7, "stdConv": 43.2, "expConv": 100.0, "expShare": 0.6, "rejectShare": 4.9}, {"month": "2026-02", "submissions": 1519, "convRate": 25.1, "stdConv": 40.2, "expConv": 100.0, "expShare": 0.2, "rejectShare": 16.2}, {"month": "2026-03", "submissions": 1606, "convRate": 29.2, "stdConv": 42.6, "expConv": 97.1, "expShare": 2.2, "rejectShare": 19.6}, {"month": "2026-04", "submissions": 1229, "convRate": 28.9, "stdConv": 40.5, "expConv": 70.4, "expShare": 2.2, "rejectShare": 14.9}, {"month": "2026-05", "submissions": 1131, "convRate": 23.9, "stdConv": 30.8, "expConv": 24.2, "expShare": 5.5, "rejectShare": 7.3}, {"month": "2026-06", "submissions": 1489, "convRate": 24.6, "stdConv": 31.9, "expConv": 19.0, "expShare": 9.5, "rejectShare": 8.5}, {"month": "2026-07", "submissions": 1997, "convRate": 21.6, "stdConv": 29.1, "expConv": 22.9, "expShare": 10.7, "rejectShare": 7.2}, {"month": "2026-08", "submissions": 1685, "convRate": 18.0, "stdConv": 25.0, "expConv": 14.7, "expShare": 12.1, "rejectShare": 6.2}, {"month": "2026-09", "submissions": 1378, "convRate": 11.1, "stdConv": 17.2, "expConv": 8.7, "expShare": 10.0, "rejectShare": 7.7}, {"month": "2026-10", "submissions": 174, "convRate": 0.6, "stdConv": 0.0, "expConv": 0.0, "expShare": 4.0, "rejectShare": 2.9}];
+export const priceIncreaseMonth = "2026-07";
+
 // Submissions + checkouts by submission month × lead source (for mix-over-time + conversion-by-source-by-month).
 export const sourceOrder = ['Influencer', 'Dental Office', 'Online Search', 'Podcast', 'Airway Ambassador', 'Parent', 'Google Ad', 'Other'];
 export type SourceMonthRow = { month: string; subs: Record<string, number>; cos: Record<string, number> };
