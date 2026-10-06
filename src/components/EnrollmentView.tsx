@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
-import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, type EventRow } from '@/data/enrollmentCheckouts';
+import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, type EventRow } from '@/data/enrollmentCheckouts';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -39,6 +39,8 @@ const TABS = [
   { id: 'monthly', label: 'Monthly' },
   { id: 'weekly', label: 'Weekly' },
   { id: 'events', label: 'Events' },
+  { id: 'conversion', label: 'Conversion' },
+  { id: 'leadsource', label: 'Lead Source' },
   { id: 'coordinator', label: 'By Coordinator' },
   { id: 'speed', label: 'Speed' },
   { id: 'segments', label: 'New vs Win-back' },
@@ -115,6 +117,8 @@ export default function EnrollmentView() {
       {tab === 'monthly' && <MonthlyTab />}
       {tab === 'weekly' && <WeeklyTab />}
       {tab === 'events' && <EventsTab />}
+      {tab === 'conversion' && <ConversionTab />}
+      {tab === 'leadsource' && <LeadSourceTab />}
       {tab === 'coordinator' && <CoordinatorTab />}
       {tab === 'speed' && <SpeedTab />}
       {tab === 'segments' && <SegmentsTab />}
@@ -384,6 +388,118 @@ function CategoryLegend() {
         </span>
       ))}
     </div>
+  );
+}
+
+function ConversionTab() {
+  const labels = conversionMonthly.map((m) => monLabel(m.month));
+  const overall = (100 * convSummary.checkouts) / convSummary.submissions;
+  const matureIdx = conversionMonthly.findIndex((m) => m.month > conversionMatureThrough);
+  const annotations: Record<string, object> = matureIdx >= 0 ? {
+    maturing: {
+      type: 'box', xMin: matureIdx - 0.5, xMax: conversionMonthly.length - 0.5,
+      backgroundColor: 'rgba(253,190,103,0.12)', borderColor: 'rgba(253,190,103,0.4)', borderWidth: 1,
+      label: { display: true, content: 'still maturing', position: { x: 'center', y: 'start' } as const, color: '#b4791f', font: { size: 10, weight: 'bold' as const }, backgroundColor: 'transparent' },
+    },
+  } : {};
+  return (
+    <>
+      <div style={{ marginBottom: 14, fontSize: 13, color: TP.text, background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 8, padding: '10px 14px' }}>
+        <b>{convSummary.submissions.toLocaleString()}</b> leads submitted in 2026 → <b>{convSummary.linkSent.toLocaleString()}</b> got a checkout link ({Math.round((100 * convSummary.linkSent) / convSummary.submissions)}%) → <b>{convSummary.checkouts.toLocaleString()}</b> checked out (<b>{overall.toFixed(1)}%</b> submission→checkout). Of those who got a link, <b>{((100 * convSummary.checkouts) / convSummary.linkSent).toFixed(1)}%</b> converted. Cohorted by submission month. <span style={{ color: '#b4791f' }}>Aug–Oct still maturing — read Jan–Jul as final.</span>
+      </div>
+      <Card>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Conversion rate by submission month</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          Blue = submission→checkout. Green = of those who got a link, what % converted. Bars = submissions (volume, right axis). The shaded months haven&apos;t finished converting yet.
+        </div>
+        <div style={{ height: 340 }}>
+          <Bar
+            data={{
+              labels,
+              datasets: [
+                { type: 'bar' as const, label: 'Submissions', data: conversionMonthly.map((m) => m.submissions), backgroundColor: `${TP.skyBlue}80`, borderRadius: 3, yAxisID: 'y1', order: 3 },
+                // @ts-expect-error mixed line
+                { type: 'line' as const, label: 'Submission → checkout %', data: conversionMonthly.map((m) => m.subToCO), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 3, yAxisID: 'y', order: 1 },
+                // @ts-expect-error mixed line
+                { type: 'line' as const, label: 'Link sent → checkout %', data: conversionMonthly.map((m) => m.linkToCO), borderColor: TP.green, backgroundColor: TP.green, borderWidth: 2.5, pointRadius: 3, yAxisID: 'y', order: 2 },
+              ],
+            }}
+            options={{
+              responsive: true, maintainAspectRatio: false,
+              plugins: { legend: { display: true, position: 'top' as const }, annotation: { annotations } },
+              scales: {
+                y: { beginAtZero: true, position: 'left' as const, title: { display: true, text: 'Conversion %' } },
+                y1: { beginAtZero: true, position: 'right' as const, grid: { drawOnChartArea: false }, title: { display: true, text: 'Submissions' } },
+              },
+            }}
+          />
+        </div>
+      </Card>
+      <Card>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr><Th>Submission month</Th><Th right>Submissions</Th><Th right>Link sent</Th><Th right>Checkouts</Th><Th right>Sub→CO %</Th><Th right>Link→CO %</Th></tr>
+          </thead>
+          <tbody>
+            {conversionMonthly.map((m) => {
+              const maturing = m.month > conversionMatureThrough;
+              return (
+                <tr key={m.month} style={maturing ? { color: '#9ca3af' } : undefined}>
+                  <Td bold>{monLabel(m.month)}{maturing ? ' *' : ''}</Td>
+                  <Td right>{m.submissions.toLocaleString()}</Td>
+                  <Td right>{m.linkSent.toLocaleString()}</Td>
+                  <Td right>{m.checkouts.toLocaleString()}</Td>
+                  <Td right bold>{m.subToCO}%</Td>
+                  <Td right>{m.linkToCO}%</Td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 10 }}>* still maturing — recent submitters can still check out, so these rates will rise.</div>
+      </Card>
+    </>
+  );
+}
+
+function LeadSourceTab() {
+  const overall = (100 * convSummary.checkouts) / convSummary.submissions;
+  const byRate = [...conversionByReferrer].sort((a, b) => b.rate - a.rate);
+  return (
+    <>
+      <div style={{ marginBottom: 14, fontSize: 13, color: TP.text, background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 8, padding: '10px 14px' }}>
+        Which channels actually convert (not just which send leads). Overall is <b>{overall.toFixed(1)}%</b>. Warm/referral sources (Ambassador, Parent) convert ~2× paid/cold ones. <b>Dental Office sends the 2nd-most leads but converts far below average; Google Ads is the weakest.</b>
+      </div>
+      <Card>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Conversion rate by lead source</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Sorted best → worst. Green = above the {overall.toFixed(1)}% overall rate, red = below.</div>
+        <div style={{ height: 340 }}>
+          <Bar
+            data={{ labels: byRate.map((r) => r.referrer), datasets: [{ label: 'Conversion %', data: byRate.map((r) => r.rate), backgroundColor: byRate.map((r) => (r.rate >= overall ? TP.green : '#e06666')), borderRadius: 4 }] }}
+            options={{ ...baseOpts, scales: { y: { beginAtZero: true, title: { display: true, text: 'Conversion %' } } } }}
+          />
+        </div>
+      </Card>
+      <Card>
+        <h3 style={{ margin: '0 0 12px', color: TP.navy, fontWeight: 600 }}>Lead source detail (by volume)</h3>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr><Th>Lead source</Th><Th right>Leads (subs)</Th><Th right>Checkouts</Th><Th right>Conversion %</Th></tr>
+          </thead>
+          <tbody>
+            {conversionByReferrer.map((r) => (
+              <tr key={r.referrer}>
+                <Td bold>{r.referrer}</Td>
+                <Td right>{r.submissions.toLocaleString()}</Td>
+                <Td right>{r.checkouts.toLocaleString()}</Td>
+                <Td right><span style={{ fontWeight: 600, color: r.rate >= overall ? '#1a7f5a' : '#c0392b' }}>{r.rate}%</span></Td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 10 }}>Cohorted by 2026 submission date; sources with ≥30 leads. Recent-month maturation slightly understates every source equally, so the ranking holds.</div>
+      </Card>
+    </>
   );
 }
 
