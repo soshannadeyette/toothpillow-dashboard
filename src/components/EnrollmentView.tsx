@@ -216,15 +216,15 @@ function DiagnosisTab() {
   return (
     <>
       <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>What moved conversion: Feb–Apr → now (decomposition)</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Breaks the 4.8-pt conversion change into its parts. The <b>standard-approval pool converting worse</b> accounts for −7.0 pts (more than the whole drop); the <b>recommendation mix shift</b> (fewer denials, more expanders/approvals) is <b>+2.2 pts — it helped</b>. If the standard pool had held its rate, conversion today would be ~29.9%, above baseline.</div>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Why conversion fell from our Feb–Apr rate</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Overall conversion is a blend of regular approvals (check out most), Expanders First (less), and denied (almost never). Two things changed: <b>fewer denials / more approvals helped (+2)</b>, but <b>regular-approved families went from ~41 of 100 checking out to ~30 of 100, pulling the whole rate down ~7.</b> If regular approvals had held, we&apos;d be ~30% today — above where we started. The problem is regular families at checkout, not expanders.</div>
         <div style={{ height: 300 }}>
           <Bar
             data={{
-              labels: ['Baseline (Feb–Apr) 27.7%', 'Standard pool converts worse  −7.0', 'Mix shift (denials→appr./exp.)  +2.2', 'Now (Jun–Jul) 22.9%'],
+              labels: ['Our Feb–Apr rate: 27.7%', 'Regular approvals stopped converting: −7', 'Fewer denials, more approvals: +2', 'Now: 22.9%'],
               datasets: [{ label: 'Conversion %', data: wfData, backgroundColor: [TP.navy, '#e06666', '#6AA84F', TP.blue], borderRadius: 3 }],
             }}
-            options={{ ...baseOpts, scales: { y: { beginAtZero: true, suggestedMax: 32, title: { display: true, text: 'Conversion %' } }, x: { ticks: { maxRotation: 0, autoSkip: false, font: { size: 10 } } } } }}
+            options={{ ...baseOpts, scales: { y: { beginAtZero: true, suggestedMax: 32, title: { display: true, text: 'Checkout rate %' } }, x: { ticks: { maxRotation: 0, autoSkip: false, font: { size: 10 } } } } }}
           />
         </div>
       </Card>
