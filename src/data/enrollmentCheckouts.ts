@@ -18,3 +18,35 @@ export const byTC: TCRow[] = [{"tc": "Desirea Peraza", "checkouts": 1365, "amoun
 export const bySegment: SegRow[] = [{"segment": "Ice", "checkouts": 866, "amountPaid": 1420523.25}, {"segment": "Lava", "checkouts": 2530, "amountPaid": 4296794.25}];
 
 export const summary = {"checkouts": 3396, "amountPaid": 5717317.5, "totalAmountPaid": 7556221.14, "firstDate": "2026-01-01", "lastDate": "2026-10-05"};
+
+// Dated enrollment events that plausibly moved conversion, for overlaying on the daily series.
+// Source: Development/New-Build/projects/enrollment/enrollment-events-timeline.md
+export type EventRow = {
+  date: string;
+  label: string;
+  category: 'product' | 'process' | 'pricing' | 'marketing' | 'launch';
+  impact: 'hurt' | 'helped' | 'neutral' | 'tbd';
+  note: string;
+  approx?: boolean;
+};
+
+export const eventCategoryColor: Record<EventRow['category'], string> = {
+  product: '#8B5CF6',
+  process: '#3A6EA4',
+  pricing: '#FDBE67',
+  marketing: '#8CD1C8',
+  launch: '#1B2A4A',
+};
+
+export const events: EventRow[] = [
+  { date: '2026-02-15', label: 'Airway Virtual launched', category: 'product', impact: 'hurt', approx: true, note: 'Assessments returned Mar, conversion tanked Apr. Exact date still unpinned (git).' },
+  { date: '2026-07-09', label: '"Schedule a call" card removed (PR #652)', category: 'process', impact: 'hurt', note: "Erin's #1 reinstate fix. Lines up with the July cliff — and the Ice segment collapse." },
+  { date: '2026-08-21', label: 'Post-submission "view assessment" msg failing', category: 'process', impact: 'hurt', note: 'Some parents not notified after submit.' },
+  { date: '2026-08-31', label: 'SF "Hold Assessment — Non Responsive" stage', category: 'process', impact: 'neutral', note: 'Measurement only.' },
+  { date: '2026-09-02', label: 'SF "Treatment Consult Scheduled" stage', category: 'process', impact: 'neutral', note: 'Measurement only.' },
+  { date: '2026-09-14', label: 'Closed Lost stages added to SF', category: 'process', impact: 'neutral', note: 'Measurement only.' },
+  { date: '2026-09-19', label: 'New payment processor (iCore) rolled out', category: 'pricing', impact: 'tbd', note: 'CC/Affirm/Klarna/Cherry in one form; no Slack notification on use. Possible driver of the H2 collection-rate rise.' },
+  { date: '2026-09-21', label: 'SF "Pre-expanders" plan types added', category: 'pricing', impact: 'tbd', note: 'Enables the pre-expanders offer.' },
+  { date: '2026-09-30', label: 'Ambassador code $200 → $300 off', category: 'marketing', impact: 'helped', note: 'Stronger discount lever.' },
+  { date: '2026-10-01', label: 'Pre-expanders LIVE + beta + Graduation V2', category: 'launch', impact: 'tbd', note: 'Three launches the same day.' },
+];
