@@ -154,13 +154,8 @@ function ExpandersSimTab() {
   const actualYTD = actual.reduce((a, b) => a + b, 0);
   const noEFYTD = noEF.reduce((a, b) => a + b, 0);
   const delta = actualYTD - noEFYTD; // >0 = EF added enrollments
-  const breakeven = 85; // where delta crosses 0 (EF kids concentrated in low-stdConv months pushes this up from a flat-33% estimate)
   return (
     <>
-      <div style={{ marginBottom: 14, fontSize: 13, color: TP.text, background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 8, padding: '12px 16px', lineHeight: 1.55 }}>
-        <b>Did Expanders First cost us enrollments?</b> Move the slider to set your assumption: of the kids recommended Expanders First, what % would <i>otherwise</i> have been <b>standard-approved</b> (vs. denied)? The data says this is near 0 — the expanders rise matched the denial drop, and standard-approval share held — so EF mostly converted kids who&apos;d have been auto-zeros. <b>EF only costs enrollments above ~{breakeven}%.</b>
-      </div>
-
       <Card>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 14 }}>
           <label style={{ fontSize: 13, fontWeight: 600, color: TP.navy }}>
@@ -170,7 +165,7 @@ function ExpandersSimTab() {
         </div>
         <div style={{ marginBottom: 12, fontSize: 14, fontWeight: 700, color: delta >= 0 ? '#1a7f5a' : '#c0392b' }}>
           At {fPct}%: Expanders First {delta >= 0 ? 'ADDED' : 'COST'} ~{Math.abs(delta).toLocaleString()} enrollments YTD
-          <span style={{ fontWeight: 400, color: '#6b7280', fontSize: 12 }}> ({actualYTD.toLocaleString()} actual vs {noEFYTD.toLocaleString()} without EF). {delta >= 0 ? 'EF is net-positive here.' : 'EF is net-negative here.'} Data-supported assumption: ~0–10%.</span>
+          <span style={{ fontWeight: 400, color: '#6b7280', fontSize: 12 }}> ({actualYTD.toLocaleString()} actual vs {noEFYTD.toLocaleString()} without EF)</span>
         </div>
         <div style={{ height: 340 }}>
           <Bar
@@ -187,20 +182,8 @@ function ExpandersSimTab() {
             options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Enrollments / month' } } } }}
           />
         </div>
-        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>By submission cohort. Aug–Oct are still maturing (EF&apos;s contribution there is understated). Counterfactual assumes would-be-standard EF kids convert at that month&apos;s standard rate.</div>
+        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>By submission cohort. Aug–Oct still maturing. Counterfactual: would-be-standard EF kids convert at that month&apos;s standard rate; the rest (denials) convert at 0.</div>
       </Card>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14 }}>
-        <StoryCard color="#1a7f5a" title="✅ Expanders came from denials, not approvals">
-          Apr→Aug: expanders share rose ~+10 pts, denials fell ~−10 pts, and <b>standard-approval share held flat (~78%)</b>. If approvals had been cannibalized, standard share would have dropped. It didn&apos;t — so EF absorbed kids we&apos;d have turned away.
-        </StoryCard>
-        <StoryCard color={TP.blue} title="➕ EF added ~197 enrollments">
-          Those ~840 expander kids convert at ~23% instead of the ~0% they&apos;d get as denials — about <b>+197 enrollments YTD.</b> EF grew volume; it only lowers the average <i>rate</i> as a mix effect.
-        </StoryCard>
-        <StoryCard color="#c0392b" title="⚠️ So EF isn't the enrollment problem">
-          The shortfall is the <b>May checkout break</b> (standard approvals fell 40%→31%). Fixing that recovers far more than anything about Expanders First. EF is a deliberate, roughly net-positive choice.
-        </StoryCard>
-      </div>
     </>
   );
 }
@@ -225,13 +208,9 @@ function DiagnosisTab() {
   };
   return (
     <>
-      <div style={{ marginBottom: 14, fontSize: 13, color: TP.text, background: '#fff5f5', border: '1px solid #f3c9c9', borderLeft: '4px solid #c0392b', borderRadius: 8, padding: '12px 16px', lineHeight: 1.55 }}>
-        <b>The enrollment shortfall is a conversion break that started in May — not the July price increase.</b> Leadership wants 400–500 enrollments/mo; we&apos;re in the 300s. But submissions are at record highs (July = 1,997, the most all year) — so it&apos;s not a lead problem. Conversion fell ~5 pts in May (29%→24%) and held, <b>two months before the July price increase.</b> At the old ~28% rate, July&apos;s 1,997 submissions would have produced ~550 enrollments.
-      </div>
-
       <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Enrollments stuck in the 300s — despite record submissions</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Bars = submissions (left) &amp; enrollments (left). Line = conversion rate (right). Submissions grew, conversion broke in May → enrollments flat. The price increase lands in July, on an already-depressed rate.</div>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Submissions, enrollments &amp; conversion by month</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Bars = submissions &amp; enrollments (left axis). Line = conversion rate (right axis). Markers: the May conversion break and the July price increase.</div>
         <div style={{ height: 360 }}>
           <Bar
             data={{
@@ -253,36 +232,24 @@ function DiagnosisTab() {
             }}
           />
         </div>
-        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>Aug–Oct conversion is still maturing (recent cohorts); the May→July break is final.</div>
+        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>Aug–Oct conversion is still maturing (recent cohorts).</div>
       </Card>
 
       <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>It&apos;s not just Expanders — the clean pool broke too</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Conversion of <b>standard (non-expander) approvals</b> vs <b>Expanders First</b>. Standard approvals fell ~40%→31% in May — so the cause hit <b>everyone at checkout</b>, not only expander kids. (Expanders line starts May; earlier months are too small to read.)</div>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Conversion by recommendation: standard vs Expanders First</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Conversion of <b>standard (non-expander) approvals</b> vs <b>Expanders First</b>, by submission month. (Expanders line starts May; earlier months are too small to read.)</div>
         <div style={{ height: 300 }}>
           <Bar data={stdExpData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const }, annotation: { annotations: breakLines } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Conversion %' } } } }} />
         </div>
       </Card>
 
       <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Denials halved in May (Expanders First absorbed them)</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Share of submissions referred out / denied. It dropped by half in May — people we&apos;d have turned away now get offered an alternative. A secondary, permanent drag on the average (expanders convert ~24% vs standard ~33%).</div>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Referred / denied share by submission month</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Share of submissions the doctor referred out or denied.</div>
         <div style={{ height: 240 }}>
           <Bar data={{ labels, datasets: [{ label: 'Referred / denied %', data: diagnosisMonthly.map((d) => d.rejectShare), backgroundColor: TP.yellow, borderRadius: 4 }] }} options={{ ...baseOpts, scales: { y: { beginAtZero: true, title: { display: true, text: '% of submissions' } } } }} />
         </div>
       </Card>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14 }}>
-        <StoryCard color="#1a7f5a" title="✅ What we've proven">
-          Conversion broke in <b>May</b> (~29%→24%) and held — <b>two months before</b> the July price increase. It hit <b>every channel, every coordinator, and even standard (non-expander) approvals</b> (40%→31%). So it&apos;s not lead quality, not Google Ads, not expanders alone, and not the July price increase.
-        </StoryCard>
-        <StoryCard color="#c0392b" title="🎯 The two real causes">
-          <b>1. A shared checkout problem in May</b> (drags even clean approvals) — the leading suspects are the 6-week public-price-vs-checkout mismatch and the checkout-link workflow change. <b>2. Expanders dilution</b> — a smaller, permanent drag from approving harder cases we used to refer out.
-        </StoryCard>
-        <StoryCard color={TP.blue} title="🔬 To prove & fix">
-          Pin exact dates from Leary&apos;s git (pricing-mismatch window, May checkout-link change). Pull <b>checkout-page abandonment by week</b> (iCore/Stripe). Then fix one lever and watch <b>link→checkout climb back toward the ~45% it ran Jan–April.</b> Recovery = proof.
-        </StoryCard>
-      </div>
     </>
   );
 }
@@ -290,7 +257,6 @@ function DiagnosisTab() {
 function OverviewTab() {
   const overall = (100 * convSummary.checkouts) / convSummary.submissions;
   const linkPct = (100 * convSummary.linkSent) / convSummary.submissions;
-  const linkToCO = (100 * convSummary.checkouts) / convSummary.linkSent;
   const lostNoLink = convSummary.submissions - convSummary.linkSent;
   const lostAtPay = convSummary.linkSent - convSummary.checkouts;
   const funnel = [
@@ -302,15 +268,6 @@ function OverviewTab() {
   const bottom = [...conversionByReferrer].filter((r) => r.referrer !== '(blank)').sort((a, b) => a.rate - b.rate).slice(0, 4);
   const mature = conversionMonthly.filter((m) => m.month <= conversionMatureThrough);
   const matureLabels = mature.map((m) => monLabel(m.month).replace(' 2026', ''));
-
-  // Opportunity sizing (CEO hook) — conservative, on collected cash
-  const collectedPer = summary.amountPaid / summary.checkouts;
-  const perPoint = Math.round(convSummary.submissions / 100);
-  const earlyAvg = mature.slice(0, 4).reduce((s, m) => s + m.subToCO, 0) / 4;
-  const liftGain = Math.round(((earlyAvg - overall) / 100) * convSummary.submissions);
-  const dental = conversionByReferrer.find((r) => r.referrer === 'Dental Office');
-  const dentalGain = dental ? Math.round(((overall - dental.rate) / 100) * dental.submissions) : 0;
-  const mShort = (n: number) => (n >= 1e6 ? `$${(n / 1e6).toFixed(1)}M` : `$${Math.round(n / 1000)}K`);
   const pctAxis = { ...baseOpts, scales: { y: { beginAtZero: true, max: 50, title: { display: true, text: '%' } } } };
   const convLineAnnotations: Record<string, object> = {
     mayDrop: { type: 'box', xMin: 3.5, xMax: 4.5, backgroundColor: 'rgba(224,102,102,0.12)', borderColor: 'rgba(224,102,102,0.5)', borderWidth: 1, label: { display: true, content: 'MAY break', position: { x: 'center', y: 'start' } as const, color: '#c0392b', font: { size: 11, weight: 'bold' as const } } },
@@ -359,14 +316,6 @@ function OverviewTab() {
           ))}
         </div>
       </Card>
-
-      {/* Opportunity banner — the $ prize */}
-      <div style={{ background: TP.navy, color: '#fff', borderRadius: 12, padding: '18px 22px', marginBottom: 20 }}>
-        <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 8 }}>💰 The size of the prize</div>
-        <div style={{ fontSize: 14, lineHeight: 1.6, opacity: 0.95 }}>
-          At ~{convSummary.submissions.toLocaleString()} leads a year, <b>every 1 point of conversion ≈ {perPoint} more checkouts ≈ ~{mShort(perPoint * collectedPer)} collected.</b> Conversion ran ~{earlyAvg.toFixed(0)}% Jan–Apr, then dropped ~5 points in May and never recovered. <b style={{ color: TP.green }}>Simply getting back to the April rate ≈ ~{liftGain.toLocaleString()} more checkouts — about {mShort(liftGain * collectedPer)}/yr</b> — with zero new ad spend. The leverage is in finding what broke in May, not in buying more leads.
-        </div>
-      </div>
 
       {/* Conversion health: two side-by-side + combined */}
       <Card>
@@ -431,18 +380,6 @@ function OverviewTab() {
         </div>
       </Card>
 
-      {/* Narrative strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14, marginTop: 4 }}>
-        <StoryCard color="#1a7f5a" title="✅ What's working">
-          {money(summary.amountPaid)} collected across {summary.checkouts.toLocaleString()} checkouts. Warm channels — ambassadors (37%), parents (29%), the podcast (26%), influencers (26%) — convert ~2× cold/paid. Coordinators are closing faster (33→18 days) and collecting more upfront (74→79%).
-        </StoryCard>
-        <StoryCard color="#c0392b" title="⚠️ The problem — May">
-          Conversion was healthy (~{earlyAvg.toFixed(0)}%) through April, then <b>dropped ~5 points in May and stayed down</b> — across <b>every channel and every coordinator</b>, concentrated at the payment step (link→checkout fell 46%→33% even as more people got links). That&apos;s not lead quality or one bad channel; <b>something changed in the checkout experience ~May 1</b>, and it&apos;s not logged anywhere.
-        </StoryCard>
-        <StoryCard color={TP.blue} title="🎯 Highest-leverage moves">
-          <b>1. Find what changed at checkout in May</b> (price, checkout page, financing, discount, or script) and reverse it — worth ~{mShort(liftGain * collectedPer)}/yr. <b>2.</b> Fix the Dental Office channel (2,765 leads, 16.5%). <b>3.</b> Tighten the link→checkout handoff. (Reinstating schedule-a-call is worth testing, but the numbers don&apos;t make it the headline.)
-        </StoryCard>
-      </div>
     </>
   );
 }
@@ -465,15 +402,6 @@ function ChannelRow({ r, good }: { r: { referrer: string; submissions: number; r
         <div style={{ width: `${Math.min(100, r.rate * 2.5)}%`, height: '100%', background: good ? TP.green : '#e06666', borderRadius: 4 }} />
       </div>
       <div style={{ width: 44, textAlign: 'right', fontWeight: 700, color: good ? '#1a7f5a' : '#c0392b' }}>{r.rate}%</div>
-    </div>
-  );
-}
-
-function StoryCard({ color, title, children }: { color: string; title: string; children: ReactNode }) {
-  return (
-    <div style={{ border: '1px solid #e5e7eb', borderTop: `4px solid ${color}`, borderRadius: 10, padding: '14px 16px', background: '#fff' }}>
-      <div style={{ fontWeight: 700, color: TP.navy, marginBottom: 6 }}>{title}</div>
-      <div style={{ fontSize: 13, color: TP.text, lineHeight: 1.5 }}>{children}</div>
     </div>
   );
 }
