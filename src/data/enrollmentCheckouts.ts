@@ -55,9 +55,11 @@ export const capacity: CapacityRow[] = [{"month": "2026-01", "activeTCs": 3, "ch
 export type DowRow = { day: string; checkouts: number };
 export const dow: DowRow[] = [{"day": "Mon", "checkouts": 541}, {"day": "Tue", "checkouts": 619}, {"day": "Wed", "checkouts": 692}, {"day": "Thu", "checkouts": 685}, {"day": "Fri", "checkouts": 605}, {"day": "Sat", "checkouts": 177}, {"day": "Sun", "checkouts": 77}];
 
+// Ordered by date. The `n` number matches the numbered marker on the chart.
 export const events: EventRow[] = [
-  { date: '2026-02-15', label: 'Airway Virtual launched', category: 'product', impact: 'hurt', approx: true, note: 'Assessments returned Mar, conversion tanked Apr. Exact date still unpinned (git).' },
-  { date: '2026-07-09', label: '"Schedule a call" card removed (PR #652)', category: 'process', impact: 'hurt', note: "Erin's #1 reinstate fix. Lines up with the July cliff — and the win-back (Ice/closed-lost) collapse: 138 → 36." },
+  { date: '2026-02-15', label: 'Airway Virtual launched', category: 'product', impact: 'hurt', approx: true, note: 'New assessment flow. Assessments returned Mar, conversion tanked Apr. Exact go-live still unpinned (git).' },
+  { date: '2026-04-24', label: '"Schedule a call" step ADDED (PR #497)', category: 'process', impact: 'helped', note: 'Added the post-submission book-a-call card (kamryn-post-submission). Present Apr 24 → Jul 9 only — that window brackets the June peak.' },
+  { date: '2026-07-09', label: '"Schedule a call" step REMOVED (PR #652)', category: 'process', impact: 'hurt', note: "Replaced with a video (gabe-replace-cta-with-video). Erin's #1 reinstate fix. The July cliff + win-back collapse (138 → 36) land here." },
   { date: '2026-08-21', label: 'Post-submission "view assessment" msg failing', category: 'process', impact: 'hurt', note: 'Some parents not notified after submit.' },
   { date: '2026-08-31', label: 'SF "Hold Assessment — Non Responsive" stage', category: 'process', impact: 'neutral', note: 'Measurement only.' },
   { date: '2026-09-02', label: 'SF "Treatment Consult Scheduled" stage', category: 'process', impact: 'neutral', note: 'Measurement only.' },
@@ -65,5 +67,7 @@ export const events: EventRow[] = [
   { date: '2026-09-19', label: 'New payment processor (iCore) rolled out', category: 'pricing', impact: 'tbd', note: 'CC/Affirm/Klarna/Cherry in one form; no Slack notification on use. Possible driver of the H2 collection-rate rise.' },
   { date: '2026-09-21', label: 'SF "Pre-expanders" plan types added', category: 'pricing', impact: 'tbd', note: 'Enables the pre-expanders offer.' },
   { date: '2026-09-30', label: 'Ambassador code $200 → $300 off', category: 'marketing', impact: 'helped', note: 'Stronger discount lever.' },
-  { date: '2026-10-01', label: 'Pre-expanders LIVE + beta + Graduation V2', category: 'launch', impact: 'tbd', note: 'Three launches the same day.' },
+  { date: '2026-10-01', label: 'Pre-expanders program goes live', category: 'launch', impact: 'tbd', note: 'Pre-expanders results + checkout live (full iCore flow).' },
+  { date: '2026-10-01', label: 'New-home / patient-app beta launches', category: 'launch', impact: 'tbd', note: '~20 testers on the rebuilt patient app.' },
+  { date: '2026-10-01', label: 'Graduation V2 goes live', category: 'launch', impact: 'tbd', note: 'New "Graduation Operations" board; all patients from Oct 1.' },
 ];

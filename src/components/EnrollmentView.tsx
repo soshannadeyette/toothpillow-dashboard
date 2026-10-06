@@ -199,13 +199,7 @@ function WeeklyTab() {
   );
 }
 
-const SHORT: Record<string, string> = {
-  '2026-02-15': 'AV launch (~Feb)',
-  '2026-07-09': 'Call step removed',
-  '2026-09-19': 'iCore processor',
-  '2026-09-30': 'Amb. $300',
-  '2026-10-01': 'Oct 1 launches',
-};
+const IMPACT_LABEL: Record<string, string> = { hurt: 'likely hurt', helped: 'likely helped', neutral: 'measurement', tbd: 'watch' };
 
 function dayIndexForDate(dateStr: string) {
   const exact = daily.findIndex((d) => d.date === dateStr);
@@ -222,33 +216,38 @@ function EventsTab() {
     return slice.reduce((s, d) => s + d.checkouts, 0) / slice.length;
   });
 
+  // Number each event by date order. Same-date events (Oct 1) stack vertically.
   const annotations: Record<string, object> = {};
+  const sameDateCount: Record<string, number> = {};
   events.forEach((e, i) => {
     const idx = dayIndexForDate(e.date);
     if (idx < 0) return;
     const color = eventCategoryColor[e.category];
-    const showLabel = SHORT[e.date] !== undefined;
+    const stack = sameDateCount[e.date] ?? 0;
+    sameDateCount[e.date] = stack + 1;
+    const strong = e.impact === 'hurt' || e.impact === 'helped';
     annotations[`ev${i}`] = {
       type: 'line',
       xMin: idx,
       xMax: idx,
       borderColor: color,
-      borderWidth: e.impact === 'hurt' ? 2 : 1.25,
-      borderDash: e.impact === 'neutral' ? [3, 3] : [6, 3],
-      label: showLabel
-        ? {
-            display: true,
-            content: SHORT[e.date],
-            position: (i % 2 === 0 ? 'start' : 'end') as 'start' | 'end',
-            backgroundColor: color,
-            color: '#fff',
-            font: { size: 9, weight: 'bold' as const },
-            padding: { x: 4, y: 2 },
-          }
-        : undefined,
+      borderWidth: strong ? 2.5 : 1.25,
+      borderDash: e.impact === 'neutral' ? [3, 3] : strong ? undefined : [6, 3],
+      label: {
+        display: true,
+        content: String(i + 1),
+        position: 'start' as const,
+        yAdjust: 10 + stack * 22, // stack numbers for same-date events
+        backgroundColor: color,
+        color: '#fff',
+        font: { size: 11, weight: 'bold' as const },
+        padding: { x: 6, y: 3 },
+        borderRadius: 10,
+      },
     };
   });
 
+  const chartWidth = Math.max(1100, daily.length * 9);
   const opts = {
     responsive: true,
     maintainAspectRatio: false,
@@ -265,7 +264,9 @@ function EventsTab() {
           maxRotation: 0,
           callback: function (_v: unknown, index: number) {
             const d = daily[index]?.date;
-            return d && d.slice(8) === '01' ? MON[parseInt(d.slice(5, 7), 10) - 1] : '';
+            if (!d) return '';
+            if (d.slice(8) === '01') return MON[parseInt(d.slice(5, 7), 10) - 1];
+            return d.slice(8) === '15' ? '·' : '';
           },
         },
         grid: { display: false },
@@ -277,36 +278,41 @@ function EventsTab() {
     <>
       <Card>
         <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Daily checkouts + 7-day average, with enrollment events</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Light bars = daily checkouts (noisy, weekday-driven). Bold line = 7-day moving average (the real trend). Vertical lines = events; dashed-thick = likely hurt, dotted = measurement-only.
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 6 }}>
+          Light bars = daily checkouts. Bold line = 7-day average (the real trend). Numbered pins = events — match them to the legend below. <b>Scroll sideways →</b> to move through the year. Solid pin = likely moved conversion; dashed = measurement-only.
         </div>
-        <div style={{ height: 380 }}>
-          <Bar
-            data={{
-              labels,
-              datasets: [
-                { type: 'bar' as const, label: 'Daily checkouts', data: daily.map((d) => d.checkouts), backgroundColor: `${TP.skyBlue}99`, borderWidth: 0, order: 3 },
-                // @ts-expect-error mixed chart: line dataset on a Bar component
-                { type: 'line' as const, label: '7-day average', data: ma7, borderColor: TP.navy, backgroundColor: TP.navy, borderWidth: 2.5, pointRadius: 0, tension: 0.3, order: 1 },
-              ],
-            }}
-            options={opts}
-          />
+        <CategoryLegend />
+        <div style={{ overflowX: 'auto', overflowY: 'hidden', paddingBottom: 8 }}>
+          <div style={{ width: chartWidth, height: 420 }}>
+            <Bar
+              data={{
+                labels,
+                datasets: [
+                  { type: 'bar' as const, label: 'Daily checkouts', data: daily.map((d) => d.checkouts), backgroundColor: `${TP.skyBlue}99`, borderWidth: 0, order: 3 },
+                  // @ts-expect-error mixed chart: line dataset on a Bar component
+                  { type: 'line' as const, label: '7-day average', data: ma7, borderColor: TP.navy, backgroundColor: TP.navy, borderWidth: 2.5, pointRadius: 0, tension: 0.3, order: 1 },
+                ],
+              }}
+              options={opts}
+            />
+          </div>
         </div>
+        <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>Tip: the chart is wider than the screen — drag or shift-scroll to see Jul–Oct.</div>
       </Card>
       <Card>
-        <h3 style={{ margin: '0 0 12px', color: TP.navy, fontWeight: 600 }}>Event log</h3>
+        <h3 style={{ margin: '0 0 12px', color: TP.navy, fontWeight: 600 }}>Event legend</h3>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr><Th>Date</Th><Th>Event</Th><Th>Category</Th><Th>Likely impact</Th><Th>Note</Th></tr>
+            <tr><Th>#</Th><Th>Date</Th><Th>Event</Th><Th>Category</Th><Th>Likely impact</Th><Th>What it means</Th></tr>
           </thead>
           <tbody>
-            {events.map((e) => (
+            {events.map((e, i) => (
               <tr key={e.date + e.label}>
+                <Td><span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, borderRadius: 11, background: eventCategoryColor[e.category], color: '#fff', fontSize: 12, fontWeight: 700 }}>{i + 1}</span></Td>
                 <Td bold>{e.date}{e.approx ? ' (approx)' : ''}</Td>
                 <Td>{e.label}</Td>
                 <Td><Chip color={eventCategoryColor[e.category]}>{e.category}</Chip></Td>
-                <Td>{e.impact}</Td>
+                <Td>{IMPACT_LABEL[e.impact]}</Td>
                 <Td>{e.note}</Td>
               </tr>
             ))}
@@ -325,6 +331,26 @@ function Chip({ children, color }: { children: ReactNode; color: string }) {
     <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 999, fontSize: 12, fontWeight: 600, color, background: `${color}1A` }}>
       {children}
     </span>
+  );
+}
+
+function CategoryLegend() {
+  const cats: { key: keyof typeof eventCategoryColor; label: string }[] = [
+    { key: 'product', label: 'Product' },
+    { key: 'process', label: 'Process' },
+    { key: 'pricing', label: 'Pricing' },
+    { key: 'marketing', label: 'Marketing' },
+    { key: 'launch', label: 'Launch' },
+  ];
+  return (
+    <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 10 }}>
+      {cats.map((c) => (
+        <span key={c.key} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#6b7280' }}>
+          <span style={{ width: 11, height: 11, borderRadius: 3, background: eventCategoryColor[c.key], display: 'inline-block' }} />
+          {c.label}
+        </span>
+      ))}
+    </div>
   );
 }
 
