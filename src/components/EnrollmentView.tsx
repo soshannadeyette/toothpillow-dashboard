@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
-import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow } from '@/data/enrollmentCheckouts';
+import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, type EventRow } from '@/data/enrollmentCheckouts';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -209,6 +209,7 @@ function dayIndexForDate(dateStr: string) {
 }
 
 function EventsTab() {
+  const [hovered, setHovered] = useState<number | null>(null);
   const labels = daily.map((d) => d.date);
   // trailing 7-day moving average of checkouts
   const ma7 = daily.map((_, i) => {
@@ -216,7 +217,13 @@ function EventsTab() {
     return slice.reduce((s, d) => s + d.checkouts, 0) / slice.length;
   });
 
-  // Number each event by date order. Same-date events (Oct 1) stack vertically.
+  // Fixed axis so event pins sit in a thin band at the top, leaving the bars full height.
+  const dataMax = Math.max(...daily.map((d) => d.checkouts));
+  const axisMax = Math.ceil(dataMax / 20) * 20;
+  const pinTop = axisMax; // top of chart
+  const pinBottom = axisMax * 0.9; // pins occupy only the top ~10%
+
+  // Short pins in the top band. Hovering a pin (line or its number badge) lights up the detail card.
   const annotations: Record<string, object> = {};
   const sameDateCount: Record<string, number> = {};
   events.forEach((e, i) => {
@@ -230,17 +237,21 @@ function EventsTab() {
       type: 'line',
       xMin: idx,
       xMax: idx,
+      yMin: pinBottom,
+      yMax: pinTop,
       borderColor: color,
-      borderWidth: strong ? 2.5 : 1.25,
-      borderDash: e.impact === 'neutral' ? [3, 3] : strong ? undefined : [6, 3],
+      borderWidth: hovered === i ? 4 : strong ? 2.5 : 1.5,
+      borderDash: e.impact === 'neutral' ? [3, 3] : undefined,
+      enter: () => setHovered(i),
+      leave: () => setHovered(null),
       label: {
         display: true,
         content: String(i + 1),
         position: 'start' as const,
-        yAdjust: 10 + stack * 22, // stack numbers for same-date events
+        xAdjust: stack * 20, // nudge same-date badges sideways so they don't overlap
         backgroundColor: color,
         color: '#fff',
-        font: { size: 11, weight: 'bold' as const },
+        font: { size: hovered === i ? 13 : 11, weight: 'bold' as const },
         padding: { x: 6, y: 3 },
         borderRadius: 10,
       },
@@ -257,7 +268,7 @@ function EventsTab() {
       annotation: { annotations },
     },
     scales: {
-      y: { beginAtZero: true, title: { display: true, text: 'Checkouts' } },
+      y: { beginAtZero: true, max: axisMax, title: { display: true, text: 'Checkouts' } },
       x: {
         ticks: {
           autoSkip: false,
@@ -279,9 +290,10 @@ function EventsTab() {
       <Card>
         <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Daily checkouts + 7-day average, with enrollment events</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 6 }}>
-          Light bars = daily checkouts. Bold line = 7-day average (the real trend). Numbered pins = events — match them to the legend below. <b>Scroll sideways →</b> to move through the year. Solid pin = likely moved conversion; dashed = measurement-only.
+          Light bars = daily checkouts. Bold line = 7-day average (the real trend). Numbered pins (top) = events — <b>hover a pin for details</b>, or match the number to the legend below. <b>Scroll sideways →</b> for Jul–Oct. Solid pin = likely moved conversion; dashed = measurement-only.
         </div>
         <CategoryLegend />
+        <HoverDetail e={hovered !== null ? events[hovered] : null} n={hovered !== null ? hovered + 1 : null} />
         <div style={{ overflowX: 'auto', overflowY: 'hidden', paddingBottom: 8 }}>
           <div style={{ width: chartWidth, height: 420 }}>
             <Bar
@@ -331,6 +343,27 @@ function Chip({ children, color }: { children: ReactNode; color: string }) {
     <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 999, fontSize: 12, fontWeight: 600, color, background: `${color}1A` }}>
       {children}
     </span>
+  );
+}
+
+function HoverDetail({ e, n }: { e: EventRow | null; n: number | null }) {
+  const color = e ? eventCategoryColor[e.category] : '#e5e7eb';
+  return (
+    <div style={{ minHeight: 56, border: `1px solid ${e ? color : '#eee'}`, borderLeft: `4px solid ${color}`, borderRadius: 8, padding: '10px 14px', marginBottom: 10, background: e ? `${color}0D` : '#fafafa', transition: 'all 0.1s' }}>
+      {e ? (
+        <div>
+          <div style={{ fontWeight: 700, color: TP.navy, fontSize: 14 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: 10, background: color, color: '#fff', fontSize: 11, marginRight: 8 }}>{n}</span>
+            {e.date}{e.approx ? ' (approx)' : ''} · {e.label}
+          </div>
+          <div style={{ fontSize: 13, color: TP.text, marginTop: 4 }}>
+            <b>{e.category}</b> · {IMPACT_LABEL[e.impact]} — {e.note}
+          </div>
+        </div>
+      ) : (
+        <div style={{ fontSize: 13, color: '#9ca3af', paddingTop: 8 }}>Hover a numbered pin on the chart to see what happened that day.</div>
+      )}
+    </div>
   );
 }
 
