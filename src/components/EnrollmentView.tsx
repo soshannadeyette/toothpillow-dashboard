@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
-import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, simMonthly, type EventRow } from '@/data/enrollmentCheckouts';
+import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, type EventRow } from '@/data/enrollmentCheckouts';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -38,7 +38,6 @@ const heatText = (v: number, max: number) => (v / max > 0.55 ? '#fff' : TP.text)
 const TABS = [
   { id: 'overview', label: 'Overview' },
   { id: 'diagnosis', label: 'Why (May break)' },
-  { id: 'efsim', label: 'Expanders sim' },
   { id: 'monthly', label: 'Monthly' },
   { id: 'weekly', label: 'Weekly' },
   { id: 'events', label: 'Events' },
@@ -121,7 +120,6 @@ export default function EnrollmentView() {
 
       {tab === 'overview' && <OverviewTab />}
       {tab === 'diagnosis' && <DiagnosisTab />}
-      {tab === 'efsim' && <ExpandersSimTab />}
       {tab === 'monthly' && <MonthlyTab />}
       {tab === 'weekly' && <WeeklyTab />}
       {tab === 'events' && <EventsTab />}
@@ -141,50 +139,6 @@ function Stat({ label, value }: { label: string; value: string }) {
       <div style={{ fontSize: 12, color: '#6b7280' }}>{label}</div>
       <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy }}>{value}</div>
     </div>
-  );
-}
-
-function ExpandersSimTab() {
-  const [fPct, setFPct] = useState(10); // % of EF kids who would otherwise have been standard-approved
-  const f = fPct / 100;
-  const labels = simMonthly.map((s) => monLabel(s.month).replace(' 2026', ''));
-  const actual = simMonthly.map((s) => s.enroll);
-  // counterfactual: remove actual EF checkouts, add what the f-fraction would convert at standard
-  const noEF = simMonthly.map((s) => Math.round(s.enroll - s.efCo + s.efRec * f * (s.stdConv / 100)));
-  const actualYTD = actual.reduce((a, b) => a + b, 0);
-  const noEFYTD = noEF.reduce((a, b) => a + b, 0);
-  const delta = actualYTD - noEFYTD; // >0 = EF added enrollments
-  return (
-    <>
-      <Card>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 14 }}>
-          <label style={{ fontSize: 13, fontWeight: 600, color: TP.navy }}>
-            Assume <span style={{ color: TP.blue, fontSize: 18 }}>{fPct}%</span> of expander kids would&apos;ve been standard-approved
-          </label>
-          <input type="range" min={0} max={100} value={fPct} onChange={(e) => setFPct(parseInt(e.target.value, 10))} style={{ flex: 1, minWidth: 220, accentColor: TP.blue }} />
-        </div>
-        <div style={{ marginBottom: 12, fontSize: 14, fontWeight: 700, color: delta >= 0 ? '#1a7f5a' : '#c0392b' }}>
-          At {fPct}%: Expanders First {delta >= 0 ? 'ADDED' : 'COST'} ~{Math.abs(delta).toLocaleString()} enrollments YTD
-          <span style={{ fontWeight: 400, color: '#6b7280', fontSize: 12 }}> ({actualYTD.toLocaleString()} actual vs {noEFYTD.toLocaleString()} without EF)</span>
-        </div>
-        <div style={{ height: 340 }}>
-          <Bar
-            data={{
-              labels,
-              datasets: [
-                { type: 'bar' as const, label: 'Actual enrollments', data: actual, backgroundColor: `${TP.skyBlue}B3`, borderRadius: 3, order: 3 },
-                // @ts-expect-error mixed line
-                { type: 'line' as const, label: 'If no Expanders First', data: noEF, borderColor: '#8B5CF6', backgroundColor: '#8B5CF6', borderWidth: 2.5, pointRadius: 3, borderDash: [6, 3], tension: 0.3, order: 1 },
-                // @ts-expect-error mixed line
-                { type: 'line' as const, label: 'Actual (line)', data: actual, borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 3, tension: 0.3, order: 2 },
-              ],
-            }}
-            options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Enrollments / month' } } } }}
-          />
-        </div>
-        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>By submission cohort. Aug–Oct still maturing. Counterfactual: would-be-standard EF kids convert at that month&apos;s standard rate; the rest (denials) convert at 0.</div>
-      </Card>
-    </>
   );
 }
 
@@ -231,7 +185,7 @@ function DiagnosisTab() {
 
       <Card>
         <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Submissions, enrollments &amp; conversion by month</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Bars = submissions &amp; enrollments (left axis). Line = conversion rate (right axis). Markers: the May conversion break and the July price increase.</div>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Bars = submissions &amp; enrollments (left axis). Lines (right axis) = <b>submission→checkout</b> (overall) and <b>checkout-link→checkout</b> (the closing step). Markers: the May break and the July price increase.</div>
         <div style={{ height: 360 }}>
           <Bar
             data={{
@@ -240,7 +194,9 @@ function DiagnosisTab() {
                 { type: 'bar' as const, label: 'Submissions', data: diagnosisMonthly.map((d) => d.submissions), backgroundColor: `${TP.skyBlue}B3`, borderRadius: 3, yAxisID: 'y', order: 4 },
                 { type: 'bar' as const, label: 'Enrollments (checkouts)', data: monthly.map((m) => m.checkouts), backgroundColor: TP.blue, borderRadius: 3, yAxisID: 'y', order: 3 },
                 // @ts-expect-error mixed line
-                { type: 'line' as const, label: 'Conversion %', data: diagnosisMonthly.map((d) => d.convRate), borderColor: '#c0392b', backgroundColor: '#c0392b', borderWidth: 3, pointRadius: 3, yAxisID: 'y1', order: 1 },
+                { type: 'line' as const, label: 'Submission → checkout %', data: diagnosisMonthly.map((d) => d.convRate), borderColor: '#c0392b', backgroundColor: '#c0392b', borderWidth: 3, pointRadius: 3, yAxisID: 'y1', order: 1 },
+                // @ts-expect-error mixed line
+                { type: 'line' as const, label: 'Checkout link → checkout %', data: conversionMonthly.map((m) => m.linkToCO), borderColor: '#6AA84F', backgroundColor: '#6AA84F', borderWidth: 3, pointRadius: 3, borderDash: [6, 3], yAxisID: 'y1', order: 2 },
               ],
             }}
             options={{
