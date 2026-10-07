@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
-import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, linkCohort, checkoutBaselineRate, checkoutEvents, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, type EventRow } from '@/data/enrollmentCheckouts';
+import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, type EventRow } from '@/data/enrollmentCheckouts';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -38,7 +38,6 @@ const heatText = (v: number, max: number) => (v / max > 0.55 ? '#fff' : TP.text)
 const TABS = [
   { id: 'overview', label: 'Overview' },
   { id: 'diagnosis', label: 'Why (May break)' },
-  { id: 'timeline', label: 'Timeline & cost' },
   { id: 'monthly', label: 'Monthly' },
   { id: 'weekly', label: 'Weekly' },
   { id: 'events', label: 'Events' },
@@ -121,7 +120,6 @@ export default function EnrollmentView() {
 
       {tab === 'overview' && <OverviewTab />}
       {tab === 'diagnosis' && <DiagnosisTab />}
-      {tab === 'timeline' && <TimelineTab />}
       {tab === 'monthly' && <MonthlyTab />}
       {tab === 'weekly' && <WeeklyTab />}
       {tab === 'events' && <EventsTab />}
@@ -144,71 +142,13 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function TimelineTab() {
-  const C = linkCohort;
-  const labels = C.map((c) => monLabel(c.month).replace(' 2026', ''));
-  const idxOf = (m: string) => C.findIndex((c) => c.month === m);
-  const evColor = (k: string) => (k === 'trigger' ? '#7C5CD6' : k === 'fix' ? '#1F7A5A' : k === 'note' ? '#E8A33B' : '#C0392B');
-  const annotations: Record<string, object> = {
-    brokenBox: { type: 'box', xMin: idxOf('2026-04'), xMax: idxOf('2026-08'), backgroundColor: 'rgba(192,57,78,0.05)', borderWidth: 0 },
-  };
-  checkoutEvents.forEach((e, i) => {
-    const x = idxOf(e.month);
-    annotations['ev' + i] = {
-      type: 'line', xMin: x, xMax: x, borderColor: evColor(e.kind), borderWidth: 1.5, borderDash: [4, 3],
-      label: { display: true, content: [e.date, e.label], position: i % 2 === 0 ? 'start' : 'end', backgroundColor: evColor(e.kind), color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { x: 4, y: 2 } },
-    };
-  });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rate: any = {
-    labels,
-    datasets: [
-      { type: 'line', label: 'Ever checked out (mature Jan–Aug)', data: C.map((c) => (c.mature ? c.ever : null)), borderColor: TP.navy, backgroundColor: TP.navy, borderWidth: 3, pointRadius: 3, tension: 0.3, spanGaps: false },
-      { type: 'line', label: 'Within 21 days of link', data: C.map((c) => c.d21), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2, pointRadius: 3, tension: 0.3 },
-      { type: 'line', label: 'Within 14 days of link', data: C.map((c) => c.d14), borderColor: '#2BA58C', backgroundColor: '#2BA58C', borderWidth: 2, pointRadius: 3, tension: 0.3 },
-    ],
-  };
-  const expected = C.map((c) => Math.round((c.links * checkoutBaselineRate) / 100));
-  const lostTotal = C.reduce((s, c, i) => s + (c.mature && c.month >= '2026-04' ? expected[i] - c.checkouts : 0), 0);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const cost: any = {
-    labels,
-    datasets: [
-      { type: 'bar', label: 'Actual checkouts', data: C.map((c) => (c.mature ? c.checkouts : null)), backgroundColor: TP.navy, borderRadius: 3, order: 2 },
-      { type: 'line', label: `Expected at pre-drop rate (${Math.round(checkoutBaselineRate)}%)`, data: C.map((c, i) => (c.mature ? expected[i] : null)), borderColor: '#C0392B', backgroundColor: '#C0392B', borderDash: [6, 3], borderWidth: 2, pointRadius: 2, order: 1 },
-    ],
-  };
-  return (
-    <>
-      <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Conversion over time, with what changed</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Three reads of the closing rate (checkout-link → checkout), by the month the link was sent. <b>Ever checked out</b> is the real impact (mature Jan–Aug only — it stops at Aug because later cohorts are still converting). <b>Within 14 / 21 days</b> use the same window every month, so they stay comparable right through September. Dashed markers are production commits (<span style={{ color: '#7C5CD6' }}>trigger</span> / <span style={{ color: '#C0392B' }}>break</span> / <span style={{ color: '#1F7A5A' }}>fix</span>).
-        </div>
-        <div style={{ height: 400 }}>
-          <Bar data={rate} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const }, annotation: { annotations } }, scales: { y: { beginAtZero: true, max: 45, title: { display: true, text: 'Checkout rate %' } } } }} />
-        </div>
-        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>All three dip hard at April and climb back by September — a shared checkout-page problem, not a messaging or lead-quality one. The September rebound is a leading signal; the full rate confirms as Sep–Oct mature.</div>
-      </Card>
-
-      <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>The hidden cost — about {lostTotal} enrollments lost (Apr–Aug)</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Raw checkouts looked fine because lead volume grew. But at the pre-drop rate these cohorts would have produced the <span style={{ color: '#C0392B', fontWeight: 700 }}>red line</span>. The gap between the bars and the line is enrollments we didn&apos;t get — <b>~{lostTotal} of them, April through August</b>. Sep–Oct omitted (cohorts not yet mature).
-        </div>
-        <div style={{ height: 340 }}>
-          <Bar data={cost} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const }, annotation: { annotations: { brokenBox: annotations.brokenBox } } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Checkouts per link cohort' } } } }} />
-        </div>
-      </Card>
-    </>
-  );
-}
-
 function DiagnosisTab() {
   const labels = diagnosisMonthly.map((d) => monLabel(d.month).replace(' 2026', ''));
   const mayIdx = diagnosisMonthly.findIndex((d) => d.month === '2026-05');
+  const aprIdx = diagnosisMonthly.findIndex((d) => d.month === '2026-04');
   const julIdx = diagnosisMonthly.findIndex((d) => d.month === priceIncreaseMonth);
   const breakLines: Record<string, object> = {
+    cab: { type: 'line', xMin: aprIdx, xMax: aprIdx, borderColor: '#7C5CD6', borderWidth: 2, borderDash: [5, 3], label: { display: true, content: 'CAB change (Apr)', position: 'end' as const, backgroundColor: '#7C5CD6', color: '#fff', font: { size: 10, weight: 'bold' as const }, padding: { x: 5, y: 2 } } },
     mayBreak: { type: 'line', xMin: mayIdx, xMax: mayIdx, borderColor: '#c0392b', borderWidth: 2, label: { display: true, content: 'conversion breaks (May)', position: 'start' as const, backgroundColor: '#c0392b', color: '#fff', font: { size: 10, weight: 'bold' as const }, padding: { x: 5, y: 2 } } },
     priceInc: { type: 'line', xMin: julIdx, xMax: julIdx, borderColor: '#9ca3af', borderWidth: 2, borderDash: [5, 3], label: { display: true, content: 'price increase (Jul)', position: 'end' as const, backgroundColor: '#9ca3af', color: '#fff', font: { size: 10, weight: 'bold' as const }, padding: { x: 5, y: 2 } } },
   };
