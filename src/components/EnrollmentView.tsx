@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
-import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, type EventRow } from '@/data/enrollmentCheckouts';
+import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, linkCohort, checkoutBaselineRate, checkoutEvents, type EventRow } from '@/data/enrollmentCheckouts';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -38,6 +38,7 @@ const heatText = (v: number, max: number) => (v / max > 0.55 ? '#fff' : TP.text)
 const TABS = [
   { id: 'overview', label: 'Overview' },
   { id: 'diagnosis', label: 'Why (May break)' },
+  { id: 'timeline', label: 'Timeline & cost' },
   { id: 'monthly', label: 'Monthly' },
   { id: 'weekly', label: 'Weekly' },
   { id: 'events', label: 'Events' },
@@ -120,6 +121,7 @@ export default function EnrollmentView() {
 
       {tab === 'overview' && <OverviewTab />}
       {tab === 'diagnosis' && <DiagnosisTab />}
+      {tab === 'timeline' && <TimelineTab />}
       {tab === 'monthly' && <MonthlyTab />}
       {tab === 'weekly' && <WeeklyTab />}
       {tab === 'events' && <EventsTab />}
@@ -139,6 +141,66 @@ function Stat({ label, value }: { label: string; value: string }) {
       <div style={{ fontSize: 12, color: '#6b7280' }}>{label}</div>
       <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy }}>{value}</div>
     </div>
+  );
+}
+
+function TimelineTab() {
+  const C = linkCohort;
+  const labels = C.map((c) => monLabel(c.month).replace(' 2026', ''));
+  const idxOf = (m: string) => C.findIndex((c) => c.month === m);
+  const evColor = (k: string) => (k === 'trigger' ? '#7C5CD6' : k === 'fix' ? '#1F7A5A' : k === 'note' ? '#E8A33B' : '#C0392B');
+  const annotations: Record<string, object> = {
+    brokenBox: { type: 'box', xMin: idxOf('2026-04'), xMax: idxOf('2026-08'), backgroundColor: 'rgba(192,57,78,0.05)', borderWidth: 0 },
+  };
+  checkoutEvents.forEach((e, i) => {
+    const x = idxOf(e.month);
+    annotations['ev' + i] = {
+      type: 'line', xMin: x, xMax: x, borderColor: evColor(e.kind), borderWidth: 1.5, borderDash: [4, 3],
+      label: { display: true, content: [e.date, e.label], position: i % 2 === 0 ? 'start' : 'end', backgroundColor: evColor(e.kind), color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { x: 4, y: 2 } },
+    };
+  });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rate: any = {
+    labels,
+    datasets: [
+      { type: 'line', label: 'Ever checked out (mature Jan–Aug)', data: C.map((c) => (c.mature ? c.ever : null)), borderColor: TP.navy, backgroundColor: TP.navy, borderWidth: 3, pointRadius: 3, tension: 0.3, spanGaps: false },
+      { type: 'line', label: 'Within 21 days of link', data: C.map((c) => c.d21), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2, pointRadius: 3, tension: 0.3 },
+      { type: 'line', label: 'Within 14 days of link', data: C.map((c) => c.d14), borderColor: '#2BA58C', backgroundColor: '#2BA58C', borderWidth: 2, pointRadius: 3, tension: 0.3 },
+    ],
+  };
+  const expected = C.map((c) => Math.round((c.links * checkoutBaselineRate) / 100));
+  const lostTotal = C.reduce((s, c, i) => s + (c.mature && c.month >= '2026-04' ? expected[i] - c.checkouts : 0), 0);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const cost: any = {
+    labels,
+    datasets: [
+      { type: 'bar', label: 'Actual checkouts', data: C.map((c) => (c.mature ? c.checkouts : null)), backgroundColor: TP.navy, borderRadius: 3, order: 2 },
+      { type: 'line', label: `Expected at pre-drop rate (${Math.round(checkoutBaselineRate)}%)`, data: C.map((c, i) => (c.mature ? expected[i] : null)), borderColor: '#C0392B', backgroundColor: '#C0392B', borderDash: [6, 3], borderWidth: 2, pointRadius: 2, order: 1 },
+    ],
+  };
+  return (
+    <>
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Conversion over time, with what changed</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          Three reads of the closing rate (checkout-link → checkout), by the month the link was sent. <b>Ever checked out</b> is the real impact (mature Jan–Aug only — it stops at Aug because later cohorts are still converting). <b>Within 14 / 21 days</b> use the same window every month, so they stay comparable right through September. Dashed markers are production commits (<span style={{ color: '#7C5CD6' }}>trigger</span> / <span style={{ color: '#C0392B' }}>break</span> / <span style={{ color: '#1F7A5A' }}>fix</span>).
+        </div>
+        <div style={{ height: 400 }}>
+          <Bar data={rate} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const }, annotation: { annotations } }, scales: { y: { beginAtZero: true, max: 45, title: { display: true, text: 'Checkout rate %' } } } }} />
+        </div>
+        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>All three dip hard at April and climb back by September — a shared checkout-page problem, not a messaging or lead-quality one. The September rebound is a leading signal; the full rate confirms as Sep–Oct mature.</div>
+      </Card>
+
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>The hidden cost — about {lostTotal} enrollments lost (Apr–Aug)</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          Raw checkouts looked fine because lead volume grew. But at the pre-drop rate these cohorts would have produced the <span style={{ color: '#C0392B', fontWeight: 700 }}>red line</span>. The gap between the bars and the line is enrollments we didn&apos;t get — <b>~{lostTotal} of them, April through August</b>. Sep–Oct omitted (cohorts not yet mature).
+        </div>
+        <div style={{ height: 340 }}>
+          <Bar data={cost} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const }, annotation: { annotations: { brokenBox: annotations.brokenBox } } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Checkouts per link cohort' } } } }} />
+        </div>
+      </Card>
+    </>
   );
 }
 
@@ -167,8 +229,85 @@ function DiagnosisTab() {
     [20.7, 22.9],    // mix shift (denials -> approvals/expanders) + other: +2.2
     [0, 22.9],       // now
   ];
+  const timeline: { when: string; what: string; tone: 'root' | 'bad' | 'fix' }[] = [
+    { when: 'Apr (CAB change)', tone: 'root', what: `Assessment flow rewired so ta_status drives everything. More cases now sit in intermediate statuses the results page was never built to handle.` },
+    { when: 'early May', tone: 'bad', what: `Checkout crashed with a 500 when a family's cart was missing. Patched repeatedly May 4–14 (PRs #500/#504/#505), band-aids rather than a root fix.` },
+    { when: 'until May 14', tone: 'bad', what: `Public price ($96 / $145 a month) did not match the checkout price ($85 / $125). Fixed May 14.` },
+    { when: 'May 18', tone: 'bad', what: `For "approve with expanders" cases the button flipped from "Select Treatment Plan" (to checkout) to "Schedule a Consultation" (to a booking link). That segment leaves self-checkout by design.` },
+    { when: 'through Jul 13', tone: 'bad', what: `The results page rendered blank whenever ta_status was not advanced yet (nil progress crashed the render, outside the rescue). A family clicking the link could land on an empty page. Only guarded Jul 13.` },
+    { when: 'Jul 20–31', tone: 'bad', what: `Page still pulling the wrong plan data (reading appliance / myo from the wrong question field).` },
+    { when: 'Aug 28', tone: 'fix', what: `Full redesign of the results and treatment-plan pages, the first real fix of the destination.` },
+  ];
+  const toneColor = (t: 'root' | 'bad' | 'fix') => (t === 'fix' ? '#1a7f5a' : t === 'root' ? '#8B5CF6' : '#c0392b');
+  // 14/21-day closing rate with events (spans whatever months linkCohort holds — 2025 drops in automatically)
+  const CC = linkCohort;
+  const multiYr = new Set(CC.map((c) => c.month.slice(0, 4))).size > 1;
+  const clab = CC.map((c) => (multiYr ? `${MON[+c.month.slice(5, 7) - 1]} '${c.month.slice(2, 4)}` : MON[+c.month.slice(5, 7) - 1]));
+  const ciOf = (m: string) => CC.findIndex((c) => c.month === m);
+  const eColor = (k: string) => (k === 'trigger' ? '#7C5CD6' : k === 'fix' ? '#1F7A5A' : k === 'note' ? '#E8A33B' : '#C0392B');
+  const annC: Record<string, object> = {};
+  checkoutEvents.forEach((e, i) => {
+    const x = ciOf(e.month);
+    if (x < 0) return;
+    annC['e' + i] = { type: 'line', xMin: x, xMax: x, borderColor: eColor(e.kind), borderWidth: 1.5, borderDash: [4, 3], label: { display: true, content: [e.date, e.label], position: i % 2 === 0 ? 'start' : 'end', backgroundColor: eColor(e.kind), color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { x: 4, y: 2 } } };
+  });
+  // pre-drop baseline (everything before the April 2026 break) as a reference line per window
+  const preDrop = CC.filter((c) => c.month < '2026-04');
+  const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
+  const b14 = avg(preDrop.map((c) => c.d14).filter((v): v is number => v != null));
+  const b21 = avg(preDrop.map((c) => c.d21).filter((v): v is number => v != null));
+  annC['base21'] = { type: 'line', yMin: b21, yMax: b21, borderColor: TP.blue, borderWidth: 1.2, borderDash: [7, 4], label: { display: true, content: `21-day baseline ~${Math.round(b21)}%`, position: 'start', backgroundColor: TP.blue, color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } };
+  annC['base14'] = { type: 'line', yMin: b14, yMax: b14, borderColor: '#2BA58C', borderWidth: 1.2, borderDash: [7, 4], label: { display: true, content: `14-day baseline ~${Math.round(b14)}%`, position: 'start', backgroundColor: '#2BA58C', color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } };
+  // outlier months (e.g. June 2026 pricing push) are dropped from the line and shown as a lone point
+  const lineD = (k: 'd14' | 'd21') => CC.map((c) => (c.outlier ? null : c[k]));
+  const ptD = (k: 'd14' | 'd21') => CC.map((c) => (c.outlier ? c[k] : null));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rate1421: any = { labels: clab, datasets: [
+    { type: 'line', label: 'Within 21 days of link', data: lineD('d21'), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 3, tension: 0.3, spanGaps: true },
+    { type: 'line', label: 'Within 14 days of link', data: lineD('d14'), borderColor: '#2BA58C', backgroundColor: '#2BA58C', borderWidth: 2.5, pointRadius: 3, tension: 0.3, spanGaps: true },
+    { type: 'line', label: 'outlier21', data: ptD('d21'), borderColor: '#E8A33B', backgroundColor: '#E8A33B', showLine: false, pointRadius: 5, pointStyle: 'rectRot' },
+    { type: 'line', label: 'outlier14', data: ptD('d14'), borderColor: '#E8A33B', backgroundColor: '#E8A33B', showLine: false, pointRadius: 5, pointStyle: 'rectRot' },
+  ] };
   return (
     <>
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>What actually broke, and why it stayed broken</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>
+          Traced Oct 6 2026 across GoHighLevel and the <code>toothpillow</code> + <code>airway-virtual</code> repos. The drop is entirely at the <b>closing step</b> (checkout-link → checkout): the same share of families get a link, far fewer complete.
+        </div>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
+          <div style={{ flex: '1 1 240px', border: '1px solid #e5e7eb', borderRadius: 8, padding: '10px 12px', background: '#f8fafc' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#1a7f5a', marginBottom: 4 }}>RULED OUT — THE MESSAGING</div>
+            <div style={{ fontSize: 12, color: TP.text }}>The checkout-link text, the &quot;your assessment is ready&quot; email, and the link itself (<code>b.toothpillow.com/l/…</code> → the Toothpillow Chart) are <b>word-for-word identical March, April and May.</b> Verified across 10 leads. Nothing in the sales flow changed.</div>
+          </div>
+          <div style={{ flex: '1 1 240px', border: `1px solid ${TP.blue}`, borderRadius: 8, padding: '10px 12px', background: `${TP.blue}0D` }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: TP.blue, marginBottom: 4 }}>THE CAUSE — WHAT THE LINK OPENS</div>
+            <div style={{ fontSize: 12, color: TP.text }}>Families click the same link and land on the <b>results / checkout page</b>. That page broke over and over from May through August, so families who were ready to pay could not.</div>
+          </div>
+        </div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: TP.navy, marginBottom: 6 }}>The checkout page, month by month</div>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {timeline.map((e, i) => (
+            <div key={e.when} style={{ display: 'flex', gap: 12, padding: '8px 0', borderTop: i ? '1px solid #f1f5f9' : 'none' }}>
+              <div style={{ width: 112, flex: 'none', fontSize: 12, fontWeight: 700, color: toneColor(e.tone) }}>{e.when}</div>
+              <div style={{ fontSize: 12, color: TP.text, lineHeight: 1.45 }}>{e.what}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: 14, padding: '10px 12px', background: `${TP.navy}0D`, borderRadius: 8, fontSize: 12, color: TP.text, lineHeight: 1.5 }}>
+          <b>Why it stepped down in May and never recovered:</b> it was never one bug. The April change made the results page fragile, and the page kept failing in new ways — crash, price mismatch, rerouted button, blank page — straight through to the August redesign. Each patch fixed one symptom while the next shape broke it again, so the closing rate stayed depressed for months.
+        </div>
+      </Card>
+
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Closing rate with what changed — within 14 &amp; 21 days of the link</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Of families who got a checkout link, the share who completed within 14 and 21 days — same window every month, so every point is comparable {multiYr ? 'across 2025–2026' : 'across the year'}. Dashed markers are production commits (<span style={{ color: '#7C5CD6' }}>trigger</span> / <span style={{ color: '#C0392B' }}>break</span> / <span style={{ color: '#1F7A5A' }}>fix</span> / <span style={{ color: '#E8A33B' }}>pricing</span>). <b>June is an outlier</b> — a last-day push before the Jul 1 price increase inflated it, so read that bump with caution.</div>
+        <div style={{ height: 360 }}>
+          <Bar data={rate1421} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const, labels: { filter: (item) => !String(item.text).startsWith('outlier') } }, annotation: { annotations: annC } }, scales: { y: { beginAtZero: true, max: 35, title: { display: true, text: 'Checkout rate %' } } } }} />
+        </div>
+        {!multiYr && <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>Showing 2026. Add a 2025 funnel export and this extends to 2025–2026 automatically.</div>}
+      </Card>
+
       <Card>
         <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Why conversion fell from our Feb–Apr rate</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Overall conversion is a blend of regular approvals (check out most), Expanders First (less), and denied (almost never). Two things changed: <b>fewer denials / more approvals helped (+2)</b>, but <b>regular-approved families went from ~41 of 100 checking out to ~30 of 100, pulling the whole rate down ~7.</b> If regular approvals had held, we&apos;d be ~30% today — above where we started. The problem is regular families at checkout, not expanders.</div>

@@ -135,3 +135,48 @@ export const events: EventRow[] = [
   { date: '2026-10-01', label: 'New-home / patient-app beta launches', category: 'launch', impact: 'tbd', note: '~20 testers on the rebuilt patient app.' },
   { date: '2026-10-01', label: 'Graduation V2 goes live', category: 'launch', impact: 'tbd', note: 'New "Graduation Operations" board; all patients from Oct 1.' },
 ];
+
+// --- Link-sent cohorts (from the SOSH Enrollment Funnel export) ---
+// Each row = links sent that month, and how those families converted.
+// ever = % that ever checked out (mature Jan–Aug only). d14/d21 = % within 14/21 days of the
+// link (same window each month, so recent months are comparable). mature=false → still filling in.
+export type CohortRow = { month: string; links: number; checkouts: number; ever: number; d14: number | null; d21: number | null; mature: boolean; outlier?: boolean };
+export const linkCohort: CohortRow[] = [
+  // 2025 (from the 2025-submitter funnel export)
+  { month: '2025-01', links: 578,  checkouts: 241, ever: 41.7, d14: 18.9, d21: 23.5, mature: true },
+  { month: '2025-02', links: 937,  checkouts: 329, ever: 35.1, d14: 15.0, d21: 19.0, mature: true },
+  { month: '2025-03', links: 1108, checkouts: 387, ever: 34.9, d14: 19.7, d21: 22.7, mature: true },
+  { month: '2025-04', links: 962,  checkouts: 393, ever: 40.9, d14: 20.8, d21: 26.5, mature: true },
+  { month: '2025-05', links: 758,  checkouts: 315, ever: 41.6, d14: 23.5, d21: 28.0, mature: true },
+  { month: '2025-06', links: 654,  checkouts: 256, ever: 39.1, d14: 20.0, d21: 23.4, mature: true },
+  { month: '2025-07', links: 1062, checkouts: 412, ever: 38.8, d14: 20.3, d21: 24.7, mature: true },
+  { month: '2025-08', links: 1605, checkouts: 633, ever: 39.4, d14: 21.5, d21: 24.1, mature: true },
+  { month: '2025-09', links: 1427, checkouts: 515, ever: 36.1, d14: 16.0, d21: 20.8, mature: true },
+  { month: '2025-10', links: 860,  checkouts: 355, ever: 41.3, d14: 21.3, d21: 24.3, mature: true },
+  { month: '2025-11', links: 638,  checkouts: 221, ever: 34.6, d14: 22.6, d21: 26.2, mature: true },
+  { month: '2025-12', links: 702,  checkouts: 286, ever: 40.7, d14: 23.2, d21: 29.1, mature: true },
+  // 2026 (from the 2026-submitter funnel export)
+  { month: '2026-01', links: 584,  checkouts: 219, ever: 37.5, d14: 25.9, d21: 28.6, mature: true },
+  { month: '2026-02', links: 717,  checkouts: 285, ever: 39.7, d14: 25.1, d21: 27.9, mature: true },
+  { month: '2026-03', links: 975,  checkouts: 360, ever: 36.9, d14: 19.9, d21: 24.1, mature: true },
+  { month: '2026-04', links: 1114, checkouts: 308, ever: 27.6, d14: 12.5, d21: 15.9, mature: true },
+  { month: '2026-05', links: 741,  checkouts: 228, ever: 30.8, d14: 17.0, d21: 20.1, mature: true },
+  { month: '2026-06', links: 1164, checkouts: 332, ever: 28.5, d14: 20.2, d21: 24.1, mature: true, outlier: true }, // last-day pricing push before Jul 1 increase
+  { month: '2026-07', links: 1156, checkouts: 315, ever: 27.2, d14: 17.6, d21: 21.1, mature: true },
+  { month: '2026-08', links: 1084, checkouts: 271, ever: 25.0, d14: 18.3, d21: 20.9, mature: true },
+  { month: '2026-09', links: 879,  checkouts: 216, ever: 24.6, d14: 24.6, d21: 25.4, mature: false },
+  { month: '2026-10', links: 117,  checkouts: 13,  ever: 11.1, d14: null, d21: null, mature: false },
+];
+// Pre-drop baseline rate (Jan–Mar) used for the "expected at old rate" / lost-enrollment math.
+export const checkoutBaselineRate = 37.96;
+
+// Checkout-system changes, dated from production commit history (toothpillow + airway-virtual).
+export type CheckoutEvent = { month: string; date: string; label: string; kind: 'trigger' | 'break' | 'fix' | 'note' };
+export const checkoutEvents: CheckoutEvent[] = [
+  { month: '2026-04', date: 'Apr 10',  label: 'CAB change',              kind: 'trigger' },
+  { month: '2026-05', date: 'May 6–14', label: 'webhook drop + cart 500s', kind: 'break' },
+  { month: '2026-06', date: 'Jun 30',  label: 'price increase — June push (outlier)', kind: 'note' },
+  { month: '2026-07', date: 'Jul 13',  label: 'blank results page',      kind: 'break' },
+  { month: '2026-08', date: 'Aug 28',  label: 'checkout rebuilt',        kind: 'fix' },
+  { month: '2026-09', date: 'Sep 30',  label: 'iCore / pre-expanders',   kind: 'fix' },
+];
