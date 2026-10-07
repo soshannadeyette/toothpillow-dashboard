@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
-import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, linkCohort, checkoutBaselineRate, checkoutEvents, type EventRow } from '@/data/enrollmentCheckouts';
+import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, linkCohort, checkoutBaselineRate, checkoutEvents, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, type EventRow } from '@/data/enrollmentCheckouts';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -229,16 +229,23 @@ function DiagnosisTab() {
     [20.7, 22.9],    // mix shift (denials -> approvals/expanders) + other: +2.2
     [0, 22.9],       // now
   ];
-  const timeline: { when: string; what: string; tone: 'root' | 'bad' | 'fix' }[] = [
-    { when: 'Apr (CAB change)', tone: 'root', what: `Assessment flow rewired so ta_status drives everything. More cases now sit in intermediate statuses the results page was never built to handle.` },
-    { when: 'early May', tone: 'bad', what: `Checkout crashed with a 500 when a family's cart was missing. Patched repeatedly May 4–14 (PRs #500/#504/#505), band-aids rather than a root fix.` },
-    { when: 'until May 14', tone: 'bad', what: `Public price ($96 / $145 a month) did not match the checkout price ($85 / $125). Fixed May 14.` },
-    { when: 'May 18', tone: 'bad', what: `For "approve with expanders" cases the button flipped from "Select Treatment Plan" (to checkout) to "Schedule a Consultation" (to a booking link). That segment leaves self-checkout by design.` },
-    { when: 'through Jul 13', tone: 'bad', what: `The results page rendered blank whenever ta_status was not advanced yet (nil progress crashed the render, outside the rescue). A family clicking the link could land on an empty page. Only guarded Jul 13.` },
-    { when: 'Jul 20–31', tone: 'bad', what: `Page still pulling the wrong plan data (reading appliance / myo from the wrong question field).` },
-    { when: 'Aug 28', tone: 'fix', what: `Full redesign of the results and treatment-plan pages, the first real fix of the destination.` },
-  ];
-  const toneColor = (t: 'root' | 'bad' | 'fix') => (t === 'fix' ? '#1a7f5a' : t === 'root' ? '#8B5CF6' : '#c0392b');
+  const maxSrc = Math.max(...breakBySource.map((s) => s.before));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const proofChart: any = {
+    labels: breakProofMonthly.map((x) => x.m),
+    datasets: [
+      { type: 'bar', label: '"refer only" links (April only)', data: breakProofMonthly.map((x) => x.referOnlyLinks), backgroundColor: 'rgba(232,163,59,0.45)', yAxisID: 'y1', order: 3, barPercentage: 0.5 },
+      { type: 'line', label: 'Approved cases only', data: breakProofMonthly.map((x) => x.plain), borderColor: '#1F7A5A', backgroundColor: '#1F7A5A', borderWidth: 3, pointRadius: 3, tension: 0.3, yAxisID: 'y', order: 1 },
+      { type: 'line', label: 'Overall (blended)', data: breakProofMonthly.map((x) => x.overall), borderColor: '#C0392B', backgroundColor: '#C0392B', borderWidth: 2.5, pointRadius: 3, tension: 0.3, yAxisID: 'y', order: 2 },
+    ],
+  };
+  const wkIdx = breakWeekly.findIndex((w) => w.w === 'May 25');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const weeklyChart: any = {
+    labels: breakWeekly.map((w) => w.w),
+    datasets: [{ type: 'bar', label: 'Plain-approved link→checkout %', data: breakWeekly.map((w) => w.r), backgroundColor: breakWeekly.map((w, i) => (i >= wkIdx ? '#C0392B' : '#9FC6B4')), borderRadius: 3 }],
+  };
+  const weeklyAnn: Record<string, object> = { brk: { type: 'line', xMin: wkIdx - 0.5, xMax: wkIdx - 0.5, borderColor: '#C0392B', borderWidth: 1.5, borderDash: [5, 3], label: { display: true, content: 'week of May 25', position: 'start' as const, backgroundColor: '#C0392B', color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { x: 4, y: 2 } } } };
   // 14/21-day closing rate with events (spans whatever months linkCohort holds — 2025 drops in automatically)
   const CC = linkCohort;
   // chart shows a trailing 12-month window (Oct '25 → current); baseline still uses all pre-drop history
@@ -273,31 +280,68 @@ function DiagnosisTab() {
   return (
     <>
       <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>What actually broke, and why it stayed broken</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>
-          Traced Oct 6 2026 across GoHighLevel and the <code>toothpillow</code> + <code>airway-virtual</code> repos. The drop is entirely at the <b>closing step</b> (checkout-link → checkout): the same share of families get a link, far fewer complete.
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>The May break — approved families stopped completing checkout</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          Link→checkout by the month the link was sent (Salesforce funnel export). <b style={{ color: '#1F7A5A' }}>Approved cases only</b> holds ~39% through April, then falls to ~27% from May and keeps sliding — the same in every source. The <b style={{ color: '#C0392B' }}>blended</b> rate only craters in April because 360 &quot;refer only&quot; cases were sent links (amber bar) and converted at 1% — an April-only artifact, not a real drop.
         </div>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
-          <div style={{ flex: '1 1 240px', border: '1px solid #e5e7eb', borderRadius: 8, padding: '10px 12px', background: '#f8fafc' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#1a7f5a', marginBottom: 4 }}>RULED OUT — THE MESSAGING</div>
-            <div style={{ fontSize: 12, color: TP.text }}>The checkout-link text, the &quot;your assessment is ready&quot; email, and the link itself (<code>b.toothpillow.com/l/…</code> → the Toothpillow Chart) are <b>word-for-word identical March, April and May.</b> Verified across 10 leads. Nothing in the sales flow changed.</div>
-          </div>
-          <div style={{ flex: '1 1 240px', border: `1px solid ${TP.blue}`, borderRadius: 8, padding: '10px 12px', background: `${TP.blue}0D` }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: TP.blue, marginBottom: 4 }}>THE CAUSE — WHAT THE LINK OPENS</div>
-            <div style={{ fontSize: 12, color: TP.text }}>Families click the same link and land on the <b>results / checkout page</b>. That page broke over and over from May through August, so families who were ready to pay could not.</div>
-          </div>
+        <div style={{ height: 320 }}>
+          <Bar data={proofChart} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const } }, scales: { y: { beginAtZero: true, max: 45, title: { display: true, text: 'Link→checkout %' } }, y1: { beginAtZero: true, max: 400, position: 'right' as const, grid: { drawOnChartArea: false }, title: { display: true, text: '"refer only" links' } } } }} />
         </div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: TP.navy, marginBottom: 6 }}>The checkout page, month by month</div>
+      </Card>
+
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>It broke the week of May 25</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Plain-approved link→checkout by week. It holds in the 34–41% band through <b>May 18</b>, then steps down to 27–32% the <b>week of May 25</b> and never recovers. (Ironically a strong week otherwise — this is the rate, not the traffic.) PR&nbsp;#626 shipped the checkout-button copy change on <b>May 29</b>.</div>
+        <div style={{ height: 280 }}>
+          <Bar data={weeklyChart} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, annotation: { annotations: weeklyAnn } }, scales: { y: { beginAtZero: true, max: 45, title: { display: true, text: 'Link→checkout %' } } } }} />
+        </div>
+      </Card>
+
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>What it is NOT — ruled out, with the numbers</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 10 }}>Every conventional suspect, tested against the data and eliminated. This is the slide for the team.</div>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          {timeline.map((e, i) => (
-            <div key={e.when} style={{ display: 'flex', gap: 12, padding: '8px 0', borderTop: i ? '1px solid #f1f5f9' : 'none' }}>
-              <div style={{ width: 112, flex: 'none', fontSize: 12, fontWeight: 700, color: toneColor(e.tone) }}>{e.when}</div>
-              <div style={{ fontSize: 12, color: TP.text, lineHeight: 1.45 }}>{e.what}</div>
+          {ruledOutScoreboard.map((r, i) => (
+            <div key={r.k} style={{ display: 'flex', gap: 12, padding: '8px 0', borderTop: i ? '1px solid #f1f5f9' : 'none' }}>
+              <div style={{ width: 160, flex: 'none', fontSize: 12, fontWeight: 700, color: '#c0392b' }}>✗ {r.k}</div>
+              <div style={{ fontSize: 12, color: '#4b5563', lineHeight: 1.45 }}>{r.v}</div>
             </div>
           ))}
         </div>
-        <div style={{ marginTop: 14, padding: '10px 12px', background: `${TP.navy}0D`, borderRadius: 8, fontSize: 12, color: TP.text, lineHeight: 1.5 }}>
-          <b>Why it stepped down in May and never recovered:</b> it was never one bug. The April change made the results page fragile, and the page kept failing in new ways — crash, price mismatch, rerouted button, blank page — straight through to the August redesign. Each patch fixed one symptom while the next shape broke it again, so the closing rate stayed depressed for months.
+      </Card>
+
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>The drop is systemic — every source fell together</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Plain-approved link→checkout by lead source, before (Feb–Apr, grey) vs after (May–Jul, red). A lead-quality problem would hit one or two channels; this hits all of them — so it&apos;s the checkout experience, not who the leads are.</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+          {breakBySource.map((s) => {
+            const isAll = s.src.startsWith('ALL');
+            return (
+              <div key={s.src} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, fontWeight: isAll ? 700 : 400, paddingTop: isAll ? 6 : 0, marginTop: isAll ? 4 : 0, borderTop: isAll ? '1px solid #e5e7eb' : 'none' }}>
+                <div style={{ width: 150, flex: 'none', color: TP.text }}>{s.src}</div>
+                <div style={{ width: 36, textAlign: 'right', color: '#94a3b8' }}>{s.before}%</div>
+                <div style={{ flex: 1, position: 'relative', height: 16, background: '#f1f5f9', borderRadius: 4 }}>
+                  <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${(s.before / maxSrc) * 100}%`, background: '#cbd5e1', borderRadius: 4 }} />
+                  <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${(s.after / maxSrc) * 100}%`, background: '#c0392b', borderRadius: 4 }} />
+                </div>
+                <div style={{ width: 36, textAlign: 'left', color: '#c0392b', fontWeight: 700 }}>{s.after}%</div>
+                <div style={{ width: 34, textAlign: 'right', color: '#c0392b' }}>{s.after - s.before}</div>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      <Card>
+        <div style={{ border: '2px solid #E8A33B', borderRadius: 10, padding: '14px 16px', background: '#FDF6EA' }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: '#9a6b14', letterSpacing: '0.06em', marginBottom: 4 }}>STRONG POSSIBILITY — TO CONFIRM, NOT YET PROVEN</div>
+          <h3 style={{ margin: '0 0 6px', color: TP.navy, fontWeight: 700, fontSize: 17 }}>PR #626 (May 29): the checkout button flipped from &quot;buy&quot; to &quot;browse&quot;</h3>
+          <div style={{ fontSize: 12.5, color: TP.text, lineHeight: 1.5 }}>
+            On <b>May 29, 2026</b>, PR&nbsp;#626 (&quot;change button text&quot;) edited the results-page checkout button for <b>every approved family</b> (the plain-approved path, not expanders): <b>&quot;Select Treatment Plan&quot; / &quot;Enroll Now&quot; → &quot;Review Treatment Plans&quot;</b>, across <code>_results_header</code>, <code>_mobile_cta</code> and <code>_progress_tracker</code>. Same destination (<code>consultant_checkout_path</code>) — nothing broke — but the call to action went from <i>commit</i> to <i>browse</i>.
+          </div>
+          <div style={{ marginTop: 10, fontSize: 12, color: '#4b5563', lineHeight: 1.5 }}>
+            <b>Why it fits:</b> dated the break week; hits all approved families; systemic across every source; invisible to errors, Honeybadger and carts — which is why the error report found nothing. <b>Why not yet proven:</b> the weekly step-down starts a few days before the merge (noise, or a small earlier contributor — there was an earlier button edit May&nbsp;18). <b>Cleanest test:</b> change it back to &quot;Enroll Now&quot; and watch the rate.
+          </div>
         </div>
       </Card>
 
@@ -482,7 +526,7 @@ function OverviewTab() {
         </div>
         <div style={{ marginTop: 18 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: TP.navy, marginBottom: 6 }}>Both rates over time — with what changed, when</div>
-          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Both rates broke in <b>May</b> — two months <b>before</b> July&apos;s price increase, and the schedule-a-call step (added Apr, removed Jul) doesn&apos;t line up either. It&apos;s a shared checkout change in May. See the <b>&quot;Why (May break)&quot;</b> tab for the full diagnosis.</div>
+          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Both rates broke in <b>May</b>. It is <b>not</b> the sales flow or the checkout page — those were ruled out by the Checkout Error Reports. It sits at the <b>payment step</b> (JotForm + financing), where approved families stopped completing. See the <b>&quot;Why (May break)&quot;</b> tab.</div>
           <div style={{ height: 260 }}>
             <Bar
               data={{

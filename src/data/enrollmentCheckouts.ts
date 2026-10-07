@@ -172,11 +172,50 @@ export const checkoutBaselineRate = 37.96;
 
 // Checkout-system changes, dated from production commit history (toothpillow + airway-virtual).
 export type CheckoutEvent = { month: string; date: string; label: string; kind: 'trigger' | 'break' | 'fix' | 'note' };
+// Corrected Oct 7 2026 against the Checkout Error Reports: the cart-500 / webhook /
+// blank-page events were ruled out as causes (all far too small). Only the CAB approval-mix
+// change and the expander reroute remain; the Aug redesign did not move the rate.
 export const checkoutEvents: CheckoutEvent[] = [
-  { month: '2026-04', date: 'Apr 10',  label: 'CAB change',              kind: 'trigger' },
-  { month: '2026-05', date: 'May 6–14', label: 'webhook drop + cart 500s', kind: 'break' },
-  { month: '2026-06', date: 'Jun 30',  label: 'price increase — June push (outlier)', kind: 'note' },
-  { month: '2026-07', date: 'Jul 13',  label: 'blank results page',      kind: 'break' },
-  { month: '2026-08', date: 'Aug 28',  label: 'checkout rebuilt',        kind: 'fix' },
-  { month: '2026-09', date: 'Sep 30',  label: 'iCore / pre-expanders',   kind: 'fix' },
+  { month: '2026-04', date: 'Apr 10',   label: 'CAB change (approval mix)',      kind: 'trigger' },
+  { month: '2026-05', date: 'May 15–19', label: 'expanders routed off checkout', kind: 'break' },
+  { month: '2026-06', date: 'Jun 30',   label: 'price increase (outlier)',       kind: 'note' },
+  { month: '2026-08', date: 'Aug 28',   label: 'results redesign (no rate effect)', kind: 'fix' },
+];
+
+// --- May-break proof (computed Oct 7 2026 directly from the Salesforce funnel export, not the error report) ---
+// Link->checkout by the month the link was sent. "overall" is the blended rate; "plain" excludes
+// expanders and refer-only. referOnlyLinks = count of "refer only" cases sent a link that month.
+export const breakProofMonthly = [
+  { m: 'Feb', overall: 39.7, plain: 39.5, referOnlyLinks: 0 },
+  { m: 'Mar', overall: 36.9, plain: 38.4, referOnlyLinks: 0 },
+  { m: 'Apr', overall: 27.6, plain: 39.1, referOnlyLinks: 360 },
+  { m: 'May', overall: 30.8, plain: 32.2, referOnlyLinks: 1 },
+  { m: 'Jun', overall: 28.5, plain: 30.3, referOnlyLinks: 0 },
+  { m: 'Jul', overall: 27.2, plain: 27.3, referOnlyLinks: 0 },
+  { m: 'Aug', overall: 26.1, plain: 26.2, referOnlyLinks: 0 },
+];
+// Plain-approved link->checkout by lead source, before (Feb-Apr) vs after (May-Jul). The drop is systemic.
+export const breakBySource = [
+  { src: 'Influencer', before: 41, after: 33 },
+  { src: 'Online Search', before: 36, after: 24 },
+  { src: 'Podcast', before: 40, after: 31 },
+  { src: 'Parent', before: 44, after: 36 },
+  { src: 'Instagram', before: 28, after: 19 },
+  { src: 'Dental Office', before: 50, after: 32 },
+  { src: 'Unknown Referral', before: 35, after: 21 },
+  { src: 'ALL plain approved', before: 39, after: 30 },
+];
+// What the data rules OUT as the cause (each line is proven from the funnel export unless noted).
+export const ruledOutScoreboard = [
+  { k: 'April itself', v: 'Artifact. 360 "refer only" cases were sent checkout links in April (zero in any other month) and converted at 1%. Strip them out and approved families converted at 41% — the year’s best.' },
+  { k: 'Lead volume', v: 'July had 1,997 submissions (the most of any month) and still only ~27% converted. More leads did not lift the rate.' },
+  { k: 'Expanders / the reroute', v: 'Plain approvals fall just as hard with expanders removed entirely. Expanders are a small, separate, low-converting bucket.' },
+  { k: 'Pricing / plan', v: 'No May move. Average amount paid is flat and the drift toward the cheaper plan started in January. Pricing did not change until July.' },
+  { k: 'Checkout errors', v: 'The blank-cart crash fired 117 times in 14 months and stopped May 7 (Honeybadger, from the error report).' },
+];
+// When it broke: plain-approved link->checkout by week. Holds ~34-41% through May 18, then 27-32% from May 25.
+export const breakWeekly = [
+  { w: 'Apr 20', r: 41 }, { w: 'Apr 27', r: 32 }, { w: 'May 04', r: 38 }, { w: 'May 11', r: 34 },
+  { w: 'May 18', r: 38 }, { w: 'May 25', r: 28 }, { w: 'Jun 01', r: 30 }, { w: 'Jun 08', r: 32 },
+  { w: 'Jun 15', r: 32 }, { w: 'Jun 22', r: 30 }, { w: 'Jun 29', r: 27 }, { w: 'Jul 06', r: 28 },
 ];
