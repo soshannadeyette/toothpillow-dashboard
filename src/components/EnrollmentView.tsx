@@ -1057,6 +1057,14 @@ function SpeedTab() {
 function SegmentsTab() {
   const labels = segMonthly.map((s) => monLabel(s.month));
   const icePct = segMonthly.map((s) => Math.round((100 * s.ice) / (s.lava + s.ice)));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const segPct: any = {
+    labels,
+    datasets: [
+      { type: 'line', label: 'New (Lava) %', data: segMonthly.map((s) => Math.round((100 * s.lava) / (s.lava + s.ice))), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 3, tension: 0.3 },
+      { type: 'line', label: 'Win-back (Ice) %', data: icePct, borderColor: TP.green, backgroundColor: TP.green, borderWidth: 2.5, pointRadius: 3, tension: 0.3 },
+    ],
+  };
   return (
     <>
       <Card>
@@ -1075,6 +1083,15 @@ function SegmentsTab() {
             }}
             options={{ ...baseOpts, plugins: { legend: { display: true, position: 'top' as const } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }}
           />
+        </div>
+      </Card>
+      <Card>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>New vs win-back — % of checkouts, by month</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          The two segments as a <b>share of each month&apos;s checkouts</b> (the lines sum to 100%), Jan–Oct 2026. This is the mix — <b>not a conversion rate</b>; a true conversion % per segment would need links-sent split by Lava/Ice.
+        </div>
+        <div style={{ height: 300 }}>
+          <Bar data={segPct} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const } }, scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: '% of checkouts' } } } }} />
         </div>
       </Card>
       <Card>
