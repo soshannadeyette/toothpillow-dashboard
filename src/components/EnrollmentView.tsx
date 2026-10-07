@@ -339,6 +339,28 @@ function DiagnosisTab() {
           <div style={{ fontSize: 12.5, color: TP.text, lineHeight: 1.5 }}>
             On <b>May 29, 2026</b>, PR&nbsp;#626 (&quot;change button text&quot;) edited the results-page checkout button for <b>every approved family</b> (the plain-approved path, not expanders): <b>&quot;Select Treatment Plan&quot; / &quot;Enroll Now&quot; → &quot;Review Treatment Plans&quot;</b>, across <code>_results_header</code>, <code>_mobile_cta</code> and <code>_progress_tracker</code>. Same destination (<code>consultant_checkout_path</code>) — nothing broke — but the call to action went from <i>commit</i> to <i>browse</i>.
           </div>
+          <div style={{ display: 'flex', alignItems: 'stretch', gap: 10, margin: '14px 0 4px' }}>
+            <div style={{ flex: 1, border: '1px solid #cbd5e1', borderRadius: 8, padding: '12px 10px', background: '#fff', textAlign: 'center' }}>
+              <div style={{ fontSize: 10, fontWeight: 800, color: '#6b7280', letterSpacing: '.05em', marginBottom: 8 }}>BEFORE MAY 29</div>
+              <div style={{ display: 'inline-block', background: '#1F7A5A', color: '#fff', fontWeight: 700, fontSize: 13, padding: '8px 16px', borderRadius: 6 }}>Select Treatment Plan</div>
+              <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 5 }}>also shown as &quot;Enroll Now&quot;</div>
+              <div style={{ fontSize: 30, fontWeight: 800, color: '#1F7A5A', marginTop: 10, lineHeight: 1 }}>39%</div>
+              <div style={{ fontSize: 11, color: '#6b7280' }}>approved families completed</div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#C0392B', flex: 'none', width: 56 }}>
+              <div style={{ fontSize: 22, lineHeight: 1 }}>→</div>
+              <div style={{ fontSize: 15, fontWeight: 800, marginTop: 2 }}>−12</div>
+              <div style={{ fontSize: 9, color: '#9a6b14' }}>points</div>
+            </div>
+            <div style={{ flex: 1, border: '1px solid #C0392B', borderRadius: 8, padding: '12px 10px', background: '#fff', textAlign: 'center' }}>
+              <div style={{ fontSize: 10, fontWeight: 800, color: '#C0392B', letterSpacing: '.05em', marginBottom: 8 }}>AFTER MAY 29 (NOW)</div>
+              <div style={{ display: 'inline-block', background: '#9aa0a6', color: '#fff', fontWeight: 700, fontSize: 13, padding: '8px 16px', borderRadius: 6 }}>Review Treatment Plans</div>
+              <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 5 }}>same page, softer ask</div>
+              <div style={{ fontSize: 30, fontWeight: 800, color: '#C0392B', marginTop: 10, lineHeight: 1 }}>27%</div>
+              <div style={{ fontSize: 11, color: '#6b7280' }}>approved families completed</div>
+            </div>
+          </div>
+          <div style={{ fontSize: 10, color: '#9ca3af', marginBottom: 6 }}>Plain-approved link→checkout: April (last full month on the old button) vs July (first clean month on the new one). Same checkout page both times.</div>
           <div style={{ marginTop: 10, fontSize: 12, color: '#4b5563', lineHeight: 1.5 }}>
             <b>Why it fits:</b> dated the break week; hits all approved families; systemic across every source; invisible to errors, Honeybadger and carts — which is why the error report found nothing. <b>Why not yet proven:</b> the weekly step-down starts a few days before the merge (noise, or a small earlier contributor — there was an earlier button edit May&nbsp;18). <b>Cleanest test:</b> change it back to &quot;Enroll Now&quot; and watch the rate.
           </div>
