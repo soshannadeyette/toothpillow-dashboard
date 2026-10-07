@@ -246,37 +246,6 @@ function DiagnosisTab() {
     datasets: [{ type: 'bar', label: 'Plain-approved link→checkout %', data: breakWeekly.map((w) => w.r), backgroundColor: breakWeekly.map((w, i) => (i >= wkIdx ? '#C0392B' : '#9FC6B4')), borderRadius: 3 }],
   };
   const weeklyAnn: Record<string, object> = { brk: { type: 'line', xMin: wkIdx - 0.5, xMax: wkIdx - 0.5, borderColor: '#C0392B', borderWidth: 1.5, borderDash: [5, 3], label: { display: true, content: 'week of May 25', position: 'start' as const, backgroundColor: '#C0392B', color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { x: 4, y: 2 } } } };
-  // 14/21-day closing rate with events (spans whatever months linkCohort holds — 2025 drops in automatically)
-  const CC = linkCohort;
-  // chart shows a trailing 12-month window (Oct '25 → current); baseline still uses all pre-drop history
-  const CW = CC.filter((c) => c.month >= '2025-10');
-  const multiYr = new Set(CW.map((c) => c.month.slice(0, 4))).size > 1;
-  const clab = CW.map((c) => (multiYr ? `${MON[+c.month.slice(5, 7) - 1]} '${c.month.slice(2, 4)}` : MON[+c.month.slice(5, 7) - 1]));
-  const ciOf = (m: string) => CW.findIndex((c) => c.month === m);
-  const eColor = (k: string) => (k === 'trigger' ? '#7C5CD6' : k === 'fix' ? '#1F7A5A' : k === 'note' ? '#E8A33B' : '#C0392B');
-  const annC: Record<string, object> = {};
-  checkoutEvents.forEach((e, i) => {
-    const x = ciOf(e.month);
-    if (x < 0) return;
-    annC['e' + i] = { type: 'line', xMin: x, xMax: x, borderColor: eColor(e.kind), borderWidth: 1.5, borderDash: [4, 3], label: { display: true, content: [e.date, e.label], position: i % 2 === 0 ? 'start' : 'end', backgroundColor: eColor(e.kind), color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { x: 4, y: 2 } } };
-  });
-  // pre-drop baseline (everything before the April 2026 break) as a reference line per window
-  const preDrop = CC.filter((c) => c.month < '2026-04');
-  const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
-  const b14 = avg(preDrop.map((c) => c.d14).filter((v): v is number => v != null));
-  const b21 = avg(preDrop.map((c) => c.d21).filter((v): v is number => v != null));
-  annC['base21'] = { type: 'line', yMin: b21, yMax: b21, borderColor: TP.blue, borderWidth: 1.2, borderDash: [7, 4], label: { display: true, content: `21-day baseline ~${Math.round(b21)}%`, position: 'start', backgroundColor: TP.blue, color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } };
-  annC['base14'] = { type: 'line', yMin: b14, yMax: b14, borderColor: '#2BA58C', borderWidth: 1.2, borderDash: [7, 4], label: { display: true, content: `14-day baseline ~${Math.round(b14)}%`, position: 'start', backgroundColor: '#2BA58C', color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } };
-  // outlier months (e.g. June 2026 pricing push) are dropped from the line and shown as a lone point
-  const lineD = (k: 'd14' | 'd21') => CW.map((c) => (c.outlier ? null : c[k]));
-  const ptD = (k: 'd14' | 'd21') => CW.map((c) => (c.outlier ? c[k] : null));
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rate1421: any = { labels: clab, datasets: [
-    { type: 'line', label: 'Within 21 days of link', data: lineD('d21'), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 3, tension: 0.3, spanGaps: true },
-    { type: 'line', label: 'Within 14 days of link', data: lineD('d14'), borderColor: '#2BA58C', backgroundColor: '#2BA58C', borderWidth: 2.5, pointRadius: 3, tension: 0.3, spanGaps: true },
-    { type: 'line', label: 'outlier21', data: ptD('d21'), borderColor: '#E8A33B', backgroundColor: '#E8A33B', showLine: false, pointRadius: 5, pointStyle: 'rectRot' },
-    { type: 'line', label: 'outlier14', data: ptD('d14'), borderColor: '#E8A33B', backgroundColor: '#E8A33B', showLine: false, pointRadius: 5, pointStyle: 'rectRot' },
-  ] };
   return (
     <>
       <Card>
@@ -365,15 +334,6 @@ function DiagnosisTab() {
             <b>Why it fits:</b> dated the break week; hits all approved families; systemic across every source; invisible to errors, Honeybadger and carts — which is why the error report found nothing. <b>Why not yet proven:</b> the weekly step-down starts a few days before the merge (noise, or a small earlier contributor — there was an earlier button edit May&nbsp;18). <b>Cleanest test:</b> change it back to &quot;Enroll Now&quot; and watch the rate.
           </div>
         </div>
-      </Card>
-
-      <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Closing rate with what changed — within 14 &amp; 21 days of the link</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Of families who got a checkout link, the share who completed within 14 and 21 days — same window every month, so every point is comparable {multiYr ? 'across 2025–2026' : 'across the year'}. Dashed markers are production commits (<span style={{ color: '#7C5CD6' }}>trigger</span> / <span style={{ color: '#C0392B' }}>break</span> / <span style={{ color: '#1F7A5A' }}>fix</span> / <span style={{ color: '#E8A33B' }}>pricing</span>). Trailing 12 months (Oct 2025 onward). <b>June and July are lifted off the line</b> — June inflated by the last-day push before the Jul 1 price increase, July the first month at the new price; the line connects May straight to August.</div>
-        <div style={{ height: 360 }}>
-          <Bar data={rate1421} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const, labels: { filter: (item) => !String(item.text).startsWith('outlier') } }, annotation: { annotations: annC } }, scales: { y: { beginAtZero: true, max: 35, title: { display: true, text: 'Checkout rate %' } } } }} />
-        </div>
-        {!multiYr && <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>Showing 2026. Add a 2025 funnel export and this extends to 2025–2026 automatically.</div>}
       </Card>
 
       <Card>
