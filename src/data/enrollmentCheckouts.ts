@@ -213,9 +213,14 @@ export const ruledOutScoreboard = [
   { k: 'Pricing / plan', v: 'No May move. Average amount paid is flat and the drift toward the cheaper plan started in January. Pricing did not change until July.' },
   { k: 'Checkout errors', v: 'The blank-cart crash fired 117 times in 14 months and stopped May 7 (Honeybadger, from the error report).' },
 ];
-// When it broke: plain-approved link->checkout by week. Holds ~34-41% through May 18, then 27-32% from May 25.
+// Plain-approved link->checkout by week, Feb–mid-Jul. A ~38% band (Feb–Apr, noisy) eroding to a
+// ~30% band (Jun–Jul). No single-week cliff — a gradual decline through May. Trigger still open.
 export const breakWeekly = [
-  { w: 'Apr 20', r: 41 }, { w: 'Apr 27', r: 32 }, { w: 'May 04', r: 38 }, { w: 'May 11', r: 34 },
-  { w: 'May 18', r: 38 }, { w: 'May 25', r: 28 }, { w: 'Jun 01', r: 30 }, { w: 'Jun 08', r: 32 },
-  { w: 'Jun 15', r: 32 }, { w: 'Jun 22', r: 30 }, { w: 'Jun 29', r: 27 }, { w: 'Jul 06', r: 28 },
+  { w: 'Feb 2', r: 43 }, { w: 'Feb 9', r: 37 }, { w: 'Feb 16', r: 38 }, { w: 'Feb 23', r: 39 },
+  { w: 'Mar 2', r: 43 }, { w: 'Mar 9', r: 45 }, { w: 'Mar 16', r: 37 }, { w: 'Mar 23', r: 33 }, { w: 'Mar 30', r: 35 },
+  { w: 'Apr 6', r: 41 }, { w: 'Apr 13', r: 36 }, { w: 'Apr 20', r: 41 }, { w: 'Apr 27', r: 32 },
+  { w: 'May 4', r: 38 }, { w: 'May 11', r: 34 }, { w: 'May 18', r: 38 }, { w: 'May 25', r: 28 },
+  { w: 'Jun 1', r: 30 }, { w: 'Jun 8', r: 32 }, { w: 'Jun 15', r: 32 }, { w: 'Jun 22', r: 30 }, { w: 'Jun 29', r: 27 },
+  { w: 'Jul 6', r: 28 }, { w: 'Jul 13', r: 29 },
 ];
+export const breakWeeklyBaseline = 38; // Feb–Apr average

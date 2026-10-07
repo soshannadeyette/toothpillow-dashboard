@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
-import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, type EventRow } from '@/data/enrollmentCheckouts';
+import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, breakWeeklyBaseline, type EventRow } from '@/data/enrollmentCheckouts';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -179,13 +179,16 @@ function DiagnosisTab() {
       { type: 'line', label: 'Overall (blended)', data: breakProofMonthly.map((x) => x.overall), borderColor: '#C0392B', backgroundColor: '#C0392B', borderWidth: 2.5, pointRadius: 3, tension: 0.3, yAxisID: 'y', order: 2 },
     ],
   };
-  const wkIdx = breakWeekly.findIndex((w) => w.w === 'May 25');
+  const wk626 = breakWeekly.findIndex((w) => w.w === 'May 25');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const weeklyChart: any = {
     labels: breakWeekly.map((w) => w.w),
-    datasets: [{ type: 'bar', label: 'Plain-approved link→checkout %', data: breakWeekly.map((w) => w.r), backgroundColor: breakWeekly.map((w, i) => (i >= wkIdx ? '#C0392B' : '#9FC6B4')), borderRadius: 3 }],
+    datasets: [{ type: 'bar', label: 'Plain-approved link→checkout %', data: breakWeekly.map((w) => w.r), backgroundColor: breakWeekly.map((w) => (w.r >= breakWeeklyBaseline ? '#9FC6B4' : '#D98C84')), borderRadius: 3 }],
   };
-  const weeklyAnn: Record<string, object> = { brk: { type: 'line', xMin: wkIdx - 0.5, xMax: wkIdx - 0.5, borderColor: '#C0392B', borderWidth: 1.5, borderDash: [5, 3], label: { display: true, content: 'week of May 25', position: 'start' as const, backgroundColor: '#C0392B', color: '#fff', font: { size: 9, weight: 'bold' as const }, padding: { x: 4, y: 2 } } } };
+  const weeklyAnn: Record<string, object> = {
+    base: { type: 'line', yMin: breakWeeklyBaseline, yMax: breakWeeklyBaseline, borderColor: '#6b7280', borderWidth: 1.2, borderDash: [6, 4], label: { display: true, content: `Feb–Apr avg ~${breakWeeklyBaseline}%`, position: 'start' as const, backgroundColor: '#6b7280', color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } },
+    pr626: { type: 'line', xMin: wk626 - 0.5, xMax: wk626 - 0.5, borderColor: '#E8A33B', borderWidth: 1.5, borderDash: [4, 3], label: { display: true, content: '#626 button (one option)', position: 'end' as const, backgroundColor: '#E8A33B', color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } },
+  };
   return (
     <>
       <Card>
@@ -199,8 +202,8 @@ function DiagnosisTab() {
       </Card>
 
       <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>It broke the week of May 25</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Plain-approved link→checkout by week. It holds in the 34–41% band through <b>May 18</b>, then steps down to 27–32% the <b>week of May 25</b> and never recovers. (Ironically a strong week otherwise — this is the rate, not the traffic.) PR&nbsp;#626 shipped the checkout-button copy change on <b>May 29</b>.</div>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>A gradual erosion through May — not a clean break</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Plain-approved link→checkout by week, Feb–mid-Jul. It runs in a <b>~38% band through April</b> (grey dashed line = the Feb–Apr average), then drifts into a <b>~30% band by June–July</b>. The decline is real but <b>gradual and noisy — there is no single-week cliff</b>, so no one deploy explains it. The <span style={{ color: '#E8A33B' }}>#626</span> button-copy change (May 29) postdates the initial dip, so it is not the trigger, but it stays on the board as a possible factor in the sustained low.</div>
         <div style={{ height: 280 }}>
           <Bar data={weeklyChart} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, annotation: { annotations: weeklyAnn } }, scales: { y: { beginAtZero: true, max: 45, title: { display: true, text: 'Link→checkout %' } } } }} />
         </div>
@@ -243,7 +246,7 @@ function DiagnosisTab() {
 
       <Card>
         <div style={{ border: '2px solid #E8A33B', borderRadius: 10, padding: '14px 16px', background: '#FDF6EA' }}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: '#9a6b14', letterSpacing: '0.06em', marginBottom: 4 }}>STRONG POSSIBILITY — TO CONFIRM, NOT YET PROVEN</div>
+          <div style={{ fontSize: 11, fontWeight: 800, color: '#9a6b14', letterSpacing: '0.06em', marginBottom: 4 }}>AN OPEN OPTION — NOT THE TRIGGER, POSSIBLY A FACTOR</div>
           <h3 style={{ margin: '0 0 6px', color: TP.navy, fontWeight: 700, fontSize: 17 }}>PR #626 (May 29): the checkout button flipped from &quot;buy&quot; to &quot;browse&quot;</h3>
           <div style={{ fontSize: 12.5, color: TP.text, lineHeight: 1.5 }}>
             On <b>May 29, 2026</b>, PR&nbsp;#626 (&quot;change button text&quot;) edited the results-page checkout button for <b>every approved family</b> (the plain-approved path, not expanders): <b>&quot;Select Treatment Plan&quot; / &quot;Enroll Now&quot; → &quot;Review Treatment Plans&quot;</b>, across <code>_results_header</code>, <code>_mobile_cta</code> and <code>_progress_tracker</code>. Same destination (<code>consultant_checkout_path</code>) — nothing broke — but the call to action went from <i>commit</i> to <i>browse</i>.
@@ -271,7 +274,7 @@ function DiagnosisTab() {
           </div>
           <div style={{ fontSize: 10, color: '#9ca3af', marginBottom: 6 }}>Plain-approved link→checkout: April (last full month on the old button) vs July (first clean month on the new one). Same checkout page both times.</div>
           <div style={{ marginTop: 10, fontSize: 12, color: '#4b5563', lineHeight: 1.5 }}>
-            <b>Why it fits:</b> dated the break week; hits all approved families; systemic across every source; invisible to errors, Honeybadger and carts — which is why the error report found nothing. <b>Why not yet proven:</b> the weekly step-down starts a few days before the merge (noise, or a small earlier contributor — there was an earlier button edit May&nbsp;18). <b>Cleanest test:</b> change it back to &quot;Enroll Now&quot; and watch the rate.
+            <b>Why it stays on the board:</b> it hits every approved family, it&apos;s systemic across sources, and it&apos;s invisible to errors/carts — and it&apos;s live on the button through the entire sustained June–July low. <b>Why it is not the trigger:</b> the drop to ~32% is already present in <b>early May, on the OLD button</b> (links sent May 1–28 convert at 32–34%), two-plus weeks before #626 merged on May 29. So the 39→27 gap above is partly a decline that was already underway. <b>Cleanest test:</b> revert to &quot;Enroll Now&quot; and watch whether the June–July rate lifts.
           </div>
         </div>
       </Card>
