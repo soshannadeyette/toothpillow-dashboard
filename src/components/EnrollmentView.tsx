@@ -202,8 +202,8 @@ function DiagnosisTab() {
       </Card>
 
       <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>A gradual erosion through May — not a clean break</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Plain-approved link→checkout by week, Feb–mid-Jul. It runs in a <b>~38% band through April</b> (grey dashed line = the Feb–Apr average), then drifts into a <b>~30% band by June–July</b>. The decline is real but <b>gradual and noisy — there is no single-week cliff</b>, so no one deploy explains it. The <span style={{ color: '#E8A33B' }}>#626</span> button-copy change (May 29) postdates the initial dip, so it is not the trigger, but it stays on the board as a possible factor in the sustained low.</div>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Plain-approved link→checkout, by week (Feb – mid-Jul 2026)</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Of approved families (expanders and &quot;refer only&quot; excluded), the share who checked out — plotted by the week the checkout link was sent. Grey dashed line = the Feb–Apr average (~38%); bars below it are red. Amber line marks when PR&nbsp;#626 (the checkout-button copy change) shipped, May&nbsp;29.</div>
         <div style={{ height: 280 }}>
           <Bar data={weeklyChart} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, annotation: { annotations: weeklyAnn } }, scales: { y: { beginAtZero: true, max: 45, title: { display: true, text: 'Link→checkout %' } } } }} />
         </div>
@@ -246,7 +246,7 @@ function DiagnosisTab() {
 
       <Card>
         <div style={{ border: '2px solid #E8A33B', borderRadius: 10, padding: '14px 16px', background: '#FDF6EA' }}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: '#9a6b14', letterSpacing: '0.06em', marginBottom: 4 }}>AN OPEN OPTION — NOT THE TRIGGER, POSSIBLY A FACTOR</div>
+          <div style={{ fontSize: 11, fontWeight: 800, color: '#9a6b14', letterSpacing: '0.06em', marginBottom: 4 }}>STRONG CANDIDATE — NOTABLE TIMING, TO CONFIRM</div>
           <h3 style={{ margin: '0 0 6px', color: TP.navy, fontWeight: 700, fontSize: 17 }}>PR #626 (May 29): the checkout button flipped from &quot;buy&quot; to &quot;browse&quot;</h3>
           <div style={{ fontSize: 12.5, color: TP.text, lineHeight: 1.5 }}>
             On <b>May 29, 2026</b>, PR&nbsp;#626 (&quot;change button text&quot;) edited the results-page checkout button for <b>every approved family</b> (the plain-approved path, not expanders): <b>&quot;Select Treatment Plan&quot; / &quot;Enroll Now&quot; → &quot;Review Treatment Plans&quot;</b>, across <code>_results_header</code>, <code>_mobile_cta</code> and <code>_progress_tracker</code>. Same destination (<code>consultant_checkout_path</code>) — nothing broke — but the call to action went from <i>commit</i> to <i>browse</i>.
@@ -274,7 +274,7 @@ function DiagnosisTab() {
           </div>
           <div style={{ fontSize: 10, color: '#9ca3af', marginBottom: 6 }}>Plain-approved link→checkout: April (last full month on the old button) vs July (first clean month on the new one). Same checkout page both times.</div>
           <div style={{ marginTop: 10, fontSize: 12, color: '#4b5563', lineHeight: 1.5 }}>
-            <b>Why it stays on the board:</b> it hits every approved family, it&apos;s systemic across sources, and it&apos;s invisible to errors/carts — and it&apos;s live on the button through the entire sustained June–July low. <b>Why it is not the trigger:</b> the drop to ~32% is already present in <b>early May, on the OLD button</b> (links sent May 1–28 convert at 32–34%), two-plus weeks before #626 merged on May 29. So the 39→27 gap above is partly a decline that was already underway. <b>Cleanest test:</b> revert to &quot;Enroll Now&quot; and watch whether the June–July rate lifts.
+            <b>Why the timing is notable:</b> the <b>durable</b> step-down — the week the rate drops to ~28% and stops recovering — is the <b>week of May 25</b>, and #626 shipped <b>May 29</b>. Through May 18 the rate still bounces back to ~38%; from this change on, it never does. It also hits every approved family, is systemic across sources, and is invisible to errors/carts — which fits the data. <b>Honest caveat:</b> the weekly series is noisy (a couple of April/early-May weeks dipped and recovered), and links sent May 25–28 technically still had the old button. <b>Cleanest test:</b> revert the copy to &quot;Enroll Now&quot; and watch whether the rate lifts.
           </div>
         </div>
       </Card>
