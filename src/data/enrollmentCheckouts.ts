@@ -162,7 +162,7 @@ export const linkCohort: CohortRow[] = [
   { month: '2026-04', links: 1114, checkouts: 308, ever: 27.6, d14: 12.5, d21: 15.9, mature: true },
   { month: '2026-05', links: 741,  checkouts: 228, ever: 30.8, d14: 17.0, d21: 20.1, mature: true },
   { month: '2026-06', links: 1164, checkouts: 332, ever: 28.5, d14: 20.2, d21: 24.1, mature: true, outlier: true }, // last-day pricing push before Jul 1 increase
-  { month: '2026-07', links: 1156, checkouts: 315, ever: 27.2, d14: 17.6, d21: 21.1, mature: true },
+  { month: '2026-07', links: 1156, checkouts: 315, ever: 27.2, d14: 17.6, d21: 21.1, mature: true, outlier: true }, // first month at the new (higher) price — pricing-distorted
   { month: '2026-08', links: 1084, checkouts: 271, ever: 25.0, d14: 18.3, d21: 20.9, mature: true },
   { month: '2026-09', links: 879,  checkouts: 216, ever: 24.6, d14: 24.6, d21: 25.4, mature: false },
   { month: '2026-10', links: 117,  checkouts: 13,  ever: 11.1, d14: null, d21: null, mature: false },

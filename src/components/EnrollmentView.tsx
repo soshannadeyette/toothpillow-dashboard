@@ -241,9 +241,11 @@ function DiagnosisTab() {
   const toneColor = (t: 'root' | 'bad' | 'fix') => (t === 'fix' ? '#1a7f5a' : t === 'root' ? '#8B5CF6' : '#c0392b');
   // 14/21-day closing rate with events (spans whatever months linkCohort holds — 2025 drops in automatically)
   const CC = linkCohort;
-  const multiYr = new Set(CC.map((c) => c.month.slice(0, 4))).size > 1;
-  const clab = CC.map((c) => (multiYr ? `${MON[+c.month.slice(5, 7) - 1]} '${c.month.slice(2, 4)}` : MON[+c.month.slice(5, 7) - 1]));
-  const ciOf = (m: string) => CC.findIndex((c) => c.month === m);
+  // chart shows a trailing 12-month window (Oct '25 → current); baseline still uses all pre-drop history
+  const CW = CC.filter((c) => c.month >= '2025-10');
+  const multiYr = new Set(CW.map((c) => c.month.slice(0, 4))).size > 1;
+  const clab = CW.map((c) => (multiYr ? `${MON[+c.month.slice(5, 7) - 1]} '${c.month.slice(2, 4)}` : MON[+c.month.slice(5, 7) - 1]));
+  const ciOf = (m: string) => CW.findIndex((c) => c.month === m);
   const eColor = (k: string) => (k === 'trigger' ? '#7C5CD6' : k === 'fix' ? '#1F7A5A' : k === 'note' ? '#E8A33B' : '#C0392B');
   const annC: Record<string, object> = {};
   checkoutEvents.forEach((e, i) => {
@@ -259,8 +261,8 @@ function DiagnosisTab() {
   annC['base21'] = { type: 'line', yMin: b21, yMax: b21, borderColor: TP.blue, borderWidth: 1.2, borderDash: [7, 4], label: { display: true, content: `21-day baseline ~${Math.round(b21)}%`, position: 'start', backgroundColor: TP.blue, color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } };
   annC['base14'] = { type: 'line', yMin: b14, yMax: b14, borderColor: '#2BA58C', borderWidth: 1.2, borderDash: [7, 4], label: { display: true, content: `14-day baseline ~${Math.round(b14)}%`, position: 'start', backgroundColor: '#2BA58C', color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } };
   // outlier months (e.g. June 2026 pricing push) are dropped from the line and shown as a lone point
-  const lineD = (k: 'd14' | 'd21') => CC.map((c) => (c.outlier ? null : c[k]));
-  const ptD = (k: 'd14' | 'd21') => CC.map((c) => (c.outlier ? c[k] : null));
+  const lineD = (k: 'd14' | 'd21') => CW.map((c) => (c.outlier ? null : c[k]));
+  const ptD = (k: 'd14' | 'd21') => CW.map((c) => (c.outlier ? c[k] : null));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rate1421: any = { labels: clab, datasets: [
     { type: 'line', label: 'Within 21 days of link', data: lineD('d21'), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 3, tension: 0.3, spanGaps: true },
@@ -301,7 +303,7 @@ function DiagnosisTab() {
 
       <Card>
         <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Closing rate with what changed — within 14 &amp; 21 days of the link</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Of families who got a checkout link, the share who completed within 14 and 21 days — same window every month, so every point is comparable {multiYr ? 'across 2025–2026' : 'across the year'}. Dashed markers are production commits (<span style={{ color: '#7C5CD6' }}>trigger</span> / <span style={{ color: '#C0392B' }}>break</span> / <span style={{ color: '#1F7A5A' }}>fix</span> / <span style={{ color: '#E8A33B' }}>pricing</span>). <b>June is an outlier</b> — a last-day push before the Jul 1 price increase inflated it, so read that bump with caution.</div>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Of families who got a checkout link, the share who completed within 14 and 21 days — same window every month, so every point is comparable {multiYr ? 'across 2025–2026' : 'across the year'}. Dashed markers are production commits (<span style={{ color: '#7C5CD6' }}>trigger</span> / <span style={{ color: '#C0392B' }}>break</span> / <span style={{ color: '#1F7A5A' }}>fix</span> / <span style={{ color: '#E8A33B' }}>pricing</span>). Trailing 12 months (Oct 2025 onward). <b>June and July are lifted off the line</b> — June inflated by the last-day push before the Jul 1 price increase, July the first month at the new price; the line connects May straight to August.</div>
         <div style={{ height: 360 }}>
           <Bar data={rate1421} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const, labels: { filter: (item) => !String(item.text).startsWith('outlier') } }, annotation: { annotations: annC } }, scales: { y: { beginAtZero: true, max: 35, title: { display: true, text: 'Checkout rate %' } } } }} />
         </div>
