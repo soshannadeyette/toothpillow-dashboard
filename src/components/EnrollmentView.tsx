@@ -187,7 +187,7 @@ function DiagnosisTab() {
   };
   const weeklyAnn: Record<string, object> = {
     base: { type: 'line', yMin: breakWeeklyBaseline, yMax: breakWeeklyBaseline, borderColor: '#6b7280', borderWidth: 1.2, borderDash: [6, 4], label: { display: true, content: `Feb–Apr avg ~${breakWeeklyBaseline}%`, position: 'start' as const, backgroundColor: '#6b7280', color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } },
-    pr626: { type: 'line', xMin: wk626 - 0.5, xMax: wk626 - 0.5, borderColor: '#E8A33B', borderWidth: 1.5, borderDash: [4, 3], label: { display: true, content: '#626 button (one option)', position: 'end' as const, backgroundColor: '#E8A33B', color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } },
+    pr626: { type: 'line', xMin: wk626, xMax: wk626, borderColor: '#E8A33B', borderWidth: 1.5, borderDash: [4, 3], label: { display: true, content: '#626 shipped May 29', position: 'end' as const, backgroundColor: '#E8A33B', color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } },
   };
   return (
     <>
