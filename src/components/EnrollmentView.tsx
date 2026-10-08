@@ -1104,6 +1104,7 @@ function SpeedTab() {
 
 function SegmentsTab() {
   const labels = segMonthly.map((s) => monLabel(s.month));
+  const icePct = segMonthly.map((s) => Math.round((100 * s.ice) / (s.lava + s.ice)));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const dashImm = { borderDash: (ctx: { p1DataIndex: number }) => (ctx.p1DataIndex >= 8 ? [5, 4] : undefined) };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1117,18 +1118,9 @@ function SegmentsTab() {
   return (
     <>
       <Card>
-        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Link→checkout rate by lead type, by link-sent month</h3>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Win-back checkout counts, by month the checkout happened</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Plain-approved link→checkout rate, by the month the link was sent (cohort clock). <b style={{ color: TP.blue }}>Blue (Lava)</b> = checked out within 3 weeks of the link. <b style={{ color: '#1F7A5A' }}>Green (Ice)</b> = after 3 weeks (win-back). Blue ranges 22–30% across the year. Green rises from 9% (Jan) to 16% (Apr), then declines to ~4% by June. Note: a cohort&apos;s win-backs check out weeks later, so this clock dates the drop ~6–8 weeks before the checkouts actually land (see the checkout-month chart below). Dashed Sep–Oct = win-back window not yet matured; those two points understate.
-        </div>
-        <div style={{ height: 340 }}>
-          <Bar data={liLine} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const } }, scales: { y: { beginAtZero: true, max: 35, title: { display: true, text: 'Link→checkout %' } } } }} />
-        </div>
-      </Card>
-      <Card>
-        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Checkout counts by lead type, by month the checkout happened</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Checkout counts (not rates), by the calendar month the checkout occurred. <b>Lava</b> = recently-arrived lead; <b>Ice</b> = a previously closed-lost lead won back. Win-back (Ice, green) runs 93–138/mo through June, drops to 36 in July, and partly recovers (84, 71) in Aug–Sep. This is the same win-back decline the rate chart above shows on the May–June cohorts — win-backs check out weeks after the link, so the cohort clock (above) leads this checkout clock by ~6–8 weeks. Win-backs are {Math.round((100 * segTotal('Ice')) / summary.checkouts)}% of all checkouts ({segTotal('Ice')}).
+          Checkout counts (not rates), by the calendar month the checkout occurred — this is the real-world clock. <b>Lava</b> = recently-arrived lead; <b>Ice</b> = a previously closed-lost lead won back. Win-back (Ice, green) runs 93–138/mo through June, drops to 36 in July, and partly recovers (84, 71) in Aug–Sep. Win-backs are {Math.round((100 * segTotal('Ice')) / summary.checkouts)}% of all checkouts ({segTotal('Ice')}).
         </div>
         <div style={{ height: 320 }}>
           <Bar
@@ -1141,6 +1133,27 @@ function SegmentsTab() {
             }}
             options={{ ...baseOpts, plugins: { legend: { display: true, position: 'top' as const } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }}
           />
+        </div>
+      </Card>
+      <Card>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Win-back share of checkouts (%), by month the checkout happened</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          Win-backs as a share of each month&apos;s checkouts (calendar clock). It runs ~23–32% most of the year, then <b>drops to 12% in July</b> (36 of 307 checkouts). Red bars flag months below 18%.
+        </div>
+        <div style={{ height: 300 }}>
+          <Bar
+            data={{ labels, datasets: [{ label: 'Win-back %', data: icePct, backgroundColor: icePct.map((p) => (p < 18 ? '#e06666' : TP.green)), borderRadius: 4 }] }}
+            options={{ ...baseOpts, scales: { y: { beginAtZero: true, title: { display: true, text: '% of checkouts' } } } }}
+          />
+        </div>
+      </Card>
+      <Card>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Same drop, dated by the month the link was sent (reads ~6–8 weeks early)</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          <b>Diagnostic view — the x-axis is the month the LINK was sent, not when the checkout happened.</b> Because a win-back pays 6–8 weeks after the link, the July drop above shows up here on the <b>May–June link-months</b>. Same decline, read ~6–8 weeks early — this is why this chart &quot;says May.&quot; <b style={{ color: TP.blue }}>Blue (Lava)</b> = checked out within 3 weeks; <b style={{ color: '#1F7A5A' }}>Green (Ice)</b> = after 3 weeks. Dashed Sep–Oct = window not yet matured; those points understate.
+        </div>
+        <div style={{ height: 340 }}>
+          <Bar data={liLine} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const } }, scales: { y: { beginAtZero: true, max: 35, title: { display: true, text: 'Link→checkout %' } } } }} />
         </div>
       </Card>
       <Card>
