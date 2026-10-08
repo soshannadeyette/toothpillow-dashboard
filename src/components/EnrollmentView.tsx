@@ -393,7 +393,7 @@ function OverviewTab() {
       {/* Exec header */}
       <div style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 22, fontWeight: 800, color: TP.navy }}>Enrollment — Executive Summary</div>
-        <div style={{ fontSize: 12, color: '#9ca3af' }}>2026 year-to-date · as of Oct 5, 2026 · source: Salesforce</div>
+        <div style={{ fontSize: 12, color: '#9ca3af' }}>2026 year-to-date · as of Oct 8, 2026 · source: Salesforce</div>
       </div>
 
       {/* KPI row */}
