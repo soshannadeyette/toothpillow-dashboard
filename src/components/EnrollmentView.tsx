@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
-import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, breakWeeklyBaseline, lavaIceCohort, type EventRow } from '@/data/enrollmentCheckouts';
+import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, breakWeeklyBaseline, lavaIceCohort, lavaIceWeekly, type EventRow } from '@/data/enrollmentCheckouts';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -190,6 +190,20 @@ function DiagnosisTab() {
     pr626: { type: 'line', xMin: wk626, xMax: wk626, borderColor: '#E8A33B', borderWidth: 1.5, borderDash: [4, 3], label: { display: true, content: '#626 shipped May 29', position: 'end' as const, backgroundColor: '#E8A33B', color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } },
     drop: { type: 'label', xValue: wk626, yValue: breakWeekly[wk626]?.r ?? 28, content: [`−${(breakWeekly[Math.max(0, wk626 - 1)]?.r ?? 0) - (breakWeekly[wk626]?.r ?? 0)} pts`, 'wk of May 25'], color: '#C0392B', font: { size: 9, weight: 'bold' as const }, backgroundColor: 'rgba(255,255,255,0.88)', borderColor: '#C0392B', borderWidth: 1, borderRadius: 4, padding: 3, yAdjust: 30 },
   };
+  const wk626b = lavaIceWeekly.findIndex((w) => w.w === 'May 25');
+  const firstImmW = lavaIceWeekly.findIndex((w) => (w as { imm?: boolean }).imm);
+  const dashImmW = { borderDash: (ctx: { p1DataIndex: number }) => (ctx.p1DataIndex >= firstImmW ? [5, 4] : undefined) };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const liWeekly: any = {
+    labels: lavaIceWeekly.map((w) => w.w),
+    datasets: [
+      { type: 'line', label: 'Fast-payer (Lava) %', data: lavaIceWeekly.map((w) => w.lava), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 2, tension: 0.3, segment: dashImmW },
+      { type: 'line', label: 'Win-back (Ice) %', data: lavaIceWeekly.map((w) => w.ice), borderColor: TP.green, backgroundColor: TP.green, borderWidth: 2.5, pointRadius: 2, tension: 0.3, segment: dashImmW },
+    ],
+  };
+  const liWeeklyAnn: Record<string, object> = {
+    pr626: { type: 'line', xMin: wk626b, xMax: wk626b, borderColor: '#E8A33B', borderWidth: 1.5, borderDash: [4, 3], label: { display: true, content: '#626 shipped May 29', position: 'start' as const, backgroundColor: '#E8A33B', color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } },
+  };
   return (
     <>
       <Card>
@@ -207,6 +221,14 @@ function DiagnosisTab() {
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Of approved families (expanders and &quot;refer only&quot; excluded), the share who checked out — plotted by the week the checkout link was sent. Grey dashed line = the Feb–Apr average (~38%); bars below it are red. Amber line marks when PR&nbsp;#626 (the checkout-button copy change) shipped, May&nbsp;29. Pale-grey bars from Aug&nbsp;31 on are still maturing — those cohorts haven&apos;t finished converting (checkout can lag the link up to ~6&nbsp;weeks), so they read artificially low and shouldn&apos;t be judged yet.</div>
         <div style={{ height: 280 }}>
           <Bar data={weeklyChart} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, annotation: { annotations: weeklyAnn } }, scales: { y: { beginAtZero: true, max: 45, title: { display: true, text: 'Link→checkout %' } } } }} />
+        </div>
+      </Card>
+
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>The same weeks, split into fast-payers and win-backs</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>The chart above is these two lines added together. Plain-approved link→checkout by link-sent week, split by checkout speed. <b style={{ color: TP.blue }}>Blue (Lava)</b> = checked out within 3 weeks of the link; <b style={{ color: '#1F7A5A' }}>green (Ice)</b> = after 3 weeks (win-back). Blue stays ~22–28% straight across the #626 ship date (May&nbsp;29). Green falls from ~11–15% (Feb–Apr) to ~3–6% from June on. A checkout-page change would move the fast-payers, and blue doesn&apos;t move — so <b>#626 is not the cause</b>; the entire decline is win-back, which checks out weeks later (landing in July). Dashed from Aug&nbsp;31 = still maturing; Ice understates there.</div>
+        <div style={{ height: 280 }}>
+          <Bar data={liWeekly} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const }, annotation: { annotations: liWeeklyAnn } }, scales: { y: { beginAtZero: true, max: 40, title: { display: true, text: 'Link→checkout %' } } } }} />
         </div>
       </Card>
 
@@ -246,9 +268,9 @@ function DiagnosisTab() {
       </Card>
 
       <Card>
-        <div style={{ border: '2px solid #E8A33B', borderRadius: 10, padding: '14px 16px', background: '#FDF6EA' }}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: '#9a6b14', letterSpacing: '0.06em', marginBottom: 4 }}>STRONG CANDIDATE — NOTABLE TIMING, TO CONFIRM</div>
-          <h3 style={{ margin: '0 0 6px', color: TP.navy, fontWeight: 700, fontSize: 17 }}>PR #626 (May 29): the checkout button flipped from &quot;buy&quot; to &quot;browse&quot;</h3>
+        <div style={{ border: '2px solid #cbd5e1', borderRadius: 10, padding: '14px 16px', background: '#f8fafc' }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: '#6b7280', letterSpacing: '0.06em', marginBottom: 4 }}>INVESTIGATED, THEN CLEARED — THE FAST-PAYER SPLIT RULES IT OUT</div>
+          <h3 style={{ margin: '0 0 6px', color: TP.navy, fontWeight: 700, fontSize: 17 }}>PR #626 (May 29): the checkout button flipped from &quot;buy&quot; to &quot;browse&quot; — notable timing, but not the cause</h3>
           <div style={{ fontSize: 12.5, color: TP.text, lineHeight: 1.5 }}>
             On <b>May 29, 2026</b>, PR&nbsp;#626 (&quot;change button text&quot;) edited the results-page checkout button for <b>every approved family</b> (the plain-approved path, not expanders): <b>&quot;Select Treatment Plan&quot; / &quot;Enroll Now&quot; → &quot;Review Treatment Plans&quot;</b>, across <code>_results_header</code>, <code>_mobile_cta</code> and <code>_progress_tracker</code>. Same destination (<code>consultant_checkout_path</code>) — nothing broke — but the call to action went from <i>commit</i> to <i>browse</i>.
           </div>
@@ -275,7 +297,7 @@ function DiagnosisTab() {
           </div>
           <div style={{ fontSize: 10, color: '#9ca3af', marginBottom: 6 }}>Plain-approved link→checkout: April (last full month on the old button) vs July (first clean month on the new one). Same checkout page both times.</div>
           <div style={{ marginTop: 10, fontSize: 12, color: '#4b5563', lineHeight: 1.5 }}>
-            <b>Why the timing is notable:</b> the <b>durable</b> step-down — the week the rate drops to ~28% and stops recovering — is the <b>week of May 25</b>, and #626 shipped <b>May 29</b>. Through May 18 the rate still bounces back to ~38%; from this change on, it never does. It also hits every approved family, is systemic across sources, and is invisible to errors/carts — which fits the data. <b>Honest caveat:</b> the weekly series is noisy (a couple of April/early-May weeks dipped and recovered), and links sent May 25–28 technically still had the old button. <b>Cleanest test:</b> revert the copy to &quot;Enroll Now&quot; and watch whether the rate lifts.
+            <b>Why it looked like the cause:</b> the durable step-down is the week of May 25 and #626 shipped May 29 — notable timing, systemic across sources, invisible to errors/carts. <b>But the fast-payer split (chart above) clears it.</b> Separate these same weeks into fast-payers (checked out ≤3 weeks — they hit the new button in June) and win-backs (checked out later): the fast-payer line holds ~22–28% straight across May 29 and never steps down. A button that suppressed checkout would have pulled the fast-payers down; it didn&apos;t move. The entire 39%→27% total drop is the <b>win-back</b> portion, whose checkouts land in <b>July</b> — on the price increase, not the button. <b>Still worth doing:</b> flipping the copy back to &quot;Enroll Now&quot; is cheap and can only help the fast-close third — just don&apos;t expect it to recover the drop.
           </div>
         </div>
       </Card>

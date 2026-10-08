@@ -257,3 +257,21 @@ export const lavaIceCohort = [
   { m: 'Sep', links: 716, lava: 27, ice: 1, iceImm: true },
   { m: 'Oct', links: 119, lava: 12, ice: 0, imm: true },
 ];
+
+// The breakWeekly total (Lava+Ice) split into its two parts, by link-sent week
+// (plain-approved only, from the 2026-10-08 funnel export). lava = checked out within
+// 21 days of the link (fast close); ice = after 21 days (win-back). The test of the
+// May cliff: Lava walks flat through the #626 ship date (May 29) — only Ice collapses.
+// A checkout-page change would have hit Lava too; it didn't, so #626 is cleared. imm
+// weeks (Aug 31+) are still maturing and understate — Ice especially (its window runs
+// to ~6 weeks, so recent cohorts haven't finished converting).
+export const lavaIceWeekly = [
+  { w: 'Feb 2', lava: 31, ice: 11 }, { w: 'Feb 9', lava: 30, ice: 7 }, { w: 'Feb 16', lava: 27, ice: 11 }, { w: 'Feb 23', lava: 25, ice: 13 },
+  { w: 'Mar 2', lava: 26, ice: 17 }, { w: 'Mar 9', lava: 34, ice: 11 }, { w: 'Mar 16', lava: 28, ice: 9 }, { w: 'Mar 23', lava: 20, ice: 13 }, { w: 'Mar 30', lava: 23, ice: 14 },
+  { w: 'Apr 6', lava: 26, ice: 15 }, { w: 'Apr 13', lava: 26, ice: 11 }, { w: 'Apr 20', lava: 28, ice: 11 }, { w: 'Apr 27', lava: 13, ice: 18 },
+  { w: 'May 4', lava: 19, ice: 16 }, { w: 'May 11', lava: 28, ice: 5 }, { w: 'May 18', lava: 24, ice: 12 }, { w: 'May 25', lava: 18, ice: 10 },
+  { w: 'Jun 1', lava: 25, ice: 5 }, { w: 'Jun 8', lava: 28, ice: 3 }, { w: 'Jun 15', lava: 28, ice: 2 }, { w: 'Jun 22', lava: 24, ice: 6 }, { w: 'Jun 29', lava: 25, ice: 6 },
+  { w: 'Jul 6', lava: 25, ice: 4 }, { w: 'Jul 13', lava: 22, ice: 8 }, { w: 'Jul 20', lava: 19, ice: 4 }, { w: 'Jul 27', lava: 23, ice: 5 },
+  { w: 'Aug 3', lava: 17, ice: 4 }, { w: 'Aug 10', lava: 20, ice: 4 }, { w: 'Aug 17', lava: 26, ice: 6 }, { w: 'Aug 24', lava: 29, ice: 3 },
+  { w: 'Aug 31', lava: 24, ice: 3, imm: true }, { w: 'Sep 7', lava: 30, ice: 2, imm: true }, { w: 'Sep 14', lava: 28, ice: 0, imm: true }, { w: 'Sep 21', lava: 33, ice: 0, imm: true }, { w: 'Sep 28', lava: 19, ice: 0, imm: true }, { w: 'Oct 5', lava: 6, ice: 0, imm: true },
+];
