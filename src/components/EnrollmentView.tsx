@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
-import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, breakWeeklyBaseline, type EventRow } from '@/data/enrollmentCheckouts';
+import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, breakWeeklyBaseline, lavaIceCohort, type EventRow } from '@/data/enrollmentCheckouts';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -1124,8 +1124,25 @@ function SegmentsTab() {
       { label: 'Win-back (Ice) portion of rate', data: segMonthly.map((s) => { const r = rateByMonth(s.month); return r == null ? null : Math.round((r * s.ice) / (s.lava + s.ice) * 10) / 10; }), backgroundColor: TP.green, borderRadius: 3, stack: 'r' },
     ],
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const liChart: any = {
+    labels: lavaIceCohort.map((d) => d.m),
+    datasets: [
+      { label: 'Lava — fast close (≤3 wk)', data: lavaIceCohort.map((d) => d.lava), backgroundColor: lavaIceCohort.map((d) => ((d as { imm?: boolean }).imm ? '#c3d0e0' : TP.blue)), borderRadius: 3, stack: 'li' },
+      { label: 'Ice — win-back (>3 wk)', data: lavaIceCohort.map((d) => d.ice), backgroundColor: lavaIceCohort.map((d) => ((d as { imm?: boolean; iceImm?: boolean }).imm || (d as { iceImm?: boolean }).iceImm ? '#cfe6dc' : TP.green)), borderRadius: 3, stack: 'li' },
+    ],
+  };
   return (
     <>
+      <Card>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Where the drop lives: Lava holds, Ice (win-back) collapses</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          Plain-approved link→checkout by the month the link was sent; bar height = total conversion, split into <b style={{ color: TP.blue }}>Lava</b> (checked out within 3 weeks) and <b style={{ color: '#1F7A5A' }}>Ice</b> (win-back, after 3 weeks). The <b>Ice slice collapses</b> (~12%→4% after April) while Lava only drifts (~27%→23%). Ice is lagged — it happens weeks after the link — so the shrinking Ice tracks weaker win-back in <b>June–Aug</b>, right when the <b>July price increase</b> hit delayed leads, not a May-1 change. Pale Sep–Oct = win-back window not matured.
+        </div>
+        <div style={{ height: 320 }}>
+          <Bar data={liChart} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, max: 45, title: { display: true, text: 'Link→checkout %' } } } }} />
+        </div>
+      </Card>
       <Card>
         <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>New leads vs. win-backs, by month</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>

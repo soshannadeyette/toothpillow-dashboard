@@ -238,3 +238,22 @@ export const breakWeekly = [
 // link was sent. Feb–Aug 24 are mature; `imm` weeks (links sent within ~6 wks of the pull) are
 // still converting (checkout lags the link a median ~8d, tail to ~6wk) and read artificially low.
 export const breakWeeklyBaseline = 38; // Feb–Apr average
+
+// Lava vs Ice conversion-RATE decomposition, by the month the checkout link was sent
+// (plain-approved only, from the 2026-10-08 funnel export). Lava = checked out within 21 days
+// of the link (fast close); Ice = after 21 days (win-back). lava + ice = total link→checkout %.
+// The finding: total falls after April, and it's the ICE (win-back) slice that collapses
+// (~12%→4%) while Lava only drifts (~27%→23%). Sep–Oct Ice is immature (win-back window not
+// matured yet), so those bars understate.
+export const lavaIceCohort = [
+  { m: 'Jan', links: 493, lava: 30, ice: 9 },
+  { m: 'Feb', links: 641, lava: 28, ice: 11 },
+  { m: 'Mar', links: 855, lava: 26, ice: 13 },
+  { m: 'Apr', links: 662, lava: 23, ice: 16 },
+  { m: 'May', links: 593, lava: 22, ice: 10 },
+  { m: 'Jun', links: 926, lava: 27, ice: 4 },
+  { m: 'Jul', links: 964, lava: 22, ice: 5 },
+  { m: 'Aug', links: 889, lava: 22, ice: 4 },
+  { m: 'Sep', links: 716, lava: 27, ice: 1, iceImm: true },
+  { m: 'Oct', links: 119, lava: 12, ice: 0, imm: true },
+];
