@@ -1117,18 +1117,18 @@ function SegmentsTab() {
   return (
     <>
       <Card>
-        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Win-back (Ice) conversion fell off a cliff; new-lead (Lava) held</h3>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Link→checkout rate by lead type, by link-sent month</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Two conversion rates, by the month the checkout link was sent. <b style={{ color: TP.blue }}>Blue</b> = new leads who checked out within 3 weeks (Lava). <b style={{ color: '#1F7A5A' }}>Green</b> = win-backs who checked out later (Ice). <b>Blue holds flat (~22–30%) all year. Green climbs to 16% in April, then drops off a cliff at the late-May cohort and keeps falling to ~4%.</b> That green line is essentially the whole enrollment drop — new-lead conversion never broke. Dashed Sep–Oct = win-back window hasn&apos;t matured, so those two points understate.
+          Plain-approved link→checkout rate, split by when the family checked out. <b style={{ color: TP.blue }}>Blue (Lava)</b> = within 3 weeks of the link. <b style={{ color: '#1F7A5A' }}>Green (Ice)</b> = after 3 weeks (win-back). Blue ranges 22–30% across the year. Green rises from 9% (Jan) to 16% (Apr), then declines to ~4% by June and stays there. Dashed Sep–Oct = win-back window not yet matured; those two points understate.
         </div>
         <div style={{ height: 340 }}>
           <Bar data={liLine} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const } }, scales: { y: { beginAtZero: true, max: 35, title: { display: true, text: 'Link→checkout %' } } } }} />
         </div>
       </Card>
       <Card>
-        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>How many checkouts each produces (volume, not rate)</h3>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Checkout counts by lead type, by month</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Counts, not rates — this is the chart above&apos;s real-world payoff. <b>Lava</b> = checkout from a recently-arrived lead; <b>Ice</b> = a previously <b>closed-lost</b> lead won back. Win-backs are {Math.round((100 * segTotal('Ice')) / summary.checkouts)}% of all checkouts ({segTotal('Ice')}) — a real revenue stream, and it&apos;s the green slice that shrank after May.
+          Checkout counts (not rates). <b>Lava</b> = checkout from a recently-arrived lead; <b>Ice</b> = a previously closed-lost lead won back. Win-backs are {Math.round((100 * segTotal('Ice')) / summary.checkouts)}% of all checkouts ({segTotal('Ice')}).
         </div>
         <div style={{ height: 320 }}>
           <Bar
