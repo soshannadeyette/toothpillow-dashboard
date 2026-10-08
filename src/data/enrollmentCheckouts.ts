@@ -198,15 +198,18 @@ export const breakProofMonthly = [
   { m: 'Aug', overall: 26.1, plain: 26.2, referOnlyLinks: 0 },
 ];
 // Plain-approved link->checkout by lead source, before (Feb-Apr) vs after (May-Jul). The drop is systemic.
+// Plain-approved link→checkout by source. before = Feb–Apr avg, after = May–Aug avg
+// (extended through Aug — now mature — from the 2026-10-08 funnel export; Sep–Oct links
+// excluded as not-yet-mature). Every source fell; ALL 39→29.
 export const breakBySource = [
-  { src: 'Influencer', before: 41, after: 33 },
+  { src: 'Influencer', before: 41, after: 31 },
   { src: 'Online Search', before: 36, after: 24 },
-  { src: 'Podcast', before: 40, after: 31 },
+  { src: 'Podcast', before: 40, after: 32 },
   { src: 'Parent', before: 44, after: 36 },
-  { src: 'Instagram', before: 28, after: 19 },
-  { src: 'Dental Office', before: 50, after: 32 },
+  { src: 'Instagram', before: 28, after: 18 },
+  { src: 'Dental Office', before: 50, after: 34 },
   { src: 'Unknown Referral', before: 35, after: 21 },
-  { src: 'ALL plain approved', before: 39, after: 30 },
+  { src: 'ALL plain approved', before: 39, after: 29 },
 ];
 // What the data rules OUT as the cause (each line is proven from the funnel export unless noted).
 export const ruledOutScoreboard = [

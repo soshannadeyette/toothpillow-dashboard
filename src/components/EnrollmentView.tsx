@@ -225,7 +225,7 @@ function DiagnosisTab() {
 
       <Card>
         <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>The drop is systemic — every source fell together</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Plain-approved link→checkout by lead source, before (Feb–Apr, grey) vs after (May–Jul, red). A lead-quality problem would hit one or two channels; this hits all of them — so it&apos;s the checkout experience, not who the leads are.</div>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Plain-approved link→checkout by lead source, before (Feb–Apr, grey) vs after (May–Aug, red; Sep–Oct excluded as not-yet-mature). A lead-quality problem would hit one or two channels; this hits all of them — so it&apos;s the checkout experience, not who the leads are.</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
           {breakBySource.map((s) => {
             const isAll = s.src.startsWith('ALL');
