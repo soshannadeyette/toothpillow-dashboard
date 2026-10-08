@@ -183,11 +183,12 @@ function DiagnosisTab() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const weeklyChart: any = {
     labels: breakWeekly.map((w) => w.w),
-    datasets: [{ type: 'bar', label: 'Plain-approved link→checkout %', data: breakWeekly.map((w) => w.r), backgroundColor: breakWeekly.map((w) => (w.r >= breakWeeklyBaseline ? '#9FC6B4' : '#D98C84')), borderRadius: 3 }],
+    datasets: [{ type: 'bar', label: 'Plain-approved link→checkout %', data: breakWeekly.map((w) => w.r), backgroundColor: breakWeekly.map((w) => ((w as { imm?: boolean }).imm ? '#d4d7dc' : w.r >= breakWeeklyBaseline ? '#9FC6B4' : '#D98C84')), borderRadius: 3 }],
   };
   const weeklyAnn: Record<string, object> = {
     base: { type: 'line', yMin: breakWeeklyBaseline, yMax: breakWeeklyBaseline, borderColor: '#6b7280', borderWidth: 1.2, borderDash: [6, 4], label: { display: true, content: `Feb–Apr avg ~${breakWeeklyBaseline}%`, position: 'start' as const, backgroundColor: '#6b7280', color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } },
     pr626: { type: 'line', xMin: wk626, xMax: wk626, borderColor: '#E8A33B', borderWidth: 1.5, borderDash: [4, 3], label: { display: true, content: '#626 shipped May 29', position: 'end' as const, backgroundColor: '#E8A33B', color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } },
+    drop: { type: 'label', xValue: wk626, yValue: breakWeekly[wk626]?.r ?? 28, content: [`−${(breakWeekly[Math.max(0, wk626 - 1)]?.r ?? 0) - (breakWeekly[wk626]?.r ?? 0)} pts`, 'wk of May 25'], color: '#C0392B', font: { size: 9, weight: 'bold' as const }, backgroundColor: 'rgba(255,255,255,0.88)', borderColor: '#C0392B', borderWidth: 1, borderRadius: 4, padding: 3, yAdjust: 30 },
   };
   return (
     <>
@@ -202,8 +203,8 @@ function DiagnosisTab() {
       </Card>
 
       <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Plain-approved link→checkout, by week (Feb – mid-Jul 2026)</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Of approved families (expanders and &quot;refer only&quot; excluded), the share who checked out — plotted by the week the checkout link was sent. Grey dashed line = the Feb–Apr average (~38%); bars below it are red. Amber line marks when PR&nbsp;#626 (the checkout-button copy change) shipped, May&nbsp;29.</div>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Plain-approved link→checkout, by week (Feb – Oct 2026)</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Of approved families (expanders and &quot;refer only&quot; excluded), the share who checked out — plotted by the week the checkout link was sent. Grey dashed line = the Feb–Apr average (~38%); bars below it are red. Amber line marks when PR&nbsp;#626 (the checkout-button copy change) shipped, May&nbsp;29. Pale-grey bars from Aug&nbsp;31 on are still maturing — those cohorts haven&apos;t finished converting (checkout can lag the link up to ~6&nbsp;weeks), so they read artificially low and shouldn&apos;t be judged yet.</div>
         <div style={{ height: 280 }}>
           <Bar data={weeklyChart} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, annotation: { annotations: weeklyAnn } }, scales: { y: { beginAtZero: true, max: 45, title: { display: true, text: 'Link→checkout %' } } } }} />
         </div>
@@ -555,17 +556,28 @@ function MonthlyTab() {
 
 function WeeklyTab() {
   const labels = weekly.map((w) => w.weekStart.slice(5));
+  // Known promo / "blast" pushes that create outlier checkout columns. Exact blast-link dates
+  // for the other spikes still need to be supplied; these two are dated from the events log.
+  const promoWeeks = [
+    { week: '2026-06-28', label: 'Jun 30 price push' },
+    { week: '2026-09-27', label: 'Sep 30 ambassador $300' },
+  ];
+  const promoMarks: Record<string, object> = {};
+  promoWeeks.forEach((p, i) => {
+    const idx = weekly.findIndex((w) => w.weekStart === p.week);
+    if (idx >= 0) promoMarks['promo' + i] = { type: 'line', xMin: idx, xMax: idx, borderColor: '#8B5CF6', borderWidth: 1.5, borderDash: [4, 3], label: { display: true, content: p.label, position: 'start' as const, backgroundColor: '#8B5CF6', color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } };
+  });
   return (
     <>
       <Card>
         <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Checkouts by week</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Week starting Sunday (MM-DD). Noisy week to week (partial weeks at month edges swing it) — the By Coordinator and Events tabs show the real trend.
+          Week starting Sunday (MM-DD). Noisy week to week (partial weeks at month edges swing it) — the By Coordinator and Events tabs show the real trend. <b style={{ color: '#8B5CF6' }}>Purple</b> marks promo/&quot;blast&quot; pushes that spike checkouts; other blast dates still need to be supplied.
         </div>
         <div style={{ height: 340 }}>
           <Bar
             data={{ labels, datasets: [{ label: 'Checkouts', data: weekly.map((w) => w.checkouts), backgroundColor: TP.blue, borderRadius: 3 }] }}
-            options={baseOpts}
+            options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, annotation: { annotations: promoMarks } } }}
           />
         </div>
       </Card>
@@ -784,10 +796,22 @@ function ConversionTab() {
       label: { display: true, content: 'still maturing', position: { x: 'center', y: 'start' } as const, color: '#b4791f', font: { size: 10, weight: 'bold' as const }, backgroundColor: 'transparent' },
     },
   } : {};
+  // Label the Apr→May link→checkout drop magnitude (the week-of-May-25 break at monthly resolution).
+  const aprIdx = conversionMonthly.findIndex((m) => m.month === '2026-04');
+  const mayIdx = conversionMonthly.findIndex((m) => m.month === '2026-05');
+  if (aprIdx >= 0 && mayIdx >= 0) {
+    const drop = conversionMonthly[aprIdx].linkToCO - conversionMonthly[mayIdx].linkToCO;
+    annotations.mayDrop = {
+      type: 'label', xValue: mayIdx, yValue: conversionMonthly[mayIdx].linkToCO,
+      content: [`−${drop.toFixed(1)} pts`, 'Apr→May link→CO'],
+      color: '#C0392B', font: { size: 10, weight: 'bold' as const }, backgroundColor: 'rgba(255,255,255,0.88)',
+      borderColor: '#C0392B', borderWidth: 1, borderRadius: 4, padding: 4, yAdjust: -26,
+    };
+  }
   return (
     <>
       <div style={{ marginBottom: 14, fontSize: 13, color: TP.text, background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 8, padding: '10px 14px' }}>
-        <b>{convSummary.submissions.toLocaleString()}</b> leads submitted in 2026 → <b>{convSummary.linkSent.toLocaleString()}</b> got a checkout link ({Math.round((100 * convSummary.linkSent) / convSummary.submissions)}%) → <b>{convSummary.checkouts.toLocaleString()}</b> checked out (<b>{overall.toFixed(1)}%</b> submission→checkout). Of those who got a link, <b>{((100 * convSummary.checkouts) / convSummary.linkSent).toFixed(1)}%</b> converted. Cohorted by submission month. <span style={{ color: '#b4791f' }}>Aug–Oct still maturing — read Jan–Jul as final.</span>
+        <b>{convSummary.submissions.toLocaleString()}</b> leads submitted in 2026 → <b>{convSummary.linkSent.toLocaleString()}</b> got a checkout link ({Math.round((100 * convSummary.linkSent) / convSummary.submissions)}%) → <b>{convSummary.checkouts.toLocaleString()}</b> checked out (<b>{overall.toFixed(1)}%</b> submission→checkout). Of those who got a link, <b>{((100 * convSummary.checkouts) / convSummary.linkSent).toFixed(1)}%</b> converted. Cohorted by submission month. <span style={{ color: '#b4791f' }}>Aug–Oct still maturing — read Jan–Jul as final.</span> <span style={{ color: '#6b7280' }}>Note: April reads clean here (submission-cohort); its inflated-link artifact — 360 re-sent &quot;refer only&quot; links, never fixed — only distorts the link-SENT-month views in the Why tab.</span>
       </div>
       <Card>
         <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Conversion rate by submission month</h3>
@@ -847,7 +871,7 @@ function ConversionTab() {
 function LeadSourceTab() {
   const overall = (100 * convSummary.checkouts) / convSummary.submissions;
   const byRate = [...conversionByReferrer].sort((a, b) => b.rate - a.rate);
-  const matureSrc = sourceMonthly.filter((m) => m.month <= conversionMatureThrough);
+  const matureSrc = sourceMonthly; // extended to current — Aug–Oct still maturing (noted in caption)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const convSrcData: any = {
     labels: matureSrc.map((m) => monLabel(m.month).replace(' 2026', '')),
@@ -892,8 +916,30 @@ function LeadSourceTab() {
       </Card>
 
       <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Checkout mix by month (share of each month&apos;s checkouts by source)</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Chad&apos;s &quot;blend of lead source to checkout&quot; — of the families who actually <b>checked out</b> each month, what share came from each source. Shares sum to 100%, Jan–Oct 2026. (Oct is only a few days in.)</div>
+        <div style={{ height: 300 }}>
+          <Bar
+            data={{
+              labels: sourceMonthly.map((m) => monLabel(m.month).replace(' 2026', '')),
+              datasets: sourceOrder.map((src) => ({
+                label: src,
+                data: sourceMonthly.map((m) => {
+                  const tot = Object.values(m.cos).reduce((s, v) => s + v, 0) || 1;
+                  return Math.round((100 * m.cos[src]) / tot);
+                }),
+                backgroundColor: sourceColors[src],
+                stack: 'comix',
+              })),
+            }}
+            options={{ ...baseOpts, plugins: { legend: { display: true, position: 'bottom' as const } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, max: 100, title: { display: true, text: '% of checkouts' } } } }}
+          />
+        </div>
+      </Card>
+
+      <Card>
         <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Conversion by source, over time</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Mature months (Jan–Jul). The May drop shows up in <b>every</b> major source at once — that&apos;s the signature of a system/checkout change, not a channel problem.</div>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Submission→checkout by source, Jan–Oct 2026 (extended to current). The May drop shows up in <b>every</b> major source at once — the signature of a system/checkout change, not a channel problem. <span style={{ color: '#b4791f' }}>Aug–Oct still maturing — recent submitters can still check out, so those points read low.</span></div>
         <div style={{ height: 300 }}>
           <Bar data={convSrcData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom' as const } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Conversion %' } } } }} />
         </div>
@@ -1065,6 +1111,17 @@ function SegmentsTab() {
       { type: 'line', label: 'Win-back (Ice) %', data: icePct, borderColor: TP.green, backgroundColor: TP.green, borderWidth: 2.5, pointRadius: 3, tension: 0.3 },
     ],
   };
+  // Chad's view: bar height = that month's link→checkout rate, split into Lava/Ice by each
+  // segment's share of that month's checkouts. NOT a true per-segment rate (needs links-sent by segment).
+  const rateByMonth = (m: string) => conversionMonthly.find((c) => c.month === m)?.linkToCO ?? null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const segConvSplit: any = {
+    labels,
+    datasets: [
+      { label: 'New (Lava) portion of rate', data: segMonthly.map((s) => { const r = rateByMonth(s.month); return r == null ? null : Math.round((r * s.lava) / (s.lava + s.ice) * 10) / 10; }), backgroundColor: TP.blue, borderRadius: 3, stack: 'r' },
+      { label: 'Win-back (Ice) portion of rate', data: segMonthly.map((s) => { const r = rateByMonth(s.month); return r == null ? null : Math.round((r * s.ice) / (s.lava + s.ice) * 10) / 10; }), backgroundColor: TP.green, borderRadius: 3, stack: 'r' },
+    ],
+  };
   return (
     <>
       <Card>
@@ -1092,6 +1149,15 @@ function SegmentsTab() {
         </div>
         <div style={{ height: 300 }}>
           <Bar data={segPct} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const } }, scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: '% of checkouts' } } } }} />
+        </div>
+      </Card>
+      <Card>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Conversion rate, split by new vs win-back (Chad&apos;s view)</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          Bar <b>height = that month&apos;s link→checkout rate</b>; each bar is split into Lava and Ice by each segment&apos;s share of that month&apos;s checkouts (so a 33% month reads e.g. 25% Lava + 8% Ice). <b>Not a true per-segment conversion rate</b> — that would need links-sent split by Lava/Ice, which the export doesn&apos;t carry. Aug–Oct still maturing.
+        </div>
+        <div style={{ height: 300 }}>
+          <Bar data={segConvSplit} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Link→checkout %' } } } }} />
         </div>
       </Card>
       <Card>

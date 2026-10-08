@@ -224,6 +224,14 @@ export const breakWeekly = [
   { w: 'Apr 6', r: 41 }, { w: 'Apr 13', r: 36 }, { w: 'Apr 20', r: 41 }, { w: 'Apr 27', r: 32 },
   { w: 'May 4', r: 38 }, { w: 'May 11', r: 34 }, { w: 'May 18', r: 38 }, { w: 'May 25', r: 28 },
   { w: 'Jun 1', r: 30 }, { w: 'Jun 8', r: 32 }, { w: 'Jun 15', r: 32 }, { w: 'Jun 22', r: 30 }, { w: 'Jun 29', r: 27 },
-  { w: 'Jul 6', r: 28 }, { w: 'Jul 13', r: 29 },
+  { w: 'Jul 6', r: 28 }, { w: 'Jul 13', r: 29 }, { w: 'Jul 20', r: 23 }, { w: 'Jul 27', r: 27 },
+  { w: 'Aug 3', r: 21 }, { w: 'Aug 10', r: 23 }, { w: 'Aug 17', r: 32 }, { w: 'Aug 24', r: 33 },
+  { w: 'Aug 31', r: 27, imm: true }, { w: 'Sep 7', r: 31, imm: true }, { w: 'Sep 14', r: 29, imm: true },
+  { w: 'Sep 21', r: 33, imm: true }, { w: 'Sep 28', r: 18, imm: true }, { w: 'Oct 5', r: 5, imm: true },
 ];
+// Recomputed from the SOSH | Enrollment Funnel export (2026-10-07): plain-approved
+// (Functional Appliance / approve / Approve for Treatment / APPROVED-for-virtual; expanders,
+// refer-only, denied, need-info, blank, pre-expanders all excluded), by the week the checkout
+// link was sent. Feb–Aug 24 are mature; `imm` weeks (links sent within ~6 wks of the pull) are
+// still converting (checkout lags the link a median ~8d, tail to ~6wk) and read artificially low.
 export const breakWeeklyBaseline = 38; // Feb–Apr average
