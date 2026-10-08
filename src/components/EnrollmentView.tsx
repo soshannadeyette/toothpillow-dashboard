@@ -1104,49 +1104,31 @@ function SpeedTab() {
 
 function SegmentsTab() {
   const labels = segMonthly.map((s) => monLabel(s.month));
-  const icePct = segMonthly.map((s) => Math.round((100 * s.ice) / (s.lava + s.ice)));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const segPct: any = {
-    labels,
-    datasets: [
-      { type: 'line', label: 'New (Lava) %', data: segMonthly.map((s) => Math.round((100 * s.lava) / (s.lava + s.ice))), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 3, tension: 0.3 },
-      { type: 'line', label: 'Win-back (Ice) %', data: icePct, borderColor: TP.green, backgroundColor: TP.green, borderWidth: 2.5, pointRadius: 3, tension: 0.3 },
-    ],
-  };
-  // Chad's view: bar height = that month's link→checkout rate, split into Lava/Ice by each
-  // segment's share of that month's checkouts. NOT a true per-segment rate (needs links-sent by segment).
-  const rateByMonth = (m: string) => conversionMonthly.find((c) => c.month === m)?.linkToCO ?? null;
+  const dashImm = { borderDash: (ctx: { p1DataIndex: number }) => (ctx.p1DataIndex >= 8 ? [5, 4] : undefined) };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const segConvSplit: any = {
-    labels,
-    datasets: [
-      { label: 'New (Lava) portion of rate', data: segMonthly.map((s) => { const r = rateByMonth(s.month); return r == null ? null : Math.round((r * s.lava) / (s.lava + s.ice) * 10) / 10; }), backgroundColor: TP.blue, borderRadius: 3, stack: 'r' },
-      { label: 'Win-back (Ice) portion of rate', data: segMonthly.map((s) => { const r = rateByMonth(s.month); return r == null ? null : Math.round((r * s.ice) / (s.lava + s.ice) * 10) / 10; }), backgroundColor: TP.green, borderRadius: 3, stack: 'r' },
-    ],
-  };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const liChart: any = {
+  const liLine: any = {
     labels: lavaIceCohort.map((d) => d.m),
     datasets: [
-      { label: 'Lava — fast close (≤3 wk)', data: lavaIceCohort.map((d) => d.lava), backgroundColor: lavaIceCohort.map((d) => ((d as { imm?: boolean }).imm ? '#c3d0e0' : TP.blue)), borderRadius: 3, stack: 'li' },
-      { label: 'Ice — win-back (>3 wk)', data: lavaIceCohort.map((d) => d.ice), backgroundColor: lavaIceCohort.map((d) => ((d as { imm?: boolean; iceImm?: boolean }).imm || (d as { iceImm?: boolean }).iceImm ? '#cfe6dc' : TP.green)), borderRadius: 3, stack: 'li' },
+      { type: 'line', label: 'New-lead (Lava) conversion %', data: lavaIceCohort.map((d) => d.lava), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 3, pointRadius: 4, tension: 0.3, segment: dashImm },
+      { type: 'line', label: 'Win-back (Ice) conversion %', data: lavaIceCohort.map((d) => d.ice), borderColor: TP.green, backgroundColor: TP.green, borderWidth: 3, pointRadius: 4, tension: 0.3, segment: dashImm },
     ],
   };
   return (
     <>
       <Card>
-        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Where the drop lives: Lava holds, Ice (win-back) collapses</h3>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Win-back (Ice) conversion fell off a cliff; new-lead (Lava) held</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Plain-approved link→checkout by the month the link was sent; bar height = total conversion, split into <b style={{ color: TP.blue }}>Lava</b> (checked out within 3 weeks) and <b style={{ color: '#1F7A5A' }}>Ice</b> (win-back, after 3 weeks). Nearly all the loss is in <b>Ice</b>: it peaks in April (16%), then <b>falls off a cliff at the late-May cohort</b> (→10%) and keeps sliding to ~4%; Lava is flat across the cliff (23→22). The late-May cliff <b>pre-dates the July price increase</b> — a May cohort&apos;s win-backs convert in June — so price is a separate, later drag on the summer cohorts, not the cause of the cliff. Pale Sep–Oct = win-back window not matured.
+          Two conversion rates, by the month the checkout link was sent. <b style={{ color: TP.blue }}>Blue</b> = new leads who checked out within 3 weeks (Lava). <b style={{ color: '#1F7A5A' }}>Green</b> = win-backs who checked out later (Ice). <b>Blue holds flat (~22–30%) all year. Green climbs to 16% in April, then drops off a cliff at the late-May cohort and keeps falling to ~4%.</b> That green line is essentially the whole enrollment drop — new-lead conversion never broke. Dashed Sep–Oct = win-back window hasn&apos;t matured, so those two points understate.
         </div>
-        <div style={{ height: 320 }}>
-          <Bar data={liChart} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, max: 45, title: { display: true, text: 'Link→checkout %' } } } }} />
+        <div style={{ height: 340 }}>
+          <Bar data={liLine} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const } }, scales: { y: { beginAtZero: true, max: 35, title: { display: true, text: 'Link→checkout %' } } } }} />
         </div>
       </Card>
       <Card>
-        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>New leads vs. win-backs, by month</h3>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>How many checkouts each produces (volume, not rate)</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          <b>Lava</b> = checkout from a recently-arrived lead. <b>Ice</b> = a previously <b>closed-lost</b> lead won back. Win-backs are {Math.round((100 * segTotal('Ice')) / summary.checkouts)}% of all checkouts ({segTotal('Ice')}) — a real revenue stream.
+          Counts, not rates — this is the chart above&apos;s real-world payoff. <b>Lava</b> = checkout from a recently-arrived lead; <b>Ice</b> = a previously <b>closed-lost</b> lead won back. Win-backs are {Math.round((100 * segTotal('Ice')) / summary.checkouts)}% of all checkouts ({segTotal('Ice')}) — a real revenue stream, and it&apos;s the green slice that shrank after May.
         </div>
         <div style={{ height: 320 }}>
           <Bar
@@ -1158,36 +1140,6 @@ function SegmentsTab() {
               ],
             }}
             options={{ ...baseOpts, plugins: { legend: { display: true, position: 'top' as const } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }}
-          />
-        </div>
-      </Card>
-      <Card>
-        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>New vs win-back — % of checkouts, by month</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          The two segments as a <b>share of each month&apos;s checkouts</b> (the lines sum to 100%), Jan–Oct 2026. This is the mix — <b>not a conversion rate</b>; a true conversion % per segment would need links-sent split by Lava/Ice.
-        </div>
-        <div style={{ height: 300 }}>
-          <Bar data={segPct} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const } }, scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: '% of checkouts' } } } }} />
-        </div>
-      </Card>
-      <Card>
-        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Conversion rate, split by new vs win-back (Chad&apos;s view)</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Bar <b>height = that month&apos;s link→checkout rate</b>; each bar is split into Lava and Ice by each segment&apos;s share of that month&apos;s checkouts (so a 33% month reads e.g. 25% Lava + 8% Ice). <b>Not a true per-segment conversion rate</b> — that would need links-sent split by Lava/Ice, which the export doesn&apos;t carry. Aug–Oct still maturing.
-        </div>
-        <div style={{ height: 300 }}>
-          <Bar data={segConvSplit} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Link→checkout %' } } } }} />
-        </div>
-      </Card>
-      <Card>
-        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Win-back share of checkouts (%)</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Win-backs normally run ~25–30% of checkouts. In <b>July they cratered to 12%</b> (36 vs a ~100+ norm) — right when the &quot;schedule a call&quot; step was removed. That step was the win-back engine for closed-lost leads.
-        </div>
-        <div style={{ height: 280 }}>
-          <Bar
-            data={{ labels, datasets: [{ label: 'Win-back %', data: icePct, backgroundColor: icePct.map((p) => (p < 18 ? '#e06666' : TP.green)), borderRadius: 4 }] }}
-            options={{ ...baseOpts, scales: { y: { beginAtZero: true, title: { display: true, text: '% of checkouts' } } } }}
           />
         </div>
       </Card>
