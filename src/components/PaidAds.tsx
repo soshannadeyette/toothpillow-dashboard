@@ -248,37 +248,37 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
    so Meta contribution is negligible in those months.
    ════════════════════════════════════════════ */
 
-// Pipeline totals — Salesforce export October 2, 2026
+// Pipeline totals — Salesforce export October 8, 2026
 const GOOGLE_SF_PIPELINE = {
-  total: 791,           // leads created (started form)
-  completed: 362,       // submitted (have submission date)
-  waitingInfo: 427,     // WAITING - Needs info
-  sentCheckout: 191,    // Sent Checkout Link (incl. Temp Hold)
-  sentToTxP: 23,        // Sent to TxP (13) + Treatment Consult Scheduled (10)
-  txpApproved: 15,
-  checkedOut: 40,
-  referredOut: 36,
-  closedLost: 49,       // Closed Lost (39) + Do Not Contact (10)
-  tempHold: 9,          // Temp Hold (2) + Assessment On Hold (6) + ON HOLD - No Doctor (1)
+  total: 804,           // leads created (started form)
+  completed: 371,       // submitted (have submission date)
+  waitingInfo: 431,     // WAITING - Needs info
+  sentCheckout: 196,    // Sent Checkout Link (195) + Temp Hold (1)
+  sentToTxP: 26,        // Sent to TxP (13) + Treatment Consult Scheduled (13)
+  txpApproved: 5,
+  checkedOut: 42,
+  referredOut: 37,
+  closedLost: 50,       // Closed Lost (40) + Do Not Contact (10)
+  tempHold: 17,         // Temp Hold (2) + Assessment On Hold (14) + ON HOLD - No Doctor (1)
   denied: 0,
   formOpens: 441,       // Google Ads conversions (form opens, Google-only)
 };
 
-// Revenue from checkouts — 40 checkouts
-// Source: Salesforce "Google Ads 2026" export, October 2, 2026
-const GOOGLE_REVENUE: number = 74574;
+// Revenue from checkouts — 42 checkouts
+// Source: Salesforce "Google Ads 2026" export, October 8, 2026
+const GOOGLE_REVENUE: number = 78574;
 
 // Monthly breakdown from Salesforce — grouped by SUBMISSION date.
 // Checkouts/revenue = leads submitted that month that have checked out to date.
-// Source: Salesforce "Google Ads 2026" export, October 2, 2026
+// Source: Salesforce "Google Ads 2026" export, October 8, 2026
 const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: number; checkouts: number; revenue: number }[] = [
   { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 20, completed: 20, checkouts: 2, revenue: 3291 },
   { month: 'May 2026', monthKey: 'May 2026', leads: 28, completed: 28, checkouts: 5, revenue: 8676 },
   { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 81, completed: 81, checkouts: 14, revenue: 24790 },
-  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 91, completed: 91, checkouts: 10, revenue: 20305 },
+  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 91, completed: 91, checkouts: 11, revenue: 22305 },
   { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 88, completed: 88, checkouts: 8, revenue: 15517 },
-  { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 52, completed: 52, checkouts: 1, revenue: 1995 },
-  { month: 'Oct 2026', monthKey: 'Oct 2026', leads: 2, completed: 2, checkouts: 0, revenue: 0 },
+  { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 53, completed: 53, checkouts: 2, revenue: 3995 },
+  { month: 'Oct 2026', monthKey: 'Oct 2026', leads: 10, completed: 10, checkouts: 0, revenue: 0 },
 ];
 
 /* ════════════════════════════════════════════
@@ -812,7 +812,7 @@ export default function PaidAds() {
       {/* ═══════ COST PER CONVERSION TREND ═══════ */}
       <SectionHeader>Cost per Conversion Over Time</SectionHeader>
       <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>
-        Monthly Google Ads spend ÷ Salesforce conversions at each funnel stage. September is partial ({(() => { const sep = SF_MONTHLY.find(s => s.monthKey === 'Sep 2026'); return sep ? `${sep.leads} leads` : 'in progress'; })()}).
+        Monthly Google Ads spend ÷ Salesforce conversions at each funnel stage. October is partial ({(() => { const oct = SF_MONTHLY.find(s => s.monthKey === 'Oct 2026'); return oct ? `${oct.leads} leads` : 'in progress'; })()}).
       </div>
       <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', marginBottom: 32 }}>
         <div style={{ height: 320 }}>
