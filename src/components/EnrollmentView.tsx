@@ -379,8 +379,10 @@ function OverviewTab() {
   ];
   const top = [...conversionByReferrer].filter((r) => r.referrer !== '(blank)').sort((a, b) => b.rate - a.rate).slice(0, 4);
   const bottom = [...conversionByReferrer].filter((r) => r.referrer !== '(blank)').sort((a, b) => a.rate - b.rate).slice(0, 4);
-  const mature = conversionMonthly.filter((m) => m.month <= conversionMatureThrough);
+  const mature = conversionMonthly; // full year Jan–Oct; Aug+ still maturing (rendered faded)
   const matureLabels = mature.map((m) => monLabel(m.month).replace(' 2026', ''));
+  const firstMaturing = conversionMonthly.findIndex((m) => m.month > conversionMatureThrough); // Aug = 7
+  const fadeBars = (solid: string, pale: string) => conversionMonthly.map((m) => (m.month > conversionMatureThrough ? pale : solid));
   const pctAxis = { ...baseOpts, scales: { y: { beginAtZero: true, max: 50, title: { display: true, text: '%' } } } };
   const convLineAnnotations: Record<string, object> = {
     mayDrop: { type: 'box', xMin: 3.5, xMax: 4.5, backgroundColor: 'rgba(224,102,102,0.12)', borderColor: 'rgba(224,102,102,0.5)', borderWidth: 1, label: { display: true, content: 'MAY break', position: { x: 'center', y: 'start' } as const, color: '#c0392b', font: { size: 11, weight: 'bold' as const } } },
@@ -434,19 +436,19 @@ function OverviewTab() {
       <Card>
         <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Conversion health — two ways to read it</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>
-          <b>Submission→checkout</b> = overall funnel health (lead quality + nurture + close). <b>Checkout-link→checkout</b> = how well we close once a family is ready to pay. Both have slid this year — so it&apos;s not just lead quality; closing weakened too. Mature months only (Jan–Jul).
+          <b>Submission→checkout</b> = overall funnel health (lead quality + nurture + close). <b>Checkout-link→checkout</b> = how well we close once a family is ready to pay. Both have slid this year — so it&apos;s not just lead quality; closing weakened too. <b>Jan–Jul are final; Aug–Oct are faded/dashed</b> because those are submission-month cohorts still converting (a family who submitted in Sept can still check out in Nov), so they read low and will rise.
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
           <div>
             <div style={{ fontSize: 13, fontWeight: 600, color: TP.blue, marginBottom: 6 }}>Submission → checkout</div>
             <div style={{ height: 210 }}>
-              <Bar data={{ labels: matureLabels, datasets: [{ type: 'bar' as const, label: 'Sub→CO %', data: mature.map((m) => m.subToCO), backgroundColor: TP.blue, borderRadius: 4 }] }} options={pctAxis} />
+              <Bar data={{ labels: matureLabels, datasets: [{ type: 'bar' as const, label: 'Sub→CO %', data: mature.map((m) => m.subToCO), backgroundColor: fadeBars(TP.blue, '#b9c6da'), borderRadius: 4 }] }} options={pctAxis} />
             </div>
           </div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 600, color: TP.green, marginBottom: 6 }}>Checkout link → checkout</div>
             <div style={{ height: 210 }}>
-              <Bar data={{ labels: matureLabels, datasets: [{ type: 'bar' as const, label: 'Link→CO %', data: mature.map((m) => m.linkToCO), backgroundColor: TP.green, borderRadius: 4 }] }} options={pctAxis} />
+              <Bar data={{ labels: matureLabels, datasets: [{ type: 'bar' as const, label: 'Link→CO %', data: mature.map((m) => m.linkToCO), backgroundColor: fadeBars(TP.green, '#c4e0d5'), borderRadius: 4 }] }} options={pctAxis} />
             </div>
           </div>
         </div>
@@ -459,9 +461,9 @@ function OverviewTab() {
                 labels: matureLabels,
                 datasets: [
                   // @ts-expect-error mixed line on Bar
-                  { type: 'line' as const, label: 'Submission → checkout %', data: mature.map((m) => m.subToCO), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 3, tension: 0.3 },
+                  { type: 'line' as const, label: 'Submission → checkout %', data: mature.map((m) => m.subToCO), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 3, pointBackgroundColor: fadeBars(TP.blue, '#b9c6da'), tension: 0.3, segment: { borderDash: (ctx: { p1DataIndex: number }) => (ctx.p1DataIndex >= firstMaturing ? [6, 4] : undefined), borderColor: (ctx: { p1DataIndex: number }) => (ctx.p1DataIndex >= firstMaturing ? '#b9c6da' : TP.blue) } },
                   // @ts-expect-error mixed line on Bar
-                  { type: 'line' as const, label: 'Checkout link → checkout %', data: mature.map((m) => m.linkToCO), borderColor: TP.green, backgroundColor: TP.green, borderWidth: 2.5, pointRadius: 3, tension: 0.3 },
+                  { type: 'line' as const, label: 'Checkout link → checkout %', data: mature.map((m) => m.linkToCO), borderColor: TP.green, backgroundColor: TP.green, borderWidth: 2.5, pointRadius: 3, pointBackgroundColor: fadeBars(TP.green, '#c4e0d5'), tension: 0.3, segment: { borderDash: (ctx: { p1DataIndex: number }) => (ctx.p1DataIndex >= firstMaturing ? [6, 4] : undefined), borderColor: (ctx: { p1DataIndex: number }) => (ctx.p1DataIndex >= firstMaturing ? '#c4e0d5' : TP.green) } },
                 ],
               }}
               options={{
