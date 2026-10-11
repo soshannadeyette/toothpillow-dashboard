@@ -256,42 +256,42 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
 
 /* ════════════════════════════════════════════
    DATA SOURCE 2: SALESFORCE (hardcoded constants)
-   Source: Salesforce "Google Ads 2026" export, October 2, 2026.
+   Source: Salesforce "Google Ads 2026" export, October 10, 2026.
    Note: Export filter includes "Up 1 equals Google Ads,Meta Ads"
    but Apr–Jun numbers are unchanged from Google-only pulls,
    so Meta contribution is negligible in those months.
    ════════════════════════════════════════════ */
 
-// Pipeline totals — Salesforce export October 9, 2026
+// Pipeline totals — Salesforce export October 10, 2026
 const GOOGLE_SF_PIPELINE = {
-  total: 806,           // leads created (started form)
-  completed: 375,       // submitted (have submission date)
-  waitingInfo: 431,     // WAITING - Needs info (429) + Waiting for TxP Assignment (2)
-  sentCheckout: 199,    // Sent Checkout Link (198) + Temp Hold (1)
-  sentToTxP: 19,        // Sent to TxP (10) + Treatment Consult Scheduled (9)
-  txpApproved: 6,
-  checkedOut: 45,
-  referredOut: 38,
-  closedLost: 50,       // Closed Lost (40) + Do Not Contact (10)
-  tempHold: 18,         // Temp Hold (3) + Assessment On Hold (14) + ON HOLD - No Doctor (1)
+  total: 820,           // leads created (started form)
+  completed: 387,       // submitted (have submission date)
+  waitingInfo: 433,     // WAITING - Needs info (430) + Waiting for TxP Assignment (3)
+  sentCheckout: 200,    // Sent Checkout Link (198) + Sent Checkout Link - Temp Hold (2)
+  sentToTxP: 22,        // Sent to TxP (11) + Treatment Consult Scheduled (11)
+  txpApproved: 7,
+  checkedOut: 46,
+  referredOut: 39,
+  closedLost: 52,       // Closed Lost (41) + Do Not Contact (11)
+  tempHold: 21,         // Temp Hold (4) + Assessment On Hold (15) + ON HOLD - No Doctor (2)
   denied: 0,
   formOpens: 441,       // Google Ads conversions (form opens, Google-only)
 };
 
-// Revenue from checkouts — 45 checkouts
-// Source: Salesforce "Google Ads 2026" export, October 9, 2026
-const GOOGLE_REVENUE: number = 84451;
+// Revenue from checkouts — 46 checkouts
+// Source: Salesforce "Google Ads 2026" export, October 10, 2026
+const GOOGLE_REVENUE: number = 86746;
 
 // Monthly breakdown from Salesforce — grouped by SUBMISSION date.
 // Checkouts/revenue = leads submitted that month that have checked out to date.
-// Source: Salesforce "Google Ads 2026" export, October 9, 2026
+// Source: Salesforce "Google Ads 2026" export, October 10, 2026
 const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: number; checkouts: number; revenue: number }[] = [
   { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 20, completed: 20, checkouts: 2, revenue: 3291 },
   { month: 'May 2026', monthKey: 'May 2026', leads: 28, completed: 28, checkouts: 5, revenue: 8676 },
   { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 81, completed: 81, checkouts: 14, revenue: 24790 },
   { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 91, completed: 91, checkouts: 11, revenue: 22301 },
   { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 89, completed: 89, checkouts: 9, revenue: 17313 },
-  { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 53, completed: 53, checkouts: 4, revenue: 8080 },
+  { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 53, completed: 53, checkouts: 5, revenue: 10375 },
   { month: 'Oct 2026', monthKey: 'Oct 2026', leads: 13, completed: 13, checkouts: 0, revenue: 0 },
 ];
 
