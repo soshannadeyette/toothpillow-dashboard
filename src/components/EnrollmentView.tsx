@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
-import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, segMonthly, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, breakWeeklyBaseline, lavaIceCohort, lavaIceWeekly, type EventRow } from '@/data/enrollmentCheckouts';
+import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, breakWeeklyBaseline, lavaIceWeekly, type EventRow } from '@/data/enrollmentCheckouts';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -45,7 +45,6 @@ const TABS = [
   { id: 'leadsource', label: 'Lead Source' },
   { id: 'coordinator', label: 'By Coordinator' },
   { id: 'speed', label: 'Speed' },
-  { id: 'segments', label: 'New vs Win-back' },
   { id: 'revenue', label: 'Revenue' },
 ] as const;
 type TabId = (typeof TABS)[number]['id'];
@@ -127,7 +126,6 @@ export default function EnrollmentView() {
       {tab === 'leadsource' && <LeadSourceTab />}
       {tab === 'coordinator' && <CoordinatorTab />}
       {tab === 'speed' && <SpeedTab />}
-      {tab === 'segments' && <SegmentsTab />}
       {tab === 'revenue' && <RevenueTab />}
     </div>
   );
@@ -1119,75 +1117,6 @@ function SpeedTab() {
             options={{ ...baseOpts, scales: { y: { beginAtZero: true, title: { display: true, text: 'Days' } } } }}
           />
         </div>
-      </Card>
-    </>
-  );
-}
-
-function SegmentsTab() {
-  const labels = segMonthly.map((s) => monLabel(s.month));
-  const icePct = segMonthly.map((s) => Math.round((100 * s.ice) / (s.lava + s.ice)));
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const dashImm = { borderDash: (ctx: { p1DataIndex: number }) => (ctx.p1DataIndex >= 8 ? [5, 4] : undefined) };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const liLine: any = {
-    labels: lavaIceCohort.map((d) => d.m),
-    datasets: [
-      { type: 'line', label: 'New-lead (Lava) conversion %', data: lavaIceCohort.map((d) => d.lava), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 3, pointRadius: 4, tension: 0.3, segment: dashImm },
-      { type: 'line', label: 'Win-back (Ice) conversion %', data: lavaIceCohort.map((d) => d.ice), borderColor: TP.green, backgroundColor: TP.green, borderWidth: 3, pointRadius: 4, tension: 0.3, segment: dashImm },
-    ],
-  };
-  return (
-    <>
-      <Card>
-        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Win-back checkout counts, by month the checkout happened</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Checkout counts (not rates), by the calendar month the checkout occurred — this is the real-world clock. <b>Lava</b> = recently-arrived lead; <b>Ice</b> = a previously closed-lost lead won back. Win-back (Ice, green) runs 93–138/mo through June, drops to 36 in July, and partly recovers (84, 71) in Aug–Sep. Win-backs are {Math.round((100 * segTotal('Ice')) / summary.checkouts)}% of all checkouts ({segTotal('Ice')}).
-        </div>
-        <div style={{ height: 320 }}>
-          <Bar
-            data={{
-              labels,
-              datasets: [
-                { label: 'New (Lava)', data: segMonthly.map((s) => s.lava), backgroundColor: TP.blue, borderRadius: 3, stack: 's' },
-                { label: 'Win-back (Ice)', data: segMonthly.map((s) => s.ice), backgroundColor: TP.green, borderRadius: 3, stack: 's' },
-              ],
-            }}
-            options={{ ...baseOpts, plugins: { legend: { display: true, position: 'top' as const } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }}
-          />
-        </div>
-      </Card>
-      <Card>
-        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Win-back share of checkouts (%), by month the checkout happened</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Win-backs as a share of each month&apos;s checkouts (calendar clock). It runs ~23–32% most of the year, then <b>drops to 12% in July</b> (36 of 307 checkouts). Red bars flag months below 18%.
-        </div>
-        <div style={{ height: 300 }}>
-          <Bar
-            data={{ labels, datasets: [{ label: 'Win-back %', data: icePct, backgroundColor: icePct.map((p) => (p < 18 ? '#e06666' : TP.green)), borderRadius: 4 }] }}
-            options={{ ...baseOpts, scales: { y: { beginAtZero: true, title: { display: true, text: '% of checkouts' } } } }}
-          />
-        </div>
-      </Card>
-      <Card>
-        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Same drop, dated by the month the link was sent (reads ~6–8 weeks early)</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          <b>Diagnostic view — the x-axis is the month the LINK was sent, not when the checkout happened.</b> Because a win-back pays 6–8 weeks after the link, the July drop above shows up here on the <b>May–June link-months</b>. Same decline, read ~6–8 weeks early — this is why this chart &quot;says May.&quot; <b style={{ color: TP.blue }}>Blue (Lava)</b> = checked out within 3 weeks; <b style={{ color: '#1F7A5A' }}>Green (Ice)</b> = after 3 weeks. Dashed Sep–Oct = window not yet matured; those points understate.
-        </div>
-        <div style={{ height: 340 }}>
-          <Bar data={liLine} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const } }, scales: { y: { beginAtZero: true, max: 35, title: { display: true, text: 'Link→checkout %' } } } }} />
-        </div>
-      </Card>
-      <Card>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr><Th>Segment</Th><Th right>Checkouts</Th><Th right>Share</Th><Th right>Collected</Th></tr>
-          </thead>
-          <tbody>
-            <tr><Td bold>New lead (Lava)</Td><Td right>{segTotal('Lava')}</Td><Td right>{Math.round((100 * segTotal('Lava')) / summary.checkouts)}%</Td><Td right>{money(bySegment.find((s) => s.segment === 'Lava')?.amountPaid ?? 0)}</Td></tr>
-            <tr><Td bold>Win-back (Ice / closed-lost)</Td><Td right>{segTotal('Ice')}</Td><Td right>{Math.round((100 * segTotal('Ice')) / summary.checkouts)}%</Td><Td right>{money(bySegment.find((s) => s.segment === 'Ice')?.amountPaid ?? 0)}</Td></tr>
-          </tbody>
-        </table>
       </Card>
     </>
   );
