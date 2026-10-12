@@ -329,26 +329,26 @@ function PlanTab() {
   const planChart: any = {
     labels,
     datasets: [
-      { label: 'Recommended', data: ICE_BY_PLAN.rec, backgroundColor: TP.blue, stack: 's1' },
-      { label: 'Essential', data: ICE_BY_PLAN.ess, backgroundColor: TP.green, stack: 's1' },
-      { label: 'Other', data: ICE_BY_PLAN.other, backgroundColor: TP.yellow, stack: 's1' },
+      { label: 'Recommended', data: ICE_BY_PLAN.rec, borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2, pointRadius: 2, tension: 0.3 },
+      { label: 'Essential', data: ICE_BY_PLAN.ess, borderColor: TP.green, backgroundColor: TP.green, borderWidth: 2, pointRadius: 2, tension: 0.3 },
+      { label: 'Other', data: ICE_BY_PLAN.other, borderColor: TP.yellow, backgroundColor: TP.yellow, borderWidth: 2, pointRadius: 2, tension: 0.3 },
     ],
   };
   return (
     <>
       <Card title="C1 · Weekly Ice Checkouts by Plan">
         <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 8 }}>
-          Stacked by treatment plan (Recommended, Essential, Other). Shows which plans the win-back conversions land on.
+          By treatment plan (Recommended, Essential, Other). Shows which plans the win-back conversions land on.
         </div>
         <div style={{ height: 340 }}>
-          <Bar data={planChart} options={{
+          <Line data={planChart} options={{
             responsive: true, maintainAspectRatio: false,
             plugins: {
               legend: { display: true, position: 'top' as const },
             },
             scales: {
-              x: { stacked: true, ticks: { maxRotation: 90, font: { size: 10 } } },
-              y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Ice checkouts' } },
+              x: { ticks: { maxRotation: 90, font: { size: 10 } } },
+              y: { beginAtZero: true, title: { display: true, text: 'Ice checkouts' } },
             },
           }} />
         </div>
@@ -479,23 +479,26 @@ function LastTouchTab() {
     datasets: LAST_TOUCH_TIMING.series.map((s: { name: string; data: number[] }, i: number) => ({
       label: s.name,
       data: s.data,
+      borderColor: colors[i % colors.length],
       backgroundColor: colors[i % colors.length],
-      stack: 's1',
+      borderWidth: 2,
+      pointRadius: 3,
+      tension: 0.3,
     })),
   };
   return (
     <>
       <Card title="B2 · Last GHL Touch Timing by Link Month">
         <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 8 }}>
-          For each link month, when did the last GHL touch happen? Each row shows the calendar month of the last touch. Stacked bars show the distribution.
+          For each link month, when did the last GHL touch happen? Each line shows the calendar month of the last touch for that cohort.
         </div>
         <div style={{ height: 400 }}>
-          <Bar data={touchChart} options={{
+          <Line data={touchChart} options={{
             responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: true, position: 'top' as const } },
             scales: {
-              x: { stacked: true },
-              y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Count' } },
+              x: {},
+              y: { beginAtZero: true, title: { display: true, text: 'Count' } },
             },
           }} />
         </div>
@@ -530,29 +533,28 @@ function TouchWindowTab() {
   const windowChart: any = {
     labels: TOUCH_WINDOW.labels,
     datasets: [
-      { label: 'Before day 21', data: TOUCH_WINDOW.before21, backgroundColor: TP.green, stack: 's1' },
-      { label: 'Day 21–72', data: TOUCH_WINDOW.d21_72, backgroundColor: TP.blue, stack: 's1' },
-      { label: 'After day 72', data: TOUCH_WINDOW.after72, backgroundColor: TP.navy, stack: 's1' },
-      { label: 'No touch', data: TOUCH_WINDOW.none, backgroundColor: '#d1d5db', stack: 's1' },
+      { label: 'Before day 21', data: TOUCH_WINDOW.before21, borderColor: TP.green, backgroundColor: TP.green, borderWidth: 2.5, pointRadius: 4, tension: 0.3 },
+      { label: 'Day 21–72', data: TOUCH_WINDOW.d21_72, borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 4, tension: 0.3 },
+      { label: 'After day 72', data: TOUCH_WINDOW.after72, borderColor: TP.navy, backgroundColor: TP.navy, borderWidth: 2.5, pointRadius: 4, tension: 0.3 },
+      { label: 'No touch', data: TOUCH_WINDOW.none, borderColor: '#d1d5db', backgroundColor: '#d1d5db', borderWidth: 2, pointRadius: 4, tension: 0.3 },
     ],
   };
   return (
     <>
       <Card title="B1 · Where Last Touch Falls (% of Leads)">
         <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 8 }}>
-          What % of leads received their last GHL touch before day 21, in the 21–72 day window, after 72 days, or had no touch at all. Stacked to 100%.
+          What % of leads received their last GHL touch before day 21, in the 21–72 day window, after 72 days, or had no touch at all.
         </div>
         <div style={{ height: 340 }}>
-          <Bar data={windowChart} options={{
+          <Line data={windowChart} options={{
             responsive: true, maintainAspectRatio: false,
             plugins: {
               legend: { display: true, position: 'top' as const },
             },
             scales: {
               x: {},
-              y: { beginAtZero: true, max: 100, stacked: true, title: { display: true, text: '% of leads' } },
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } as any,
+              y: { beginAtZero: true, title: { display: true, text: '% of leads' } },
+            },
           }} />
         </div>
       </Card>
@@ -673,8 +675,11 @@ function CoordinatorTab() {
     datasets: COORDINATOR_MIX.coord.map((c: { name: string; data: number[] }, i: number) => ({
       label: c.name,
       data: c.data,
+      borderColor: coordColors[i % coordColors.length],
       backgroundColor: coordColors[i % coordColors.length],
-      stack: 's1',
+      borderWidth: 2.5,
+      pointRadius: 4,
+      tension: 0.3,
     })),
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -683,8 +688,11 @@ function CoordinatorTab() {
     datasets: COORDINATOR_MIX.owner.map((o: { name: string; data: number[] }, i: number) => ({
       label: o.name,
       data: o.data,
+      borderColor: ownerColors[i % ownerColors.length],
       backgroundColor: ownerColors[i % ownerColors.length],
-      stack: 's1',
+      borderWidth: 2,
+      pointRadius: 3,
+      tension: 0.3,
     })),
   };
   return (
@@ -694,12 +702,12 @@ function CoordinatorTab() {
           Share of leads by GHL contact owner (coordinator). Shows how the caseload shifted — Desirea&apos;s share dropped from 53% to 23%, Sam Rice entered in Aug.
         </div>
         <div style={{ height: 340 }}>
-          <Bar data={coordChart} options={{
+          <Line data={coordChart} options={{
             responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: true, position: 'top' as const } },
             scales: {
-              x: { stacked: true },
-              y: { stacked: true, beginAtZero: true, max: 100, title: { display: true, text: '% of leads' } },
+              x: {},
+              y: { beginAtZero: true, title: { display: true, text: '% of leads' } },
             },
           }} />
         </div>
@@ -710,12 +718,12 @@ function CoordinatorTab() {
           Share of leads by Salesforce record owner. Similar pattern: original three coordinators&apos; shares shrank as Sam Rice took on ~17% of caseload.
         </div>
         <div style={{ height: 380 }}>
-          <Bar data={ownerChart} options={{
+          <Line data={ownerChart} options={{
             responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: true, position: 'top' as const } },
             scales: {
-              x: { stacked: true },
-              y: { stacked: true, beginAtZero: true, max: 100, title: { display: true, text: '% of leads' } },
+              x: {},
+              y: { beginAtZero: true, title: { display: true, text: '% of leads' } },
             },
           }} />
         </div>
