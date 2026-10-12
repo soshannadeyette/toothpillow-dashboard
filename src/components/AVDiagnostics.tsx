@@ -31,25 +31,25 @@ const TP = {
 };
 
 // ── Hardcoded data (source of truth) ──────────────────────────────────
-// Source: Salesforce "Waiting on Info Ratios" exports, October 8, 2026
-// H1 (Jan-Jun): 10,368 records | H2 (Jul-Dec): 6,093 records | Total: 16,461 | Total waiting: 5,771
+// Source: Salesforce "Waiting on Info Ratios" exports, October 12, 2026
+// H1 (Jan-Jun): 10,368 records | H2 (Jul-Dec): 6,224 records | Total: 16,592 | Total waiting: 5,822
 const AV_DATA = [
-  { label: 'Jan 26', month: 1, year: 2026, traffic: 37320, starts: 1147, waiting: 105, submitted: 1040, partial: false, period: 'full' as const },
-  { label: 'Feb 26', month: 2, year: 2026, traffic: 51480, starts: 2185, waiting: 847, submitted: 1324, partial: false, period: 'full' as const },
-  { label: 'Mar 26', month: 3, year: 2026, traffic: 39218, starts: 2256, waiting: 908, submitted: 1335, partial: false, period: 'full' as const },
-  { label: 'Apr 26', month: 4, year: 2026, traffic: 30311, starts: 1427, waiting: 514, submitted: 909, partial: false, period: 'full' as const },
-  { label: 'May 26', month: 5, year: 2026, traffic: 33031, starts: 1602, waiting: 686, submitted: 914, partial: false, period: 'full' as const },
-  { label: 'Jun 26', month: 6, year: 2026, traffic: 36468, starts: 1751, waiting: 547, submitted: 1202, partial: false, period: 'full' as const },
-  { label: 'Jul 26', month: 7, year: 2026, traffic: 0, starts: 2210, waiting: 719, submitted: 1489, partial: false, period: 'full' as const },
-  { label: 'Aug 26', month: 8, year: 2026, traffic: 0, starts: 2058, waiting: 796, submitted: 1261, partial: false, period: 'full' as const },
-  { label: 'Sep 26', month: 9, year: 2026, traffic: 0, starts: 1529, waiting: 529, submitted: 998, partial: false, period: 'full' as const },
-  { label: 'Oct 26', month: 10, year: 2026, traffic: 0, starts: 296, waiting: 120, submitted: 175, partial: true, period: 'partial' as const },
+  { label: 'Jan 26', month: 1, year: 2026, traffic: 37320, starts: 1147, waiting: 107, submitted: 1040, partial: false, period: 'full' as const },
+  { label: 'Feb 26', month: 2, year: 2026, traffic: 51480, starts: 2185, waiting: 861, submitted: 1324, partial: false, period: 'full' as const },
+  { label: 'Mar 26', month: 3, year: 2026, traffic: 39218, starts: 2256, waiting: 921, submitted: 1335, partial: false, period: 'full' as const },
+  { label: 'Apr 26', month: 4, year: 2026, traffic: 30311, starts: 1427, waiting: 518, submitted: 909, partial: false, period: 'full' as const },
+  { label: 'May 26', month: 5, year: 2026, traffic: 33031, starts: 1602, waiting: 688, submitted: 914, partial: false, period: 'full' as const },
+  { label: 'Jun 26', month: 6, year: 2026, traffic: 36468, starts: 1751, waiting: 549, submitted: 1202, partial: false, period: 'full' as const },
+  { label: 'Jul 26', month: 7, year: 2026, traffic: 0, starts: 2210, waiting: 719, submitted: 1491, partial: false, period: 'full' as const },
+  { label: 'Aug 26', month: 8, year: 2026, traffic: 0, starts: 2058, waiting: 792, submitted: 1266, partial: false, period: 'full' as const },
+  { label: 'Sep 26', month: 9, year: 2026, traffic: 0, starts: 1528, waiting: 528, submitted: 1000, partial: false, period: 'full' as const },
+  { label: 'Oct 26', month: 10, year: 2026, traffic: 0, starts: 428, waiting: 167, submitted: 261, partial: true, period: 'partial' as const },
 ];
 
 // ── Same-week completion rate by weekly cohort (source of truth) ──────
 // For each week: of all records created, what % submitted within the same Mon-Sun window.
 // Hard stop — later submissions don't count. Apples-to-apples across all weeks.
-// Source: Salesforce "Waiting on Info Ratios" (H1 Oct 8, H2 Oct 8) + "Google Ads" exports, October 8, 2026
+// Source: Salesforce "Waiting on Info Ratios" (H1 Oct 12, H2 Oct 12) + "Google Ads" exports, October 12, 2026
 const WEEKLY_COMPLETION: { label: string; total: number; submitted: number; pct: number; paidAds: number }[] = [
   { label: 'Feb 02', total: 284, submitted: 204, pct: 71.8, paidAds: 0 },
   { label: 'Feb 09', total: 293, submitted: 183, pct: 62.5, paidAds: 0 },
@@ -81,11 +81,13 @@ const WEEKLY_COMPLETION: { label: string; total: number; submitted: number; pct:
   { label: 'Aug 10', total: 359, submitted: 223, pct: 62.1, paidAds: 41 },
   { label: 'Aug 17', total: 312, submitted: 190, pct: 60.9, paidAds: 40 },
   { label: 'Aug 24', total: 901, submitted: 408, pct: 45.3, paidAds: 46 },
-  { label: 'Aug 31', total: 598, submitted: 379, pct: 63.4, paidAds: 31 },
+  { label: 'Aug 31', total: 597, submitted: 378, pct: 63.3, paidAds: 31 },
   { label: 'Sep 07', total: 329, submitted: 222, pct: 67.5, paidAds: 22 },
   { label: 'Sep 14', total: 240, submitted: 148, pct: 61.7, paidAds: 23 },
   { label: 'Sep 21', total: 295, submitted: 158, pct: 53.6, paidAds: 26 },
-  { label: 'Sep 28', total: 352, submitted: 201, pct: 57.1, paidAds: 7 },
+  { label: 'Sep 28', total: 352, submitted: 201, pct: 57.1, paidAds: 25 },
+  { label: 'Oct 05', total: 245, submitted: 149, pct: 60.8, paidAds: 7 },
+  { label: 'Oct 12', total: 10, submitted: 6, pct: 60.0, paidAds: 1 },
 ];
 
 // ── Event markers for same-week chart ──────────────────────────────────
