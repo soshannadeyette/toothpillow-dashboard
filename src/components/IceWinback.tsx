@@ -16,7 +16,6 @@ import {
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar, Line } from 'react-chartjs-2';
 import {
-  ICE_EVENTS,
   WEEKLY_COHORT,
   MONTHLY_WINBACK,
   ICE_BY_PLAN,
@@ -77,65 +76,7 @@ function Td({ children, right, bold }: { children: ReactNode; right?: boolean; b
   );
 }
 
-/* Build Chart.js event annotation lines from ICE_EVENTS */
-function eventAnnotations() {
-  const out: Record<string, object> = {};
-  const colors = [TP.red, '#9ca3af', TP.purple];
-  ICE_EVENTS.forEach((ev: { x: number; label: string; date: string }, i: number) => {
-    out[`ev${i}`] = {
-      type: 'line',
-      xMin: ev.x,
-      xMax: ev.x,
-      borderColor: colors[i % colors.length],
-      borderWidth: 2,
-      borderDash: [5, 3],
-      label: {
-        display: true,
-        content: ev.label,
-        position: 'start' as const,
-        backgroundColor: colors[i % colors.length],
-        color: '#fff',
-        font: { size: 10, weight: 'bold' as const },
-        padding: { x: 5, y: 2 },
-      },
-    };
-  });
-  return out;
-}
-
-function eventAnnotationsMonthly() {
-  const monthIndex: Record<string, number> = {};
-  MONTHLY_WINBACK.labels.forEach((l, i) => { monthIndex[l] = i; });
-  const mapping: { label: string; month: string; color: string }[] = [
-    { label: '#626 shipped (May 29)', month: 'May', color: TP.red },
-    { label: 'price increase (Jun 30)', month: 'Jun', color: '#9ca3af' },
-    { label: 'automations paused (Jul 13)', month: 'Jul', color: TP.purple },
-  ];
-  const out: Record<string, object> = {};
-  mapping.forEach((m, i) => {
-    const idx = monthIndex[m.month];
-    if (idx !== undefined) {
-      out[`mev${i}`] = {
-        type: 'line',
-        xMin: idx + 0.3 * i,
-        xMax: idx + 0.3 * i,
-        borderColor: m.color,
-        borderWidth: 2,
-        borderDash: [5, 3],
-        label: {
-          display: true,
-          content: m.label,
-          position: i % 2 === 0 ? 'start' : 'end',
-          backgroundColor: m.color,
-          color: '#fff',
-          font: { size: 10, weight: 'bold' as const },
-          padding: { x: 4, y: 2 },
-        },
-      };
-    }
-  });
-  return out;
-}
+/* Event annotations removed per Sosh */
 
 /* ─── Tab content ──────────────────────────────────────────── */
 
@@ -209,7 +150,6 @@ function CohortTab() {
             responsive: true, maintainAspectRatio: false,
             plugins: {
               legend: { display: true, position: 'top' as const },
-              annotation: { annotations: eventAnnotations() },
             },
             scales: {
               x: { ticks: { maxRotation: 90, font: { size: 10 } } },
@@ -229,7 +169,6 @@ function CohortTab() {
             plugins: {
               legend: { display: true, position: 'top' as const },
               annotation: { annotations: {
-                ...eventAnnotations(),
                 ref: { type: 'line', yMin: WEEKLY_COHORT.ref, yMax: WEEKLY_COHORT.ref, borderColor: '#d1d5db', borderWidth: 1.5, borderDash: [5, 3], label: { display: true, content: WEEKLY_COHORT.ref_label, position: 'end' as const, backgroundColor: '#d1d5db', color: '#333', font: { size: 10 }, padding: { x: 4, y: 2 } } },
               } },
             },
@@ -333,7 +272,6 @@ function WinbackTab() {
             responsive: true, maintainAspectRatio: false,
             plugins: {
               legend: { display: true, position: 'top' as const },
-              annotation: { annotations: eventAnnotationsMonthly() },
             },
             scales: {
               x: {},
@@ -407,7 +345,6 @@ function PlanTab() {
             responsive: true, maintainAspectRatio: false,
             plugins: {
               legend: { display: true, position: 'top' as const },
-              annotation: { annotations: eventAnnotations() },
             },
             scales: {
               x: { stacked: true, ticks: { maxRotation: 90, font: { size: 10 } } },
@@ -497,7 +434,6 @@ function GHLTab() {
             responsive: true, maintainAspectRatio: false,
             plugins: {
               legend: { display: true, position: 'top' as const },
-              annotation: { annotations: eventAnnotationsMonthly() },
             },
             scales: {
               y: { beginAtZero: true, max: 100, position: 'left' as const, title: { display: true, text: '%' } },
@@ -611,7 +547,6 @@ function TouchWindowTab() {
             responsive: true, maintainAspectRatio: false,
             plugins: {
               legend: { display: true, position: 'top' as const },
-              annotation: { annotations: eventAnnotationsMonthly() },
             },
             scales: {
               x: {},
@@ -692,7 +627,6 @@ function SFActivityTab() {
             responsive: true, maintainAspectRatio: false,
             plugins: {
               legend: { display: true, position: 'top' as const },
-              annotation: { annotations: eventAnnotationsMonthly() },
             },
             scales: {
               y: { beginAtZero: true, position: 'left' as const, title: { display: true, text: 'Share %' } },
