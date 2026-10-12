@@ -14,6 +14,7 @@ import AVDiagnostics from '@/components/AVDiagnostics';
 import AccountStatus from '@/components/AccountStatus';
 import Creators from '@/components/Creators';
 import EnrollmentView from '@/components/EnrollmentView';
+import IceWinback from '@/components/IceWinback';
 const TABS = [
   { id: 'daily', label: 'Daily Tracker' },
   { id: 'weekly', label: 'Weekly Report' },
@@ -34,6 +35,7 @@ type TabId = (typeof TABS)[number]['id'];
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<TabId>('daily');
   const [section, setSection] = useState<'submissions' | 'enrollment'>('submissions');
+  const [enrollView, setEnrollView] = useState<'checkouts' | 'icewinback'>('checkouts');
 
   return (
     <div className="min-h-screen" style={{ background: '#FFFFFF' }}>
@@ -108,7 +110,31 @@ export default function Dashboard() {
         </>
       ) : (
         <main className="p-6 max-w-7xl mx-auto">
-          <EnrollmentView />
+          {/* Enrollment sub-section toggle */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+            {([
+              { id: 'checkouts' as const, label: 'Checkout Analysis' },
+              { id: 'icewinback' as const, label: 'Ice / Win-back' },
+            ]).map((v) => (
+              <button
+                key={v.id}
+                onClick={() => setEnrollView(v.id)}
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  borderRadius: 8,
+                  padding: '6px 14px',
+                  cursor: 'pointer',
+                  border: '1.5px solid #1B2A4A',
+                  background: enrollView === v.id ? '#1B2A4A' : '#FFFFFF',
+                  color: enrollView === v.id ? '#FFFFFF' : '#1B2A4A',
+                }}
+              >
+                {v.label}
+              </button>
+            ))}
+          </div>
+          {enrollView === 'checkouts' ? <EnrollmentView /> : <IceWinback />}
         </main>
       )}
     </div>
