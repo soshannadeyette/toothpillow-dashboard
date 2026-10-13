@@ -270,7 +270,7 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
 // Pipeline totals — Salesforce export October 12, 2026
 const GOOGLE_SF_PIPELINE = {
   total: 808,           // leads created (started form)
-  completed: 377,       // submitted (have submission date)
+  completed: 375,       // submitted (have submission date)
   waitingInfo: 431,     // WAITING - Needs info
   sentCheckout: 195,    // Sent Checkout Link (194) + Sent Checkout Link - Temp Hold (1)
   sentToTxP: 20,        // Sent to TxP (12) + Treatment Consult Scheduled (8)
@@ -291,13 +291,13 @@ const GOOGLE_REVENUE: number = 94430;
 // Checkouts/revenue = leads submitted that month that have checked out to date.
 // Source: Salesforce "Google Ads 2026" export, October 13, 2026
 const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: number; checkouts: number; revenue: number }[] = [
-  { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 21, completed: 21, checkouts: 2, revenue: 3291 },
+  { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 20, completed: 20, checkouts: 2, revenue: 3291 },
   { month: 'May 2026', monthKey: 'May 2026', leads: 28, completed: 28, checkouts: 5, revenue: 8676 },
-  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 81, completed: 81, checkouts: 15, revenue: 26790 },
+  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 81, completed: 81, checkouts: 14, revenue: 24790 },
   { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 91, completed: 91, checkouts: 11, revenue: 22301 },
   { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 89, completed: 89, checkouts: 10, revenue: 19609 },
-  { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 54, completed: 54, checkouts: 15, revenue: 29763 },
-  { month: 'Oct 2026', monthKey: 'Oct 2026', leads: 13, completed: 13, checkouts: 9, revenue: 18000 },
+  { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 53, completed: 53, checkouts: 8, revenue: 15763 },
+  { month: 'Oct 2026', monthKey: 'Oct 2026', leads: 13, completed: 13, checkouts: 0, revenue: 0 },
 ];
 
 /* ════════════════════════════════════════════
