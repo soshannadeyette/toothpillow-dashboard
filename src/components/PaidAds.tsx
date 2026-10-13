@@ -111,6 +111,7 @@ const GOOGLE_ADS_FORM_STARTS: Record<string, number> = {
 // Aug 6 corrected to final + Aug 7-9 added from Google Ads Campaigns view (day-by-day), August 10, 2026
 // Sep 8-13 + Aug 24/31 corrections from Google Ads Report Editor "When your ads showed", September 14, 2026
 // Sep 29 – Oct 8 added from Google Ads Campaigns view (day-by-day), October 9, 2026
+// Oct 9 – Oct 12 added from Google Ads Campaigns view (day-by-day), October 13, 2026
 // submit/started/finished/treatment fields retained for the entry form only —
 // NOT used anywhere in this page's analysis (see Salesforce constants below instead).
 const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
@@ -244,6 +245,10 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-10-06', spend: 116.49, clicks: 30, impressions: 432, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-10-07', spend: 107.67, clicks: 30, impressions: 247, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-10-08', spend: 116.50, clicks: 32, impressions: 347, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-10-09', spend: 114.49, clicks: 25, impressions: 209, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-10-10', spend: 112.86, clicks: 26, impressions: 235, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-10-11', spend: 102.48, clicks: 30, impressions: 295, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-10-12', spend: 106.80, clicks: 24, impressions: 295, submit: 0, started: 0, finished: 0, treatment: 0 },
 ];
 
 // Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)
@@ -264,35 +269,35 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
 
 // Pipeline totals — Salesforce export October 12, 2026
 const GOOGLE_SF_PIPELINE = {
-  total: 807,           // leads created (started form)
-  completed: 376,       // submitted (have submission date)
-  waitingInfo: 431,     // WAITING - Needs info (430) + WAITING - Needs Photos (1)
-  sentCheckout: 199,    // Sent Checkout Link (198) + Sent Checkout Link - Temp Hold (1)
-  sentToTxP: 19,        // Sent to TxP (11) + Treatment Consult Scheduled (8)
-  txpApproved: 6,
-  checkedOut: 46,
+  total: 808,           // leads created (started form)
+  completed: 377,       // submitted (have submission date)
+  waitingInfo: 431,     // WAITING - Needs info
+  sentCheckout: 195,    // Sent Checkout Link (194) + Sent Checkout Link - Temp Hold (1)
+  sentToTxP: 20,        // Sent to TxP (12) + Treatment Consult Scheduled (8)
+  txpApproved: 5,
+  checkedOut: 50,
   referredOut: 38,
   closedLost: 50,       // Closed Lost (40) + Do Not Contact (10)
-  tempHold: 18,         // Temp Hold (3) + Assessment On Hold (14) + ON HOLD - No Doctor (1)
+  tempHold: 19,         // Temp Hold (3) + Assessment On Hold (15) + ON HOLD - No Doctor (1)
   denied: 0,
   formOpens: 441,       // Google Ads conversions (form opens, Google-only)
 };
 
-// Revenue from checkouts — 46 checkouts
-// Source: Salesforce "Google Ads 2026" export, October 12, 2026
-const GOOGLE_REVENUE: number = 86746;
+// Revenue from checkouts — 50 CHECKED OUT records
+// Source: Salesforce "Google Ads 2026" export, October 13, 2026
+const GOOGLE_REVENUE: number = 94430;
 
 // Monthly breakdown from Salesforce — grouped by SUBMISSION date.
 // Checkouts/revenue = leads submitted that month that have checked out to date.
-// Source: Salesforce "Google Ads 2026" export, October 12, 2026
+// Source: Salesforce "Google Ads 2026" export, October 13, 2026
 const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: number; checkouts: number; revenue: number }[] = [
-  { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 20, completed: 20, checkouts: 2, revenue: 3291 },
+  { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 21, completed: 21, checkouts: 2, revenue: 3291 },
   { month: 'May 2026', monthKey: 'May 2026', leads: 28, completed: 28, checkouts: 5, revenue: 8676 },
-  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 81, completed: 81, checkouts: 14, revenue: 24790 },
+  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 81, completed: 81, checkouts: 15, revenue: 26790 },
   { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 91, completed: 91, checkouts: 11, revenue: 22301 },
-  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 89, completed: 89, checkouts: 9, revenue: 17313 },
-  { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 53, completed: 53, checkouts: 5, revenue: 10375 },
-  { month: 'Oct 2026', monthKey: 'Oct 2026', leads: 13, completed: 13, checkouts: 0, revenue: 0 },
+  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 89, completed: 89, checkouts: 10, revenue: 19609 },
+  { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 54, completed: 54, checkouts: 15, revenue: 29763 },
+  { month: 'Oct 2026', monthKey: 'Oct 2026', leads: 13, completed: 13, checkouts: 9, revenue: 18000 },
 ];
 
 /* ════════════════════════════════════════════
