@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
-import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, breakWeeklyBaseline, lavaIceWeekly, dailyFunnel, weeklyTTCL, weeklyLavaIce, type EventRow } from '@/data/enrollmentCheckouts';
+import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, breakWeeklyBaseline, lavaIceWeekly, dailyFunnel, weeklyTTCL, weeklyLavaIce, monthlyWinback, type EventRow } from '@/data/enrollmentCheckouts';
 import IceWinback from '@/components/IceWinback';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
@@ -262,6 +262,48 @@ function IceShareChart() {
       </div>
       <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>
         Drop started the week of Jul 6, before the Jul 15 policy change. Ice share fell from 36% to 12% in one week.
+      </div>
+
+      {/* Monthly win-back rate table */}
+      <h4 style={{ margin: '24px 0 8px', color: TP.navy, fontWeight: 700, fontSize: 15 }}>Monthly win-back rate (by checkout-link month)</h4>
+      <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>
+        Win-back rate = Ice / all leads that received a checkout link that month. Ice share = Ice / (Ice + Lava) checkouts only. Sep–Oct still maturing.
+      </div>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ borderBottom: `2px solid ${TP.navy}` }}>
+              <th style={{ textAlign: 'left', padding: '6px 8px', color: TP.navy, fontWeight: 700 }}>Metric</th>
+              {monthlyWinback.filter((m) => m.month >= '2026-01').map((m) => (
+                <th key={m.month} style={{ textAlign: 'center', padding: '6px 6px', color: TP.navy, fontWeight: 700 }}>
+                  {MO_NAMES[parseInt(m.month.slice(5), 10) - 1]}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+              <td style={{ padding: '6px 8px', fontWeight: 600, color: '#374151' }}>Win-back rate</td>
+              {monthlyWinback.filter((m) => m.month >= '2026-01').map((m) => {
+                const color = m.winbackRate >= 12 ? '#047857' : m.winbackRate >= 6 ? '#d97706' : '#dc2626';
+                return <td key={m.month} style={{ textAlign: 'center', padding: '6px 6px', color, fontWeight: 600 }}>{m.winbackRate}%</td>;
+              })}
+            </tr>
+            <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+              <td style={{ padding: '6px 8px', fontWeight: 600, color: '#374151' }}>Ice share of checkouts</td>
+              {monthlyWinback.filter((m) => m.month >= '2026-01').map((m) => {
+                const color = m.iceShareCO >= 25 ? '#047857' : m.iceShareCO >= 12 ? '#d97706' : '#dc2626';
+                return <td key={m.month} style={{ textAlign: 'center', padding: '6px 6px', color, fontWeight: 600 }}>{m.iceShareCO}%</td>;
+              })}
+            </tr>
+            <tr>
+              <td style={{ padding: '6px 8px', color: '#6b7280', fontSize: 12 }}>Links sent</td>
+              {monthlyWinback.filter((m) => m.month >= '2026-01').map((m) => (
+                <td key={m.month} style={{ textAlign: 'center', padding: '6px 6px', color: '#6b7280', fontSize: 12 }}>{m.links}</td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
       </div>
     </Card>
   );

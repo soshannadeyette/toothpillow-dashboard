@@ -501,3 +501,24 @@ export const weeklyLavaIce: WeeklyLavaIceRow[] = [
   { week: '2026-10-05', lava: 35, ice: 15, unclass: 11, total: 61, icePct: 30.0, lavaRev: 69047, iceRev: 24247, unclassRev: 22115 },
   { week: '2026-10-12', lava: 16, ice: 15, unclass: 5, total: 36, icePct: 48.4, lavaRev: 30333, iceRev: 24295, unclassRev: 8433 },
 ];
+
+// Monthly win-back rates by checkout-link month (from Oct 14 Enrollment Funnel exports, both combined)
+// links = total leads that received a checkout link that month
+// winbackRate = Ice / links (what % of linked leads became win-backs)
+// iceShareCO = Ice / (Ice + Lava) (what % of actual checkouts were win-backs)
+export type MonthlyWinbackRow = { month: string; links: number; lava: number; ice: number; noCO: number; winbackRate: number; iceShareCO: number };
+export const monthlyWinback: MonthlyWinbackRow[] = [
+  { month: '2025-10', links: 592, lava: 188, ice: 143, noCO: 261, winbackRate: 24.2, iceShareCO: 43.2 },
+  { month: '2025-11', links: 386, lava: 148, ice: 56, noCO: 182, winbackRate: 14.5, iceShareCO: 27.5 },
+  { month: '2025-12', links: 512, lava: 182, ice: 80, noCO: 250, winbackRate: 15.6, iceShareCO: 30.5 },
+  { month: '2026-01', links: 483, lava: 187, ice: 60, noCO: 236, winbackRate: 12.4, iceShareCO: 24.3 },
+  { month: '2026-02', links: 483, lava: 190, ice: 83, noCO: 210, winbackRate: 17.2, iceShareCO: 30.4 },
+  { month: '2026-03', links: 627, lava: 230, ice: 112, noCO: 285, winbackRate: 17.9, iceShareCO: 32.7 },
+  { month: '2026-04', links: 651, lava: 182, ice: 111, noCO: 358, winbackRate: 17.1, iceShareCO: 37.9 },
+  { month: '2026-05', links: 497, lava: 136, ice: 72, noCO: 289, winbackRate: 14.5, iceShareCO: 34.6 },
+  { month: '2026-06', links: 675, lava: 256, ice: 46, noCO: 373, winbackRate: 6.8, iceShareCO: 15.2 },
+  { month: '2026-07', links: 654, lava: 219, ice: 75, noCO: 360, winbackRate: 11.5, iceShareCO: 25.5 },
+  { month: '2026-08', links: 655, lava: 201, ice: 46, noCO: 408, winbackRate: 7.0, iceShareCO: 18.6 },
+  { month: '2026-09', links: 561, lava: 202, ice: 13, noCO: 346, winbackRate: 2.3, iceShareCO: 6.0 },
+  { month: '2026-10', links: 199, lava: 42, ice: 0, noCO: 157, winbackRate: 0.0, iceShareCO: 0.0 },
+];
