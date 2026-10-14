@@ -142,6 +142,82 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
+const MO_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function LavaIceChart() {
+  const [view, setView] = useState<'weekly' | 'monthly'>('weekly');
+
+  // Aggregate weekly → monthly
+  const monthlyMap: Record<string, { lava: number; ice: number; lavaRev: number; iceRev: number }> = {};
+  for (const w of weeklyLavaIce) {
+    const mo = w.week.slice(0, 7); // '2026-01'
+    if (!monthlyMap[mo]) monthlyMap[mo] = { lava: 0, ice: 0, lavaRev: 0, iceRev: 0 };
+    monthlyMap[mo].lava += w.lava;
+    monthlyMap[mo].ice += w.ice;
+    monthlyMap[mo].lavaRev += w.lavaRev;
+    monthlyMap[mo].iceRev += w.iceRev;
+  }
+  const monthlyLavaIce = Object.entries(monthlyMap).sort(([a], [b]) => a.localeCompare(b)).map(([mo, d]) => {
+    const total = d.lava + d.ice;
+    return { label: MO_NAMES[parseInt(mo.slice(5), 10) - 1], lava: d.lava, ice: d.ice, total, icePct: total ? Math.round(1000 * d.ice / total) / 10 : 0, lavaRev: d.lavaRev, iceRev: d.iceRev };
+  });
+
+  const isWeekly = view === 'weekly';
+  const chartLabels = isWeekly
+    ? weeklyLavaIce.map((w) => { const m = parseInt(w.week.slice(5, 7), 10); const d = parseInt(w.week.slice(8), 10); return `${MO_NAMES[m - 1]} ${d}`; })
+    : monthlyLavaIce.map((m) => m.label);
+  const lavaData = isWeekly ? weeklyLavaIce.map((w) => w.lava) : monthlyLavaIce.map((m) => m.lava);
+  const iceData = isWeekly ? weeklyLavaIce.map((w) => w.ice) : monthlyLavaIce.map((m) => m.ice);
+  const icePctData = isWeekly ? weeklyLavaIce.map((w) => w.icePct) : monthlyLavaIce.map((m) => m.icePct);
+  const maxPct = isWeekly ? 55 : Math.ceil(Math.max(...icePctData) / 5) * 5 + 5;
+
+  const toggleStyle = (active: boolean): React.CSSProperties => ({
+    padding: '3px 12px', borderRadius: 4, border: `1px solid ${TP.blue}`, cursor: 'pointer', fontSize: 12, fontWeight: 600,
+    backgroundColor: active ? TP.blue : '#fff', color: active ? '#fff' : TP.blue,
+  });
+
+  return (
+    <Card>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+        <h3 style={{ margin: 0, color: TP.navy, fontWeight: 700, fontSize: 18 }}>Lava vs Ice — {isWeekly ? 'weekly' : 'monthly'} checkout mix</h3>
+        <div style={{ display: 'flex', gap: 4 }}>
+          <button style={toggleStyle(isWeekly)} onClick={() => setView('weekly')}>Weekly</button>
+          <button style={toggleStyle(!isWeekly)} onClick={() => setView('monthly')}>Monthly</button>
+        </div>
+      </div>
+      <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+        <b style={{ color: TP.blue }}>Lava</b> = checked out within 3 weeks of receiving a checkout link (fast payer). <b style={{ color: TP.green }}>Ice</b> = checked out after 3+ weeks (win-back). The <b style={{ color: '#c0392b' }}>red line</b> is Ice&apos;s share of total checkouts.
+      </div>
+      <div style={{ height: 360 }}>
+        <Bar
+          data={{
+            labels: chartLabels,
+            datasets: [
+              { type: 'bar' as const, label: 'Lava (fast payer)', data: lavaData, backgroundColor: `${TP.blue}CC`, borderRadius: 3, stack: 'mix', yAxisID: 'y', order: 3 },
+              { type: 'bar' as const, label: 'Ice (win-back)', data: iceData, backgroundColor: `${TP.green}CC`, borderRadius: 3, stack: 'mix', yAxisID: 'y', order: 2 },
+              // @ts-expect-error mixed line on Bar
+              { type: 'line' as const, label: 'Ice share %', data: icePctData, borderColor: '#c0392b', backgroundColor: '#c0392b', borderWidth: 2.5, pointRadius: isWeekly ? 3 : 5, pointBackgroundColor: icePctData.map((p) => (p >= 30 ? '#c0392b' : '#e06666')), yAxisID: 'y1', order: 1, tension: 0.3 },
+            ],
+          }}
+          options={{
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: true, position: 'top' as const } },
+            scales: {
+              y: { beginAtZero: true, stacked: true, position: 'left' as const, title: { display: true, text: 'Checkouts' } },
+              y1: { beginAtZero: true, max: maxPct, position: 'right' as const, grid: { drawOnChartArea: false }, title: { display: true, text: 'Ice share %' } },
+            },
+          }}
+        />
+      </div>
+      <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>
+        {isWeekly
+          ? 'This week (Oct 12) is partial — only 3 days in. But even so, 14 of 30 checkouts were Ice. The prior 3 weeks averaged 30% Ice, up from 14% in early Sep.'
+          : 'October is partial (14 days). Monthly view smooths out weekly noise — notice how Ice share was negligible in Jan/Feb, then started climbing in March.'}
+      </div>
+    </Card>
+  );
+}
+
 function DailyTrendsTab() {
   const labels = dailyFunnel.map((d) => d.date);
   const monFmt = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -271,41 +347,8 @@ function DailyTrendsTab() {
         </div>
       </Card>
 
-      {/* 4. Weekly Lava vs Ice */}
-      <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Lava vs Ice — weekly checkout mix</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          <b style={{ color: TP.blue }}>Lava</b> = checked out within 3 weeks of receiving a checkout link (fast payer). <b style={{ color: TP.green }}>Ice</b> = checked out after 3+ weeks (win-back). The <b style={{ color: '#c0392b' }}>red line</b> is Ice&apos;s share of total checkouts. Ice ran 13–15% in early September, then jumped to 30%+ in October — and hit 47% this week (Oct 12). If Erin holding leads with TCs longer is driving this, the data supports it: more win-backs are converting.
-        </div>
-        <div style={{ height: 360 }}>
-          <Bar
-            data={{
-              labels: weeklyLavaIce.map((w) => {
-                const m = parseInt(w.week.slice(5, 7), 10);
-                const d = parseInt(w.week.slice(8), 10);
-                return `${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m - 1]} ${d}`;
-              }),
-              datasets: [
-                { type: 'bar' as const, label: 'Lava (fast payer)', data: weeklyLavaIce.map((w) => w.lava), backgroundColor: `${TP.blue}CC`, borderRadius: 3, stack: 'mix', yAxisID: 'y', order: 3 },
-                { type: 'bar' as const, label: 'Ice (win-back)', data: weeklyLavaIce.map((w) => w.ice), backgroundColor: `${TP.green}CC`, borderRadius: 3, stack: 'mix', yAxisID: 'y', order: 2 },
-                // @ts-expect-error mixed line on Bar
-                { type: 'line' as const, label: 'Ice share %', data: weeklyLavaIce.map((w) => w.icePct), borderColor: '#c0392b', backgroundColor: '#c0392b', borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: weeklyLavaIce.map((w) => (w.icePct >= 30 ? '#c0392b' : '#e06666')), yAxisID: 'y1', order: 1, tension: 0.3 },
-              ],
-            }}
-            options={{
-              responsive: true, maintainAspectRatio: false,
-              plugins: { legend: { display: true, position: 'top' as const } },
-              scales: {
-                y: { beginAtZero: true, stacked: true, position: 'left' as const, title: { display: true, text: 'Checkouts' } },
-                y1: { beginAtZero: true, max: 55, position: 'right' as const, grid: { drawOnChartArea: false }, title: { display: true, text: 'Ice share %' } },
-              },
-            }}
-          />
-        </div>
-        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>
-          This week (Oct 12) is partial — only 3 days in. But even so, 14 of 30 checkouts were Ice. The prior 3 weeks averaged 30% Ice, up from 14% in early Sep.
-        </div>
-      </Card>
+      {/* 4. Lava vs Ice (weekly / monthly toggle) */}
+      <LavaIceChart />
     </>
   );
 }
