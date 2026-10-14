@@ -145,7 +145,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 const MO_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 function LavaIceChart() {
-  const [view, setView] = useState<'weekly' | 'monthly'>('weekly');
+  const [view, setView] = useState<'weekly' | 'monthly'>('monthly');
 
   // Aggregate weekly → monthly
   const monthlyMap: Record<string, { lava: number; ice: number; unclass: number; lavaRev: number; iceRev: number }> = {};
@@ -214,8 +214,8 @@ function LavaIceChart() {
       </div>
       <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>
         {isWeekly
-          ? 'This week (Oct 12) is partial — only 3 days in. Gray bars are checkouts with no checkout-link date on file. Ice % is calculated from classifiable (Lava + Ice) checkouts only.'
-          : 'October is partial (14 days). Ice was near-zero in Jan/Feb because the win-back pool was small — few leads had been sitting 3+ weeks yet. As the pipeline aged, more old leads converted.'}
+          ? 'Gray bars are checkouts with no checkout-link date on file. Ice % is calculated from classifiable (Lava + Ice) checkouts only. Oct 2026 is partial (14 days).'
+          : 'Oct 2026 is partial (14 days). In 2025, Ice consistently ran 25–50%. The Jan 2026 reset to near-zero and slow rebuild is the standout pattern.'}
       </div>
     </Card>
   );
