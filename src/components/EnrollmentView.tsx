@@ -166,8 +166,6 @@ function IceShareChart() {
     return window.length >= 2 ? Math.round(10 * window.reduce((a, b) => a + b, 0) / window.length) / 10 : null;
   });
 
-  // Find the Jul 14 week index for the annotation
-  const jul14Idx = data.findIndex((w) => w.week >= '2026-07-14');
 
   // Week labels: show "Mon D" for each week
   const chartLabels = data.map((w) => {
@@ -177,13 +175,7 @@ function IceShareChart() {
     return d <= 7 ? `${MO_NAMES[m - 1]} ${d}` : `${d}`;
   });
 
-  // Bar colors: blue normally, red-ish after Jul 6 cliff
-  const jul6Idx = data.findIndex((w) => w.week >= '2026-07-06');
-  const barColors = rawPct.map((v, i) => {
-    if (v === null) return '#e5e7eb';
-    if (jul6Idx >= 0 && i >= jul6Idx && i < jul6Idx + 8) return '#e8a8a0'; // cliff zone (soft red)
-    return TP.skyBlue;
-  });
+  const barColors = rawPct.map((v) => v === null ? '#e5e7eb' : TP.skyBlue);
 
   return (
     <Card>
@@ -206,7 +198,6 @@ function IceShareChart() {
       <div style={{ display: 'flex', gap: 16, marginBottom: 8, fontSize: 12, color: '#6b7280' }}>
         <span><span style={{ display: 'inline-block', width: 14, height: 14, background: TP.skyBlue, verticalAlign: 'middle', marginRight: 4, borderRadius: 2 }} /> Ice %</span>
         <span><span style={{ display: 'inline-block', width: 24, height: 3, background: TP.navy, verticalAlign: 'middle', marginRight: 4, borderRadius: 2 }} /> 4-week avg</span>
-        <span><span style={{ display: 'inline-block', width: 14, height: 14, background: '#e8a8a0', verticalAlign: 'middle', marginRight: 4, borderRadius: 2 }} /> cliff zone</span>
       </div>
       <div style={{ height: 400 }}>
         <Bar
@@ -256,26 +247,7 @@ function IceShareChart() {
                   },
                 },
               },
-              annotation: {
-                annotations: {
-                  jul15line: {
-                    type: 'line' as const,
-                    xMin: jul14Idx,
-                    xMax: jul14Idx,
-                    borderColor: '#c0392b',
-                    borderWidth: 1.5,
-                    borderDash: [4, 3],
-                  },
-                  jul15label: {
-                    type: 'label' as const,
-                    xValue: jul14Idx,
-                    yValue: 65,
-                    content: ['Jul 15'],
-                    color: '#c0392b',
-                    font: { size: 10, weight: 'bold' as const },
-                  },
-                },
-              },
+              annotation: { annotations: {} },
             },
             scales: {
               y: {
