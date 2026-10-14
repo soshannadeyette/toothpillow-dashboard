@@ -169,17 +169,26 @@ function IceShareChart() {
   // Find the Jul 14 week index for the annotation
   const jul14Idx = data.findIndex((w) => w.week >= '2026-07-14');
 
+  // Week labels: show "Mon D" for each week
   const chartLabels = data.map((w) => {
     const m = parseInt(w.week.slice(5, 7), 10);
-    const yr = w.week.slice(2, 4);
     const d = parseInt(w.week.slice(8), 10);
-    return d <= 7 ? `${MO_NAMES[m - 1]} ${yr}` : '';
+    // Show month name on 1st week of month, else just day
+    return d <= 7 ? `${MO_NAMES[m - 1]} ${d}` : `${d}`;
+  });
+
+  // Bar colors: blue normally, red-ish after Jul 6 cliff
+  const jul6Idx = data.findIndex((w) => w.week >= '2026-07-06');
+  const barColors = rawPct.map((v, i) => {
+    if (v === null) return '#e5e7eb';
+    if (jul6Idx >= 0 && i >= jul6Idx && i < jul6Idx + 8) return '#e8a8a0'; // cliff zone (soft red)
+    return TP.skyBlue;
   });
 
   return (
     <Card>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-        <h3 style={{ margin: 0, color: TP.navy, fontWeight: 700, fontSize: 18 }}>Ice (win-back) as a share of checkouts, by week</h3>
+        <h3 style={{ margin: 0, color: TP.navy, fontWeight: 700, fontSize: 18 }}>Ice (win-back) share of checkouts, week by week</h3>
         <div style={{ display: 'flex', gap: 4 }}>
           {(['1y', 'all'] as const).map((r) => (
             <button key={r} onClick={() => setRange(r)} style={{
@@ -192,27 +201,61 @@ function IceShareChart() {
         </div>
       </div>
       <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-        Each point is one week, by the week a checkout closed. Ice = paid 21+ days after the checkout link; share = Ice / (Ice + Lava), of checkouts with a known link date. Jan 2025 – Oct 2026, both submitter-year exports combined.
+        Each bar is one week. Ice = checkout 21+ days after checkout link sent. Share = Ice / (Ice + Lava). Both exports combined.
       </div>
       <div style={{ display: 'flex', gap: 16, marginBottom: 8, fontSize: 12, color: '#6b7280' }}>
-        <span><span style={{ display: 'inline-block', width: 24, height: 3, background: TP.navy, verticalAlign: 'middle', marginRight: 4, borderRadius: 2 }} /> 4-week moving average</span>
-        <span><span style={{ display: 'inline-block', width: 24, height: 2, background: '#B6CAE3', verticalAlign: 'middle', marginRight: 4, borderRadius: 2 }} /> individual weeks</span>
+        <span><span style={{ display: 'inline-block', width: 14, height: 14, background: TP.skyBlue, verticalAlign: 'middle', marginRight: 4, borderRadius: 2 }} /> Ice %</span>
+        <span><span style={{ display: 'inline-block', width: 24, height: 3, background: TP.navy, verticalAlign: 'middle', marginRight: 4, borderRadius: 2 }} /> 4-week avg</span>
+        <span><span style={{ display: 'inline-block', width: 14, height: 14, background: '#e8a8a0', verticalAlign: 'middle', marginRight: 4, borderRadius: 2 }} /> cliff zone</span>
       </div>
-      <div style={{ height: 380 }}>
+      <div style={{ height: 400 }}>
         <Bar
           data={{
             labels: chartLabels,
             datasets: [
-              // @ts-expect-error mixed line on Bar
-              { type: 'line' as const, label: 'Individual weeks', data: rawPct, borderColor: '#B6CAE3', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.3, order: 2 },
-              // @ts-expect-error mixed line on Bar
-              { type: 'line' as const, label: '4-week moving average', data: ma4, borderColor: TP.navy, backgroundColor: 'transparent', borderWidth: 3, pointRadius: 0, tension: 0.3, order: 1 },
+              {
+                label: 'Ice %',
+                data: rawPct,
+                backgroundColor: barColors,
+                borderRadius: 2,
+                order: 2,
+              },
+              {
+                // @ts-ignore mixed line on Bar chart
+                type: 'line' as const,
+                label: '4-week avg',
+                data: ma4,
+                borderColor: TP.navy,
+                backgroundColor: 'transparent',
+                borderWidth: 2.5,
+                pointRadius: 0,
+                tension: 0.3,
+                order: 1,
+              },
             ],
           }}
           options={{
             responsive: true, maintainAspectRatio: false,
             plugins: {
               legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  title: (items) => {
+                    const i = items[0]?.dataIndex;
+                    if (i == null) return '';
+                    const w = data[i];
+                    return `Week of ${w.week}`;
+                  },
+                  label: (item) => {
+                    const i = item.dataIndex;
+                    const w = data[i];
+                    if (item.datasetIndex === 0) {
+                      return `Ice: ${w.ice}  Lava: ${w.lava}  Ice%: ${rawPct[i]}%`;
+                    }
+                    return `4-wk avg: ${ma4[i]}%`;
+                  },
+                },
+              },
               annotation: {
                 annotations: {
                   jul15line: {
@@ -225,11 +268,11 @@ function IceShareChart() {
                   },
                   jul15label: {
                     type: 'label' as const,
-                    xValue: jul14Idx + 2,
-                    yValue: 62,
-                    content: ['Jul 15: 21-day pipeline'],
+                    xValue: jul14Idx,
+                    yValue: 65,
+                    content: ['Jul 15'],
                     color: '#c0392b',
-                    font: { size: 11, weight: 'bold' as const },
+                    font: { size: 10, weight: 'bold' as const },
                   },
                 },
               },
@@ -240,13 +283,13 @@ function IceShareChart() {
                 ticks: { callback: (v: unknown) => `${v}%` },
                 grid: { color: '#f0f0f0' },
               },
-              x: { grid: { display: false }, ticks: { maxRotation: 0 } },
+              x: { grid: { display: false }, ticks: { maxRotation: 0, font: { size: 10 } } },
             },
           }}
         />
       </div>
       <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>
-        Steady ~32–42% through June 2026, then a cliff through July (33% to 14% by late July, bottoming the first week of August), then a partial climb back to ~26% through September — still below the two-year norm.
+        Drop started the week of Jul 6, before the Jul 15 policy change. Ice share fell from 36% to 12% in one week.
       </div>
     </Card>
   );
