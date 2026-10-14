@@ -122,7 +122,7 @@ export default function EnrollmentView() {
 
       {tab === 'overview' && <OverviewTab />}
       {tab === 'dailytrends' && <DailyTrendsTab />}
-      {tab === 'icewinback' && <IceWinback />}
+      {tab === 'icewinback' && <><IceShareChart /><IceWinback /></>}
       {tab === 'diagnosis' && <DiagnosisTab />}
       {tab === 'monthly' && <MonthlyTab />}
       {tab === 'weekly' && <WeeklyTab />}
@@ -148,8 +148,14 @@ function Stat({ label, value }: { label: string; value: string }) {
 const MO_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 function IceShareChart() {
-  // Compute Ice % per week from weeklyLavaIce
-  const rawPct = weeklyLavaIce.map((w) => {
+  const [range, setRange] = useState<'1y' | 'all'>('1y');
+
+  // Filter to last 52 weeks when '1y' selected
+  const cutoffDate = '2025-10-14';
+  const data = range === '1y' ? weeklyLavaIce.filter((w) => w.week >= cutoffDate) : weeklyLavaIce;
+
+  // Compute Ice % per week
+  const rawPct = data.map((w) => {
     const classifiable = w.lava + w.ice;
     return classifiable > 0 ? Math.round(1000 * w.ice / classifiable) / 10 : null;
   });
@@ -161,9 +167,9 @@ function IceShareChart() {
   });
 
   // Find the Jul 14 week index for the annotation
-  const jul14Idx = weeklyLavaIce.findIndex((w) => w.week >= '2026-07-14');
+  const jul14Idx = data.findIndex((w) => w.week >= '2026-07-14');
 
-  const chartLabels = weeklyLavaIce.map((w) => {
+  const chartLabels = data.map((w) => {
     const m = parseInt(w.week.slice(5, 7), 10);
     const yr = w.week.slice(2, 4);
     const d = parseInt(w.week.slice(8), 10);
@@ -172,7 +178,19 @@ function IceShareChart() {
 
   return (
     <Card>
-      <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Ice (win-back) as a share of checkouts, by week</h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+        <h3 style={{ margin: 0, color: TP.navy, fontWeight: 700, fontSize: 18 }}>Ice (win-back) as a share of checkouts, by week</h3>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {(['1y', 'all'] as const).map((r) => (
+            <button key={r} onClick={() => setRange(r)} style={{
+              fontSize: 12, fontWeight: 600, padding: '4px 12px', borderRadius: 999, cursor: 'pointer',
+              border: `1.5px solid ${TP.blue}`,
+              background: range === r ? TP.blue : '#fff',
+              color: range === r ? '#fff' : TP.blue,
+            }}>{r === '1y' ? '1 Year' : 'All Time'}</button>
+          ))}
+        </div>
+      </div>
       <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
         Each point is one week, by the week a checkout closed. Ice = paid 21+ days after the checkout link; share = Ice / (Ice + Lava), of checkouts with a known link date. Jan 2025 – Oct 2026, both submitter-year exports combined.
       </div>
@@ -208,7 +226,7 @@ function IceShareChart() {
                     type: 'label' as const,
                     xValue: jul14Idx + 1.5,
                     yValue: 65,
-                    content: ['21-day TC hold', '+ price increase'],
+                    content: ['Jul 15: moved to', '21-day pipeline'],
                     color: '#c0392b',
                     font: { size: 11, weight: 'bold' as const },
                   },
@@ -362,8 +380,6 @@ function DailyTrendsTab() {
         </div>
       </Card>
 
-      {/* 4. Ice (win-back) share — clean line chart */}
-      <IceShareChart />
     </>
   );
 }
