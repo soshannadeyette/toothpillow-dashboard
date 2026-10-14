@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
-import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, breakWeeklyBaseline, lavaIceWeekly, dailyFunnel, weeklyTTCL, type EventRow } from '@/data/enrollmentCheckouts';
+import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, breakWeeklyBaseline, lavaIceWeekly, dailyFunnel, weeklyTTCL, weeklyLavaIce, type EventRow } from '@/data/enrollmentCheckouts';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -268,6 +268,42 @@ function DailyTrendsTab() {
         </div>
         <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>
           Time-to-checkout-link rose from ~6 days (mid-Jul) to ~13 days (early Sep), then came back down to ~8 days by late Sep. The Sep peak lines up with the TC ramp — new coordinators joining while the pipeline was backed up.
+        </div>
+      </Card>
+
+      {/* 4. Weekly Lava vs Ice */}
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Lava vs Ice — weekly checkout mix</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          <b style={{ color: TP.blue }}>Lava</b> = checked out within 3 weeks of receiving a checkout link (fast payer). <b style={{ color: TP.green }}>Ice</b> = checked out after 3+ weeks (win-back). The <b style={{ color: '#c0392b' }}>red line</b> is Ice&apos;s share of total checkouts. Ice ran 13–15% in early September, then jumped to 30%+ in October — and hit 47% this week (Oct 12). If Erin holding leads with TCs longer is driving this, the data supports it: more win-backs are converting.
+        </div>
+        <div style={{ height: 360 }}>
+          <Bar
+            data={{
+              labels: weeklyLavaIce.map((w) => {
+                const m = parseInt(w.week.slice(5, 7), 10);
+                const d = parseInt(w.week.slice(8), 10);
+                return `${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m - 1]} ${d}`;
+              }),
+              datasets: [
+                { type: 'bar' as const, label: 'Lava (fast payer)', data: weeklyLavaIce.map((w) => w.lava), backgroundColor: `${TP.blue}CC`, borderRadius: 3, stack: 'mix', yAxisID: 'y', order: 3 },
+                { type: 'bar' as const, label: 'Ice (win-back)', data: weeklyLavaIce.map((w) => w.ice), backgroundColor: `${TP.green}CC`, borderRadius: 3, stack: 'mix', yAxisID: 'y', order: 2 },
+                // @ts-expect-error mixed line on Bar
+                { type: 'line' as const, label: 'Ice share %', data: weeklyLavaIce.map((w) => w.icePct), borderColor: '#c0392b', backgroundColor: '#c0392b', borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: weeklyLavaIce.map((w) => (w.icePct >= 30 ? '#c0392b' : '#e06666')), yAxisID: 'y1', order: 1, tension: 0.3 },
+              ],
+            }}
+            options={{
+              responsive: true, maintainAspectRatio: false,
+              plugins: { legend: { display: true, position: 'top' as const } },
+              scales: {
+                y: { beginAtZero: true, stacked: true, position: 'left' as const, title: { display: true, text: 'Checkouts' } },
+                y1: { beginAtZero: true, max: 55, position: 'right' as const, grid: { drawOnChartArea: false }, title: { display: true, text: 'Ice share %' } },
+              },
+            }}
+          />
+        </div>
+        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>
+          This week (Oct 12) is partial — only 3 days in. But even so, 14 of 30 checkouts were Ice. The prior 3 weeks averaged 30% Ice, up from 14% in early Sep.
         </div>
       </Card>
     </>

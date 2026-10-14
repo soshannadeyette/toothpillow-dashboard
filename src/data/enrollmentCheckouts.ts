@@ -396,3 +396,26 @@ export const weeklyTTCL: WeeklyTTCLRow[] = [
   { week: '2026-10-05', median: 5, mean: 5.2, count: 25 },
   { week: '2026-10-12', median: 1, mean: 1.3, count: 3 },
 ];
+
+// Weekly Lava vs Ice checkouts (by checkout date), Jul 14 – Oct 14 2026.
+// Lava = checked out <=21 days after checkout link sent (fast payer).
+// Ice = checked out >21 days after checkout link sent (win-back).
+// Source: Enrollment Funnel export, Oct 14 2026 — CHECKED OUT records with both
+// a checkout-link-sent date and a checkout date.
+export type WeeklyLavaIceRow = { week: string; lava: number; ice: number; total: number; icePct: number; lavaRev: number; iceRev: number };
+export const weeklyLavaIce: WeeklyLavaIceRow[] = [
+  { week: '2026-07-13', lava: 40, ice: 1, total: 41, icePct: 2.4, lavaRev: 80027, iceRev: 1796 },
+  { week: '2026-07-20', lava: 47, ice: 10, total: 57, icePct: 17.5, lavaRev: 94266, iceRev: 18655 },
+  { week: '2026-07-27', lava: 83, ice: 12, total: 95, icePct: 12.6, lavaRev: 151359, iceRev: 21650 },
+  { week: '2026-08-03', lava: 41, ice: 7, total: 48, icePct: 14.6, lavaRev: 86317, iceRev: 13969 },
+  { week: '2026-08-10', lava: 68, ice: 24, total: 92, icePct: 26.1, lavaRev: 132748, iceRev: 46335 },
+  { week: '2026-08-17', lava: 52, ice: 14, total: 66, icePct: 21.2, lavaRev: 105430, iceRev: 24846 },
+  { week: '2026-08-24', lava: 64, ice: 25, total: 89, icePct: 28.1, lavaRev: 123585, iceRev: 43640 },
+  { week: '2026-08-31', lava: 53, ice: 18, total: 71, icePct: 25.4, lavaRev: 100479, iceRev: 30823 },
+  { week: '2026-09-07', lava: 45, ice: 8, total: 53, icePct: 15.1, lavaRev: 86062, iceRev: 14217 },
+  { week: '2026-09-14', lava: 65, ice: 10, total: 75, icePct: 13.3, lavaRev: 128262, iceRev: 20356 },
+  { week: '2026-09-21', lava: 53, ice: 29, total: 82, icePct: 35.4, lavaRev: 103270, iceRev: 51380 },
+  { week: '2026-09-28', lava: 51, ice: 14, total: 65, icePct: 21.5, lavaRev: 95044, iceRev: 23847 },
+  { week: '2026-10-05', lava: 35, ice: 15, total: 50, icePct: 30.0, lavaRev: 69047, iceRev: 24247 },
+  { week: '2026-10-12', lava: 16, ice: 14, total: 30, icePct: 46.7, lavaRev: 30333, iceRev: 24295 },
+];
