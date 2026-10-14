@@ -15,6 +15,7 @@ import {
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
 import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, breakWeeklyBaseline, lavaIceWeekly, dailyFunnel, weeklyTTCL, weeklyLavaIce, type EventRow } from '@/data/enrollmentCheckouts';
+import IceWinback from '@/components/IceWinback';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -38,6 +39,7 @@ const heatText = (v: number, max: number) => (v / max > 0.55 ? '#fff' : TP.text)
 const TABS = [
   { id: 'overview', label: 'Overview' },
   { id: 'dailytrends', label: 'Daily Trends' },
+  { id: 'icewinback', label: 'Ice / Win-back' },
   { id: 'diagnosis', label: 'Why (May break)' },
   { id: 'monthly', label: 'Monthly' },
   { id: 'weekly', label: 'Weekly' },
@@ -120,6 +122,7 @@ export default function EnrollmentView() {
 
       {tab === 'overview' && <OverviewTab />}
       {tab === 'dailytrends' && <DailyTrendsTab />}
+      {tab === 'icewinback' && <IceWinback />}
       {tab === 'diagnosis' && <DiagnosisTab />}
       {tab === 'monthly' && <MonthlyTab />}
       {tab === 'weekly' && <WeeklyTab />}
@@ -144,78 +147,87 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 const MO_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-function LavaIceChart() {
-  const [view, setView] = useState<'weekly' | 'monthly'>('monthly');
-
-  // Aggregate weekly → monthly
-  const monthlyMap: Record<string, { lava: number; ice: number; unclass: number; lavaRev: number; iceRev: number }> = {};
-  for (const w of weeklyLavaIce) {
-    const mo = w.week.slice(0, 7);
-    if (!monthlyMap[mo]) monthlyMap[mo] = { lava: 0, ice: 0, unclass: 0, lavaRev: 0, iceRev: 0 };
-    monthlyMap[mo].lava += w.lava;
-    monthlyMap[mo].ice += w.ice;
-    monthlyMap[mo].unclass += w.unclass;
-    monthlyMap[mo].lavaRev += w.lavaRev;
-    monthlyMap[mo].iceRev += w.iceRev;
-  }
-  const monthlyLavaIce = Object.entries(monthlyMap).sort(([a], [b]) => a.localeCompare(b)).map(([mo, d]) => {
-    const classifiable = d.lava + d.ice;
-    return { label: MO_NAMES[parseInt(mo.slice(5), 10) - 1], lava: d.lava, ice: d.ice, unclass: d.unclass, total: classifiable + d.unclass, icePct: classifiable ? Math.round(1000 * d.ice / classifiable) / 10 : 0, lavaRev: d.lavaRev, iceRev: d.iceRev };
+function IceShareChart() {
+  // Compute Ice % per week from weeklyLavaIce
+  const rawPct = weeklyLavaIce.map((w) => {
+    const classifiable = w.lava + w.ice;
+    return classifiable > 0 ? Math.round(1000 * w.ice / classifiable) / 10 : null;
   });
 
-  const isWeekly = view === 'weekly';
-  const chartLabels = isWeekly
-    ? weeklyLavaIce.map((w) => { const m = parseInt(w.week.slice(5, 7), 10); const d = parseInt(w.week.slice(8), 10); return `${MO_NAMES[m - 1]} ${d}`; })
-    : monthlyLavaIce.map((m) => m.label);
-  const lavaData = isWeekly ? weeklyLavaIce.map((w) => w.lava) : monthlyLavaIce.map((m) => m.lava);
-  const iceData = isWeekly ? weeklyLavaIce.map((w) => w.ice) : monthlyLavaIce.map((m) => m.ice);
-  const unclassData = isWeekly ? weeklyLavaIce.map((w) => w.unclass) : monthlyLavaIce.map((m) => m.unclass);
-  const icePctData = isWeekly ? weeklyLavaIce.map((w) => w.icePct) : monthlyLavaIce.map((m) => m.icePct);
-  const maxPct = isWeekly ? 55 : Math.ceil(Math.max(...icePctData) / 5) * 5 + 5;
+  // 4-week moving average
+  const ma4: (number | null)[] = rawPct.map((_, i) => {
+    const window = rawPct.slice(Math.max(0, i - 3), i + 1).filter((v): v is number => v !== null);
+    return window.length >= 2 ? Math.round(10 * window.reduce((a, b) => a + b, 0) / window.length) / 10 : null;
+  });
 
-  const toggleStyle = (active: boolean): React.CSSProperties => ({
-    padding: '3px 12px', borderRadius: 4, border: `1px solid ${TP.blue}`, cursor: 'pointer', fontSize: 12, fontWeight: 600,
-    backgroundColor: active ? TP.blue : '#fff', color: active ? '#fff' : TP.blue,
+  // Find the Jul 14 week index for the annotation
+  const jul14Idx = weeklyLavaIce.findIndex((w) => w.week >= '2026-07-14');
+
+  const chartLabels = weeklyLavaIce.map((w) => {
+    const m = parseInt(w.week.slice(5, 7), 10);
+    const yr = w.week.slice(2, 4);
+    const d = parseInt(w.week.slice(8), 10);
+    return d <= 7 ? `${MO_NAMES[m - 1]} ${yr}` : '';
   });
 
   return (
     <Card>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-        <h3 style={{ margin: 0, color: TP.navy, fontWeight: 700, fontSize: 18 }}>Lava vs Ice — {isWeekly ? 'weekly' : 'monthly'} checkout mix</h3>
-        <div style={{ display: 'flex', gap: 4 }}>
-          <button style={toggleStyle(isWeekly)} onClick={() => setView('weekly')}>Weekly</button>
-          <button style={toggleStyle(!isWeekly)} onClick={() => setView('monthly')}>Monthly</button>
-        </div>
-      </div>
+      <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Ice (win-back) as a share of checkouts, by week</h3>
       <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-        <b style={{ color: TP.blue }}>Lava</b> = checked out within 3 weeks of receiving a checkout link (fast payer). <b style={{ color: TP.green }}>Ice</b> = checked out after 3+ weeks (win-back). <span style={{ color: '#999' }}>Gray</span> = no checkout-link date on file (can&apos;t classify). The <b style={{ color: '#c0392b' }}>red line</b> is Ice&apos;s share of classifiable checkouts.
+        Each point is one week, by the week a checkout closed. Ice = paid 21+ days after the checkout link; share = Ice / (Ice + Lava), of checkouts with a known link date. Jan 2025 – Oct 2026, both submitter-year exports combined.
       </div>
-      <div style={{ height: 360 }}>
+      <div style={{ display: 'flex', gap: 16, marginBottom: 8, fontSize: 12, color: '#6b7280' }}>
+        <span><span style={{ display: 'inline-block', width: 24, height: 3, background: TP.navy, verticalAlign: 'middle', marginRight: 4, borderRadius: 2 }} /> 4-week moving average</span>
+        <span><span style={{ display: 'inline-block', width: 24, height: 2, background: '#B6CAE3', verticalAlign: 'middle', marginRight: 4, borderRadius: 2 }} /> individual weeks</span>
+      </div>
+      <div style={{ height: 380 }}>
         <Bar
           data={{
             labels: chartLabels,
             datasets: [
-              { type: 'bar' as const, label: 'Lava (fast payer)', data: lavaData, backgroundColor: `${TP.blue}CC`, borderRadius: 3, stack: 'mix', yAxisID: 'y', order: 4 },
-              { type: 'bar' as const, label: 'Ice (win-back)', data: iceData, backgroundColor: `${TP.green}CC`, borderRadius: 3, stack: 'mix', yAxisID: 'y', order: 3 },
-              { type: 'bar' as const, label: 'No link date', data: unclassData, backgroundColor: '#d1d5db99', borderRadius: 3, stack: 'mix', yAxisID: 'y', order: 2 },
               // @ts-expect-error mixed line on Bar
-              { type: 'line' as const, label: 'Ice share %', data: icePctData, borderColor: '#c0392b', backgroundColor: '#c0392b', borderWidth: 2.5, pointRadius: isWeekly ? 3 : 5, pointBackgroundColor: icePctData.map((p) => (p >= 30 ? '#c0392b' : '#e06666')), yAxisID: 'y1', order: 1, tension: 0.3 },
+              { type: 'line' as const, label: 'Individual weeks', data: rawPct, borderColor: '#B6CAE3', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.3, order: 2 },
+              // @ts-expect-error mixed line on Bar
+              { type: 'line' as const, label: '4-week moving average', data: ma4, borderColor: TP.navy, backgroundColor: 'transparent', borderWidth: 3, pointRadius: 0, tension: 0.3, order: 1 },
             ],
           }}
           options={{
             responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: true, position: 'top' as const } },
+            plugins: {
+              legend: { display: false },
+              annotation: {
+                annotations: {
+                  jul15box: {
+                    type: 'box' as const,
+                    xMin: jul14Idx - 0.5,
+                    xMax: jul14Idx + 3.5,
+                    backgroundColor: 'rgba(192,57,43,0.08)',
+                    borderWidth: 0,
+                  },
+                  jul15label: {
+                    type: 'label' as const,
+                    xValue: jul14Idx + 1.5,
+                    yValue: 65,
+                    content: ['21-day TC hold', '+ price increase'],
+                    color: '#c0392b',
+                    font: { size: 11, weight: 'bold' as const },
+                  },
+                },
+              },
+            },
             scales: {
-              y: { beginAtZero: true, stacked: true, position: 'left' as const, title: { display: true, text: 'Checkouts' } },
-              y1: { beginAtZero: true, max: maxPct, position: 'right' as const, grid: { drawOnChartArea: false }, title: { display: true, text: 'Ice share %' } },
+              y: {
+                beginAtZero: true, max: 70,
+                ticks: { callback: (v: unknown) => `${v}%` },
+                grid: { color: '#f0f0f0' },
+              },
+              x: { grid: { display: false }, ticks: { maxRotation: 0 } },
             },
           }}
         />
       </div>
       <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>
-        {isWeekly
-          ? 'Gray bars are checkouts with no checkout-link date on file. Ice % is calculated from classifiable (Lava + Ice) checkouts only. Oct 2026 is partial (14 days).'
-          : 'Oct 2026 is partial (14 days). In 2025, Ice consistently ran 25–50%. The Jan 2026 reset to near-zero and slow rebuild is the standout pattern.'}
+        Steady ~32–42% through June 2026, then a cliff through July (33% to 14% by late July, bottoming the first week of August), then a partial climb back to ~26% through September — still below the two-year norm.
       </div>
     </Card>
   );
@@ -350,8 +362,8 @@ function DailyTrendsTab() {
         </div>
       </Card>
 
-      {/* 4. Lava vs Ice (weekly / monthly toggle) */}
-      <LavaIceChart />
+      {/* 4. Ice (win-back) share — clean line chart */}
+      <IceShareChart />
     </>
   );
 }
