@@ -175,7 +175,11 @@ function IceShareChart() {
     return d <= 7 ? `${MO_NAMES[m - 1]} ${d}` : `${d}`;
   });
 
-  const barColors = rawPct.map((v) => v === null ? '#e5e7eb' : TP.skyBlue);
+  const barColors = rawPct.map((v) => {
+    if (v === null) return '#e5e7eb';
+    if (v < 20) return '#e8a8a0';
+    return TP.skyBlue;
+  });
 
   return (
     <Card>
