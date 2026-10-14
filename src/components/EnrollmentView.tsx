@@ -148,18 +148,19 @@ function LavaIceChart() {
   const [view, setView] = useState<'weekly' | 'monthly'>('weekly');
 
   // Aggregate weekly → monthly
-  const monthlyMap: Record<string, { lava: number; ice: number; lavaRev: number; iceRev: number }> = {};
+  const monthlyMap: Record<string, { lava: number; ice: number; unclass: number; lavaRev: number; iceRev: number }> = {};
   for (const w of weeklyLavaIce) {
-    const mo = w.week.slice(0, 7); // '2026-01'
-    if (!monthlyMap[mo]) monthlyMap[mo] = { lava: 0, ice: 0, lavaRev: 0, iceRev: 0 };
+    const mo = w.week.slice(0, 7);
+    if (!monthlyMap[mo]) monthlyMap[mo] = { lava: 0, ice: 0, unclass: 0, lavaRev: 0, iceRev: 0 };
     monthlyMap[mo].lava += w.lava;
     monthlyMap[mo].ice += w.ice;
+    monthlyMap[mo].unclass += w.unclass;
     monthlyMap[mo].lavaRev += w.lavaRev;
     monthlyMap[mo].iceRev += w.iceRev;
   }
   const monthlyLavaIce = Object.entries(monthlyMap).sort(([a], [b]) => a.localeCompare(b)).map(([mo, d]) => {
-    const total = d.lava + d.ice;
-    return { label: MO_NAMES[parseInt(mo.slice(5), 10) - 1], lava: d.lava, ice: d.ice, total, icePct: total ? Math.round(1000 * d.ice / total) / 10 : 0, lavaRev: d.lavaRev, iceRev: d.iceRev };
+    const classifiable = d.lava + d.ice;
+    return { label: MO_NAMES[parseInt(mo.slice(5), 10) - 1], lava: d.lava, ice: d.ice, unclass: d.unclass, total: classifiable + d.unclass, icePct: classifiable ? Math.round(1000 * d.ice / classifiable) / 10 : 0, lavaRev: d.lavaRev, iceRev: d.iceRev };
   });
 
   const isWeekly = view === 'weekly';
@@ -168,6 +169,7 @@ function LavaIceChart() {
     : monthlyLavaIce.map((m) => m.label);
   const lavaData = isWeekly ? weeklyLavaIce.map((w) => w.lava) : monthlyLavaIce.map((m) => m.lava);
   const iceData = isWeekly ? weeklyLavaIce.map((w) => w.ice) : monthlyLavaIce.map((m) => m.ice);
+  const unclassData = isWeekly ? weeklyLavaIce.map((w) => w.unclass) : monthlyLavaIce.map((m) => m.unclass);
   const icePctData = isWeekly ? weeklyLavaIce.map((w) => w.icePct) : monthlyLavaIce.map((m) => m.icePct);
   const maxPct = isWeekly ? 55 : Math.ceil(Math.max(...icePctData) / 5) * 5 + 5;
 
@@ -186,15 +188,16 @@ function LavaIceChart() {
         </div>
       </div>
       <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-        <b style={{ color: TP.blue }}>Lava</b> = checked out within 3 weeks of receiving a checkout link (fast payer). <b style={{ color: TP.green }}>Ice</b> = checked out after 3+ weeks (win-back). The <b style={{ color: '#c0392b' }}>red line</b> is Ice&apos;s share of total checkouts.
+        <b style={{ color: TP.blue }}>Lava</b> = checked out within 3 weeks of receiving a checkout link (fast payer). <b style={{ color: TP.green }}>Ice</b> = checked out after 3+ weeks (win-back). <span style={{ color: '#999' }}>Gray</span> = no checkout-link date on file (can&apos;t classify). The <b style={{ color: '#c0392b' }}>red line</b> is Ice&apos;s share of classifiable checkouts.
       </div>
       <div style={{ height: 360 }}>
         <Bar
           data={{
             labels: chartLabels,
             datasets: [
-              { type: 'bar' as const, label: 'Lava (fast payer)', data: lavaData, backgroundColor: `${TP.blue}CC`, borderRadius: 3, stack: 'mix', yAxisID: 'y', order: 3 },
-              { type: 'bar' as const, label: 'Ice (win-back)', data: iceData, backgroundColor: `${TP.green}CC`, borderRadius: 3, stack: 'mix', yAxisID: 'y', order: 2 },
+              { type: 'bar' as const, label: 'Lava (fast payer)', data: lavaData, backgroundColor: `${TP.blue}CC`, borderRadius: 3, stack: 'mix', yAxisID: 'y', order: 4 },
+              { type: 'bar' as const, label: 'Ice (win-back)', data: iceData, backgroundColor: `${TP.green}CC`, borderRadius: 3, stack: 'mix', yAxisID: 'y', order: 3 },
+              { type: 'bar' as const, label: 'No link date', data: unclassData, backgroundColor: '#d1d5db99', borderRadius: 3, stack: 'mix', yAxisID: 'y', order: 2 },
               // @ts-expect-error mixed line on Bar
               { type: 'line' as const, label: 'Ice share %', data: icePctData, borderColor: '#c0392b', backgroundColor: '#c0392b', borderWidth: 2.5, pointRadius: isWeekly ? 3 : 5, pointBackgroundColor: icePctData.map((p) => (p >= 30 ? '#c0392b' : '#e06666')), yAxisID: 'y1', order: 1, tension: 0.3 },
             ],
@@ -211,8 +214,8 @@ function LavaIceChart() {
       </div>
       <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>
         {isWeekly
-          ? 'This week (Oct 12) is partial — only 3 days in. But even so, 14 of 30 checkouts were Ice. The prior 3 weeks averaged 30% Ice, up from 14% in early Sep.'
-          : 'October is partial (14 days). Monthly view smooths out weekly noise — notice how Ice share was negligible in Jan/Feb, then started climbing in March.'}
+          ? 'This week (Oct 12) is partial — only 3 days in. Gray bars are checkouts with no checkout-link date on file. Ice % is calculated from classifiable (Lava + Ice) checkouts only.'
+          : 'October is partial (14 days). Ice was near-zero in Jan/Feb because the win-back pool was small — few leads had been sitting 3+ weeks yet. As the pipeline aged, more old leads converted.'}
       </div>
     </Card>
   );
