@@ -215,18 +215,19 @@ function IceShareChart() {
               legend: { display: false },
               annotation: {
                 annotations: {
-                  jul15box: {
-                    type: 'box' as const,
-                    xMin: jul14Idx - 0.5,
-                    xMax: jul14Idx + 3.5,
-                    backgroundColor: 'rgba(192,57,43,0.08)',
-                    borderWidth: 0,
+                  jul15line: {
+                    type: 'line' as const,
+                    xMin: jul14Idx,
+                    xMax: jul14Idx,
+                    borderColor: '#c0392b',
+                    borderWidth: 1.5,
+                    borderDash: [4, 3],
                   },
                   jul15label: {
                     type: 'label' as const,
-                    xValue: jul14Idx + 1.5,
-                    yValue: 65,
-                    content: ['Jul 15: moved to', '21-day pipeline'],
+                    xValue: jul14Idx + 2,
+                    yValue: 62,
+                    content: ['Jul 15: 21-day pipeline'],
                     color: '#c0392b',
                     font: { size: 11, weight: 'bold' as const },
                   },
