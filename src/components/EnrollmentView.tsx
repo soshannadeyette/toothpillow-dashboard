@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
-import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, breakWeeklyBaseline, lavaIceWeekly, type EventRow } from '@/data/enrollmentCheckouts';
+import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, breakWeeklyBaseline, lavaIceWeekly, dailyFunnel, weeklyTTCL, type EventRow } from '@/data/enrollmentCheckouts';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -37,6 +37,7 @@ const heatText = (v: number, max: number) => (v / max > 0.55 ? '#fff' : TP.text)
 
 const TABS = [
   { id: 'overview', label: 'Overview' },
+  { id: 'dailytrends', label: 'Daily Trends' },
   { id: 'diagnosis', label: 'Why (May break)' },
   { id: 'monthly', label: 'Monthly' },
   { id: 'weekly', label: 'Weekly' },
@@ -87,7 +88,7 @@ export default function EnrollmentView() {
       {/* Source line + summary — hidden on the Overview (it has its own exec KPIs) */}
       {tab !== 'overview' && (
         <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 13, color: '#6b7280' }}>Checkouts · Jan 1 – Oct 5, 2026 · from Salesforce</div>
+          <div style={{ fontSize: 13, color: '#6b7280' }}>Checkouts · Jan 1 – Oct 14, 2026 · from Salesforce</div>
           <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', marginTop: 10 }}>
             <Stat label="Checkouts (YTD)" value={summary.checkouts.toLocaleString()} />
             <Stat label="Collected" value={money(summary.amountPaid)} />
@@ -118,6 +119,7 @@ export default function EnrollmentView() {
       </nav>
 
       {tab === 'overview' && <OverviewTab />}
+      {tab === 'dailytrends' && <DailyTrendsTab />}
       {tab === 'diagnosis' && <DiagnosisTab />}
       {tab === 'monthly' && <MonthlyTab />}
       {tab === 'weekly' && <WeeklyTab />}
@@ -137,6 +139,138 @@ function Stat({ label, value }: { label: string; value: string }) {
       <div style={{ fontSize: 12, color: '#6b7280' }}>{label}</div>
       <div style={{ fontSize: 20, fontWeight: 700, color: TP.navy }}>{value}</div>
     </div>
+  );
+}
+
+function DailyTrendsTab() {
+  const labels = dailyFunnel.map((d) => d.date);
+  const monFmt = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  // 7-day moving averages
+  const ma7 = (arr: number[]) => arr.map((_, i) => {
+    const slice = arr.slice(Math.max(0, i - 6), i + 1);
+    return Math.round((slice.reduce((s, v) => s + v, 0) / slice.length) * 10) / 10;
+  });
+  const subMA = ma7(dailyFunnel.map((d) => d.submissions));
+  const clMA = ma7(dailyFunnel.map((d) => d.checkoutLinks));
+  const coMA = ma7(dailyFunnel.map((d) => d.checkouts));
+
+  const xTicks = {
+    autoSkip: false,
+    maxRotation: 0,
+    callback: function (_v: unknown, index: number) {
+      const d = dailyFunnel[index]?.date;
+      if (!d) return '';
+      if (d.slice(8) === '01') return monFmt[parseInt(d.slice(5, 7), 10) - 1];
+      if (d.slice(8) === '15') return '·';
+      return '';
+    },
+  };
+
+  // TTCL chart
+  const ttclLabels = weeklyTTCL.map((w) => {
+    const m = parseInt(w.week.slice(5, 7), 10);
+    const d = parseInt(w.week.slice(8), 10);
+    return `${monFmt[m - 1]} ${d}`;
+  });
+
+  return (
+    <>
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 22, fontWeight: 800, color: TP.navy }}>Daily Trends — Last 3 Months</div>
+        <div style={{ fontSize: 12, color: '#9ca3af' }}>Jul 14 – Oct 14, 2026 · all leads, all sources · from Salesforce Enrollment Funnel export</div>
+      </div>
+
+      {/* 1. Daily submissions */}
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Daily submissions</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          Light bars = daily count of new assessments submitted. Bold line = 7-day moving average. Weekends dip but the pattern is consistent — look at the moving average for the real trend.
+        </div>
+        <div style={{ overflowX: 'auto', overflowY: 'hidden', paddingBottom: 8 }}>
+          <div style={{ minWidth: 900, height: 320 }}>
+            <Bar
+              data={{
+                labels,
+                datasets: [
+                  { type: 'bar' as const, label: 'Daily submissions', data: dailyFunnel.map((d) => d.submissions), backgroundColor: `${TP.skyBlue}99`, borderWidth: 0, order: 2 },
+                  // @ts-expect-error mixed line on Bar
+                  { type: 'line' as const, label: '7-day avg', data: subMA, borderColor: TP.navy, backgroundColor: TP.navy, borderWidth: 2.5, pointRadius: 0, tension: 0.3, order: 1 },
+                ],
+              }}
+              options={{
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: true, position: 'top' as const } },
+                scales: { y: { beginAtZero: true, title: { display: true, text: 'Submissions' } }, x: { ticks: xTicks, grid: { display: false } } },
+              }}
+            />
+          </div>
+        </div>
+      </Card>
+
+      {/* 2. Stacked funnel stages */}
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Funnel stages — submissions, checkout links, checkouts</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          Three 7-day moving averages stacked: <b style={{ color: TP.navy }}>submissions</b> (when the family fills out the assessment), <b style={{ color: TP.blue }}>checkout links sent</b> (when the TC sends the payment link), and <b style={{ color: TP.green }}>checkouts</b> (when the family pays). The gap between lines is the pipeline lag at each step. Checkout-link volume drops to zero on weekends (TC-driven), while submissions keep coming.
+        </div>
+        <div style={{ overflowX: 'auto', overflowY: 'hidden', paddingBottom: 8 }}>
+          <div style={{ minWidth: 900, height: 340 }}>
+            <Bar
+              data={{
+                labels,
+                datasets: [
+                  // @ts-expect-error mixed line on Bar
+                  { type: 'line' as const, label: 'Submissions (7d avg)', data: subMA, borderColor: TP.navy, backgroundColor: `${TP.navy}15`, borderWidth: 2.5, pointRadius: 0, tension: 0.3, fill: true, order: 1 },
+                  // @ts-expect-error mixed line on Bar
+                  { type: 'line' as const, label: 'Checkout links sent (7d avg)', data: clMA, borderColor: TP.blue, backgroundColor: `${TP.blue}15`, borderWidth: 2.5, pointRadius: 0, tension: 0.3, fill: true, order: 2 },
+                  // @ts-expect-error mixed line on Bar
+                  { type: 'line' as const, label: 'Checkouts (7d avg)', data: coMA, borderColor: TP.green, backgroundColor: `${TP.green}25`, borderWidth: 2.5, pointRadius: 0, tension: 0.3, fill: true, order: 3 },
+                ],
+              }}
+              options={{
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: true, position: 'top' as const } },
+                scales: { y: { beginAtZero: true, title: { display: true, text: 'Daily count (7d avg)' } }, x: { ticks: xTicks, grid: { display: false } } },
+              }}
+            />
+          </div>
+        </div>
+      </Card>
+
+      {/* 3. Time to checkout link */}
+      <Card>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Time to checkout link (days from submission)</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
+          How many days between a family submitting their assessment and receiving a checkout link, grouped by submission week. <b style={{ color: TP.blue }}>Blue = median</b>, <b style={{ color: TP.yellow }}>amber = mean</b>. The mean runs above the median because a few long-wait cases pull it up. The last two weeks (Oct) are artificially low — those families just submitted, so only the fast ones have links yet. Bars = number of records per week (right axis).
+        </div>
+        <div style={{ height: 320 }}>
+          <Bar
+            data={{
+              labels: ttclLabels,
+              datasets: [
+                { type: 'bar' as const, label: 'Records', data: weeklyTTCL.map((w) => w.count), backgroundColor: `${TP.skyBlue}60`, borderRadius: 3, yAxisID: 'y1', order: 3 },
+                // @ts-expect-error mixed line on Bar
+                { type: 'line' as const, label: 'Median days', data: weeklyTTCL.map((w) => w.median), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 3, yAxisID: 'y', order: 1, tension: 0.3 },
+                // @ts-expect-error mixed line on Bar
+                { type: 'line' as const, label: 'Mean days', data: weeklyTTCL.map((w) => w.mean), borderColor: TP.yellow, backgroundColor: TP.yellow, borderWidth: 2, pointRadius: 3, yAxisID: 'y', order: 2, tension: 0.3, borderDash: [5, 3] },
+              ],
+            }}
+            options={{
+              responsive: true, maintainAspectRatio: false,
+              plugins: { legend: { display: true, position: 'top' as const } },
+              scales: {
+                y: { beginAtZero: true, position: 'left' as const, title: { display: true, text: 'Days' } },
+                y1: { beginAtZero: true, position: 'right' as const, grid: { drawOnChartArea: false }, title: { display: true, text: 'Records' } },
+              },
+            }}
+          />
+        </div>
+        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>
+          Time-to-checkout-link rose from ~6 days (mid-Jul) to ~13 days (early Sep), then came back down to ~8 days by late Sep. The Sep peak lines up with the TC ramp — new coordinators joining while the pipeline was backed up.
+        </div>
+      </Card>
+    </>
   );
 }
 
@@ -415,7 +549,7 @@ function OverviewTab() {
       {/* Exec header */}
       <div style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 22, fontWeight: 800, color: TP.navy }}>Enrollment — Executive Summary</div>
-        <div style={{ fontSize: 12, color: '#9ca3af' }}>2026 year-to-date · as of Oct 8, 2026 · source: Salesforce</div>
+        <div style={{ fontSize: 12, color: '#9ca3af' }}>2026 year-to-date · as of Oct 14, 2026 · source: Salesforce</div>
       </div>
 
       {/* KPI row */}
