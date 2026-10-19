@@ -31,19 +31,18 @@ const TP = {
 };
 
 // ── Hardcoded data (source of truth) ──────────────────────────────────
-// Source: Salesforce "Waiting on Info Ratios" exports, October 12, 2026
-// H1 (Jan-Jun): 10,368 records | H2 (Jul-Dec): 6,224 records | Total: 16,592 | Total waiting: 5,822
+// Source: Salesforce "Waiting on Info Ratios" exports, October 19, 2026
 const AV_DATA = [
-  { label: 'Jan 26', month: 1, year: 2026, traffic: 37320, starts: 1147, waiting: 107, submitted: 1040, partial: false, period: 'full' as const },
-  { label: 'Feb 26', month: 2, year: 2026, traffic: 51480, starts: 2185, waiting: 861, submitted: 1324, partial: false, period: 'full' as const },
-  { label: 'Mar 26', month: 3, year: 2026, traffic: 39218, starts: 2256, waiting: 921, submitted: 1335, partial: false, period: 'full' as const },
-  { label: 'Apr 26', month: 4, year: 2026, traffic: 30311, starts: 1427, waiting: 518, submitted: 909, partial: false, period: 'full' as const },
-  { label: 'May 26', month: 5, year: 2026, traffic: 33031, starts: 1602, waiting: 688, submitted: 914, partial: false, period: 'full' as const },
-  { label: 'Jun 26', month: 6, year: 2026, traffic: 36468, starts: 1751, waiting: 549, submitted: 1202, partial: false, period: 'full' as const },
-  { label: 'Jul 26', month: 7, year: 2026, traffic: 0, starts: 2210, waiting: 719, submitted: 1491, partial: false, period: 'full' as const },
-  { label: 'Aug 26', month: 8, year: 2026, traffic: 0, starts: 2058, waiting: 792, submitted: 1266, partial: false, period: 'full' as const },
-  { label: 'Sep 26', month: 9, year: 2026, traffic: 0, starts: 1528, waiting: 528, submitted: 1000, partial: false, period: 'full' as const },
-  { label: 'Oct 26', month: 10, year: 2026, traffic: 0, starts: 428, waiting: 167, submitted: 261, partial: true, period: 'partial' as const },
+  { label: 'Jan 26', month: 1, year: 2026, traffic: 37320, starts: 1147, waiting: 102, submitted: 1045, partial: false, period: 'full' as const },
+  { label: 'Feb 26', month: 2, year: 2026, traffic: 51480, starts: 2185, waiting: 846, submitted: 1339, partial: false, period: 'full' as const },
+  { label: 'Mar 26', month: 3, year: 2026, traffic: 39218, starts: 2256, waiting: 907, submitted: 1349, partial: false, period: 'full' as const },
+  { label: 'Apr 26', month: 4, year: 2026, traffic: 30311, starts: 1427, waiting: 513, submitted: 914, partial: false, period: 'full' as const },
+  { label: 'May 26', month: 5, year: 2026, traffic: 33031, starts: 1602, waiting: 686, submitted: 916, partial: false, period: 'full' as const },
+  { label: 'Jun 26', month: 6, year: 2026, traffic: 36468, starts: 1751, waiting: 545, submitted: 1206, partial: false, period: 'full' as const },
+  { label: 'Jul 26', month: 7, year: 2026, traffic: 0, starts: 2210, waiting: 716, submitted: 1494, partial: false, period: 'full' as const },
+  { label: 'Aug 26', month: 8, year: 2026, traffic: 0, starts: 2058, waiting: 789, submitted: 1269, partial: false, period: 'full' as const },
+  { label: 'Sep 26', month: 9, year: 2026, traffic: 0, starts: 1528, waiting: 520, submitted: 1008, partial: false, period: 'full' as const },
+  { label: 'Oct 26', month: 10, year: 2026, traffic: 0, starts: 833, waiting: 346, submitted: 487, partial: true, period: 'partial' as const },
 ];
 
 // ── Same-week completion rate by weekly cohort (source of truth) ──────
@@ -101,16 +100,16 @@ const EVENTS: { week: string; label: string; color: string }[] = [
 // Checkout (Sent Checkout Link), Checked Out (CHECKED OUT + Consult Complete + Myo Only),
 // Closed (Referred Out, Denied, Closed Lost, etc.), On Hold
 const FUNNEL_DATA = [
-  { label: 'Jan 26', waiting: 105, inReview:   0, checkout:    7, checkedOut: 312, closed: 705, onHold: 18 },
-  { label: 'Feb 26', waiting: 847, inReview:   3, checkout:   23, checkedOut: 356, closed: 927, onHold: 29 },
-  { label: 'Mar 26', waiting: 908, inReview:   4, checkout:   81, checkedOut: 395, closed: 840, onHold: 28 },
-  { label: 'Apr 26', waiting: 514, inReview:   2, checkout:   39, checkedOut: 268, closed: 587, onHold: 17 },
-  { label: 'May 26', waiting: 686, inReview:   6, checkout:  205, checkedOut: 219, closed: 473, onHold: 13 },
-  { label: 'Jun 26', waiting: 547, inReview:  12, checkout:  627, checkedOut: 292, closed: 251, onHold: 22 },
-  { label: 'Jul 26', waiting: 719, inReview:  12, checkout:  824, checkedOut: 326, closed: 293, onHold: 36 },
-  { label: 'Aug 26', waiting: 796, inReview:  57, checkout:  649, checkedOut: 227, closed: 191, onHold: 138 },
-  { label: 'Sep 26', waiting: 529, inReview: 257, checkout:  342, checkedOut: 135, closed: 118, onHold: 148 },
-  { label: 'Oct 26', waiting: 120, inReview: 153, checkout:    3, checkedOut:   1, closed:   7, onHold: 12 },
+  { label: 'Jan 26', waiting: 102, inReview:   1, checkout:    4, checkedOut: 312, closed: 699, onHold: 16 },
+  { label: 'Feb 26', waiting: 846, inReview:   3, checkout:   17, checkedOut: 357, closed: 922, onHold: 29 },
+  { label: 'Mar 26', waiting: 907, inReview:   3, checkout:   40, checkedOut: 396, closed: 838, onHold: 28 },
+  { label: 'Apr 26', waiting: 513, inReview:   2, checkout:   37, checkedOut: 269, closed: 584, onHold: 16 },
+  { label: 'May 26', waiting: 686, inReview:   5, checkout:  206, checkedOut: 218, closed: 471, onHold: 13 },
+  { label: 'Jun 26', waiting: 545, inReview:  13, checkout:  621, checkedOut: 294, closed: 251, onHold: 23 },
+  { label: 'Jul 26', waiting: 716, inReview:  11, checkout:  806, checkedOut: 334, closed: 306, onHold: 35 },
+  { label: 'Aug 26', waiting: 789, inReview:  40, checkout:  631, checkedOut: 246, closed: 211, onHold: 140 },
+  { label: 'Sep 26', waiting: 520, inReview: 158, checkout:  345, checkedOut: 181, closed: 153, onHold: 167 },
+  { label: 'Oct 26', waiting: 346, inReview: 334, checkout:   51, checkedOut:  17, closed:  30, onHold:  29 },
 ];
 
 // ── May daily data (source of truth) ─────────────────────────────────
@@ -246,7 +245,7 @@ const WAITING_AGE_BUCKETS = [
 ];
 
 // ── Post-update tracking ────────────────────────────────────────────
-const POST_UPDATE_DAYS_ELAPSED = 115; // Jun 15 – Oct 8 = 115 days
+const POST_UPDATE_DAYS_ELAPSED = 126; // Jun 15 – Oct 19 = 126 days
 
 function num(v: number): string { return v.toLocaleString(); }
 
@@ -585,7 +584,7 @@ export default function AVDiagnostics() {
 
       {/* ═══════ FOOTER: Source ═══════ */}
       <div style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'center', padding: '8px 0' }}>
-        Source: Salesforce exports, September 14, 2026. Cohort data from &quot;Waiting on Info Ratios&quot; export.
+        Source: Salesforce exports, October 19, 2026. Cohort data from &quot;Waiting on Info Ratios&quot; export.
       </div>
 
     </div>

@@ -1,5 +1,5 @@
-// Enrollment checkouts data — hardcoded from Salesforce 'Checkouts Today' export (Jan 1–Oct 5, 2026).
-// Source: Checkouts Today-2026-10-05. Totals verified: 3396 checkouts, $5,717,318 collected.
+// Enrollment checkouts data — hardcoded from Salesforce exports.
+// Checkout data: Checkouts Today export. Funnel/conversion data: SOSH | Enrollment Funnel export (Oct 19, 2026).
 
 export type MonthRow = { month: string; checkouts: number; amountPaid: number; totalAmountPaid: number };
 export type WeekRow = { weekStart: string; checkouts: number; amountPaid: number };
@@ -57,23 +57,23 @@ export const capacity: CapacityRow[] = [{"month": "2026-01", "activeTCs": 3, "ch
 // ---- Conversion (from the "SOSH | Enrollment Funnel" report: one row per 2026-submitting lead) ----
 // Submission->checkout and link-sent->checkout, cohorted by SUBMISSION month. Validated vs Erin's dashboard.
 export type ConvMonthRow = { month: string; submissions: number; linkSent: number; checkouts: number; subToCO: number; linkToCO: number };
-export const conversionMonthly: ConvMonthRow[] = [{"month": "2026-01", "submissions": 1416, "linkSent": 794, "checkouts": 378, "subToCO": 26.7, "linkToCO": 47.6}, {"month": "2026-02", "submissions": 1519, "linkSent": 1001, "checkouts": 381, "subToCO": 25.1, "linkToCO": 38.1}, {"month": "2026-03", "submissions": 1606, "linkSent": 1052, "checkouts": 469, "subToCO": 29.2, "linkToCO": 44.6}, {"month": "2026-04", "submissions": 1229, "linkSent": 768, "checkouts": 355, "subToCO": 28.9, "linkToCO": 46.2}, {"month": "2026-05", "submissions": 1131, "linkSent": 819, "checkouts": 270, "subToCO": 23.9, "linkToCO": 33.0}, {"month": "2026-06", "submissions": 1489, "linkSent": 1106, "checkouts": 366, "subToCO": 24.6, "linkToCO": 33.1}, {"month": "2026-07", "submissions": 1997, "linkSent": 1411, "checkouts": 431, "subToCO": 21.6, "linkToCO": 30.5}, {"month": "2026-08", "submissions": 1685, "linkSent": 1033, "checkouts": 302, "subToCO": 17.9, "linkToCO": 29.2}, {"month": "2026-09", "submissions": 1378, "linkSent": 535, "checkouts": 152, "subToCO": 11.0, "linkToCO": 28.4}, {"month": "2026-10", "submissions": 171, "linkSent": 4, "checkouts": 1, "subToCO": 0.6, "linkToCO": 25.0}];
+export const conversionMonthly: ConvMonthRow[] = [{"month": "2026-01", "submissions": 1415, "linkSent": 793, "checkouts": 378, "subToCO": 26.7, "linkToCO": 47.7}, {"month": "2026-02", "submissions": 1519, "linkSent": 1001, "checkouts": 381, "subToCO": 25.1, "linkToCO": 38.1}, {"month": "2026-03", "submissions": 1606, "linkSent": 1052, "checkouts": 472, "subToCO": 29.4, "linkToCO": 44.9}, {"month": "2026-04", "submissions": 1229, "linkSent": 768, "checkouts": 355, "subToCO": 28.9, "linkToCO": 46.2}, {"month": "2026-05", "submissions": 1131, "linkSent": 819, "checkouts": 271, "subToCO": 24.0, "linkToCO": 33.1}, {"month": "2026-06", "submissions": 1489, "linkSent": 1106, "checkouts": 370, "subToCO": 24.8, "linkToCO": 33.5}, {"month": "2026-07", "submissions": 1997, "linkSent": 1411, "checkouts": 443, "subToCO": 22.2, "linkToCO": 31.4}, {"month": "2026-08", "submissions": 1685, "linkSent": 1047, "checkouts": 326, "subToCO": 19.3, "linkToCO": 31.1}, {"month": "2026-09", "submissions": 1376, "linkSent": 667, "checkouts": 214, "subToCO": 15.6, "linkToCO": 32.1}, {"month": "2026-10", "submissions": 684, "linkSent": 91, "checkouts": 29, "subToCO": 4.2, "linkToCO": 31.9}];
 // Months from Aug onward are still MATURING (recent submitters can still check out later) — treat as incomplete.
 export const conversionMatureThrough = "2026-07";
 
 export type ConvRefRow = { referrer: string; submissions: number; checkouts: number; rate: number };
-export const conversionByReferrer: ConvRefRow[] = [{"referrer": "Influencer", "submissions": 3464, "checkouts": 893, "rate": 25.8}, {"referrer": "Dental Office", "submissions": 2765, "checkouts": 455, "rate": 16.5}, {"referrer": "Online Search", "submissions": 2649, "checkouts": 590, "rate": 22.3}, {"referrer": "Podcast", "submissions": 1585, "checkouts": 409, "rate": 25.8}, {"referrer": "Parent", "submissions": 666, "checkouts": 195, "rate": 29.3}, {"referrer": "Instagram", "submissions": 560, "checkouts": 104, "rate": 18.6}, {"referrer": "Airway Ambassador", "submissions": 530, "checkouts": 196, "rate": 37.0}, {"referrer": "Unknown Referral", "submissions": 501, "checkouts": 103, "rate": 20.6}, {"referrer": "Google Ad", "submissions": 374, "checkouts": 42, "rate": 11.2}, {"referrer": "Unknown Professional Referral", "submissions": 155, "checkouts": 49, "rate": 31.6}, {"referrer": "(blank)", "submissions": 142, "checkouts": 31, "rate": 21.8}, {"referrer": "Facebook", "submissions": 114, "checkouts": 14, "rate": 12.3}];
+export const conversionByReferrer: ConvRefRow[] = [{"referrer": "Influencer", "submissions": 3545, "checkouts": 933, "rate": 26.3}, {"referrer": "Dental Office", "submissions": 2885, "checkouts": 468, "rate": 16.2}, {"referrer": "Online Search", "submissions": 2762, "checkouts": 613, "rate": 22.2}, {"referrer": "Podcast", "submissions": 1643, "checkouts": 438, "rate": 26.7}, {"referrer": "Parent", "submissions": 690, "checkouts": 201, "rate": 29.1}, {"referrer": "Instagram", "submissions": 571, "checkouts": 107, "rate": 18.7}, {"referrer": "Airway Ambassador", "submissions": 545, "checkouts": 198, "rate": 36.3}, {"referrer": "Unknown Referral", "submissions": 513, "checkouts": 106, "rate": 20.7}, {"referrer": "Google Ad", "submissions": 386, "checkouts": 52, "rate": 13.5}, {"referrer": "(blank)", "submissions": 191, "checkouts": 32, "rate": 16.8}, {"referrer": "Unknown Professional Referral", "submissions": 167, "checkouts": 51, "rate": 30.5}, {"referrer": "Facebook", "submissions": 116, "checkouts": 15, "rate": 12.9}];
 
 export type FunnelStageRow = { stage: string; count: number };
-export const funnelStages: FunnelStageRow[] = [{"stage": "Closed Lost", "count": 3689}, {"stage": "CHECKED OUT", "count": 3030}, {"stage": "Sent Checkout Link", "count": 2747}, {"stage": "Referred Out", "count": 1275}, {"stage": "Screening Received", "count": 594}, {"stage": "Non Responsive - 2 or less responses", "count": 347}, {"stage": "Denied", "count": 315}, {"stage": "Sent to TxP", "count": 265}, {"stage": "Closed Lost - Do Not Contact", "count": 258}, {"stage": "Assessment On Hold - Non Responsive", "count": 221}, {"stage": "TxP Approved", "count": 180}, {"stage": "ON HOLD - No Doctor in State", "count": 150}, {"stage": "Consult Complete", "count": 133}, {"stage": "Treatment Consult Scheduled", "count": 104}, {"stage": "Temp Hold", "count": 90}];
+export const funnelStages: FunnelStageRow[] = [{"stage": "Closed Lost", "count": 3776}, {"stage": "CHECKED OUT", "count": 3154}, {"stage": "Sent Checkout Link", "count": 2760}, {"stage": "Referred Out", "count": 1309}, {"stage": "Screening Received", "count": 586}, {"stage": "Non Responsive - 2 or less responses", "count": 429}, {"stage": "Denied", "count": 321}, {"stage": "Assessment On Hold - Non Responsive", "count": 319}, {"stage": "Sent to TxP", "count": 301}, {"stage": "Closed Lost - Do Not Contact", "count": 274}, {"stage": "Treatment Consult Scheduled", "count": 171}, {"stage": "ON HOLD - No Doctor in State", "count": 151}, {"stage": "Consult Complete", "count": 143}, {"stage": "TxP Approved", "count": 112}, {"stage": "Temp Hold", "count": 88}];
 
-export const convSummary = { submissions: 13621, linkSent: 8523, checkouts: 3105 };
+export const convSummary = { submissions: 14137, linkSent: 8755, checkouts: 3239 };
 
 // Diagnosis of the May break (from the funnel report w/ "Results of Exam" recommendation).
 // stdConv = conversion of STANDARD approvals (non-expander); expConv = expander recs; rejectShare = referred/denied share.
 // Key: the STANDARD pool also fell ~40%->31% in May => broad checkout cause, not just expanders. Jan-Mar expConv is tiny-N noise.
 export type DiagnosisRow = { month: string; submissions: number; convRate: number; stdConv: number; expConv: number; expShare: number; rejectShare: number };
-export const diagnosisMonthly: DiagnosisRow[] = [{"month": "2026-01", "submissions": 1416, "convRate": 26.7, "stdConv": 43.2, "expConv": 100.0, "expShare": 0.6, "rejectShare": 4.9}, {"month": "2026-02", "submissions": 1519, "convRate": 25.1, "stdConv": 40.2, "expConv": 100.0, "expShare": 0.2, "rejectShare": 16.2}, {"month": "2026-03", "submissions": 1606, "convRate": 29.2, "stdConv": 42.6, "expConv": 97.1, "expShare": 2.2, "rejectShare": 19.6}, {"month": "2026-04", "submissions": 1229, "convRate": 28.9, "stdConv": 40.5, "expConv": 70.4, "expShare": 2.2, "rejectShare": 14.9}, {"month": "2026-05", "submissions": 1131, "convRate": 23.9, "stdConv": 30.8, "expConv": 24.2, "expShare": 5.5, "rejectShare": 7.3}, {"month": "2026-06", "submissions": 1489, "convRate": 24.6, "stdConv": 31.9, "expConv": 19.0, "expShare": 9.5, "rejectShare": 8.5}, {"month": "2026-07", "submissions": 1997, "convRate": 21.6, "stdConv": 29.1, "expConv": 22.9, "expShare": 10.7, "rejectShare": 7.2}, {"month": "2026-08", "submissions": 1685, "convRate": 18.0, "stdConv": 25.0, "expConv": 14.7, "expShare": 12.1, "rejectShare": 6.2}, {"month": "2026-09", "submissions": 1378, "convRate": 11.1, "stdConv": 17.2, "expConv": 8.7, "expShare": 10.0, "rejectShare": 7.7}, {"month": "2026-10", "submissions": 174, "convRate": 0.6, "stdConv": 0.0, "expConv": 0.0, "expShare": 4.0, "rejectShare": 2.9}];
+export const diagnosisMonthly: DiagnosisRow[] = [{"month": "2026-01", "submissions": 1416, "convRate": 26.7, "stdConv": 43.2, "expConv": 100.0, "expShare": 0.6, "rejectShare": 4.9}, {"month": "2026-02", "submissions": 1519, "convRate": 25.1, "stdConv": 40.2, "expConv": 100.0, "expShare": 0.2, "rejectShare": 16.2}, {"month": "2026-03", "submissions": 1606, "convRate": 29.2, "stdConv": 42.6, "expConv": 97.1, "expShare": 2.2, "rejectShare": 19.6}, {"month": "2026-04", "submissions": 1229, "convRate": 28.9, "stdConv": 40.5, "expConv": 70.4, "expShare": 2.2, "rejectShare": 14.9}, {"month": "2026-05", "submissions": 1131, "convRate": 23.9, "stdConv": 30.8, "expConv": 24.2, "expShare": 5.5, "rejectShare": 7.3}, {"month": "2026-06", "submissions": 1489, "convRate": 24.6, "stdConv": 31.9, "expConv": 19.0, "expShare": 9.5, "rejectShare": 8.5}, {"month": "2026-07", "submissions": 1997, "convRate": 21.6, "stdConv": 29.1, "expConv": 22.9, "expShare": 10.7, "rejectShare": 7.2}, {"month": "2026-08", "submissions": 1685, "convRate": 19.3, "stdConv": 25.0, "expConv": 14.7, "expShare": 12.1, "rejectShare": 6.2}, {"month": "2026-09", "submissions": 1376, "convRate": 15.6, "stdConv": 17.2, "expConv": 8.7, "expShare": 10.0, "rejectShare": 7.7}, {"month": "2026-10", "submissions": 684, "convRate": 4.2, "stdConv": 0.0, "expConv": 0.0, "expShare": 3.1, "rejectShare": 2.6}];
 export const priceIncreaseMonth = "2026-07";
 
 // Fresh vs stale link->checkout. Fresh = link sent <=14 days after submission (brand-new lead).
@@ -107,13 +107,13 @@ export const simMonthly: SimRow[] = [
   { month: '2026-07', enroll: 431, efRec: 214, efCo: 49, stdConv: 29.1 },
   { month: '2026-08', enroll: 302, efRec: 204, efCo: 30, stdConv: 25.0 },
   { month: '2026-09', enroll: 152, efRec: 138, efCo: 12, stdConv: 17.2 },
-  { month: '2026-10', enroll: 1, efRec: 7, efCo: 0, stdConv: 0 },
+  { month: '2026-10', enroll: 29, efRec: 7, efCo: 0, stdConv: 0 },
 ];
 
 // Submissions + checkouts by submission month × lead source (for mix-over-time + conversion-by-source-by-month).
 export const sourceOrder = ['Influencer', 'Dental Office', 'Online Search', 'Podcast', 'Airway Ambassador', 'Parent', 'Google Ad', 'Other'];
 export type SourceMonthRow = { month: string; subs: Record<string, number>; cos: Record<string, number> };
-export const sourceMonthly: SourceMonthRow[] = [{"month": "2026-01", "subs": {"Influencer": 309, "Dental Office": 367, "Online Search": 233, "Podcast": 150, "Airway Ambassador": 53, "Parent": 77, "Google Ad": 0, "Other": 227}, "cos": {"Influencer": 103, "Dental Office": 56, "Online Search": 61, "Podcast": 43, "Airway Ambassador": 22, "Parent": 32, "Google Ad": 0, "Other": 61}}, {"month": "2026-02", "subs": {"Influencer": 511, "Dental Office": 314, "Online Search": 284, "Podcast": 96, "Airway Ambassador": 61, "Parent": 64, "Google Ad": 0, "Other": 189}, "cos": {"Influencer": 145, "Dental Office": 54, "Online Search": 74, "Podcast": 28, "Airway Ambassador": 20, "Parent": 22, "Google Ad": 0, "Other": 38}}, {"month": "2026-03", "subs": {"Influencer": 462, "Dental Office": 316, "Online Search": 338, "Podcast": 165, "Airway Ambassador": 70, "Parent": 72, "Google Ad": 0, "Other": 183}, "cos": {"Influencer": 138, "Dental Office": 71, "Online Search": 92, "Podcast": 61, "Airway Ambassador": 33, "Parent": 24, "Google Ad": 0, "Other": 50}}, {"month": "2026-04", "subs": {"Influencer": 234, "Dental Office": 255, "Online Search": 298, "Podcast": 129, "Airway Ambassador": 68, "Parent": 73, "Google Ad": 20, "Other": 152}, "cos": {"Influencer": 76, "Dental Office": 57, "Online Search": 93, "Podcast": 47, "Airway Ambassador": 26, "Parent": 14, "Google Ad": 2, "Other": 40}}, {"month": "2026-05", "subs": {"Influencer": 269, "Dental Office": 212, "Online Search": 251, "Podcast": 127, "Airway Ambassador": 53, "Parent": 49, "Google Ad": 28, "Other": 142}, "cos": {"Influencer": 74, "Dental Office": 40, "Online Search": 60, "Podcast": 35, "Airway Ambassador": 23, "Parent": 12, "Google Ad": 5, "Other": 21}}, {"month": "2026-06", "subs": {"Influencer": 306, "Dental Office": 228, "Online Search": 326, "Podcast": 279, "Airway Ambassador": 47, "Parent": 84, "Google Ad": 81, "Other": 138}, "cos": {"Influencer": 92, "Dental Office": 51, "Online Search": 57, "Podcast": 69, "Airway Ambassador": 22, "Parent": 33, "Google Ad": 14, "Other": 28}}, {"month": "2026-07", "subs": {"Influencer": 602, "Dental Office": 389, "Online Search": 331, "Podcast": 161, "Airway Ambassador": 91, "Parent": 108, "Google Ad": 93, "Other": 222}, "cos": {"Influencer": 138, "Dental Office": 55, "Online Search": 77, "Podcast": 41, "Airway Ambassador": 36, "Parent": 25, "Google Ad": 11, "Other": 48}}, {"month": "2026-08", "subs": {"Influencer": 522, "Dental Office": 363, "Online Search": 274, "Podcast": 168, "Airway Ambassador": 52, "Parent": 62, "Google Ad": 88, "Other": 156}, "cos": {"Influencer": 92, "Dental Office": 48, "Online Search": 51, "Podcast": 47, "Airway Ambassador": 12, "Parent": 21, "Google Ad": 8, "Other": 23}}, {"month": "2026-09", "subs": {"Influencer": 218, "Dental Office": 291, "Online Search": 271, "Podcast": 284, "Airway Ambassador": 30, "Parent": 71, "Google Ad": 55, "Other": 158}, "cos": {"Influencer": 35, "Dental Office": 22, "Online Search": 25, "Podcast": 38, "Airway Ambassador": 2, "Parent": 12, "Google Ad": 2, "Other": 16}}, {"month": "2026-10", "subs": {"Influencer": 31, "Dental Office": 30, "Online Search": 43, "Podcast": 26, "Airway Ambassador": 5, "Parent": 6, "Google Ad": 9, "Other": 21}, "cos": {"Influencer": 0, "Dental Office": 1, "Online Search": 0, "Podcast": 0, "Airway Ambassador": 0, "Parent": 0, "Google Ad": 0, "Other": 0}}];
+export const sourceMonthly: SourceMonthRow[] = [{"month": "2026-01", "subs": {"Influencer": 309, "Dental Office": 367, "Online Search": 233, "Podcast": 150, "Airway Ambassador": 53, "Parent": 77, "Google Ad": 0, "Other": 227}, "cos": {"Influencer": 103, "Dental Office": 56, "Online Search": 61, "Podcast": 43, "Airway Ambassador": 22, "Parent": 32, "Google Ad": 0, "Other": 61}}, {"month": "2026-02", "subs": {"Influencer": 511, "Dental Office": 314, "Online Search": 284, "Podcast": 96, "Airway Ambassador": 61, "Parent": 64, "Google Ad": 0, "Other": 189}, "cos": {"Influencer": 145, "Dental Office": 54, "Online Search": 74, "Podcast": 28, "Airway Ambassador": 20, "Parent": 22, "Google Ad": 0, "Other": 38}}, {"month": "2026-03", "subs": {"Influencer": 462, "Dental Office": 316, "Online Search": 338, "Podcast": 165, "Airway Ambassador": 70, "Parent": 72, "Google Ad": 0, "Other": 183}, "cos": {"Influencer": 138, "Dental Office": 71, "Online Search": 92, "Podcast": 61, "Airway Ambassador": 33, "Parent": 24, "Google Ad": 0, "Other": 50}}, {"month": "2026-04", "subs": {"Influencer": 234, "Dental Office": 255, "Online Search": 298, "Podcast": 129, "Airway Ambassador": 68, "Parent": 73, "Google Ad": 20, "Other": 152}, "cos": {"Influencer": 76, "Dental Office": 57, "Online Search": 93, "Podcast": 47, "Airway Ambassador": 26, "Parent": 14, "Google Ad": 2, "Other": 40}}, {"month": "2026-05", "subs": {"Influencer": 269, "Dental Office": 212, "Online Search": 251, "Podcast": 127, "Airway Ambassador": 53, "Parent": 49, "Google Ad": 28, "Other": 142}, "cos": {"Influencer": 74, "Dental Office": 40, "Online Search": 60, "Podcast": 35, "Airway Ambassador": 23, "Parent": 12, "Google Ad": 5, "Other": 21}}, {"month": "2026-06", "subs": {"Influencer": 306, "Dental Office": 228, "Online Search": 326, "Podcast": 279, "Airway Ambassador": 47, "Parent": 84, "Google Ad": 81, "Other": 138}, "cos": {"Influencer": 92, "Dental Office": 51, "Online Search": 57, "Podcast": 69, "Airway Ambassador": 22, "Parent": 33, "Google Ad": 14, "Other": 28}}, {"month": "2026-07", "subs": {"Influencer": 602, "Dental Office": 389, "Online Search": 331, "Podcast": 161, "Airway Ambassador": 91, "Parent": 108, "Google Ad": 93, "Other": 222}, "cos": {"Influencer": 143, "Dental Office": 57, "Online Search": 80, "Podcast": 44, "Airway Ambassador": 36, "Parent": 26, "Google Ad": 11, "Other": 46}}, {"month": "2026-08", "subs": {"Influencer": 522, "Dental Office": 363, "Online Search": 274, "Podcast": 168, "Airway Ambassador": 52, "Parent": 62, "Google Ad": 88, "Other": 156}, "cos": {"Influencer": 100, "Dental Office": 50, "Online Search": 54, "Podcast": 52, "Airway Ambassador": 14, "Parent": 21, "Google Ad": 9, "Other": 26}}, {"month": "2026-09", "subs": {"Influencer": 218, "Dental Office": 291, "Online Search": 271, "Podcast": 284, "Airway Ambassador": 30, "Parent": 71, "Google Ad": 55, "Other": 156}, "cos": {"Influencer": 51, "Dental Office": 31, "Online Search": 40, "Podcast": 48, "Airway Ambassador": 4, "Parent": 16, "Google Ad": 4, "Other": 20}}, {"month": "2026-10", "subs": {"Influencer": 101, "Dental Office": 150, "Online Search": 160, "Podcast": 84, "Airway Ambassador": 21, "Parent": 29, "Google Ad": 20, "Other": 119}, "cos": {"Influencer": 9, "Dental Office": 9, "Online Search": 1, "Podcast": 8, "Airway Ambassador": 0, "Parent": 0, "Google Ad": 0, "Other": 2}}];
 export const sourceColors: Record<string, string> = { Influencer: '#3A6EA4', 'Dental Office': '#e06666', 'Online Search': '#8CD1C8', Podcast: '#1B2A4A', 'Airway Ambassador': '#6AA84F', Parent: '#FDBE67', 'Google Ad': '#B6CAE3', Other: '#d1d5db' };
 
 export type DowRow = { day: string; checkouts: number };
@@ -161,14 +161,14 @@ export const linkCohort: CohortRow[] = [
   // 2026 (from the 2026-submitter funnel export)
   { month: '2026-01', links: 584,  checkouts: 219, ever: 37.5, d14: 25.9, d21: 28.6, mature: true },
   { month: '2026-02', links: 717,  checkouts: 285, ever: 39.7, d14: 25.1, d21: 27.9, mature: true },
-  { month: '2026-03', links: 975,  checkouts: 360, ever: 36.9, d14: 19.9, d21: 24.1, mature: true },
-  { month: '2026-04', links: 1114, checkouts: 308, ever: 27.6, d14: 12.5, d21: 15.9, mature: true },
-  { month: '2026-05', links: 741,  checkouts: 228, ever: 30.8, d14: 17.0, d21: 20.1, mature: true },
-  { month: '2026-06', links: 1164, checkouts: 332, ever: 28.5, d14: 20.2, d21: 24.1, mature: true, outlier: true }, // last-day pricing push before Jul 1 increase
-  { month: '2026-07', links: 1156, checkouts: 315, ever: 27.2, d14: 17.6, d21: 21.1, mature: true, outlier: true }, // first month at the new (higher) price — pricing-distorted
-  { month: '2026-08', links: 1084, checkouts: 271, ever: 25.0, d14: 18.3, d21: 20.9, mature: true },
-  { month: '2026-09', links: 879,  checkouts: 216, ever: 24.6, d14: 24.6, d21: 25.4, mature: false },
-  { month: '2026-10', links: 117,  checkouts: 13,  ever: 11.1, d14: null, d21: null, mature: false },
+  { month: '2026-03', links: 976,  checkouts: 362, ever: 37.1, d14: 20.9, d21: 25.1, mature: true },
+  { month: '2026-04', links: 1114, checkouts: 308, ever: 27.6, d14: 13.7, d21: 17.1, mature: true },
+  { month: '2026-05', links: 741,  checkouts: 228, ever: 30.8, d14: 17.7, d21: 20.8, mature: true },
+  { month: '2026-06', links: 1164, checkouts: 333, ever: 28.6, d14: 20.5, d21: 24.4, mature: true, outlier: true }, // last-day pricing push before Jul 1 increase
+  { month: '2026-07', links: 1158, checkouts: 321, ever: 27.7, d14: 17.6, d21: 21.2, mature: true, outlier: true }, // first month at the new (higher) price — pricing-distorted
+  { month: '2026-08', links: 1081, checkouts: 287, ever: 26.5, d14: 18.3, d21: 21.0, mature: true },
+  { month: '2026-09', links: 866,  checkouts: 243, ever: 28.1, d14: 24.1, d21: 26.0, mature: false },
+  { month: '2026-10', links: 330,  checkouts: 72,  ever: 21.8, d14: 21.8, d21: 21.8, mature: false },
 ];
 // Pre-drop baseline rate (Jan–Mar) used for the "expected at old rate" / lost-enrollment math.
 export const checkoutBaselineRate = 37.96;
@@ -252,10 +252,10 @@ export const lavaIceCohort = [
   { m: 'Apr', links: 662, lava: 23, ice: 16 },
   { m: 'May', links: 593, lava: 22, ice: 10 },
   { m: 'Jun', links: 926, lava: 27, ice: 4 },
-  { m: 'Jul', links: 964, lava: 22, ice: 5 },
-  { m: 'Aug', links: 889, lava: 22, ice: 4 },
-  { m: 'Sep', links: 716, lava: 27, ice: 1, iceImm: true },
-  { m: 'Oct', links: 119, lava: 12, ice: 0, imm: true },
+  { m: 'Jul', links: 966, lava: 22, ice: 6 },
+  { m: 'Aug', links: 886, lava: 22, ice: 6 },
+  { m: 'Sep', links: 706, lava: 29, ice: 2, iceImm: true },
+  { m: 'Oct', links: 277, lava: 23, ice: 0, imm: true },
 ];
 
 // The breakWeekly total (Lava+Ice) split into its two parts, by link-sent week
@@ -276,15 +276,15 @@ export const lavaIceWeekly = [
   { w: 'Aug 31', lava: 24, ice: 3, imm: true }, { w: 'Sep 7', lava: 30, ice: 2, imm: true }, { w: 'Sep 14', lava: 28, ice: 0, imm: true }, { w: 'Sep 21', lava: 33, ice: 0, imm: true }, { w: 'Sep 28', lava: 19, ice: 0, imm: true }, { w: 'Oct 5', lava: 6, ice: 0, imm: true },
 ];
 
-// ---- Daily Funnel Trends (last 3 months: Jul 14 – Oct 14, 2026) ----
-// Source: Enrollment Funnel export, Oct 14 2026. Submissions by submission date, checkout links by
+// ---- Daily Funnel Trends (last 3 months: Jul 14 – Oct 19, 2026) ----
+// Source: Enrollment Funnel export, Oct 19 2026. Submissions by submission date, checkout links by
 // checkout-link-sent date, checkouts by checkout date — all records, not just Google Ads.
 export type DailyFunnelRow = { date: string; submissions: number; checkoutLinks: number; checkouts: number; revenue: number };
 export const dailyFunnel: DailyFunnelRow[] = [
   { date: '2026-07-14', submissions: 114, checkoutLinks: 30, checkouts: 10, revenue: 20458 },
   { date: '2026-07-15', submissions: 120, checkoutLinks: 40, checkouts: 12, revenue: 19162 },
   { date: '2026-07-16', submissions: 100, checkoutLinks: 61, checkouts: 10, revenue: 18911 },
-  { date: '2026-07-17', submissions: 80, checkoutLinks: 42, checkouts: 15, revenue: 29686 },
+  { date: '2026-07-17', submissions: 80, checkoutLinks: 43, checkouts: 15, revenue: 29686 },
   { date: '2026-07-18', submissions: 34, checkoutLinks: 28, checkouts: 5, revenue: 10028 },
   { date: '2026-07-19', submissions: 34, checkoutLinks: 0, checkouts: 1, revenue: 2245 },
   { date: '2026-07-20', submissions: 154, checkoutLinks: 106, checkouts: 9, revenue: 18360 },
@@ -298,13 +298,13 @@ export const dailyFunnel: DailyFunnelRow[] = [
   { date: '2026-07-28', submissions: 51, checkoutLinks: 29, checkouts: 20, revenue: 38466 },
   { date: '2026-07-29', submissions: 66, checkoutLinks: 66, checkouts: 34, revenue: 57768 },
   { date: '2026-07-30', submissions: 98, checkoutLinks: 59, checkouts: 26, revenue: 46494 },
-  { date: '2026-07-31', submissions: 103, checkoutLinks: 34, checkouts: 16, revenue: 30830 },
+  { date: '2026-07-31', submissions: 103, checkoutLinks: 35, checkouts: 16, revenue: 30830 },
   { date: '2026-08-01', submissions: 30, checkoutLinks: 0, checkouts: 5, revenue: 8532 },
   { date: '2026-08-02', submissions: 25, checkoutLinks: 0, checkouts: 1, revenue: 2296 },
   { date: '2026-08-03', submissions: 88, checkoutLinks: 59, checkouts: 7, revenue: 12574 },
   { date: '2026-08-04', submissions: 64, checkoutLinks: 62, checkouts: 9, revenue: 19259 },
   { date: '2026-08-05', submissions: 79, checkoutLinks: 96, checkouts: 7, revenue: 14869 },
-  { date: '2026-08-06', submissions: 53, checkoutLinks: 58, checkouts: 14, revenue: 27842 },
+  { date: '2026-08-06', submissions: 53, checkoutLinks: 57, checkouts: 14, revenue: 27842 },
   { date: '2026-08-07', submissions: 32, checkoutLinks: 38, checkouts: 14, revenue: 27240 },
   { date: '2026-08-08', submissions: 27, checkoutLinks: 0, checkouts: 3, revenue: 5688 },
   { date: '2026-08-09', submissions: 12, checkoutLinks: 2, checkouts: 2, revenue: 3991 },
@@ -318,7 +318,7 @@ export const dailyFunnel: DailyFunnelRow[] = [
   { date: '2026-08-17', submissions: 39, checkoutLinks: 85, checkouts: 16, revenue: 34931 },
   { date: '2026-08-18', submissions: 61, checkoutLinks: 14, checkouts: 8, revenue: 14718 },
   { date: '2026-08-19', submissions: 67, checkoutLinks: 54, checkouts: 10, revenue: 19707 },
-  { date: '2026-08-20', submissions: 42, checkoutLinks: 33, checkouts: 14, revenue: 26143 },
+  { date: '2026-08-20', submissions: 42, checkoutLinks: 32, checkouts: 14, revenue: 26143 },
   { date: '2026-08-21', submissions: 41, checkoutLinks: 34, checkouts: 19, revenue: 35926 },
   { date: '2026-08-22', submissions: 15, checkoutLinks: 0, checkouts: 6, revenue: 10678 },
   { date: '2026-08-23', submissions: 21, checkoutLinks: 1, checkouts: 1, revenue: 1746 },
@@ -353,7 +353,7 @@ export const dailyFunnel: DailyFunnelRow[] = [
   { date: '2026-09-21', submissions: 49, checkoutLinks: 30, checkouts: 8, revenue: 15564 },
   { date: '2026-09-22', submissions: 47, checkoutLinks: 29, checkouts: 22, revenue: 42908 },
   { date: '2026-09-23', submissions: 41, checkoutLinks: 31, checkouts: 9, revenue: 18660 },
-  { date: '2026-09-24', submissions: 54, checkoutLinks: 32, checkouts: 27, revenue: 47190 },
+  { date: '2026-09-24', submissions: 53, checkoutLinks: 31, checkouts: 27, revenue: 47190 },
   { date: '2026-09-25', submissions: 22, checkoutLinks: 16, checkouts: 14, revenue: 25641 },
   { date: '2026-09-26', submissions: 20, checkoutLinks: 2, checkouts: 7, revenue: 14469 },
   { date: '2026-09-27', submissions: 30, checkoutLinks: 0, checkouts: 3, revenue: 5487 },
@@ -372,12 +372,17 @@ export const dailyFunnel: DailyFunnelRow[] = [
   { date: '2026-10-10', submissions: 22, checkoutLinks: 0, checkouts: 6, revenue: 11974 },
   { date: '2026-10-11', submissions: 15, checkoutLinks: 1, checkouts: 7, revenue: 14069 },
   { date: '2026-10-12', submissions: 45, checkoutLinks: 31, checkouts: 9, revenue: 18012 },
-  { date: '2026-10-13', submissions: 41, checkoutLinks: 40, checkouts: 14, revenue: 26444 },
-  { date: '2026-10-14', submissions: 19, checkoutLinks: 41, checkouts: 12, revenue: 18605 },
+  { date: '2026-10-13', submissions: 41, checkoutLinks: 42, checkouts: 14, revenue: 27439 },
+  { date: '2026-10-14', submissions: 41, checkoutLinks: 43, checkouts: 18, revenue: 30979 },
+  { date: '2026-10-15', submissions: 76, checkoutLinks: 20, checkouts: 9, revenue: 18558 },
+  { date: '2026-10-16', submissions: 42, checkoutLinks: 19, checkouts: 11, revenue: 18255 },
+  { date: '2026-10-17', submissions: 26, checkoutLinks: 1, checkouts: 17, revenue: 30630 },
+  { date: '2026-10-18', submissions: 22, checkoutLinks: 1, checkouts: 3, revenue: 5886 },
+  { date: '2026-10-19', submissions: 26, checkoutLinks: 2, checkouts: 4, revenue: 0 },
 ];
 
 // Weekly time-to-checkout-link: median and mean days from submission to checkout-link-sent,
-// grouped by submission week. Source: Enrollment Funnel export, Oct 14 2026. Only records with
+// grouped by submission week. Source: Enrollment Funnel export, Oct 19 2026. Only records with
 // both a submission date and a checkout-link date >= Jul 14 are included.
 export type WeeklyTTCLRow = { week: string; median: number; mean: number; count: number };
 export const weeklyTTCL: WeeklyTTCLRow[] = [
@@ -390,19 +395,18 @@ export const weeklyTTCL: WeeklyTTCLRow[] = [
   { week: '2026-08-24', median: 10, mean: 13.1, count: 307 },
   { week: '2026-08-31', median: 13, mean: 14.3, count: 288 },
   { week: '2026-09-07', median: 12, mean: 13.4, count: 174 },
-  { week: '2026-09-14', median: 13, mean: 13.0, count: 129 },
-  { week: '2026-09-21', median: 11, mean: 10.8, count: 92 },
-  { week: '2026-09-28', median: 8, mean: 8.7, count: 74 },
-  { week: '2026-10-05', median: 5, mean: 5.2, count: 25 },
-  { week: '2026-10-12', median: 1, mean: 1.3, count: 3 },
+  { week: '2026-09-14', median: 13, mean: 13.3, count: 130 },
+  { week: '2026-09-21', median: 11, mean: 11.0, count: 95 },
+  { week: '2026-09-28', median: 10, mean: 9.8, count: 92 },
+  { week: '2026-10-05', median: 6, mean: 6.1, count: 33 },
+  { week: '2026-10-12', median: 2, mean: 2.2, count: 8 },
 ];
 
 // Weekly Lava vs Ice checkouts (by checkout date), Jan 2025 – Oct 2026.
 // Lava = checked out <=21 days after checkout link sent (fast payer).
 // Ice = checked out >21 days after checkout link sent (win-back).
-// Source: TWO Enrollment Funnel exports combined (Oct 14 2026). Exports are partitioned
-// by Created Date with no cross-export duplicates; union gives complete checkout history.
-// All records with a checkout date, regardless of current stage.
+// Source: Enrollment Funnel exports (Oct 19 2026). 2025 data from prior combined exports;
+// 2026 data refreshed from Oct 19 export. All records with a checkout date.
 export type WeeklyLavaIceRow = { week: string; lava: number; ice: number; unclass: number; total: number; icePct: number; lavaRev: number; iceRev: number; unclassRev: number };
 export const weeklyLavaIce: WeeklyLavaIceRow[] = [
   // --- 2025 ---
@@ -496,13 +500,14 @@ export const weeklyLavaIce: WeeklyLavaIceRow[] = [
   { week: '2026-08-31', lava: 53, ice: 21, unclass: 13, total: 87, icePct: 28.4, lavaRev: 100479, iceRev: 33865, unclassRev: 23847 },
   { week: '2026-09-07', lava: 45, ice: 10, unclass: 7, total: 62, icePct: 18.2, lavaRev: 86062, iceRev: 17809, unclassRev: 9284 },
   { week: '2026-09-14', lava: 65, ice: 10, unclass: 9, total: 84, icePct: 13.3, lavaRev: 128262, iceRev: 20356, unclassRev: 13175 },
-  { week: '2026-09-21', lava: 53, ice: 30, unclass: 8, total: 91, icePct: 36.1, lavaRev: 103270, iceRev: 53276, unclassRev: 15269 },
-  { week: '2026-09-28', lava: 52, ice: 17, unclass: 12, total: 81, icePct: 24.6, lavaRev: 96940, iceRev: 30133, unclassRev: 19272 },
-  { week: '2026-10-05', lava: 35, ice: 15, unclass: 11, total: 61, icePct: 30.0, lavaRev: 69047, iceRev: 24247, unclassRev: 22115 },
-  { week: '2026-10-12', lava: 16, ice: 15, unclass: 5, total: 36, icePct: 48.4, lavaRev: 30333, iceRev: 24295, unclassRev: 8433 },
+  { week: '2026-09-21', lava: 53, ice: 29, unclass: 8, total: 90, icePct: 35.4, lavaRev: 103270, iceRev: 51380, unclassRev: 15269 },
+  { week: '2026-09-28', lava: 52, ice: 14, unclass: 12, total: 78, icePct: 21.2, lavaRev: 96940, iceRev: 24247, unclassRev: 19272 },
+  { week: '2026-10-05', lava: 34, ice: 16, unclass: 11, total: 61, icePct: 32.0, lavaRev: 67151, iceRev: 25441, unclassRev: 22115 },
+  { week: '2026-10-12', lava: 39, ice: 34, unclass: 8, total: 81, icePct: 46.6, lavaRev: 72537, iceRev: 62882, unclassRev: 15612 },
+  { week: '2026-10-19', lava: 2, ice: 1, unclass: 1, total: 4, icePct: 33.3, lavaRev: 3592, iceRev: 1796, unclassRev: 498 },
 ];
 
-// Monthly win-back rates by checkout-link month (from Oct 14 Enrollment Funnel exports, both combined)
+// Monthly win-back rates by checkout-link month (from Oct 19 Enrollment Funnel export)
 // links = total leads that received a checkout link that month
 // winbackRate = Ice / links (what % of linked leads became win-backs)
 // iceShareCO = Ice / (Ice + Lava) (what % of actual checkouts were win-backs)
@@ -517,8 +522,8 @@ export const monthlyWinback: MonthlyWinbackRow[] = [
   { month: '2026-04', links: 651, lava: 182, ice: 111, noCO: 358, winbackRate: 17.1, iceShareCO: 37.9 },
   { month: '2026-05', links: 497, lava: 136, ice: 72, noCO: 289, winbackRate: 14.5, iceShareCO: 34.6 },
   { month: '2026-06', links: 675, lava: 256, ice: 46, noCO: 373, winbackRate: 6.8, iceShareCO: 15.2 },
-  { month: '2026-07', links: 654, lava: 219, ice: 75, noCO: 360, winbackRate: 11.5, iceShareCO: 25.5 },
-  { month: '2026-08', links: 655, lava: 201, ice: 46, noCO: 408, winbackRate: 7.0, iceShareCO: 18.6 },
-  { month: '2026-09', links: 561, lava: 202, ice: 13, noCO: 346, winbackRate: 2.3, iceShareCO: 6.0 },
-  { month: '2026-10', links: 199, lava: 42, ice: 0, noCO: 157, winbackRate: 0.0, iceShareCO: 0.0 },
+  { month: '2026-07', links: 1158, lava: 245, ice: 76, noCO: 837, winbackRate: 6.6, iceShareCO: 23.7 },
+  { month: '2026-08', links: 1081, lava: 227, ice: 60, noCO: 794, winbackRate: 5.6, iceShareCO: 20.9 },
+  { month: '2026-09', links: 866, lava: 225, ice: 18, noCO: 623, winbackRate: 2.1, iceShareCO: 7.4 },
+  { month: '2026-10', links: 330, lava: 72, ice: 0, noCO: 258, winbackRate: 0.0, iceShareCO: 0.0 },
 ];

@@ -63,7 +63,8 @@ const GSC_MONTHLY: Array<{ month: string; clicks: number; impressions: number; c
   { month: '2026-06', clicks: 11550, impressions: 54729, ctr: 21.1, position: 10.1 },
   { month: '2026-07', clicks: 11163, impressions: 52738, ctr: 21.2, position: 9.3 },
   { month: '2026-08', clicks: 9948, impressions: 56938, ctr: 17.5, position: 10.8 },
-  { month: '2026-09', clicks: 12621, impressions: 52716, ctr: 23.9, position: 7.6, partial: true, daysReported: 27 },
+  { month: '2026-09', clicks: 14730, impressions: 59655, ctr: 24.7, position: 7.6 },
+  { month: '2026-10', clicks: 6830, impressions: 32223, ctr: 21.2, position: 9.0, partial: true, daysReported: 17 },
 ];
 
 const GSC_WEEKLY = [
@@ -155,8 +156,8 @@ const GSC_WEEKLY = [
   { week: '2026-09-22', clicks: 1774, impressions: 9795, ctr: 18.1, position: 5.8 }, // partial week: 6/7 days (Sep 22-27, GSC lag)
 ];
 
-// Full-year daily GSC data — Jan 1 to Sep 27, 2026
-// Source: Google Search Console DAYS view, updated September 29, 2026
+// Full-year daily GSC data — Jan 1 to Oct 17, 2026
+// Source: Google Search Console DAYS view, updated October 19, 2026
 // Format: [day, clicks, impressions]
 const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
   Jan: [
@@ -218,6 +219,12 @@ const GSC_DAILY_2026: Record<string, [number, number, number][]> = {
     [7,359,1601],[8,438,1826],[9,362,1764],[10,456,2028],[11,309,1480],[12,253,1555],[13,218,1970],
     [14,285,1561],[15,322,1635],[16,331,1582],[17,317,1363],[18,264,1417],[19,192,1104],
     [20,179,1121],[21,306,1444],[22,319,1429],[23,309,1521],[24,400,1839],[25,303,1457],[26,235,1869],[27,208,1680],
+    [28,310,1473],[29,403,1655],[30,1396,3811],
+  ],
+  Oct: [
+    [1,972,3197],[2,1244,4740],[3,190,1357],[4,190,1328],[5,312,1828],[6,315,1728],[7,360,1786],
+    [8,389,1760],[9,264,1450],[10,186,1224],[11,217,1524],[12,320,1550],[13,293,1675],[14,370,1765],
+    [15,486,2088],[16,464,1775],[17,258,1448],
   ],
 };
 
