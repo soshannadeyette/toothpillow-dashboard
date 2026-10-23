@@ -1,5 +1,5 @@
 // Enrollment checkouts data — hardcoded from Salesforce exports.
-// Checkout data: Checkouts Today export. Funnel/conversion data: SOSH | Enrollment Funnel export (Oct 19, 2026).
+// Checkout data: Checkouts Today export. Funnel/conversion data: SOSH | Enrollment Funnel export (Oct 22, 2026).
 
 export type MonthRow = { month: string; checkouts: number; amountPaid: number; totalAmountPaid: number };
 export type WeekRow = { weekStart: string; checkouts: number; amountPaid: number };
@@ -57,23 +57,23 @@ export const capacity: CapacityRow[] = [{"month": "2026-01", "activeTCs": 3, "ch
 // ---- Conversion (from the "SOSH | Enrollment Funnel" report: one row per 2026-submitting lead) ----
 // Submission->checkout and link-sent->checkout, cohorted by SUBMISSION month. Validated vs Erin's dashboard.
 export type ConvMonthRow = { month: string; submissions: number; linkSent: number; checkouts: number; subToCO: number; linkToCO: number };
-export const conversionMonthly: ConvMonthRow[] = [{"month": "2026-01", "submissions": 1415, "linkSent": 793, "checkouts": 378, "subToCO": 26.7, "linkToCO": 47.7}, {"month": "2026-02", "submissions": 1519, "linkSent": 1001, "checkouts": 381, "subToCO": 25.1, "linkToCO": 38.1}, {"month": "2026-03", "submissions": 1606, "linkSent": 1052, "checkouts": 472, "subToCO": 29.4, "linkToCO": 44.9}, {"month": "2026-04", "submissions": 1229, "linkSent": 768, "checkouts": 355, "subToCO": 28.9, "linkToCO": 46.2}, {"month": "2026-05", "submissions": 1131, "linkSent": 819, "checkouts": 271, "subToCO": 24.0, "linkToCO": 33.1}, {"month": "2026-06", "submissions": 1489, "linkSent": 1106, "checkouts": 370, "subToCO": 24.8, "linkToCO": 33.5}, {"month": "2026-07", "submissions": 1997, "linkSent": 1411, "checkouts": 443, "subToCO": 22.2, "linkToCO": 31.4}, {"month": "2026-08", "submissions": 1685, "linkSent": 1047, "checkouts": 326, "subToCO": 19.3, "linkToCO": 31.1}, {"month": "2026-09", "submissions": 1376, "linkSent": 667, "checkouts": 214, "subToCO": 15.6, "linkToCO": 32.1}, {"month": "2026-10", "submissions": 684, "linkSent": 91, "checkouts": 29, "subToCO": 4.2, "linkToCO": 31.9}];
+export const conversionMonthly: ConvMonthRow[] = [{"month": "2026-01", "submissions": 1415, "linkSent": 793, "checkouts": 378, "subToCO": 26.7, "linkToCO": 47.7}, {"month": "2026-02", "submissions": 1519, "linkSent": 1001, "checkouts": 381, "subToCO": 25.1, "linkToCO": 38.1}, {"month": "2026-03", "submissions": 1606, "linkSent": 1052, "checkouts": 472, "subToCO": 29.4, "linkToCO": 44.9}, {"month": "2026-04", "submissions": 1229, "linkSent": 768, "checkouts": 355, "subToCO": 28.9, "linkToCO": 46.2}, {"month": "2026-05", "submissions": 1131, "linkSent": 819, "checkouts": 271, "subToCO": 24.0, "linkToCO": 33.1}, {"month": "2026-06", "submissions": 1489, "linkSent": 1106, "checkouts": 372, "subToCO": 25.0, "linkToCO": 33.6}, {"month": "2026-07", "submissions": 1997, "linkSent": 1411, "checkouts": 445, "subToCO": 22.3, "linkToCO": 31.5}, {"month": "2026-08", "submissions": 1684, "linkSent": 1054, "checkouts": 332, "subToCO": 19.7, "linkToCO": 31.5}, {"month": "2026-09", "submissions": 1376, "linkSent": 714, "checkouts": 238, "subToCO": 17.3, "linkToCO": 33.3}, {"month": "2026-10", "submissions": 816, "linkSent": 178, "checkouts": 53, "subToCO": 6.5, "linkToCO": 29.8}];
 // Months from Aug onward are still MATURING (recent submitters can still check out later) — treat as incomplete.
 export const conversionMatureThrough = "2026-07";
 
 export type ConvRefRow = { referrer: string; submissions: number; checkouts: number; rate: number };
-export const conversionByReferrer: ConvRefRow[] = [{"referrer": "Influencer", "submissions": 3545, "checkouts": 933, "rate": 26.3}, {"referrer": "Dental Office", "submissions": 2885, "checkouts": 468, "rate": 16.2}, {"referrer": "Online Search", "submissions": 2762, "checkouts": 613, "rate": 22.2}, {"referrer": "Podcast", "submissions": 1643, "checkouts": 438, "rate": 26.7}, {"referrer": "Parent", "submissions": 690, "checkouts": 201, "rate": 29.1}, {"referrer": "Instagram", "submissions": 571, "checkouts": 107, "rate": 18.7}, {"referrer": "Airway Ambassador", "submissions": 545, "checkouts": 198, "rate": 36.3}, {"referrer": "Unknown Referral", "submissions": 513, "checkouts": 106, "rate": 20.7}, {"referrer": "Google Ad", "submissions": 386, "checkouts": 52, "rate": 13.5}, {"referrer": "(blank)", "submissions": 191, "checkouts": 32, "rate": 16.8}, {"referrer": "Unknown Professional Referral", "submissions": 167, "checkouts": 51, "rate": 30.5}, {"referrer": "Facebook", "submissions": 116, "checkouts": 15, "rate": 12.9}];
+export const conversionByReferrer: ConvRefRow[] = [{"referrer": "Influencer", "submissions": 3562, "checkouts": 952, "rate": 26.7}, {"referrer": "Dental Office", "submissions": 2924, "checkouts": 478, "rate": 16.3}, {"referrer": "Online Search", "submissions": 2810, "checkouts": 621, "rate": 22.1}, {"referrer": "Podcast", "submissions": 1650, "checkouts": 444, "rate": 26.9}, {"referrer": "Parent", "submissions": 691, "checkouts": 203, "rate": 29.4}, {"referrer": "Instagram", "submissions": 572, "checkouts": 108, "rate": 18.9}, {"referrer": "Airway Ambassador", "submissions": 550, "checkouts": 202, "rate": 36.7}, {"referrer": "Unknown Referral", "submissions": 529, "checkouts": 111, "rate": 21.0}, {"referrer": "Google Ad", "submissions": 388, "checkouts": 52, "rate": 13.4}, {"referrer": "(blank)", "submissions": 172, "checkouts": 34, "rate": 19.8}, {"referrer": "Unknown Professional Referral", "submissions": 168, "checkouts": 51, "rate": 30.4}, {"referrer": "Facebook", "submissions": 119, "checkouts": 15, "rate": 12.6}];
 
 export type FunnelStageRow = { stage: string; count: number };
-export const funnelStages: FunnelStageRow[] = [{"stage": "Closed Lost", "count": 3776}, {"stage": "CHECKED OUT", "count": 3154}, {"stage": "Sent Checkout Link", "count": 2760}, {"stage": "Referred Out", "count": 1309}, {"stage": "Screening Received", "count": 586}, {"stage": "Non Responsive - 2 or less responses", "count": 429}, {"stage": "Denied", "count": 321}, {"stage": "Assessment On Hold - Non Responsive", "count": 319}, {"stage": "Sent to TxP", "count": 301}, {"stage": "Closed Lost - Do Not Contact", "count": 274}, {"stage": "Treatment Consult Scheduled", "count": 171}, {"stage": "ON HOLD - No Doctor in State", "count": 151}, {"stage": "Consult Complete", "count": 143}, {"stage": "TxP Approved", "count": 112}, {"stage": "Temp Hold", "count": 88}];
+export const funnelStages: FunnelStageRow[] = [{"stage": "Closed Lost", "count": 3848}, {"stage": "CHECKED OUT", "count": 3207}, {"stage": "Sent Checkout Link", "count": 2805}, {"stage": "Referred Out", "count": 1320}, {"stage": "Screening Received", "count": 604}, {"stage": "Non Responsive - 2 or less responses", "count": 422}, {"stage": "Denied", "count": 323}, {"stage": "Assessment On Hold - Non Responsive", "count": 307}, {"stage": "Closed Lost - Do Not Contact", "count": 297}, {"stage": "Sent to TxP", "count": 261}, {"stage": "ON HOLD - No Doctor in State", "count": 152}, {"stage": "Consult Complete", "count": 150}, {"stage": "Treatment Consult Scheduled", "count": 133}, {"stage": "TxP Approved", "count": 116}, {"stage": "Temp Hold", "count": 86}];
 
-export const convSummary = { submissions: 14137, linkSent: 8755, checkouts: 3239 };
+export const convSummary = { submissions: 14262, linkSent: 8896, checkouts: 3297 };
 
 // Diagnosis of the May break (from the funnel report w/ "Results of Exam" recommendation).
 // stdConv = conversion of STANDARD approvals (non-expander); expConv = expander recs; rejectShare = referred/denied share.
 // Key: the STANDARD pool also fell ~40%->31% in May => broad checkout cause, not just expanders. Jan-Mar expConv is tiny-N noise.
 export type DiagnosisRow = { month: string; submissions: number; convRate: number; stdConv: number; expConv: number; expShare: number; rejectShare: number };
-export const diagnosisMonthly: DiagnosisRow[] = [{"month": "2026-01", "submissions": 1416, "convRate": 26.7, "stdConv": 43.2, "expConv": 100.0, "expShare": 0.6, "rejectShare": 4.9}, {"month": "2026-02", "submissions": 1519, "convRate": 25.1, "stdConv": 40.2, "expConv": 100.0, "expShare": 0.2, "rejectShare": 16.2}, {"month": "2026-03", "submissions": 1606, "convRate": 29.2, "stdConv": 42.6, "expConv": 97.1, "expShare": 2.2, "rejectShare": 19.6}, {"month": "2026-04", "submissions": 1229, "convRate": 28.9, "stdConv": 40.5, "expConv": 70.4, "expShare": 2.2, "rejectShare": 14.9}, {"month": "2026-05", "submissions": 1131, "convRate": 23.9, "stdConv": 30.8, "expConv": 24.2, "expShare": 5.5, "rejectShare": 7.3}, {"month": "2026-06", "submissions": 1489, "convRate": 24.6, "stdConv": 31.9, "expConv": 19.0, "expShare": 9.5, "rejectShare": 8.5}, {"month": "2026-07", "submissions": 1997, "convRate": 21.6, "stdConv": 29.1, "expConv": 22.9, "expShare": 10.7, "rejectShare": 7.2}, {"month": "2026-08", "submissions": 1685, "convRate": 19.3, "stdConv": 25.0, "expConv": 14.7, "expShare": 12.1, "rejectShare": 6.2}, {"month": "2026-09", "submissions": 1376, "convRate": 15.6, "stdConv": 17.2, "expConv": 8.7, "expShare": 10.0, "rejectShare": 7.7}, {"month": "2026-10", "submissions": 684, "convRate": 4.2, "stdConv": 0.0, "expConv": 0.0, "expShare": 3.1, "rejectShare": 2.6}];
+export const diagnosisMonthly: DiagnosisRow[] = [{"month": "2026-01", "submissions": 1415, "convRate": 26.7, "stdConv": 41.3, "expConv": 100.0, "expShare": 1.2, "rejectShare": 17.1}, {"month": "2026-02", "submissions": 1519, "convRate": 25.1, "stdConv": 37.9, "expConv": 100.0, "expShare": 0.4, "rejectShare": 21.0}, {"month": "2026-03", "submissions": 1606, "convRate": 29.4, "stdConv": 38.2, "expConv": 100.0, "expShare": 3.9, "rejectShare": 18.1}, {"month": "2026-04", "submissions": 1229, "convRate": 28.9, "stdConv": 38.6, "expConv": 52.9, "expShare": 3.8, "rejectShare": 15.3}, {"month": "2026-05", "submissions": 1131, "convRate": 24.0, "stdConv": 29.3, "expConv": 23.0, "expShare": 8.2, "rejectShare": 8.0}, {"month": "2026-06", "submissions": 1489, "convRate": 25.0, "stdConv": 30.1, "expConv": 18.4, "expShare": 13.5, "rejectShare": 8.7}, {"month": "2026-07", "submissions": 1997, "convRate": 22.3, "stdConv": 27.6, "expConv": 23.5, "expShare": 14.7, "rejectShare": 7.1}, {"month": "2026-08", "submissions": 1684, "convRate": 19.7, "stdConv": 28.6, "expConv": 17.2, "expShare": 16.7, "rejectShare": 6.3}, {"month": "2026-09", "submissions": 1376, "convRate": 17.3, "stdConv": 31.0, "expConv": 18.3, "expShare": 15.4, "rejectShare": 7.1}, {"month": "2026-10", "submissions": 816, "convRate": 6.5, "stdConv": 27.5, "expConv": 8.1, "expShare": 16.8, "rejectShare": 3.9}];
 export const priceIncreaseMonth = "2026-07";
 
 // Fresh vs stale link->checkout. Fresh = link sent <=14 days after submission (brand-new lead).
@@ -81,16 +81,16 @@ export const priceIncreaseMonth = "2026-07";
 // Proves the May decline is REAL (fresh leads broke 38->30), not just blasting old leads. April's dip was the stale blast (328 re-sends).
 export type FreshStaleRow = { month: string; freshConv: number; staleN: number; staleConv: number | null };
 export const linkFreshStale: FreshStaleRow[] = [
-  { month: '2026-01', freshConv: 37.4, staleN: 0, staleConv: null },
-  { month: '2026-02', freshConv: 38.9, staleN: 14, staleConv: null },
-  { month: '2026-03', freshConv: 37.5, staleN: 16, staleConv: null },
-  { month: '2026-04', freshConv: 38.2, staleN: 328, staleConv: 8.8 },
-  { month: '2026-05', freshConv: 30.1, staleN: 31, staleConv: null },
-  { month: '2026-06', freshConv: 29.1, staleN: 45, staleConv: 33.3 },
-  { month: '2026-07', freshConv: 27.5, staleN: 35, staleConv: 31.4 },
-  { month: '2026-08', freshConv: 24.6, staleN: 50, staleConv: 30.0 },
-  { month: '2026-09', freshConv: 25.7, staleN: 47, staleConv: 17.0 },
-  { month: '2026-10', freshConv: 12.1, staleN: 12, staleConv: null },
+  { month: '2026-01', freshConv: 39.3, staleN: 48, staleConv: 16.7 },
+  { month: '2026-02', freshConv: 37.8, staleN: 174, staleConv: 3.4 },
+  { month: '2026-03', freshConv: 37.6, staleN: 161, staleConv: 20.5 },
+  { month: '2026-04', freshConv: 37.6, staleN: 46, staleConv: 37.0 },
+  { month: '2026-05', freshConv: 28.2, staleN: 29, staleConv: 34.5 },
+  { month: '2026-06', freshConv: 29.5, staleN: 21, staleConv: 19.0 },
+  { month: '2026-07', freshConv: 26.8, staleN: 64, staleConv: 32.8 },
+  { month: '2026-08', freshConv: 26.9, staleN: 56, staleConv: 10.7 },
+  { month: '2026-09', freshConv: 35.6, staleN: 54, staleConv: 9.3 },
+  { month: '2026-10', freshConv: 24.0, staleN: 0, staleConv: null },
 ];
 
 // Expanders-First simulation: per submission month, total enrollments (checkouts), expander recs & checkouts, standard conv.
@@ -98,26 +98,26 @@ export const linkFreshStale: FreshStaleRow[] = [
 // (convert at that month's stdConv), the rest would've been denied (0). Data says f is near 0 (standard share held).
 export type SimRow = { month: string; enroll: number; efRec: number; efCo: number; stdConv: number };
 export const simMonthly: SimRow[] = [
-  { month: '2026-01', enroll: 378, efRec: 8, efCo: 8, stdConv: 43.2 },
-  { month: '2026-02', enroll: 381, efRec: 3, efCo: 3, stdConv: 40.2 },
-  { month: '2026-03', enroll: 469, efRec: 35, efCo: 34, stdConv: 42.6 },
-  { month: '2026-04', enroll: 355, efRec: 27, efCo: 19, stdConv: 40.5 },
-  { month: '2026-05', enroll: 270, efRec: 62, efCo: 15, stdConv: 30.8 },
-  { month: '2026-06', enroll: 366, efRec: 142, efCo: 27, stdConv: 31.9 },
-  { month: '2026-07', enroll: 431, efRec: 214, efCo: 49, stdConv: 29.1 },
-  { month: '2026-08', enroll: 302, efRec: 204, efCo: 30, stdConv: 25.0 },
-  { month: '2026-09', enroll: 152, efRec: 138, efCo: 12, stdConv: 17.2 },
-  { month: '2026-10', enroll: 29, efRec: 7, efCo: 0, stdConv: 0 },
+  { month: '2026-01', enroll: 378, efRec: 8, efCo: 8, stdConv: 41.3 },
+  { month: '2026-02', enroll: 381, efRec: 3, efCo: 3, stdConv: 37.9 },
+  { month: '2026-03', enroll: 472, efRec: 35, efCo: 34, stdConv: 38.2 },
+  { month: '2026-04', enroll: 355, efRec: 27, efCo: 19, stdConv: 38.6 },
+  { month: '2026-05', enroll: 271, efRec: 62, efCo: 15, stdConv: 29.3 },
+  { month: '2026-06', enroll: 372, efRec: 142, efCo: 27, stdConv: 30.1 },
+  { month: '2026-07', enroll: 445, efRec: 214, efCo: 50, stdConv: 27.6 },
+  { month: '2026-08', enroll: 332, efRec: 205, efCo: 34, stdConv: 28.6 },
+  { month: '2026-09', enroll: 238, efRec: 144, efCo: 23, stdConv: 31.0 },
+  { month: '2026-10', enroll: 53, efRec: 69, efCo: 3, stdConv: 27.5 },
 ];
 
 // Submissions + checkouts by submission month × lead source (for mix-over-time + conversion-by-source-by-month).
 export const sourceOrder = ['Influencer', 'Dental Office', 'Online Search', 'Podcast', 'Airway Ambassador', 'Parent', 'Google Ad', 'Other'];
 export type SourceMonthRow = { month: string; subs: Record<string, number>; cos: Record<string, number> };
-export const sourceMonthly: SourceMonthRow[] = [{"month": "2026-01", "subs": {"Influencer": 309, "Dental Office": 367, "Online Search": 233, "Podcast": 150, "Airway Ambassador": 53, "Parent": 77, "Google Ad": 0, "Other": 227}, "cos": {"Influencer": 103, "Dental Office": 56, "Online Search": 61, "Podcast": 43, "Airway Ambassador": 22, "Parent": 32, "Google Ad": 0, "Other": 61}}, {"month": "2026-02", "subs": {"Influencer": 511, "Dental Office": 314, "Online Search": 284, "Podcast": 96, "Airway Ambassador": 61, "Parent": 64, "Google Ad": 0, "Other": 189}, "cos": {"Influencer": 145, "Dental Office": 54, "Online Search": 74, "Podcast": 28, "Airway Ambassador": 20, "Parent": 22, "Google Ad": 0, "Other": 38}}, {"month": "2026-03", "subs": {"Influencer": 462, "Dental Office": 316, "Online Search": 338, "Podcast": 165, "Airway Ambassador": 70, "Parent": 72, "Google Ad": 0, "Other": 183}, "cos": {"Influencer": 138, "Dental Office": 71, "Online Search": 92, "Podcast": 61, "Airway Ambassador": 33, "Parent": 24, "Google Ad": 0, "Other": 50}}, {"month": "2026-04", "subs": {"Influencer": 234, "Dental Office": 255, "Online Search": 298, "Podcast": 129, "Airway Ambassador": 68, "Parent": 73, "Google Ad": 20, "Other": 152}, "cos": {"Influencer": 76, "Dental Office": 57, "Online Search": 93, "Podcast": 47, "Airway Ambassador": 26, "Parent": 14, "Google Ad": 2, "Other": 40}}, {"month": "2026-05", "subs": {"Influencer": 269, "Dental Office": 212, "Online Search": 251, "Podcast": 127, "Airway Ambassador": 53, "Parent": 49, "Google Ad": 28, "Other": 142}, "cos": {"Influencer": 74, "Dental Office": 40, "Online Search": 60, "Podcast": 35, "Airway Ambassador": 23, "Parent": 12, "Google Ad": 5, "Other": 21}}, {"month": "2026-06", "subs": {"Influencer": 306, "Dental Office": 228, "Online Search": 326, "Podcast": 279, "Airway Ambassador": 47, "Parent": 84, "Google Ad": 81, "Other": 138}, "cos": {"Influencer": 92, "Dental Office": 51, "Online Search": 57, "Podcast": 69, "Airway Ambassador": 22, "Parent": 33, "Google Ad": 14, "Other": 28}}, {"month": "2026-07", "subs": {"Influencer": 602, "Dental Office": 389, "Online Search": 331, "Podcast": 161, "Airway Ambassador": 91, "Parent": 108, "Google Ad": 93, "Other": 222}, "cos": {"Influencer": 143, "Dental Office": 57, "Online Search": 80, "Podcast": 44, "Airway Ambassador": 36, "Parent": 26, "Google Ad": 11, "Other": 46}}, {"month": "2026-08", "subs": {"Influencer": 522, "Dental Office": 363, "Online Search": 274, "Podcast": 168, "Airway Ambassador": 52, "Parent": 62, "Google Ad": 88, "Other": 156}, "cos": {"Influencer": 100, "Dental Office": 50, "Online Search": 54, "Podcast": 52, "Airway Ambassador": 14, "Parent": 21, "Google Ad": 9, "Other": 26}}, {"month": "2026-09", "subs": {"Influencer": 218, "Dental Office": 291, "Online Search": 271, "Podcast": 284, "Airway Ambassador": 30, "Parent": 71, "Google Ad": 55, "Other": 156}, "cos": {"Influencer": 51, "Dental Office": 31, "Online Search": 40, "Podcast": 48, "Airway Ambassador": 4, "Parent": 16, "Google Ad": 4, "Other": 20}}, {"month": "2026-10", "subs": {"Influencer": 101, "Dental Office": 150, "Online Search": 160, "Podcast": 84, "Airway Ambassador": 21, "Parent": 29, "Google Ad": 20, "Other": 119}, "cos": {"Influencer": 9, "Dental Office": 9, "Online Search": 1, "Podcast": 8, "Airway Ambassador": 0, "Parent": 0, "Google Ad": 0, "Other": 2}}];
+export const sourceMonthly: SourceMonthRow[] = [{"month": "2026-01", "subs": {"Influencer": 309, "Dental Office": 367, "Online Search": 232, "Podcast": 150, "Airway Ambassador": 53, "Parent": 77, "Google Ad": 0, "Other": 227}, "cos": {"Influencer": 103, "Dental Office": 56, "Online Search": 61, "Podcast": 43, "Airway Ambassador": 22, "Parent": 32, "Google Ad": 0, "Other": 61}}, {"month": "2026-02", "subs": {"Influencer": 511, "Dental Office": 314, "Online Search": 284, "Podcast": 96, "Airway Ambassador": 62, "Parent": 63, "Google Ad": 0, "Other": 189}, "cos": {"Influencer": 145, "Dental Office": 54, "Online Search": 74, "Podcast": 28, "Airway Ambassador": 20, "Parent": 22, "Google Ad": 0, "Other": 38}}, {"month": "2026-03", "subs": {"Influencer": 462, "Dental Office": 316, "Online Search": 338, "Podcast": 165, "Airway Ambassador": 70, "Parent": 72, "Google Ad": 0, "Other": 183}, "cos": {"Influencer": 139, "Dental Office": 71, "Online Search": 93, "Podcast": 61, "Airway Ambassador": 33, "Parent": 24, "Google Ad": 0, "Other": 51}}, {"month": "2026-04", "subs": {"Influencer": 234, "Dental Office": 255, "Online Search": 298, "Podcast": 129, "Airway Ambassador": 68, "Parent": 73, "Google Ad": 20, "Other": 152}, "cos": {"Influencer": 76, "Dental Office": 57, "Online Search": 93, "Podcast": 47, "Airway Ambassador": 26, "Parent": 14, "Google Ad": 2, "Other": 40}}, {"month": "2026-05", "subs": {"Influencer": 269, "Dental Office": 212, "Online Search": 251, "Podcast": 127, "Airway Ambassador": 53, "Parent": 49, "Google Ad": 28, "Other": 142}, "cos": {"Influencer": 74, "Dental Office": 40, "Online Search": 61, "Podcast": 35, "Airway Ambassador": 23, "Parent": 12, "Google Ad": 5, "Other": 21}}, {"month": "2026-06", "subs": {"Influencer": 306, "Dental Office": 228, "Online Search": 326, "Podcast": 279, "Airway Ambassador": 47, "Parent": 84, "Google Ad": 81, "Other": 138}, "cos": {"Influencer": 95, "Dental Office": 52, "Online Search": 59, "Podcast": 69, "Airway Ambassador": 22, "Parent": 33, "Google Ad": 14, "Other": 28}}, {"month": "2026-07", "subs": {"Influencer": 602, "Dental Office": 389, "Online Search": 331, "Podcast": 161, "Airway Ambassador": 92, "Parent": 108, "Google Ad": 93, "Other": 221}, "cos": {"Influencer": 146, "Dental Office": 57, "Online Search": 79, "Podcast": 42, "Airway Ambassador": 36, "Parent": 25, "Google Ad": 12, "Other": 48}}, {"month": "2026-08", "subs": {"Influencer": 523, "Dental Office": 362, "Online Search": 274, "Podcast": 168, "Airway Ambassador": 51, "Parent": 62, "Google Ad": 89, "Other": 155}, "cos": {"Influencer": 104, "Dental Office": 49, "Online Search": 57, "Podcast": 52, "Airway Ambassador": 12, "Parent": 22, "Google Ad": 11, "Other": 25}}, {"month": "2026-09", "subs": {"Influencer": 228, "Dental Office": 291, "Online Search": 267, "Podcast": 284, "Airway Ambassador": 30, "Parent": 72, "Google Ad": 55, "Other": 149}, "cos": {"Influencer": 55, "Dental Office": 29, "Online Search": 39, "Podcast": 55, "Airway Ambassador": 5, "Parent": 19, "Google Ad": 8, "Other": 28}}, {"month": "2026-10", "subs": {"Influencer": 118, "Dental Office": 190, "Online Search": 209, "Podcast": 91, "Airway Ambassador": 24, "Parent": 31, "Google Ad": 22, "Other": 131}, "cos": {"Influencer": 15, "Dental Office": 13, "Online Search": 5, "Podcast": 12, "Airway Ambassador": 3, "Parent": 0, "Google Ad": 0, "Other": 5}}];
 export const sourceColors: Record<string, string> = { Influencer: '#3A6EA4', 'Dental Office': '#e06666', 'Online Search': '#8CD1C8', Podcast: '#1B2A4A', 'Airway Ambassador': '#6AA84F', Parent: '#FDBE67', 'Google Ad': '#B6CAE3', Other: '#d1d5db' };
 
 export type DowRow = { day: string; checkouts: number };
-export const dow: DowRow[] = [{"day": "Mon", "checkouts": 541}, {"day": "Tue", "checkouts": 619}, {"day": "Wed", "checkouts": 692}, {"day": "Thu", "checkouts": 685}, {"day": "Fri", "checkouts": 605}, {"day": "Sat", "checkouts": 177}, {"day": "Sun", "checkouts": 77}];
+export const dow: DowRow[] = [{"day": "Mon", "checkouts": 505}, {"day": "Tue", "checkouts": 603}, {"day": "Wed", "checkouts": 629}, {"day": "Thu", "checkouts": 685}, {"day": "Fri", "checkouts": 607}, {"day": "Sat", "checkouts": 185}, {"day": "Sun", "checkouts": 83}];
 
 // Ordered by date. The `n` number matches the numbered marker on the chart.
 export const events: EventRow[] = [
@@ -160,15 +160,15 @@ export const linkCohort: CohortRow[] = [
   { month: '2025-12', links: 702,  checkouts: 286, ever: 40.7, d14: 23.2, d21: 29.1, mature: true },
   // 2026 (from the 2026-submitter funnel export)
   { month: '2026-01', links: 584,  checkouts: 219, ever: 37.5, d14: 25.9, d21: 28.6, mature: true },
-  { month: '2026-02', links: 717,  checkouts: 285, ever: 39.7, d14: 25.1, d21: 27.9, mature: true },
+  { month: '2026-02', links: 717,  checkouts: 285, ever: 39.7, d14: 26.1, d21: 28.9, mature: true },
   { month: '2026-03', links: 976,  checkouts: 362, ever: 37.1, d14: 20.9, d21: 25.1, mature: true },
   { month: '2026-04', links: 1114, checkouts: 308, ever: 27.6, d14: 13.7, d21: 17.1, mature: true },
   { month: '2026-05', links: 741,  checkouts: 228, ever: 30.8, d14: 17.7, d21: 20.8, mature: true },
-  { month: '2026-06', links: 1164, checkouts: 333, ever: 28.6, d14: 20.5, d21: 24.4, mature: true, outlier: true }, // last-day pricing push before Jul 1 increase
-  { month: '2026-07', links: 1158, checkouts: 321, ever: 27.7, d14: 17.6, d21: 21.2, mature: true, outlier: true }, // first month at the new (higher) price — pricing-distorted
-  { month: '2026-08', links: 1081, checkouts: 287, ever: 26.5, d14: 18.3, d21: 21.0, mature: true },
-  { month: '2026-09', links: 866,  checkouts: 243, ever: 28.1, d14: 24.1, d21: 26.0, mature: false },
-  { month: '2026-10', links: 330,  checkouts: 72,  ever: 21.8, d14: 21.8, d21: 21.8, mature: false },
+  { month: '2026-06', links: 1164, checkouts: 335, ever: 28.8, d14: 20.5, d21: 24.4, mature: true, outlier: true }, // last-day pricing push before Jul 1 increase
+  { month: '2026-07', links: 1157, checkouts: 322, ever: 27.8, d14: 17.6, d21: 21.2, mature: true, outlier: true }, // first month at the new (higher) price — pricing-distorted
+  { month: '2026-08', links: 1081, checkouts: 289, ever: 26.7, d14: 18.3, d21: 21.0, mature: true },
+  { month: '2026-09', links: 867,  checkouts: 250, ever: 28.8, d14: 24.1, d21: 26.0, mature: false },
+  { month: '2026-10', links: 476,  checkouts: 107, ever: 22.5, d14: 22.1, d21: 22.5, mature: false },
 ];
 // Pre-drop baseline rate (Jan–Mar) used for the "expected at old rate" / lost-enrollment math.
 export const checkoutBaselineRate = 37.96;
@@ -223,14 +223,14 @@ export const ruledOutScoreboard = [
 // ~30% band (Jun–Jul). No single-week cliff — a gradual decline through May. Trigger still open.
 export const breakWeekly = [
   { w: 'Feb 2', r: 43 }, { w: 'Feb 9', r: 37 }, { w: 'Feb 16', r: 38 }, { w: 'Feb 23', r: 39 },
-  { w: 'Mar 2', r: 43 }, { w: 'Mar 9', r: 45 }, { w: 'Mar 16', r: 37 }, { w: 'Mar 23', r: 33 }, { w: 'Mar 30', r: 35 },
+  { w: 'Mar 2', r: 43 }, { w: 'Mar 9', r: 45 }, { w: 'Mar 16', r: 38 }, { w: 'Mar 23', r: 34 }, { w: 'Mar 30', r: 35 },
   { w: 'Apr 6', r: 41 }, { w: 'Apr 13', r: 36 }, { w: 'Apr 20', r: 41 }, { w: 'Apr 27', r: 32 },
   { w: 'May 4', r: 38 }, { w: 'May 11', r: 34 }, { w: 'May 18', r: 38 }, { w: 'May 25', r: 28 },
-  { w: 'Jun 1', r: 30 }, { w: 'Jun 8', r: 32 }, { w: 'Jun 15', r: 32 }, { w: 'Jun 22', r: 30 }, { w: 'Jun 29', r: 27 },
-  { w: 'Jul 6', r: 28 }, { w: 'Jul 13', r: 29 }, { w: 'Jul 20', r: 23 }, { w: 'Jul 27', r: 27 },
-  { w: 'Aug 3', r: 21 }, { w: 'Aug 10', r: 23 }, { w: 'Aug 17', r: 32 }, { w: 'Aug 24', r: 33 },
-  { w: 'Aug 31', r: 27, imm: true }, { w: 'Sep 7', r: 31, imm: true }, { w: 'Sep 14', r: 29, imm: true },
-  { w: 'Sep 21', r: 33, imm: true }, { w: 'Sep 28', r: 18, imm: true }, { w: 'Oct 5', r: 5, imm: true },
+  { w: 'Jun 1', r: 30 }, { w: 'Jun 8', r: 32 }, { w: 'Jun 15', r: 32 }, { w: 'Jun 22', r: 31 }, { w: 'Jun 29', r: 27 },
+  { w: 'Jul 6', r: 29 }, { w: 'Jul 13', r: 30 }, { w: 'Jul 20', r: 24 }, { w: 'Jul 27', r: 28 },
+  { w: 'Aug 3', r: 22 }, { w: 'Aug 10', r: 25 }, { w: 'Aug 17', r: 33 }, { w: 'Aug 24', r: 34 }, { w: 'Aug 31', r: 31 },
+  { w: 'Sep 7', r: 34, imm: true }, { w: 'Sep 14', r: 34, imm: true }, { w: 'Sep 21', r: 36, imm: true }, { w: 'Sep 28', r: 24, imm: true },
+  { w: 'Oct 5', r: 30, imm: true }, { w: 'Oct 12', r: 26, imm: true }, { w: 'Oct 19', r: 16, imm: true },
 ];
 // Recomputed from the SOSH | Enrollment Funnel export (2026-10-07): plain-approved
 // (Functional Appliance / approve / Approve for Treatment / APPROVED-for-virtual; expanders,
@@ -246,16 +246,16 @@ export const breakWeeklyBaseline = 38; // Feb–Apr average
 // (~12%→4%) while Lava only drifts (~27%→23%). Sep–Oct Ice is immature (win-back window not
 // matured yet), so those bars understate.
 export const lavaIceCohort = [
-  { m: 'Jan', links: 493, lava: 30, ice: 9 },
+  { m: 'Jan', links: 492, lava: 30, ice: 9 },
   { m: 'Feb', links: 641, lava: 28, ice: 11 },
-  { m: 'Mar', links: 855, lava: 26, ice: 13 },
+  { m: 'Mar', links: 857, lava: 26, ice: 13 },
   { m: 'Apr', links: 662, lava: 23, ice: 16 },
-  { m: 'May', links: 593, lava: 22, ice: 10 },
+  { m: 'May', links: 594, lava: 22, ice: 10 },
   { m: 'Jun', links: 926, lava: 27, ice: 4 },
-  { m: 'Jul', links: 966, lava: 22, ice: 6 },
+  { m: 'Jul', links: 965, lava: 22, ice: 6 },
   { m: 'Aug', links: 886, lava: 22, ice: 6 },
-  { m: 'Sep', links: 706, lava: 29, ice: 2, iceImm: true },
-  { m: 'Oct', links: 277, lava: 23, ice: 0, imm: true },
+  { m: 'Sep', links: 706, lava: 29, ice: 3, iceImm: true },
+  { m: 'Oct', links: 401, lava: 25, ice: 0, imm: true },
 ];
 
 // The breakWeekly total (Lava+Ice) split into its two parts, by link-sent week
@@ -266,18 +266,19 @@ export const lavaIceCohort = [
 // weeks (Aug 31+) are still maturing and understate — Ice especially (its window runs
 // to ~6 weeks, so recent cohorts haven't finished converting).
 export const lavaIceWeekly = [
-  { w: 'Feb 2', lava: 31, ice: 11 }, { w: 'Feb 9', lava: 30, ice: 7 }, { w: 'Feb 16', lava: 27, ice: 11 }, { w: 'Feb 23', lava: 25, ice: 13 },
-  { w: 'Mar 2', lava: 26, ice: 17 }, { w: 'Mar 9', lava: 34, ice: 11 }, { w: 'Mar 16', lava: 28, ice: 9 }, { w: 'Mar 23', lava: 20, ice: 13 }, { w: 'Mar 30', lava: 23, ice: 14 },
-  { w: 'Apr 6', lava: 26, ice: 15 }, { w: 'Apr 13', lava: 26, ice: 11 }, { w: 'Apr 20', lava: 28, ice: 11 }, { w: 'Apr 27', lava: 13, ice: 18 },
-  { w: 'May 4', lava: 19, ice: 16 }, { w: 'May 11', lava: 28, ice: 5 }, { w: 'May 18', lava: 24, ice: 12 }, { w: 'May 25', lava: 18, ice: 10 },
-  { w: 'Jun 1', lava: 25, ice: 5 }, { w: 'Jun 8', lava: 28, ice: 3 }, { w: 'Jun 15', lava: 28, ice: 2 }, { w: 'Jun 22', lava: 24, ice: 6 }, { w: 'Jun 29', lava: 25, ice: 6 },
-  { w: 'Jul 6', lava: 25, ice: 4 }, { w: 'Jul 13', lava: 22, ice: 8 }, { w: 'Jul 20', lava: 19, ice: 4 }, { w: 'Jul 27', lava: 23, ice: 5 },
-  { w: 'Aug 3', lava: 17, ice: 4 }, { w: 'Aug 10', lava: 20, ice: 4 }, { w: 'Aug 17', lava: 26, ice: 6 }, { w: 'Aug 24', lava: 29, ice: 3 },
-  { w: 'Aug 31', lava: 24, ice: 3, imm: true }, { w: 'Sep 7', lava: 30, ice: 2, imm: true }, { w: 'Sep 14', lava: 28, ice: 0, imm: true }, { w: 'Sep 21', lava: 33, ice: 0, imm: true }, { w: 'Sep 28', lava: 19, ice: 0, imm: true }, { w: 'Oct 5', lava: 6, ice: 0, imm: true },
+  { w: 'Feb 2', lava: 32, ice: 12 }, { w: 'Feb 9', lava: 29, ice: 8 }, { w: 'Feb 16', lava: 27, ice: 11 }, { w: 'Feb 23', lava: 25, ice: 14 },
+  { w: 'Mar 2', lava: 27, ice: 16 }, { w: 'Mar 9', lava: 34, ice: 12 }, { w: 'Mar 16', lava: 28, ice: 10 }, { w: 'Mar 23', lava: 20, ice: 14 }, { w: 'Mar 30', lava: 21, ice: 15 },
+  { w: 'Apr 6', lava: 25, ice: 16 }, { w: 'Apr 13', lava: 26, ice: 10 }, { w: 'Apr 20', lava: 29, ice: 13 }, { w: 'Apr 27', lava: 14, ice: 18 },
+  { w: 'May 4', lava: 21, ice: 16 }, { w: 'May 11', lava: 29, ice: 5 }, { w: 'May 18', lava: 25, ice: 13 }, { w: 'May 25', lava: 18, ice: 10 },
+  { w: 'Jun 1', lava: 24, ice: 5 }, { w: 'Jun 8', lava: 29, ice: 3 }, { w: 'Jun 15', lava: 29, ice: 3 }, { w: 'Jun 22', lava: 25, ice: 6 }, { w: 'Jun 29', lava: 23, ice: 4 },
+  { w: 'Jul 6', lava: 25, ice: 4 }, { w: 'Jul 13', lava: 22, ice: 8 }, { w: 'Jul 20', lava: 19, ice: 5 }, { w: 'Jul 27', lava: 22, ice: 5 },
+  { w: 'Aug 3', lava: 17, ice: 5 }, { w: 'Aug 10', lava: 20, ice: 6 }, { w: 'Aug 17', lava: 26, ice: 7 }, { w: 'Aug 24', lava: 29, ice: 5 }, { w: 'Aug 31', lava: 24, ice: 7, imm: true },
+  { w: 'Sep 7', lava: 30, ice: 4, imm: true }, { w: 'Sep 14', lava: 30, ice: 4, imm: true }, { w: 'Sep 21', lava: 35, ice: 2, imm: true }, { w: 'Sep 28', lava: 23, ice: 1, imm: true },
+  { w: 'Oct 5', lava: 30, ice: 0, imm: true }, { w: 'Oct 12', lava: 26, ice: 0, imm: true }, { w: 'Oct 19', lava: 16, ice: 0, imm: true },
 ];
 
-// ---- Daily Funnel Trends (last 3 months: Jul 14 – Oct 19, 2026) ----
-// Source: Enrollment Funnel export, Oct 19 2026. Submissions by submission date, checkout links by
+// ---- Daily Funnel Trends (last 3 months: Jul 14 – Oct 22, 2026) ----
+// Source: Enrollment Funnel export, Oct 22 2026. Submissions by submission date, checkout links by
 // checkout-link-sent date, checkouts by checkout date — all records, not just Google Ads.
 export type DailyFunnelRow = { date: string; submissions: number; checkoutLinks: number; checkouts: number; revenue: number };
 export const dailyFunnel: DailyFunnelRow[] = [
@@ -376,30 +377,34 @@ export const dailyFunnel: DailyFunnelRow[] = [
   { date: '2026-10-14', submissions: 41, checkoutLinks: 43, checkouts: 18, revenue: 30979 },
   { date: '2026-10-15', submissions: 76, checkoutLinks: 20, checkouts: 9, revenue: 18558 },
   { date: '2026-10-16', submissions: 42, checkoutLinks: 19, checkouts: 11, revenue: 18255 },
-  { date: '2026-10-17', submissions: 26, checkoutLinks: 1, checkouts: 17, revenue: 30630 },
+  { date: '2026-10-17', submissions: 26, checkoutLinks: 1, checkouts: 16, revenue: 30827 },
   { date: '2026-10-18', submissions: 22, checkoutLinks: 1, checkouts: 3, revenue: 5886 },
-  { date: '2026-10-19', submissions: 26, checkoutLinks: 2, checkouts: 4, revenue: 0 },
+  { date: '2026-10-19', submissions: 67, checkoutLinks: 18, checkouts: 7, revenue: 12572 },
+  { date: '2026-10-20', submissions: 36, checkoutLinks: 33, checkouts: 5, revenue: 12478 },
+  { date: '2026-10-21', submissions: 35, checkoutLinks: 58, checkouts: 20, revenue: 40415 },
+  { date: '2026-10-22', submissions: 20, checkoutLinks: 40, checkouts: 31, revenue: 50278 },
 ];
 
 // Weekly time-to-checkout-link: median and mean days from submission to checkout-link-sent,
-// grouped by submission week. Source: Enrollment Funnel export, Oct 19 2026. Only records with
+// grouped by submission week. Source: Enrollment Funnel export, Oct 22 2026. Only records with
 // both a submission date and a checkout-link date >= Jul 14 are included.
 export type WeeklyTTCLRow = { week: string; median: number; mean: number; count: number };
 export const weeklyTTCL: WeeklyTTCLRow[] = [
-  { week: '2026-07-13', median: 6, mean: 9.6, count: 344 },
-  { week: '2026-07-20', median: 7, mean: 9.8, count: 405 },
+  { week: '2026-07-13', median: 6, mean: 9.5, count: 344 },
+  { week: '2026-07-20', median: 7, mean: 10.0, count: 405 },
   { week: '2026-07-27', median: 8, mean: 10.3, count: 334 },
-  { week: '2026-08-03', median: 7, mean: 9.1, count: 193 },
-  { week: '2026-08-10', median: 9, mean: 10.4, count: 229 },
+  { week: '2026-08-03', median: 7, mean: 9.4, count: 194 },
+  { week: '2026-08-10', median: 9, mean: 10.9, count: 230 },
   { week: '2026-08-17', median: 9, mean: 11.7, count: 179 },
-  { week: '2026-08-24', median: 10, mean: 13.1, count: 307 },
-  { week: '2026-08-31', median: 13, mean: 14.3, count: 288 },
-  { week: '2026-09-07', median: 12, mean: 13.4, count: 174 },
-  { week: '2026-09-14', median: 13, mean: 13.3, count: 130 },
-  { week: '2026-09-21', median: 11, mean: 11.0, count: 95 },
-  { week: '2026-09-28', median: 10, mean: 9.8, count: 92 },
-  { week: '2026-10-05', median: 6, mean: 6.1, count: 33 },
-  { week: '2026-10-12', median: 2, mean: 2.2, count: 8 },
+  { week: '2026-08-24', median: 11, mean: 14, count: 313 },
+  { week: '2026-08-31', median: 13, mean: 15.2, count: 297 },
+  { week: '2026-09-07', median: 13, mean: 15.2, count: 188 },
+  { week: '2026-09-14', median: 13, mean: 13.4, count: 132 },
+  { week: '2026-09-21', median: 13, mean: 13.7, count: 114 },
+  { week: '2026-09-28', median: 13, mean: 12.1, count: 121 },
+  { week: '2026-10-05', median: 10, mean: 9.8, count: 73 },
+  { week: '2026-10-12', median: 6, mean: 5.8, count: 40 },
+  { week: '2026-10-19', median: 2, mean: 2, count: 3 },
 ];
 
 // Weekly Lava vs Ice checkouts (by checkout date), Jan 2025 – Oct 2026.
@@ -463,67 +468,64 @@ export const weeklyLavaIce: WeeklyLavaIceRow[] = [
   { week: '2025-12-22', lava: 12, ice: 4, unclass: 7, total: 23, icePct: 25.0, lavaRev: 18750, iceRev: 6336, unclassRev: 7607 },
   { week: '2025-12-29', lava: 29, ice: 16, unclass: 10, total: 55, icePct: 35.6, lavaRev: 50623, iceRev: 25440, unclassRev: 12468 },
   // --- 2026 ---
-  { week: '2026-01-05', lava: 30, ice: 30, unclass: 11, total: 71, icePct: 50.0, lavaRev: 53515, iceRev: 50475, unclassRev: 14670 },
-  { week: '2026-01-12', lava: 85, ice: 40, unclass: 21, total: 146, icePct: 32.0, lavaRev: 141577, iceRev: 64582, unclassRev: 39545 },
-  { week: '2026-01-19', lava: 28, ice: 17, unclass: 23, total: 68, icePct: 37.8, lavaRev: 47229, iceRev: 27983, unclassRev: 38745 },
-  { week: '2026-01-26', lava: 63, ice: 30, unclass: 17, total: 110, icePct: 32.3, lavaRev: 99944, iceRev: 48476, unclassRev: 28090 },
-  { week: '2026-02-02', lava: 36, ice: 11, unclass: 13, total: 60, icePct: 23.4, lavaRev: 62736, iceRev: 19751, unclassRev: 22154 },
-  { week: '2026-02-09', lava: 56, ice: 20, unclass: 19, total: 95, icePct: 26.3, lavaRev: 93251, iceRev: 28279, unclassRev: 27858 },
-  { week: '2026-02-16', lava: 25, ice: 6, unclass: 12, total: 43, icePct: 19.4, lavaRev: 42487, iceRev: 9324, unclassRev: 23048 },
-  { week: '2026-02-23', lava: 112, ice: 61, unclass: 28, total: 201, icePct: 35.3, lavaRev: 177601, iceRev: 94243, unclassRev: 46416 },
-  { week: '2026-03-02', lava: 34, ice: 4, unclass: 22, total: 60, icePct: 10.5, lavaRev: 57943, iceRev: 6783, unclassRev: 52973 },
-  { week: '2026-03-09', lava: 40, ice: 11, unclass: 11, total: 62, icePct: 21.6, lavaRev: 68377, iceRev: 19147, unclassRev: 20581 },
-  { week: '2026-03-16', lava: 69, ice: 20, unclass: 16, total: 105, icePct: 22.5, lavaRev: 111753, iceRev: 33863, unclassRev: 27106 },
-  { week: '2026-03-23', lava: 74, ice: 33, unclass: 27, total: 134, icePct: 30.8, lavaRev: 116991, iceRev: 52221, unclassRev: 37141 },
-  { week: '2026-03-30', lava: 31, ice: 35, unclass: 16, total: 82, icePct: 53.0, lavaRev: 50819, iceRev: 57501, unclassRev: 26658 },
-  { week: '2026-04-06', lava: 32, ice: 16, unclass: 14, total: 62, icePct: 33.3, lavaRev: 52823, iceRev: 27627, unclassRev: 20256 },
-  { week: '2026-04-13', lava: 52, ice: 14, unclass: 22, total: 88, icePct: 21.2, lavaRev: 92393, iceRev: 23142, unclassRev: 38867 },
-  { week: '2026-04-20', lava: 60, ice: 39, unclass: 22, total: 121, icePct: 39.4, lavaRev: 98150, iceRev: 63290, unclassRev: 33587 },
-  { week: '2026-04-27', lava: 28, ice: 26, unclass: 25, total: 79, icePct: 48.1, lavaRev: 42890, iceRev: 42049, unclassRev: 36547 },
-  { week: '2026-05-04', lava: 34, ice: 12, unclass: 22, total: 68, icePct: 26.1, lavaRev: 56504, iceRev: 20145, unclassRev: 39581 },
-  { week: '2026-05-11', lava: 32, ice: 20, unclass: 21, total: 73, icePct: 38.5, lavaRev: 52416, iceRev: 32466, unclassRev: 33967 },
-  { week: '2026-05-18', lava: 29, ice: 7, unclass: 12, total: 48, icePct: 19.4, lavaRev: 41942, iceRev: 12368, unclassRev: 21504 },
-  { week: '2026-05-25', lava: 56, ice: 61, unclass: 18, total: 135, icePct: 52.1, lavaRev: 81991, iceRev: 99081, unclassRev: 30446 },
-  { week: '2026-06-01', lava: 38, ice: 7, unclass: 3, total: 48, icePct: 15.6, lavaRev: 59256, iceRev: 11521, unclassRev: 2797 },
-  { week: '2026-06-08', lava: 33, ice: 20, unclass: 13, total: 66, icePct: 37.7, lavaRev: 50465, iceRev: 29879, unclassRev: 20502 },
-  { week: '2026-06-15', lava: 57, ice: 23, unclass: 11, total: 91, icePct: 28.8, lavaRev: 92556, iceRev: 37750, unclassRev: 11290 },
-  { week: '2026-06-22', lava: 86, ice: 45, unclass: 14, total: 145, icePct: 34.4, lavaRev: 134321, iceRev: 68157, unclassRev: 20392 },
-  { week: '2026-06-29', lava: 90, ice: 51, unclass: 24, total: 165, icePct: 36.2, lavaRev: 134822, iceRev: 72944, unclassRev: 32213 },
+  { week: '2026-01-05', lava: 8, ice: 0, unclass: 6, total: 14, icePct: 0.0, lavaRev: 15063, iceRev: 0, unclassRev: 7687 },
+  { week: '2026-01-12', lava: 51, ice: 0, unclass: 8, total: 59, icePct: 0.0, lavaRev: 84925, iceRev: 0, unclassRev: 18796 },
+  { week: '2026-01-19', lava: 25, ice: 1, unclass: 22, total: 48, icePct: 3.8, lavaRev: 42291, iceRev: 1995, unclassRev: 37147 },
+  { week: '2026-01-26', lava: 54, ice: 1, unclass: 13, total: 68, icePct: 1.8, lavaRev: 86678, iceRev: 1596, unclassRev: 23298 },
+  { week: '2026-02-02', lava: 32, ice: 3, unclass: 9, total: 44, icePct: 8.6, lavaRev: 56655, iceRev: 5037, unclassRev: 17713 },
+  { week: '2026-02-09', lava: 53, ice: 3, unclass: 10, total: 66, icePct: 5.4, lavaRev: 87866, iceRev: 3442, unclassRev: 17586 },
+  { week: '2026-02-16', lava: 25, ice: 2, unclass: 11, total: 38, icePct: 7.4, lavaRev: 42487, iceRev: 2592, unclassRev: 21502 },
+  { week: '2026-02-23', lava: 110, ice: 22, unclass: 22, total: 154, icePct: 16.7, lavaRev: 174510, iceRev: 33108, unclassRev: 37142 },
+  { week: '2026-03-02', lava: 34, ice: 4, unclass: 18, total: 56, icePct: 10.5, lavaRev: 57943, iceRev: 6783, unclassRev: 47537 },
+  { week: '2026-03-09', lava: 39, ice: 5, unclass: 11, total: 55, icePct: 11.4, lavaRev: 66781, iceRev: 8626, unclassRev: 20581 },
+  { week: '2026-03-16', lava: 69, ice: 15, unclass: 16, total: 100, icePct: 17.9, lavaRev: 111753, iceRev: 24934, unclassRev: 27106 },
+  { week: '2026-03-23', lava: 74, ice: 23, unclass: 26, total: 123, icePct: 23.7, lavaRev: 116991, iceRev: 35914, unclassRev: 35595 },
+  { week: '2026-03-30', lava: 31, ice: 25, unclass: 16, total: 72, icePct: 44.6, lavaRev: 50819, iceRev: 39027, unclassRev: 26658 },
+  { week: '2026-04-06', lava: 31, ice: 14, unclass: 14, total: 59, icePct: 31.1, lavaRev: 51078, iceRev: 24136, unclassRev: 20256 },
+  { week: '2026-04-13', lava: 52, ice: 11, unclass: 21, total: 84, icePct: 17.5, lavaRev: 92393, iceRev: 18055, unclassRev: 36571 },
+  { week: '2026-04-20', lava: 60, ice: 31, unclass: 22, total: 113, icePct: 34.1, lavaRev: 98150, iceRev: 49725, unclassRev: 33587 },
+  { week: '2026-04-27', lava: 28, ice: 22, unclass: 24, total: 74, icePct: 44.0, lavaRev: 42890, iceRev: 36015, unclassRev: 34552 },
+  { week: '2026-05-04', lava: 34, ice: 9, unclass: 21, total: 64, icePct: 20.9, lavaRev: 56504, iceRev: 14959, unclassRev: 37586 },
+  { week: '2026-05-11', lava: 32, ice: 19, unclass: 20, total: 71, icePct: 37.3, lavaRev: 52416, iceRev: 30670, unclassRev: 32271 },
+  { week: '2026-05-18', lava: 29, ice: 5, unclass: 12, total: 46, icePct: 14.7, lavaRev: 41942, iceRev: 8628, unclassRev: 21504 },
+  { week: '2026-05-25', lava: 56, ice: 60, unclass: 16, total: 132, icePct: 51.7, lavaRev: 81991, iceRev: 97686, unclassRev: 27104 },
+  { week: '2026-06-01', lava: 37, ice: 6, unclass: 3, total: 46, icePct: 14.0, lavaRev: 57655, iceRev: 9725, unclassRev: 2797 },
+  { week: '2026-06-08', lava: 33, ice: 18, unclass: 13, total: 64, icePct: 35.3, lavaRev: 50465, iceRev: 26487, unclassRev: 20502 },
+  { week: '2026-06-15', lava: 57, ice: 20, unclass: 10, total: 87, icePct: 26.0, lavaRev: 92556, iceRev: 32863, unclassRev: 9494 },
+  { week: '2026-06-22', lava: 86, ice: 44, unclass: 13, total: 143, icePct: 33.8, lavaRev: 134321, iceRev: 66711, unclassRev: 18846 },
+  { week: '2026-06-29', lava: 90, ice: 48, unclass: 22, total: 160, icePct: 34.8, lavaRev: 134822, iceRev: 68606, unclassRev: 29321 },
   { week: '2026-07-06', lava: 35, ice: 5, unclass: 8, total: 48, icePct: 12.5, lavaRev: 64208, iceRev: 7232, unclassRev: 13273 },
-  { week: '2026-07-13', lava: 51, ice: 6, unclass: 15, total: 72, icePct: 10.5, lavaRev: 103579, iceRev: 10268, unclassRev: 23559 },
+  { week: '2026-07-13', lava: 50, ice: 2, unclass: 15, total: 67, icePct: 3.8, lavaRev: 101084, iceRev: 3587, unclassRev: 23559 },
   { week: '2026-07-20', lava: 48, ice: 10, unclass: 16, total: 74, icePct: 17.2, lavaRev: 96062, iceRev: 18655, unclassRev: 20962 },
   { week: '2026-07-27', lava: 84, ice: 12, unclass: 15, total: 111, icePct: 12.5, lavaRev: 153354, iceRev: 21650, unclassRev: 27042 },
   { week: '2026-08-03', lava: 41, ice: 8, unclass: 7, total: 56, icePct: 16.3, lavaRev: 86317, iceRev: 13969, unclassRev: 11177 },
   { week: '2026-08-10', lava: 68, ice: 25, unclass: 13, total: 106, icePct: 26.9, lavaRev: 132748, iceRev: 48430, unclassRev: 23548 },
-  { week: '2026-08-17', lava: 52, ice: 15, unclass: 8, total: 75, icePct: 22.4, lavaRev: 105430, iceRev: 26096, unclassRev: 13573 },
-  { week: '2026-08-24', lava: 64, ice: 27, unclass: 27, total: 118, icePct: 29.7, lavaRev: 123585, iceRev: 47531, unclassRev: 52388 },
-  { week: '2026-08-31', lava: 53, ice: 21, unclass: 13, total: 87, icePct: 28.4, lavaRev: 100479, iceRev: 33865, unclassRev: 23847 },
-  { week: '2026-09-07', lava: 45, ice: 10, unclass: 7, total: 62, icePct: 18.2, lavaRev: 86062, iceRev: 17809, unclassRev: 9284 },
+  { week: '2026-08-17', lava: 52, ice: 14, unclass: 8, total: 74, icePct: 21.2, lavaRev: 105430, iceRev: 24846, unclassRev: 13573 },
+  { week: '2026-08-24', lava: 64, ice: 25, unclass: 27, total: 116, icePct: 28.1, lavaRev: 123585, iceRev: 43640, unclassRev: 52388 },
+  { week: '2026-08-31', lava: 53, ice: 20, unclass: 13, total: 86, icePct: 27.4, lavaRev: 100479, iceRev: 32069, unclassRev: 23847 },
+  { week: '2026-09-07', lava: 45, ice: 8, unclass: 7, total: 60, icePct: 15.1, lavaRev: 86062, iceRev: 14217, unclassRev: 9284 },
   { week: '2026-09-14', lava: 65, ice: 10, unclass: 9, total: 84, icePct: 13.3, lavaRev: 128262, iceRev: 20356, unclassRev: 13175 },
   { week: '2026-09-21', lava: 53, ice: 29, unclass: 8, total: 90, icePct: 35.4, lavaRev: 103270, iceRev: 51380, unclassRev: 15269 },
-  { week: '2026-09-28', lava: 52, ice: 14, unclass: 12, total: 78, icePct: 21.2, lavaRev: 96940, iceRev: 24247, unclassRev: 19272 },
-  { week: '2026-10-05', lava: 34, ice: 16, unclass: 11, total: 61, icePct: 32.0, lavaRev: 67151, iceRev: 25441, unclassRev: 22115 },
-  { week: '2026-10-12', lava: 39, ice: 34, unclass: 8, total: 81, icePct: 46.6, lavaRev: 72537, iceRev: 62882, unclassRev: 15612 },
-  { week: '2026-10-19', lava: 2, ice: 1, unclass: 1, total: 4, icePct: 33.3, lavaRev: 3592, iceRev: 1796, unclassRev: 498 },
+  { week: '2026-09-28', lava: 52, ice: 14, unclass: 12, total: 78, icePct: 21.2, lavaRev: 96940, iceRev: 23847, unclassRev: 19272 },
+  { week: '2026-10-05', lava: 34, ice: 16, unclass: 11, total: 61, icePct: 32.0, lavaRev: 67052, iceRev: 26242, unclassRev: 22115 },
+  { week: '2026-10-12', lava: 38, ice: 34, unclass: 8, total: 80, icePct: 47.2, lavaRev: 76830, iceRev: 58507, unclassRev: 14619 },
+  { week: '2026-10-19', lava: 38, ice: 13, unclass: 12, total: 63, icePct: 25.5, lavaRev: 66948, iceRev: 24941, unclassRev: 23854 },
 ];
 
-// Monthly win-back rates by checkout-link month (from Oct 19 Enrollment Funnel export)
+// Monthly win-back rates by checkout-link month (from Oct 22 Enrollment Funnel export)
 // links = total leads that received a checkout link that month
 // winbackRate = Ice / links (what % of linked leads became win-backs)
 // iceShareCO = Ice / (Ice + Lava) (what % of actual checkouts were win-backs)
 export type MonthlyWinbackRow = { month: string; links: number; lava: number; ice: number; noCO: number; winbackRate: number; iceShareCO: number };
 export const monthlyWinback: MonthlyWinbackRow[] = [
-  { month: '2025-10', links: 592, lava: 188, ice: 143, noCO: 261, winbackRate: 24.2, iceShareCO: 43.2 },
-  { month: '2025-11', links: 386, lava: 148, ice: 56, noCO: 182, winbackRate: 14.5, iceShareCO: 27.5 },
-  { month: '2025-12', links: 512, lava: 182, ice: 80, noCO: 250, winbackRate: 15.6, iceShareCO: 30.5 },
-  { month: '2026-01', links: 483, lava: 187, ice: 60, noCO: 236, winbackRate: 12.4, iceShareCO: 24.3 },
-  { month: '2026-02', links: 483, lava: 190, ice: 83, noCO: 210, winbackRate: 17.2, iceShareCO: 30.4 },
-  { month: '2026-03', links: 627, lava: 230, ice: 112, noCO: 285, winbackRate: 17.9, iceShareCO: 32.7 },
-  { month: '2026-04', links: 651, lava: 182, ice: 111, noCO: 358, winbackRate: 17.1, iceShareCO: 37.9 },
-  { month: '2026-05', links: 497, lava: 136, ice: 72, noCO: 289, winbackRate: 14.5, iceShareCO: 34.6 },
-  { month: '2026-06', links: 675, lava: 256, ice: 46, noCO: 373, winbackRate: 6.8, iceShareCO: 15.2 },
-  { month: '2026-07', links: 1158, lava: 245, ice: 76, noCO: 837, winbackRate: 6.6, iceShareCO: 23.7 },
-  { month: '2026-08', links: 1081, lava: 227, ice: 60, noCO: 794, winbackRate: 5.6, iceShareCO: 20.9 },
-  { month: '2026-09', links: 866, lava: 225, ice: 18, noCO: 623, winbackRate: 2.1, iceShareCO: 7.4 },
-  { month: '2026-10', links: 330, lava: 72, ice: 0, noCO: 258, winbackRate: 0.0, iceShareCO: 0.0 },
+  { month: '2026-01', links: 584, lava: 167, ice: 52, noCO: 365, winbackRate: 8.9, iceShareCO: 23.7 },
+  { month: '2026-02', links: 717, lava: 207, ice: 78, noCO: 432, winbackRate: 10.9, iceShareCO: 27.4 },
+  { month: '2026-03', links: 976, lava: 245, ice: 117, noCO: 614, winbackRate: 12.0, iceShareCO: 32.3 },
+  { month: '2026-04', links: 1114, lava: 191, ice: 117, noCO: 806, winbackRate: 10.5, iceShareCO: 38.0 },
+  { month: '2026-05', links: 741, lava: 154, ice: 74, noCO: 513, winbackRate: 10.0, iceShareCO: 32.5 },
+  { month: '2026-06', links: 1164, lava: 284, ice: 51, noCO: 829, winbackRate: 4.4, iceShareCO: 15.2 },
+  { month: '2026-07', links: 1157, lava: 245, ice: 77, noCO: 835, winbackRate: 6.7, iceShareCO: 23.9 },
+  { month: '2026-08', links: 1081, lava: 227, ice: 62, noCO: 792, winbackRate: 5.7, iceShareCO: 21.5 },
+  { month: '2026-09', links: 867, lava: 225, ice: 25, noCO: 617, winbackRate: 2.9, iceShareCO: 10.0 },
+  { month: '2026-10', links: 476, lava: 107, ice: 0, noCO: 369, winbackRate: 0.0, iceShareCO: 0.0 },
 ];
