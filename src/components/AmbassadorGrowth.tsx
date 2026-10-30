@@ -36,7 +36,7 @@ const TP = {
    DATA — all from the HTML source of truth
    ════════════════════════════════════════════════════════════════════════ */
 
-// Source: synced from Monthly Submissions + LBT window subs (Oct 29, 2026; LBT data from Oct 19)
+// Source: synced from Monthly Submissions + LBT window subs (Oct 30, 2026; LBT data from Oct 19)
 const ambSubs: Record<string, number> = {
   '2023-01':9,'2023-02':20,'2023-03':10,'2023-04':15,'2023-05':14,'2023-06':218,'2023-07':81,'2023-08':15,'2023-09':22,'2023-10':16,'2023-11':22,'2023-12':22,
   '2024-01':14,'2024-02':15,'2024-03':29,'2024-04':33,'2024-05':32,'2024-06':24,'2024-07':35,'2024-08':48,'2024-09':72,'2024-10':33,'2024-11':40,'2024-12':67,
@@ -54,7 +54,7 @@ const newAddsAmb: Record<string, number> = {
   '2023-02':1,'2023-04':1,'2023-06':1,'2023-11':1,
   '2024-01':4,'2024-02':7,'2024-03':7,'2024-04':6,'2024-05':3,'2024-06':7,'2024-07':10,'2024-08':2,'2024-09':6,'2024-10':7,'2024-11':7,'2024-12':6,
   '2025-01':7,'2025-02':84,'2025-03':7,'2025-04':5,'2025-05':5,'2025-06':6,'2025-07':1,'2025-08':15,'2025-09':2,'2025-10':1,'2025-11':6,'2025-12':1,
-  '2026-01':5,'2026-02':12,'2026-03':10,'2026-04':28,'2026-05':20,'2026-06':28,'2026-07':29,'2026-08':35,'2026-09':13,'2026-10':37,
+  '2026-01':5,'2026-02':12,'2026-03':10,'2026-04':28,'2026-05':20,'2026-06':28,'2026-07':29,'2026-08':35,'2026-09':14,'2026-10':56,
 };
 const newAddsInf: Record<string, number> = {
   '2023-10':1,'2023-11':1,
@@ -73,10 +73,10 @@ const newAddsPod: Record<string, number> = {
 const ambSubsYear: Record<number, number> = {2023:464, 2024:442, 2025:575, 2026:548};
 const infSubsYear: Record<number, number> = {2023:1335, 2024:8249, 2025:5516, 2026:3560};
 const combSubsYear: Record<number, number> = {2023:1799, 2024:8691, 2025:6091, 2026:4108};
-const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:140, 2026:217};
+const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:140, 2026:237};
 const addsInfYear: Record<number, number> = {2023:2, 2024:59, 2025:31, 2026:28};
 const addsPodYear: Record<number, number> = {2023:0, 2024:1, 2025:1, 2026:9};
-const addsTotalYear: Record<number, number> = {2023:6, 2024:132, 2025:172, 2026:254};
+const addsTotalYear: Record<number, number> = {2023:6, 2024:132, 2025:172, 2026:274};
 // Note: adds counts are from ambassador program tracking, not Salesforce referral exports
 
 // Active ambassadors with ≥1 submission per year (from Salesforce)
@@ -109,8 +109,8 @@ const recruit26: {label:string; amb:number; inf:number; pod:number; accent:strin
   {label:'Jun', amb:28, inf:4, pod:0, accent:'#DD5759'},
   {label:'Jul', amb:29, inf:2, pod:1, accent:'#F6AACB'},
   {label:'Aug', amb:35, inf:1, pod:6, accent:'#D6E5F7'},
-  {label:'Sep', amb:13, inf:2, pod:1, accent:'#8CD1C8'},
-  {label:'Oct', amb:37, inf:1, pod:0, accent:'#3A6EA4', tag:'partial'},
+  {label:'Sep', amb:14, inf:2, pod:1, accent:'#8CD1C8'},
+  {label:'Oct', amb:56, inf:1, pod:0, accent:'#3A6EA4', tag:'partial'},
 ];
 
 const concRows = [
