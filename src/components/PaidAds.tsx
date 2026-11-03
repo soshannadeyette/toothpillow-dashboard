@@ -258,6 +258,20 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-10-16', spend: 104.54, clicks: 24, impressions: 346, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-10-17', spend: 115.46, clicks: 22, impressions: 232, submit: 0, started: 0, finished: 0, treatment: 0 },
   { date: '2026-10-18', spend: 102.15, clicks: 29, impressions: 421, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-10-19', spend: 73.25, clicks: 30, impressions: 354, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-10-20', spend: 85.20, clicks: 76, impressions: 786, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-10-21', spend: 89.13, clicks: 85, impressions: 812, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-10-22', spend: 85.96, clicks: 81, impressions: 772, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-10-23', spend: 90.32, clicks: 85, impressions: 692, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-10-24', spend: 104.17, clicks: 93, impressions: 815, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-10-25', spend: 102.85, clicks: 100, impressions: 745, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-10-26', spend: 90.43, clicks: 93, impressions: 911, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-10-27', spend: 89.74, clicks: 86, impressions: 949, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-10-28', spend: 91.24, clicks: 86, impressions: 918, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-10-29', spend: 93.15, clicks: 90, impressions: 889, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-10-30', spend: 90.70, clicks: 86, impressions: 857, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-10-31', spend: 89.20, clicks: 79, impressions: 812, submit: 0, started: 0, finished: 0, treatment: 0 },
+  { date: '2026-11-01', spend: 112.92, clicks: 91, impressions: 900, submit: 0, started: 0, finished: 0, treatment: 0 },
 ];
 
 // Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)
