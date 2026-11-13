@@ -5,7 +5,7 @@
 
 export const DRIP_START = '2026-11-02';
 export const SF_EXPORT_DATE = '2026-11-13';
-export const GHL_AS_OF: string | null = null; // set when first GHL scrape runs
+export const GHL_AS_OF: string | null = '2026-11-13'; // first GHL scrape
 
 // ════════════════════════════════════════════════════════════════════════
 //  ENROLLMENT BY REFERRAL MONTH (from Salesforce CHECKOUT export)
@@ -68,31 +68,31 @@ export type FamilyPoolRow = {
 // New drip (Nov 2+): 58 hybrid, 30 screening.
 // Enrolled within 30d: hybrid 10% (85/858), screening 7% (95/1340).
 export const familyPool: FamilyPoolRow[] = [
-  // Populated from the other thread's dataset. GHL scrape will refresh these.
-  // Hybrid — monthly breakdown from GHL contact counts
-  { month: '2026-01', type: 'hybrid', referred: 204, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-02', type: 'hybrid', referred: 75, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-03', type: 'hybrid', referred: 95, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-04', type: 'hybrid', referred: 83, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-05', type: 'hybrid', referred: 57, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-06', type: 'hybrid', referred: 79, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-07', type: 'hybrid', referred: 84, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-08', type: 'hybrid', referred: 83, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-09', type: 'hybrid', referred: 50, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-10', type: 'hybrid', referred: 48, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-11', type: 'hybrid', referred: 58, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
+  // GHL scrape Nov 13 2026. Referred = GHL contact count; booking = PE appointment match.
+  // Hybrid
+  { month: '2026-01', type: 'hybrid', referred: 204, bookedCall: 44, bookedWithin3d: 6, bookedWithin7d: 29 },
+  { month: '2026-02', type: 'hybrid', referred: 70, bookedCall: 15, bookedWithin3d: 4, bookedWithin7d: 11 },
+  { month: '2026-03', type: 'hybrid', referred: 37, bookedCall: 10, bookedWithin3d: 1, bookedWithin7d: 6 },
+  { month: '2026-04', type: 'hybrid', referred: 43, bookedCall: 11, bookedWithin3d: 0, bookedWithin7d: 6 },
+  { month: '2026-05', type: 'hybrid', referred: 42, bookedCall: 17, bookedWithin3d: 4, bookedWithin7d: 10 },
+  { month: '2026-06', type: 'hybrid', referred: 60, bookedCall: 21, bookedWithin3d: 3, bookedWithin7d: 15 },
+  { month: '2026-07', type: 'hybrid', referred: 158, bookedCall: 43, bookedWithin3d: 8, bookedWithin7d: 27 },
+  { month: '2026-08', type: 'hybrid', referred: 100, bookedCall: 24, bookedWithin3d: 3, bookedWithin7d: 19 },
+  { month: '2026-09', type: 'hybrid', referred: 100, bookedCall: 19, bookedWithin3d: 5, bookedWithin7d: 8 },
+  { month: '2026-10', type: 'hybrid', referred: 98, bookedCall: 30, bookedWithin3d: 14, bookedWithin7d: 24 },
+  { month: '2026-11', type: 'hybrid', referred: 58, bookedCall: 9, bookedWithin3d: 6, bookedWithin7d: 6 },
   // Screening
-  { month: '2026-01', type: 'screening', referred: 150, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-02', type: 'screening', referred: 107, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-03', type: 'screening', referred: 139, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-04', type: 'screening', referred: 123, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-05', type: 'screening', referred: 127, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-06', type: 'screening', referred: 104, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-07', type: 'screening', referred: 149, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-08', type: 'screening', referred: 183, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-09', type: 'screening', referred: 128, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-10', type: 'screening', referred: 130, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
-  { month: '2026-11', type: 'screening', referred: 30, bookedCall: 0, bookedWithin3d: 0, bookedWithin7d: 0 },
+  { month: '2026-01', type: 'screening', referred: 106, bookedCall: 32, bookedWithin3d: 9, bookedWithin7d: 20 },
+  { month: '2026-02', type: 'screening', referred: 159, bookedCall: 31, bookedWithin3d: 7, bookedWithin7d: 19 },
+  { month: '2026-03', type: 'screening', referred: 201, bookedCall: 41, bookedWithin3d: 5, bookedWithin7d: 26 },
+  { month: '2026-04', type: 'screening', referred: 147, bookedCall: 35, bookedWithin3d: 2, bookedWithin7d: 19 },
+  { month: '2026-05', type: 'screening', referred: 118, bookedCall: 27, bookedWithin3d: 0, bookedWithin7d: 12 },
+  { month: '2026-06', type: 'screening', referred: 110, bookedCall: 30, bookedWithin3d: 1, bookedWithin7d: 19 },
+  { month: '2026-07', type: 'screening', referred: 145, bookedCall: 37, bookedWithin3d: 5, bookedWithin7d: 24 },
+  { month: '2026-08', type: 'screening', referred: 177, bookedCall: 34, bookedWithin3d: 9, bookedWithin7d: 26 },
+  { month: '2026-09', type: 'screening', referred: 132, bookedCall: 13, bookedWithin3d: 4, bookedWithin7d: 12 },
+  { month: '2026-10', type: 'screening', referred: 111, bookedCall: 31, bookedWithin3d: 9, bookedWithin7d: 22 },
+  { month: '2026-11', type: 'screening', referred: 30, bookedCall: 5, bookedWithin3d: 3, bookedWithin7d: 1 },
 ];
 
 // ════════════════════════════════════════════════════════════════════════
@@ -157,8 +157,8 @@ export const dripTimeline = [
 export const keyFindings = {
   oldFlowHybrid30d: 10.0,       // % enrolled within 30 days
   oldFlowScreening30d: 7.0,
-  oldFlowHybridFamilies: 858,
-  oldFlowScreeningFamilies: 1340,
+  oldFlowHybridFamilies: 912,
+  oldFlowScreeningFamilies: 1406,
   newDripHybridFamilies: 58,
   newDripScreeningFamilies: 30,
   newDripFirstCheckout: null as string | null,
