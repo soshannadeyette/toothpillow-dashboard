@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -10,375 +10,464 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import annotationPlugin from 'chartjs-plugin-annotation';
 import {
   familyPool,
+  cardStatus,
   keyFindings,
+  enrollmentByMonth,
   GHL_AS_OF,
   SF_EXPORT_DATE,
+  type FamilyPoolRow,
+  type CardStatusRow,
 } from '@/data/pediatricDrip';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, annotationPlugin);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 /* ------------------------------------------------------------------
-   THEME
+   CONSTANTS
    ------------------------------------------------------------------ */
-const TP = {
-  blue: '#3A6EA4',
-  skyBlue: '#B6CAE3',
-  green: '#22C55E',
-  red: '#EF4444',
-  amber: '#F59E0B',
-  amberLight: '#FEF9C3',
+const MONTHS = [
+  '2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06',
+  '2026-07', '2026-08', '2026-09', '2026-10', '2026-11',
+];
+const MON_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
+
+const COLORS = {
+  off: '#9CA3AF',
+  on: '#F97316',
+  onDrip: '#F97316',
+  novBorder: '#F97316',
+  teal: '#0D9488',
   navy: '#1B2A4A',
   text: '#333333',
   muted: '#6b7280',
   border: '#e5e7eb',
-  lightBorder: '#f1f1f1',
-  dripBlue: '#2563EB',
+  pillOn: '#ECFDF5',
+  pillOnText: '#065F46',
+  pillOff: '#F3F4F6',
+  pillOffText: '#6B7280',
+  pillDrip: '#DBEAFE',
+  pillDripText: '#1E40AF',
 };
 
-const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const monShort = (ym: string) => MON[parseInt(ym.slice(5, 7), 10) - 1];
-const pct1 = (n: number, d: number) => d === 0 ? 0 : Math.round((n / d) * 1000) / 10;
-const fmtPct = (v: number) => `${v.toFixed(1)}%`;
+type Metric = 'bookedCall' | 'bookedWithin3d' | 'bookedWithin7d';
+
+const METRIC_OPTIONS: { key: Metric; label: string; headlineLabel: string }[] = [
+  { key: 'bookedCall', label: 'Booked a call', headlineLabel: 'booked a call' },
+  { key: 'bookedWithin3d', label: 'Within 3 days', headlineLabel: 'booked within 3 days' },
+  { key: 'bookedWithin7d', label: 'Within 7 days', headlineLabel: 'booked within 7 days' },
+];
 
 /* ------------------------------------------------------------------
-   DATA HELPERS
+   HELPERS
    ------------------------------------------------------------------ */
-const BASELINE_MONTHS = ['2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06', '2026-07', '2026-08'];
-const DROP_MONTHS = ['2026-09', '2026-10'];
-const NEW_DRIP_MONTHS = ['2026-11'];
-const ALL_MONTHS = [...BASELINE_MONTHS, ...DROP_MONTHS, ...NEW_DRIP_MONTHS];
-
-type Agg = { referred: number; booked: number; within3d: number; within7d: number };
-
-function aggMonths(months: string[]): Agg {
-  return months.reduce<Agg>((acc, m) => {
-    const rows = familyPool.filter(r => r.month === m);
-    for (const r of rows) {
-      acc.referred += r.referred;
-      acc.booked += r.bookedCall;
-      acc.within3d += r.bookedWithin3d;
-      acc.within7d += r.bookedWithin7d;
-    }
-    return acc;
-  }, { referred: 0, booked: 0, within3d: 0, within7d: 0 });
+function getRow(type: 'hybrid' | 'screening', month: string): FamilyPoolRow | undefined {
+  return familyPool.find(r => r.type === type && r.month === month);
 }
 
-function aggMonth(m: string): Agg {
-  return aggMonths([m]);
+function getCardStatus(month: string): CardStatusRow | undefined {
+  return cardStatus.find(c => c.month === month);
 }
 
-const baseline = aggMonths(BASELINE_MONTHS);
-const drop = aggMonths(DROP_MONTHS);
-const oldFlow = aggMonths([...BASELINE_MONTHS, ...DROP_MONTHS]);
-const newDrip = aggMonths(NEW_DRIP_MONTHS);
+function pct(n: number, d: number): number {
+  return d === 0 ? 0 : Math.round((n / d) * 1000) / 10;
+}
+
+function fmtPct(v: number): string {
+  return `${v.toFixed(1)}%`;
+}
+
+function metricValue(row: FamilyPoolRow, metric: Metric): number {
+  return row[metric];
+}
 
 /* ------------------------------------------------------------------
-   UI PRIMITIVES
+   COMPONENTS
    ------------------------------------------------------------------ */
-function Card({ children, style }: { children: ReactNode; style?: React.CSSProperties }) {
+
+function StatusPill({ status }: { status: CardStatusRow }) {
+  let bg = COLORS.pillOff;
+  let color = COLORS.pillOffText;
+  let borderColor = COLORS.border;
+
+  if (status.status === 'on') {
+    bg = COLORS.pillOn;
+    color = COLORS.pillOnText;
+    borderColor = '#A7F3D0';
+  } else if (status.status === 'on+drip') {
+    bg = COLORS.pillDrip;
+    color = COLORS.pillDripText;
+    borderColor = '#93C5FD';
+  }
+
   return (
-    <div style={{ border: `1px solid ${TP.border}`, borderRadius: 12, padding: 20, background: '#fff', marginBottom: 20, ...style }}>
-      {children}
+    <span style={{
+      display: 'inline-block',
+      fontSize: 10,
+      fontWeight: 600,
+      padding: '2px 6px',
+      borderRadius: 8,
+      background: bg,
+      color,
+      border: `1px solid ${borderColor}`,
+      whiteSpace: 'nowrap',
+    }}>
+      {status.label}
+    </span>
+  );
+}
+
+function MetricToggle({ active, onChange }: { active: Metric; onChange: (m: Metric) => void }) {
+  return (
+    <div style={{ display: 'flex', gap: 0, marginBottom: 16 }}>
+      {METRIC_OPTIONS.map(opt => (
+        <button
+          key={opt.key}
+          onClick={() => onChange(opt.key)}
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            padding: '8px 16px',
+            cursor: 'pointer',
+            border: `1px solid ${COLORS.border}`,
+            borderRight: opt.key === 'bookedWithin7d' ? `1px solid ${COLORS.border}` : 'none',
+            borderRadius: opt.key === 'bookedCall' ? '8px 0 0 8px' : opt.key === 'bookedWithin7d' ? '0 8px 8px 0' : '0',
+            background: active === opt.key ? COLORS.navy : '#fff',
+            color: active === opt.key ? '#fff' : COLORS.text,
+          }}
+        >
+          {opt.label}
+        </button>
+      ))}
     </div>
   );
 }
 
-function SectionTitle({ children }: { children: ReactNode }) {
-  return <h3 style={{ fontSize: 16, fontWeight: 700, color: TP.navy, marginBottom: 12, marginTop: 0 }}>{children}</h3>;
-}
+function FamilySection({ type, label }: { type: 'hybrid' | 'screening'; label: string }) {
+  const [metric, setMetric] = useState<Metric>('bookedCall');
+  const [showNumbers, setShowNumbers] = useState(false);
+  const metricInfo = METRIC_OPTIONS.find(o => o.key === metric)!;
 
-function Takeaway({ children }: { children: ReactNode }) {
-  return <p style={{ fontSize: 13, color: TP.muted, marginTop: 8, marginBottom: 0, lineHeight: 1.5 }}>{children}</p>;
-}
-
-/* ------------------------------------------------------------------
-   SECTION 1: HEADLINE — Early Signal
-   ------------------------------------------------------------------ */
-function EarlySignal() {
-  const oldBookingRate = pct1(oldFlow.booked, oldFlow.referred);
-  const newBookingRate = pct1(newDrip.booked, newDrip.referred);
-  const old7dRate = pct1(oldFlow.within7d, oldFlow.referred);
-  const new7dRate = pct1(newDrip.within7d, newDrip.referred);
-
-  const bookingDelta = newBookingRate - oldBookingRate;
-  const speedDelta = new7dRate - old7dRate;
-
-  return (
-    <Card>
-      <SectionTitle>Early signal: booking rates</SectionTitle>
-      <p style={{ fontSize: 13, color: TP.muted, marginTop: -8, marginBottom: 16, lineHeight: 1.5 }}>
-        Enrollment takes 30+ days, so we can&apos;t compare enrollment rates yet. But we can compare <strong style={{ color: TP.navy }}>booking rates</strong> — are families getting on PE calls?
-      </p>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-        {/* Old flow booking rate */}
-        <StatCard
-          label="Old flow (Jan-Oct)"
-          value={fmtPct(oldBookingRate)}
-          detail={`${oldFlow.booked} of ${oldFlow.referred} booked a PE call`}
-          bg="#f8fafc"
-          borderColor={TP.border}
-        />
-        {/* New drip booking rate */}
-        <StatCard
-          label="New drip (Nov)"
-          value={fmtPct(newBookingRate)}
-          detail={`${newDrip.booked} of ${newDrip.referred} booked (11 days in)`}
-          bg="#EFF6FF"
-          borderColor={TP.dripBlue}
-          delta={bookingDelta}
-        />
-        {/* 7-day speed */}
-        <StatCard
-          label="Booked within 7 days"
-          value={`${fmtPct(new7dRate)} vs ${fmtPct(old7dRate)}`}
-          detail={`New drip: ${newDrip.within7d} of ${newDrip.referred} | Old: ${oldFlow.within7d} of ${oldFlow.referred}`}
-          bg={speedDelta >= 0 ? '#F0FDF4' : '#FEF2F2'}
-          borderColor={speedDelta >= 0 ? '#22C55E' : '#EF4444'}
-          delta={speedDelta}
-        />
-      </div>
-      <Takeaway>
-        Nov families are only 11 days old, so the booking rate will keep rising as more families schedule calls. The old-flow rate includes families with 10+ months of exposure, so it&apos;s a ceiling the new drip is tracking toward.
-        {newDrip.within3d > 0 && ` Within 3 days: ${newDrip.within3d} of ${newDrip.referred} new-drip families (${fmtPct(pct1(newDrip.within3d, newDrip.referred))}) vs old flow ${fmtPct(pct1(oldFlow.within3d, oldFlow.referred))}.`}
-      </Takeaway>
-      <div style={{ fontSize: 11, color: TP.muted, marginTop: 8 }}>
-        GHL data as of {GHL_AS_OF ?? 'awaiting scrape'} · Salesforce export {SF_EXPORT_DATE}
-      </div>
-    </Card>
-  );
-}
-
-function StatCard({ label, value, detail, bg, borderColor, delta }: {
-  label: string; value: string; detail: string; bg: string; borderColor: string; delta?: number;
-}) {
-  return (
-    <div style={{ padding: 16, borderRadius: 8, background: bg, border: `1.5px solid ${borderColor}` }}>
-      <div style={{ fontSize: 11, fontWeight: 600, color: TP.muted, textTransform: 'uppercase', marginBottom: 8 }}>{label}</div>
-      <div style={{ fontSize: 26, fontWeight: 700, color: TP.navy, display: 'flex', alignItems: 'center', gap: 8 }}>
-        {value}
-        {delta !== undefined && delta !== 0 && (
-          <span style={{ fontSize: 13, fontWeight: 600, color: delta > 0 ? TP.green : TP.red }}>
-            {delta > 0 ? '▲' : '▼'} {Math.abs(delta).toFixed(1)}pp
-          </span>
-        )}
-      </div>
-      <div style={{ fontSize: 12, color: TP.muted, marginTop: 4 }}>{detail}</div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------
-   SECTION 2: MONTHLY BOOKING RATE CHART
-   ------------------------------------------------------------------ */
-function MonthlyBookingChart() {
-  const monthData = ALL_MONTHS.map(m => {
-    const a = aggMonth(m);
-    return { month: m, rate: pct1(a.booked, a.referred), ...a };
+  // Build per-month data
+  const monthData = MONTHS.map(m => {
+    const row = getRow(type, m);
+    const cs = getCardStatus(m);
+    const referred = row?.referred ?? 0;
+    const value = row ? metricValue(row, metric) : 0;
+    const rate = pct(value, referred);
+    return { month: m, referred, value, rate, cardStatus: cs };
   });
 
-  const oldFlowAvg = pct1(oldFlow.booked, oldFlow.referred);
+  // Headline: compare Nov vs Oct
+  const nov = monthData[10];
+  const oct = monthData[9];
+  const novLabel = `November 1–13: ${fmtPct(nov.rate)} (${nov.value} of ${nov.referred})`;
+  const octLabel = `October: ${fmtPct(oct.rate)} (${oct.value} of ${oct.referred})`;
 
+  // Average for Jan-Oct
+  const janOctTotal = monthData.slice(0, 10);
+  const janOctReferred = janOctTotal.reduce((s, d) => s + d.referred, 0);
+  const janOctValue = janOctTotal.reduce((s, d) => s + d.value, 0);
+  const janOctRate = pct(janOctValue, janOctReferred);
+
+  // Chart data
   const barColors = monthData.map(d => {
-    if (NEW_DRIP_MONTHS.includes(d.month)) return TP.dripBlue;
-    if (DROP_MONTHS.includes(d.month)) return TP.amber;
-    return TP.skyBlue;
+    if (!d.cardStatus || d.cardStatus.status === 'off') return COLORS.off;
+    return COLORS.on;
   });
 
-  const barBorders = monthData.map(d => {
-    if (NEW_DRIP_MONTHS.includes(d.month)) return '#1D4ED8';
-    if (DROP_MONTHS.includes(d.month)) return '#D97706';
-    return TP.blue;
+  const barBorderColors = monthData.map((d, i) => {
+    if (i === 10) return COLORS.novBorder; // Nov gets a visible border
+    return 'transparent';
   });
 
+  const barBorderWidth = monthData.map((_, i) => (i === 10 ? 2 : 0));
+
+  const barBorderDash = monthData.map((_, i) => (i === 10 ? [4, 4] : []));
+
+  const chartData = {
+    labels: MON_LABELS,
+    datasets: [
+      {
+        data: monthData.map(d => d.rate),
+        backgroundColor: barColors,
+        borderColor: barBorderColors,
+        borderWidth: barBorderWidth,
+        borderDash: undefined as number[] | undefined,
+        borderRadius: 4,
+        barPercentage: 0.7,
+        categoryPercentage: 0.8,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx: { parsed: { y: number | null }; dataIndex: number }) => {
+            const d = monthData[ctx.dataIndex];
+            const v = ctx.parsed.y ?? 0;
+            return `${fmtPct(v)} (${d.value} of ${d.referred})`;
+          },
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (v: string | number) => `${v}%`,
+          font: { size: 11 },
+        },
+        grid: { color: '#f0f0f0' },
+      },
+      x: {
+        ticks: { font: { size: 11 } },
+        grid: { display: false },
+      },
+    },
+  };
+
+  // Custom datalabels via plugin-less approach: use a second hidden dataset trick,
+  // or simpler: use the animation onComplete. Since Chart.js react wrapper makes this
+  // tricky, we'll just show % labels via a Chart.js plugin registered inline.
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const datalabelPlugin = {
+    id: `datalabel-${type}-${metric}`,
+    afterDatasetsDraw(chart: any) {
+      const { ctx } = chart;
+      const meta = chart.getDatasetMeta(0);
+      ctx.save();
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillStyle = COLORS.navy;
+      meta.data.forEach((bar: any, i: number) => {
+        const val = chart.data.datasets[0].data[i];
+        if (val > 0) {
+          ctx.fillText(`${val.toFixed(1)}%`, bar.x, bar.y - 4);
+        }
+      });
+      ctx.restore();
+    },
+  };
+
+  const novDashedPlugin = {
+    id: `nov-dashed-${type}-${metric}`,
+    afterDatasetsDraw(chart: any) {
+      const meta = chart.getDatasetMeta(0);
+      const novBar = meta.data[10];
+      if (!novBar) return;
+      const { ctx } = chart;
+      ctx.save();
+      ctx.setLineDash([4, 3]);
+      ctx.strokeStyle = COLORS.novBorder;
+      ctx.lineWidth = 2;
+      const x = novBar.x - novBar.width / 2;
+      const y = novBar.y;
+      const w = novBar.width;
+      const h = novBar.base - novBar.y;
+      ctx.strokeRect(x, y, w, h);
+      ctx.restore();
+    },
+  };
+  /* eslint-enable @typescript-eslint/no-explicit-any */
+
   return (
-    <Card>
-      <SectionTitle>Booking rate by month (all referral types combined)</SectionTitle>
-      <div style={{ display: 'flex', gap: 16, marginBottom: 12, fontSize: 11, color: TP.muted }}>
-        <span><span style={{ display: 'inline-block', width: 12, height: 12, background: TP.skyBlue, borderRadius: 2, marginRight: 4, verticalAlign: 'middle' }} /> Jan-Aug baseline</span>
-        <span><span style={{ display: 'inline-block', width: 12, height: 12, background: TP.amber, borderRadius: 2, marginRight: 4, verticalAlign: 'middle' }} /> Sep-Oct (pre-drip drop)</span>
-        <span><span style={{ display: 'inline-block', width: 12, height: 12, background: TP.dripBlue, borderRadius: 2, marginRight: 4, verticalAlign: 'middle' }} /> Nov (new drip)</span>
-        <span><span style={{ display: 'inline-block', width: 20, height: 2, background: '#EF4444', marginRight: 4, verticalAlign: 'middle' }} /> Old-flow avg</span>
-      </div>
-      <div style={{ height: 260 }}>
-        <Bar
-          data={{
-            labels: monthData.map(d => monShort(d.month)),
-            datasets: [{
-              label: 'Booking rate',
-              data: monthData.map(d => d.rate),
-              backgroundColor: barColors,
-              borderColor: barBorders,
-              borderWidth: monthData.map(d => NEW_DRIP_MONTHS.includes(d.month) ? 2 : 1),
-              borderRadius: 4,
-            }],
-          }}
-          options={{
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: (ctx) => {
-                    const d = monthData[ctx.dataIndex];
-                    return `${d.rate.toFixed(1)}% (${d.booked} of ${d.referred})`;
-                  },
-                },
-              },
-              annotation: {
-                annotations: {
-                  avgLine: {
-                    type: 'line' as const,
-                    yMin: oldFlowAvg,
-                    yMax: oldFlowAvg,
-                    borderColor: '#EF4444',
-                    borderWidth: 2,
-                    borderDash: [6, 3],
-                    label: {
-                      display: true,
-                      content: `Old avg ${oldFlowAvg.toFixed(1)}%`,
-                      position: 'end' as const,
-                      font: { size: 10 },
-                      backgroundColor: 'rgba(239,68,68,0.8)',
-                    },
-                  },
-                },
-              },
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                max: Math.ceil(Math.max(...monthData.map(d => d.rate), oldFlowAvg) / 5) * 5 + 5,
-                title: { display: true, text: '% booked a PE call', font: { size: 11 } },
-                ticks: { callback: (v) => `${v}%` },
-              },
-            },
-          }}
-        />
-      </div>
-      <Takeaway>
-        Nov is 11 days in with a {monthData[monthData.length - 1].rate.toFixed(1)}% booking rate. The old-flow average over 10 months was {oldFlowAvg.toFixed(1)}%. Sep-Oct dipped before the drip changed, which is what prompted the new campaign.
-      </Takeaway>
-    </Card>
-  );
-}
+    <div style={{ marginBottom: 40 }}>
+      {/* Section header */}
+      <h3 style={{
+        fontSize: 15,
+        fontWeight: 700,
+        color: COLORS.teal,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+        marginBottom: 12,
+        marginTop: 0,
+      }}>
+        {label}
+      </h3>
 
-/* ------------------------------------------------------------------
-   SECTION 3: SPEED — Within 3d / 7d
-   ------------------------------------------------------------------ */
-function BookingSpeed() {
-  const rows = ALL_MONTHS.map(m => {
-    const a = aggMonth(m);
-    return {
-      month: m,
-      referred: a.referred,
-      booked: a.booked,
-      within3d: a.within3d,
-      within7d: a.within7d,
-      rate3d: pct1(a.within3d, a.referred),
-      rate7d: pct1(a.within7d, a.referred),
-      isBaseline: BASELINE_MONTHS.includes(m),
-      isDrop: DROP_MONTHS.includes(m),
-      isDrip: NEW_DRIP_MONTHS.includes(m),
-    };
-  });
+      {/* Metric toggle */}
+      <MetricToggle active={metric} onChange={setMetric} />
 
-  const blAvg3d = pct1(baseline.within3d, baseline.referred);
-  const blAvg7d = pct1(baseline.within7d, baseline.referred);
+      {/* Headline */}
+      <h4 style={{ fontSize: 16, fontWeight: 700, color: COLORS.navy, marginBottom: 8, marginTop: 0 }}>
+        {novLabel} {metricInfo.headlineLabel}. {octLabel}.
+      </h4>
 
-  return (
-    <Card>
-      <SectionTitle>How fast are families booking?</SectionTitle>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>
-              <th style={thStyle}>Month</th>
-              <th style={thStyleR}>Referred</th>
-              <th style={thStyleR}>Booked</th>
-              <th style={thStyleR}>Book rate</th>
-              <th style={thStyleR}>Within 3d</th>
-              <th style={thStyleR}>Within 7d</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map(r => {
-              const rowBg = r.isDrip ? '#EFF6FF' : r.isDrop ? TP.amberLight : undefined;
-              return (
-                <tr key={r.month} style={{ background: rowBg }}>
-                  <td style={{ ...tdStyle, fontWeight: r.isDrip ? 700 : 400 }}>
-                    {monShort(r.month)} {r.isDrip && <span style={{ fontSize: 10, color: TP.dripBlue, fontWeight: 600 }}>NEW</span>}
-                  </td>
-                  <td style={tdStyleR}>{r.referred}</td>
-                  <td style={tdStyleR}>{r.booked}</td>
-                  <td style={tdStyleR}>{fmtPct(pct1(r.booked, r.referred))}</td>
-                  <td style={{ ...tdStyleR, fontWeight: r.isDrip ? 700 : 400, color: r.isDrip && r.rate3d > blAvg3d ? TP.green : undefined }}>
-                    {fmtPct(r.rate3d)}
-                  </td>
-                  <td style={{ ...tdStyleR, fontWeight: r.isDrip ? 700 : 400, color: r.isDrip && r.rate7d > blAvg7d ? TP.green : undefined }}>
-                    {fmtPct(r.rate7d)}
-                  </td>
-                </tr>
-              );
-            })}
-            {/* Averages row */}
-            <tr style={{ borderTop: `2px solid ${TP.border}`, background: '#f8fafc' }}>
-              <td style={{ ...tdStyle, fontWeight: 700, fontSize: 11, textTransform: 'uppercase' as const, color: TP.muted }}>Jan-Aug avg</td>
-              <td style={tdStyleR}>{Math.round(baseline.referred / BASELINE_MONTHS.length)}/mo</td>
-              <td style={tdStyleR}>{Math.round(baseline.booked / BASELINE_MONTHS.length)}/mo</td>
-              <td style={tdStyleR}>{fmtPct(pct1(baseline.booked, baseline.referred))}</td>
-              <td style={tdStyleR}>{fmtPct(blAvg3d)}</td>
-              <td style={tdStyleR}>{fmtPct(blAvg7d)}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <Takeaway>
-        Within-3d and within-7d rates are the speed signal. The new drip has had only 11 days, so its overall booking rate will keep climbing. Compare the 7-day rate to the baseline average to gauge early momentum.
-      </Takeaway>
-    </Card>
-  );
-}
-
-const thStyle: React.CSSProperties = { textAlign: 'left', padding: '8px 10px', borderBottom: `2px solid ${TP.border}`, fontSize: 11, color: TP.muted, textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' };
-const thStyleR: React.CSSProperties = { ...thStyle, textAlign: 'right' };
-const tdStyle: React.CSSProperties = { textAlign: 'left', padding: '8px 10px', borderBottom: `1px solid ${TP.lightBorder}`, fontSize: 13, color: TP.text };
-const tdStyleR: React.CSSProperties = { ...tdStyle, textAlign: 'right' };
-
-/* ------------------------------------------------------------------
-   SECTION 4: ENROLLMENT STATUS (compact)
-   ------------------------------------------------------------------ */
-function EnrollmentStatus() {
-  const k = keyFindings;
-  return (
-    <Card style={{ background: '#f8fafc', border: `1px dashed ${TP.border}` }}>
-      <SectionTitle>Enrollment: waiting for data</SectionTitle>
-      <p style={{ fontSize: 14, color: TP.text, margin: 0, lineHeight: 1.7 }}>
-        Enrollment comparison starts <strong>Dec 2</strong> — that&apos;s when the first new-drip families reach 30 days.
-        The old flow enrolled <strong>{k.oldFlowHybrid30d}% hybrid</strong> and <strong>{k.oldFlowScreening30d}% screening</strong> within 30 days.
-        Right now: {k.newDripHybridFamilies + k.newDripScreeningFamilies} new-drip families, 0 enrolled (oldest is 11 days old).
+      {/* Description paragraph */}
+      <p style={{ fontSize: 13, color: COLORS.muted, lineHeight: 1.6, marginBottom: 16, marginTop: 0 }}>
+        {nov.rate > oct.rate
+          ? `November is ${(nov.rate - oct.rate).toFixed(1)} points above October.`
+          : nov.rate < oct.rate
+          ? `November is ${(oct.rate - nov.rate).toFixed(1)} points below October.`
+          : 'November matches October.'}
+        {' '}Families counted: {nov.referred} vs {oct.referred}.
+        {' '}The average for Jan–Oct is {fmtPct(janOctRate)}.
+        {' '}With {nov.referred} families, one booking moves November&apos;s rate by {nov.referred > 0 ? (100 / nov.referred).toFixed(1) : '0'} points.
       </p>
-    </Card>
+
+      {/* Chart */}
+      <div style={{ height: 280, marginBottom: 8 }}>
+        <Bar data={chartData} options={chartOptions} plugins={[datalabelPlugin, novDashedPlugin]} />
+      </div>
+
+      {/* Status pills row */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${MONTHS.length}, 1fr)`,
+        gap: 2,
+        textAlign: 'center',
+        marginBottom: 16,
+      }}>
+        {monthData.map(d => (
+          <div key={d.month} style={{ fontSize: 10 }}>
+            {d.month === '2026-11' ? (
+              <div style={{ fontSize: 10, color: COLORS.muted, marginBottom: 2 }}>so far</div>
+            ) : null}
+            {d.cardStatus ? <StatusPill status={d.cardStatus} /> : null}
+          </div>
+        ))}
+      </div>
+
+      {/* Collapsible numbers table */}
+      <button
+        onClick={() => setShowNumbers(!showNumbers)}
+        style={{
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          fontSize: 13,
+          color: COLORS.muted,
+          padding: 0,
+          marginBottom: showNumbers ? 8 : 0,
+        }}
+      >
+        {showNumbers ? '▼' : '▶'} Show the numbers
+      </button>
+
+      {showNumbers && (
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse', marginTop: 8 }}>
+            <thead>
+              <tr style={{ borderBottom: `2px solid ${COLORS.border}` }}>
+                <th style={{ textAlign: 'left', padding: '6px 8px', color: COLORS.muted, fontWeight: 600 }}>Month</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', color: COLORS.muted, fontWeight: 600 }}>Referred</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', color: COLORS.muted, fontWeight: 600 }}>Booked</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', color: COLORS.muted, fontWeight: 600 }}>Within 3d</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', color: COLORS.muted, fontWeight: 600 }}>Within 7d</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', color: COLORS.muted, fontWeight: 600 }}>Rate</th>
+                <th style={{ textAlign: 'center', padding: '6px 8px', color: COLORS.muted, fontWeight: 600 }}>Card</th>
+              </tr>
+            </thead>
+            <tbody>
+              {monthData.map((d, i) => {
+                const row = getRow(type, d.month);
+                return (
+                  <tr key={d.month} style={{ borderBottom: `1px solid ${COLORS.border}`, background: i === 10 ? '#F0F9FF' : undefined }}>
+                    <td style={{ padding: '6px 8px', fontWeight: i === 10 ? 700 : 400 }}>
+                      {MON_LABELS[i]}{i === 10 ? ' *' : ''}
+                    </td>
+                    <td style={{ textAlign: 'right', padding: '6px 8px' }}>{d.referred}</td>
+                    <td style={{ textAlign: 'right', padding: '6px 8px' }}>{row?.bookedCall ?? 0}</td>
+                    <td style={{ textAlign: 'right', padding: '6px 8px' }}>{row?.bookedWithin3d ?? 0}</td>
+                    <td style={{ textAlign: 'right', padding: '6px 8px' }}>{row?.bookedWithin7d ?? 0}</td>
+                    <td style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>{fmtPct(d.rate)}</td>
+                    <td style={{ textAlign: 'center', padding: '6px 8px' }}>
+                      {d.cardStatus ? <StatusPill status={d.cardStatus} /> : null}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {/* Nov partial note */}
+          <p style={{ fontSize: 11, color: COLORS.muted, marginTop: 4 }}>
+            * November is partial (1st–13th only). Rate will change as more families schedule.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EnrollmentSummary() {
+  const k = keyFindings;
+  const hybridEnroll = enrollmentByMonth.filter(r => r.type === 'hybrid');
+  const screenEnroll = enrollmentByMonth.filter(r => r.type === 'screening');
+  const hybridTotal = hybridEnroll.reduce((s, r) => s + r.checkouts, 0);
+  const screenTotal = screenEnroll.reduce((s, r) => s + r.checkouts, 0);
+  const hybridRev = hybridEnroll.reduce((s, r) => s + r.amtPaid, 0);
+  const screenRev = screenEnroll.reduce((s, r) => s + r.amtPaid, 0);
+
+  return (
+    <div style={{
+      border: `1px solid ${COLORS.border}`,
+      borderRadius: 12,
+      padding: 20,
+      background: '#FAFAFA',
+      marginTop: 20,
+    }}>
+      <h3 style={{ fontSize: 14, fontWeight: 700, color: COLORS.navy, margin: '0 0 12px 0' }}>
+        Enrollment snapshot (Salesforce)
+      </h3>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, fontSize: 13 }}>
+        <div>
+          <div style={{ fontWeight: 600, color: COLORS.teal, marginBottom: 4 }}>Hybrid</div>
+          <div>{hybridTotal} checkouts &middot; ${(hybridRev / 1000).toFixed(0)}K collected</div>
+          <div style={{ color: COLORS.muted }}>
+            Old flow: {k.oldFlowHybrid30d}% enrolled within 30d ({k.oldFlowHybridFamilies} families)
+          </div>
+        </div>
+        <div>
+          <div style={{ fontWeight: 600, color: COLORS.teal, marginBottom: 4 }}>Screening</div>
+          <div>{screenTotal} checkouts &middot; ${(screenRev / 1000).toFixed(0)}K collected</div>
+          <div style={{ color: COLORS.muted }}>
+            Old flow: {k.oldFlowScreening30d}% enrolled within 30d ({k.oldFlowScreeningFamilies} families)
+          </div>
+        </div>
+      </div>
+      <p style={{ fontSize: 12, color: COLORS.muted, marginTop: 12, marginBottom: 0, lineHeight: 1.5 }}>
+        New-drip families: {k.newDripHybridFamilies} hybrid + {k.newDripScreeningFamilies} screening.
+        {k.newDripFirstCheckout
+          ? ` First checkout: ${k.newDripFirstCheckout}.`
+          : ' No checkouts yet (oldest family is 11 days old; first reach 30 days Dec 2).'}
+      </p>
+    </div>
   );
 }
 
 /* ------------------------------------------------------------------
-   MAIN EXPORT
+   MAIN COMPONENT
    ------------------------------------------------------------------ */
 export default function PediatricDrip() {
   return (
-    <div>
-      <h2 style={{ fontSize: 22, fontWeight: 700, color: TP.navy, marginBottom: 4 }}>Is the new drip working?</h2>
-      <p style={{ fontSize: 13, color: TP.muted, marginBottom: 20 }}>
-        Pediatric drip campaign launched Nov 2, 2026. Hybrid + screening families from dental offices.
-      </p>
-      <EarlySignal />
-      <MonthlyBookingChart />
-      <BookingSpeed />
-      <EnrollmentStatus />
+    <div style={{ maxWidth: 900, margin: '0 auto' }}>
+      {/* Page title + data freshness */}
+      <div style={{ marginBottom: 24 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: COLORS.navy, margin: '0 0 4px 0' }}>
+          Pediatric Drip Campaign
+        </h2>
+        <p style={{ fontSize: 12, color: COLORS.muted, margin: 0 }}>
+          Drip launched Nov 2, 2026. Hybrid + screening families from dental offices.
+          {GHL_AS_OF && <> &middot; GHL data as of {GHL_AS_OF}</>}
+          {SF_EXPORT_DATE && <> &middot; Salesforce export {SF_EXPORT_DATE}</>}
+        </p>
+      </div>
+
+      {/* Hybrid families */}
+      <FamilySection type="hybrid" label="Hybrid Families" />
+
+      {/* Screening families */}
+      <FamilySection type="screening" label="Screening Families" />
+
+      {/* Enrollment summary */}
+      <EnrollmentSummary />
     </div>
   );
 }
