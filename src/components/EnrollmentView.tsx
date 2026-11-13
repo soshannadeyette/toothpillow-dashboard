@@ -16,6 +16,7 @@ import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
 import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, breakWeeklyBaseline, lavaIceWeekly, dailyFunnel, weeklyTTCL, weeklyLavaIce, monthlyWinback, type EventRow } from '@/data/enrollmentCheckouts';
 import IceWinback from '@/components/IceWinback';
+import PediatricDrip from '@/components/PediatricDrip';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -37,6 +38,7 @@ const heat = (v: number, max: number) => (v === 0 ? '#f8fafc' : `rgba(58,110,164
 const heatText = (v: number, max: number) => (v / max > 0.55 ? '#fff' : TP.text);
 
 const TABS = [
+  { id: 'pedsdrip', label: 'Pediatric Drip' },
   { id: 'overview', label: 'Overview' },
   { id: 'dailytrends', label: 'Daily Trends' },
   { id: 'icewinback', label: 'Ice / Win-back' },
@@ -87,10 +89,10 @@ export default function EnrollmentView() {
 
   return (
     <div>
-      {/* Source line + summary — hidden on the Overview (it has its own exec KPIs) */}
+      {/* Source line + summary â hidden on the Overview (it has its own exec KPIs) */}
       {tab !== 'overview' && (
         <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 13, color: '#6b7280' }}>Checkouts · Jan 1 – Oct 14, 2026 · from Salesforce</div>
+          <div style={{ fontSize: 13, color: '#6b7280' }}>Checkouts Â· Jan 1 â Oct 14, 2026 Â· from Salesforce</div>
           <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', marginTop: 10 }}>
             <Stat label="Checkouts (YTD)" value={summary.checkouts.toLocaleString()} />
             <Stat label="Collected" value={money(summary.amountPaid)} />
@@ -120,6 +122,7 @@ export default function EnrollmentView() {
         </div>
       </nav>
 
+      {tab === 'pedsdrip' && <PediatricDrip />}
       {tab === 'overview' && <OverviewTab />}
       {tab === 'dailytrends' && <DailyTrendsTab />}
       {tab === 'icewinback' && <><IceShareChart /><IceWinback /></>}
@@ -271,7 +274,7 @@ function IceShareChart() {
       {/* Monthly win-back rate table */}
       <h4 style={{ margin: '24px 0 8px', color: TP.navy, fontWeight: 700, fontSize: 15 }}>Monthly win-back rate (by checkout-link month)</h4>
       <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>
-        Win-back rate = Ice / all leads that received a checkout link that month. Ice share = Ice / (Ice + Lava) checkouts only. Sep–Oct still maturing.
+        Win-back rate = Ice / all leads that received a checkout link that month. Ice share = Ice / (Ice + Lava) checkouts only. SepâOct still maturing.
       </div>
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
@@ -333,7 +336,7 @@ function DailyTrendsTab() {
       const d = dailyFunnel[index]?.date;
       if (!d) return '';
       if (d.slice(8) === '01') return monFmt[parseInt(d.slice(5, 7), 10) - 1];
-      if (d.slice(8) === '15') return '·';
+      if (d.slice(8) === '15') return 'Â·';
       return '';
     },
   };
@@ -348,15 +351,15 @@ function DailyTrendsTab() {
   return (
     <>
       <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 22, fontWeight: 800, color: TP.navy }}>Daily Trends — Last 3 Months</div>
-        <div style={{ fontSize: 12, color: '#9ca3af' }}>Jul 14 – Oct 14, 2026 · all leads, all sources · from Salesforce Enrollment Funnel export</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: TP.navy }}>Daily Trends â Last 3 Months</div>
+        <div style={{ fontSize: 12, color: '#9ca3af' }}>Jul 14 â Oct 14, 2026 Â· all leads, all sources Â· from Salesforce Enrollment Funnel export</div>
       </div>
 
       {/* 1. Daily submissions */}
       <Card>
         <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Daily submissions</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Light bars = daily count of new assessments submitted. Bold line = 7-day moving average. Weekends dip but the pattern is consistent — look at the moving average for the real trend.
+          Light bars = daily count of new assessments submitted. Bold line = 7-day moving average. Weekends dip but the pattern is consistent â look at the moving average for the real trend.
         </div>
         <div style={{ overflowX: 'auto', overflowY: 'hidden', paddingBottom: 8 }}>
           <div style={{ minWidth: 900, height: 320 }}>
@@ -381,7 +384,7 @@ function DailyTrendsTab() {
 
       {/* 2. Stacked funnel stages */}
       <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Funnel stages — submissions, checkout links, checkouts</h3>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Funnel stages â submissions, checkout links, checkouts</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
           Three 7-day moving averages stacked: <b style={{ color: TP.navy }}>submissions</b> (when the family fills out the assessment), <b style={{ color: TP.blue }}>checkout links sent</b> (when the TC sends the payment link), and <b style={{ color: TP.green }}>checkouts</b> (when the family pays). The gap between lines is the pipeline lag at each step. Checkout-link volume drops to zero on weekends (TC-driven), while submissions keep coming.
         </div>
@@ -413,7 +416,7 @@ function DailyTrendsTab() {
       <Card>
         <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Time to checkout link (days from submission)</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          How many days between a family submitting their assessment and receiving a checkout link, grouped by submission week. <b style={{ color: TP.blue }}>Blue = median</b>, <b style={{ color: TP.yellow }}>amber = mean</b>. The mean runs above the median because a few long-wait cases pull it up. The last two weeks (Oct) are artificially low — those families just submitted, so only the fast ones have links yet. Bars = number of records per week (right axis).
+          How many days between a family submitting their assessment and receiving a checkout link, grouped by submission week. <b style={{ color: TP.blue }}>Blue = median</b>, <b style={{ color: TP.yellow }}>amber = mean</b>. The mean runs above the median because a few long-wait cases pull it up. The last two weeks (Oct) are artificially low â those families just submitted, so only the fast ones have links yet. Bars = number of records per week (right axis).
         </div>
         <div style={{ height: 320 }}>
           <Bar
@@ -438,7 +441,7 @@ function DailyTrendsTab() {
           />
         </div>
         <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>
-          Time-to-checkout-link rose from ~6 days (mid-Jul) to ~13 days (early Sep), then came back down to ~8 days by late Sep. The Sep peak lines up with the TC ramp — new coordinators joining while the pipeline was backed up.
+          Time-to-checkout-link rose from ~6 days (mid-Jul) to ~13 days (early Sep), then came back down to ~8 days by late Sep. The Sep peak lines up with the TC ramp â new coordinators joining while the pipeline was backed up.
         </div>
       </Card>
 
@@ -466,7 +469,7 @@ function DiagnosisTab() {
       { type: 'line' as const, label: 'Expanders First', data: expLine, borderColor: '#8B5CF6', backgroundColor: '#8B5CF6', borderWidth: 2.5, pointRadius: 3, tension: 0.3, spanGaps: false },
     ],
   };
-  // Shift-share decomposition of the Feb–Apr → Jun–Jul conversion change (both mature)
+  // Shift-share decomposition of the FebâApr â JunâJul conversion change (both mature)
   const wfData = [
     [0, 27.7],       // baseline
     [20.7, 27.7],    // standard pool converts worse: -7.0
@@ -487,12 +490,12 @@ function DiagnosisTab() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const weeklyChart: any = {
     labels: breakWeekly.map((w) => w.w),
-    datasets: [{ type: 'bar', label: 'Plain-approved link→checkout %', data: breakWeekly.map((w) => w.r), backgroundColor: breakWeekly.map((w) => ((w as { imm?: boolean }).imm ? '#d4d7dc' : w.r >= breakWeeklyBaseline ? '#9FC6B4' : '#D98C84')), borderRadius: 3 }],
+    datasets: [{ type: 'bar', label: 'Plain-approved linkâcheckout %', data: breakWeekly.map((w) => w.r), backgroundColor: breakWeekly.map((w) => ((w as { imm?: boolean }).imm ? '#d4d7dc' : w.r >= breakWeeklyBaseline ? '#9FC6B4' : '#D98C84')), borderRadius: 3 }],
   };
   const weeklyAnn: Record<string, object> = {
-    base: { type: 'line', yMin: breakWeeklyBaseline, yMax: breakWeeklyBaseline, borderColor: '#6b7280', borderWidth: 1.2, borderDash: [6, 4], label: { display: true, content: `Feb–Apr avg ~${breakWeeklyBaseline}%`, position: 'start' as const, backgroundColor: '#6b7280', color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } },
+    base: { type: 'line', yMin: breakWeeklyBaseline, yMax: breakWeeklyBaseline, borderColor: '#6b7280', borderWidth: 1.2, borderDash: [6, 4], label: { display: true, content: `FebâApr avg ~${breakWeeklyBaseline}%`, position: 'start' as const, backgroundColor: '#6b7280', color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } },
     pr626: { type: 'line', xMin: wk626, xMax: wk626, borderColor: '#E8A33B', borderWidth: 1.5, borderDash: [4, 3], label: { display: true, content: '#626 shipped May 29', position: 'end' as const, backgroundColor: '#E8A33B', color: '#fff', font: { size: 8, weight: 'bold' as const }, padding: { x: 3, y: 1 } } },
-    drop: { type: 'label', xValue: wk626, yValue: breakWeekly[wk626]?.r ?? 28, content: [`−${(breakWeekly[Math.max(0, wk626 - 1)]?.r ?? 0) - (breakWeekly[wk626]?.r ?? 0)} pts`, 'wk of May 25'], color: '#C0392B', font: { size: 9, weight: 'bold' as const }, backgroundColor: 'rgba(255,255,255,0.88)', borderColor: '#C0392B', borderWidth: 1, borderRadius: 4, padding: 3, yAdjust: 30 },
+    drop: { type: 'label', xValue: wk626, yValue: breakWeekly[wk626]?.r ?? 28, content: [`â${(breakWeekly[Math.max(0, wk626 - 1)]?.r ?? 0) - (breakWeekly[wk626]?.r ?? 0)} pts`, 'wk of May 25'], color: '#C0392B', font: { size: 9, weight: 'bold' as const }, backgroundColor: 'rgba(255,255,255,0.88)', borderColor: '#C0392B', borderWidth: 1, borderRadius: 4, padding: 3, yAdjust: 30 },
   };
   const wk626b = lavaIceWeekly.findIndex((w) => w.w === 'May 25');
   const firstImmW = lavaIceWeekly.findIndex((w) => (w as { imm?: boolean }).imm);
@@ -511,38 +514,38 @@ function DiagnosisTab() {
   return (
     <>
       <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>The May break — approved families stopped completing checkout</h3>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>The May break â approved families stopped completing checkout</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Link→checkout by the month the link was sent (Salesforce funnel export). <b style={{ color: '#1F7A5A' }}>Approved cases only</b> holds ~39% through April, then falls to ~27% from May and keeps sliding — the same in every source. The <b style={{ color: '#C0392B' }}>blended</b> rate only craters in April because 360 &quot;refer only&quot; cases were sent links (amber bar) and converted at 1% — an April-only artifact, not a real drop.
+          Linkâcheckout by the month the link was sent (Salesforce funnel export). <b style={{ color: '#1F7A5A' }}>Approved cases only</b> holds ~39% through April, then falls to ~27% from May and keeps sliding â the same in every source. The <b style={{ color: '#C0392B' }}>blended</b> rate only craters in April because 360 &quot;refer only&quot; cases were sent links (amber bar) and converted at 1% â an April-only artifact, not a real drop.
         </div>
         <div style={{ height: 320 }}>
-          <Bar data={proofChart} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const } }, scales: { y: { beginAtZero: true, max: 45, title: { display: true, text: 'Link→checkout %' } }, y1: { beginAtZero: true, max: 400, position: 'right' as const, grid: { drawOnChartArea: false }, title: { display: true, text: '"refer only" links' } } } }} />
+          <Bar data={proofChart} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const } }, scales: { y: { beginAtZero: true, max: 45, title: { display: true, text: 'Linkâcheckout %' } }, y1: { beginAtZero: true, max: 400, position: 'right' as const, grid: { drawOnChartArea: false }, title: { display: true, text: '"refer only" links' } } } }} />
         </div>
       </Card>
 
       <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Plain-approved link→checkout, by week (Feb – Oct 2026)</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Of approved families (expanders and &quot;refer only&quot; excluded), the share who checked out — plotted by the week the checkout link was sent. Grey dashed line = the Feb–Apr average (~38%); bars below it are red. Amber line marks when PR&nbsp;#626 (the checkout-button copy change) shipped, May&nbsp;29. Pale-grey bars from Aug&nbsp;31 on are still maturing — those cohorts haven&apos;t finished converting (checkout can lag the link up to ~6&nbsp;weeks), so they read artificially low and shouldn&apos;t be judged yet.</div>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>Plain-approved linkâcheckout, by week (Feb â Oct 2026)</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Of approved families (expanders and &quot;refer only&quot; excluded), the share who checked out â plotted by the week the checkout link was sent. Grey dashed line = the FebâApr average (~38%); bars below it are red. Amber line marks when PR&nbsp;#626 (the checkout-button copy change) shipped, May&nbsp;29. Pale-grey bars from Aug&nbsp;31 on are still maturing â those cohorts haven&apos;t finished converting (checkout can lag the link up to ~6&nbsp;weeks), so they read artificially low and shouldn&apos;t be judged yet.</div>
         <div style={{ height: 280 }}>
-          <Bar data={weeklyChart} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, annotation: { annotations: weeklyAnn } }, scales: { y: { beginAtZero: true, max: 45, title: { display: true, text: 'Link→checkout %' } } } }} />
+          <Bar data={weeklyChart} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, annotation: { annotations: weeklyAnn } }, scales: { y: { beginAtZero: true, max: 45, title: { display: true, text: 'Linkâcheckout %' } } } }} />
         </div>
       </Card>
 
       <Card>
         <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>The same weeks, split into fast-payers and win-backs</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>The chart above is these two lines added together. Plain-approved link→checkout by link-sent week, split by checkout speed. <b style={{ color: TP.blue }}>Blue (Lava)</b> = checked out within 3 weeks of the link; <b style={{ color: '#1F7A5A' }}>green (Ice)</b> = after 3 weeks (win-back). Blue stays ~22–28% straight across the #626 ship date (May&nbsp;29). Green falls from ~11–15% (Feb–Apr) to ~3–6% from June on. A button that caused the drop would move the fast-payers, and blue doesn&apos;t move — so <b>#626 is not the cause of the drop</b> (this doesn&apos;t prove zero effect; a point or two could hide in the week-to-week noise). The decline is win-back, which checks out weeks later, landing in July. Dashed from Aug&nbsp;31 = still maturing; Ice understates there.</div>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>The chart above is these two lines added together. Plain-approved linkâcheckout by link-sent week, split by checkout speed. <b style={{ color: TP.blue }}>Blue (Lava)</b> = checked out within 3 weeks of the link; <b style={{ color: '#1F7A5A' }}>green (Ice)</b> = after 3 weeks (win-back). Blue stays ~22â28% straight across the #626 ship date (May&nbsp;29). Green falls from ~11â15% (FebâApr) to ~3â6% from June on. A button that caused the drop would move the fast-payers, and blue doesn&apos;t move â so <b>#626 is not the cause of the drop</b> (this doesn&apos;t prove zero effect; a point or two could hide in the week-to-week noise). The decline is win-back, which checks out weeks later, landing in July. Dashed from Aug&nbsp;31 = still maturing; Ice understates there.</div>
         <div style={{ height: 280 }}>
-          <Bar data={liWeekly} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const }, annotation: { annotations: liWeeklyAnn } }, scales: { y: { beginAtZero: true, max: 40, title: { display: true, text: 'Link→checkout %' } } } }} />
+          <Bar data={liWeekly} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' as const }, annotation: { annotations: liWeeklyAnn } }, scales: { y: { beginAtZero: true, max: 40, title: { display: true, text: 'Linkâcheckout %' } } } }} />
         </div>
       </Card>
 
       <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>What it is NOT — ruled out, with the numbers</h3>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>What it is NOT â ruled out, with the numbers</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 10 }}>Every conventional suspect, tested against the data and eliminated. This is the slide for the team.</div>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           {ruledOutScoreboard.map((r, i) => (
             <div key={r.k} style={{ display: 'flex', gap: 12, padding: '8px 0', borderTop: i ? '1px solid #f1f5f9' : 'none' }}>
-              <div style={{ width: 160, flex: 'none', fontSize: 12, fontWeight: 700, color: '#c0392b' }}>✗ {r.k}</div>
+              <div style={{ width: 160, flex: 'none', fontSize: 12, fontWeight: 700, color: '#c0392b' }}>â {r.k}</div>
               <div style={{ fontSize: 12, color: '#4b5563', lineHeight: 1.45 }}>{r.v}</div>
             </div>
           ))}
@@ -550,8 +553,8 @@ function DiagnosisTab() {
       </Card>
 
       <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>The drop is systemic — every source fell together</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Plain-approved link→checkout by lead source, before (Feb–Apr, grey) vs after (May–Aug, red; Sep–Oct excluded as not-yet-mature). A lead-quality problem would hit one or two channels; this hits all of them — so it&apos;s the checkout experience, not who the leads are.</div>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 700, fontSize: 18 }}>The drop is systemic â every source fell together</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Plain-approved linkâcheckout by lead source, before (FebâApr, grey) vs after (MayâAug, red; SepâOct excluded as not-yet-mature). A lead-quality problem would hit one or two channels; this hits all of them â so it&apos;s the checkout experience, not who the leads are.</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
           {breakBySource.map((s) => {
             const isAll = s.src.startsWith('ALL');
@@ -573,10 +576,10 @@ function DiagnosisTab() {
 
       <Card>
         <div style={{ border: '2px solid #cbd5e1', borderRadius: 10, padding: '14px 16px', background: '#f8fafc' }}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: '#6b7280', letterSpacing: '0.06em', marginBottom: 4 }}>NOT THE CAUSE OF THE DROP — TRUE EFFECT SMALL &amp; UNMEASURED, PENDING THE A/B</div>
-          <h3 style={{ margin: '0 0 6px', color: TP.navy, fontWeight: 700, fontSize: 17 }}>PR #626 (May 29): the checkout button flipped from &quot;buy&quot; to &quot;browse&quot; — notable timing, but not the cause</h3>
+          <div style={{ fontSize: 11, fontWeight: 800, color: '#6b7280', letterSpacing: '0.06em', marginBottom: 4 }}>NOT THE CAUSE OF THE DROP â TRUE EFFECT SMALL &amp; UNMEASURED, PENDING THE A/B</div>
+          <h3 style={{ margin: '0 0 6px', color: TP.navy, fontWeight: 700, fontSize: 17 }}>PR #626 (May 29): the checkout button flipped from &quot;buy&quot; to &quot;browse&quot; â notable timing, but not the cause</h3>
           <div style={{ fontSize: 12.5, color: TP.text, lineHeight: 1.5 }}>
-            On <b>May 29, 2026</b>, PR&nbsp;#626 (&quot;change button text&quot;) edited the results-page checkout button for <b>every approved family</b> (the plain-approved path, not expanders): <b>&quot;Select Treatment Plan&quot; / &quot;Enroll Now&quot; → &quot;Review Treatment Plans&quot;</b>, across <code>_results_header</code>, <code>_mobile_cta</code> and <code>_progress_tracker</code>. Same destination (<code>consultant_checkout_path</code>) — nothing broke — but the call to action went from <i>commit</i> to <i>browse</i>.
+            On <b>May 29, 2026</b>, PR&nbsp;#626 (&quot;change button text&quot;) edited the results-page checkout button for <b>every approved family</b> (the plain-approved path, not expanders): <b>&quot;Select Treatment Plan&quot; / &quot;Enroll Now&quot; â &quot;Review Treatment Plans&quot;</b>, across <code>_results_header</code>, <code>_mobile_cta</code> and <code>_progress_tracker</code>. Same destination (<code>consultant_checkout_path</code>) â nothing broke â but the call to action went from <i>commit</i> to <i>browse</i>.
           </div>
           <div style={{ display: 'flex', alignItems: 'stretch', gap: 10, margin: '14px 0 4px' }}>
             <div style={{ flex: 1, border: '1px solid #cbd5e1', borderRadius: 8, padding: '12px 10px', background: '#fff', textAlign: 'center' }}>
@@ -587,8 +590,8 @@ function DiagnosisTab() {
               <div style={{ fontSize: 11, color: '#6b7280' }}>approved families completed</div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#C0392B', flex: 'none', width: 56 }}>
-              <div style={{ fontSize: 22, lineHeight: 1 }}>→</div>
-              <div style={{ fontSize: 15, fontWeight: 800, marginTop: 2 }}>−12</div>
+              <div style={{ fontSize: 22, lineHeight: 1 }}>â</div>
+              <div style={{ fontSize: 15, fontWeight: 800, marginTop: 2 }}>â12</div>
               <div style={{ fontSize: 9, color: '#9a6b14' }}>points</div>
             </div>
             <div style={{ flex: 1, border: '1px solid #C0392B', borderRadius: 8, padding: '12px 10px', background: '#fff', textAlign: 'center' }}>
@@ -599,20 +602,20 @@ function DiagnosisTab() {
               <div style={{ fontSize: 11, color: '#6b7280' }}>approved families completed</div>
             </div>
           </div>
-          <div style={{ fontSize: 10, color: '#9ca3af', marginBottom: 6 }}>Plain-approved link→checkout: April (last full month on the old button) vs July (first clean month on the new one). Same checkout page both times.</div>
+          <div style={{ fontSize: 10, color: '#9ca3af', marginBottom: 6 }}>Plain-approved linkâcheckout: April (last full month on the old button) vs July (first clean month on the new one). Same checkout page both times.</div>
           <div style={{ marginTop: 10, fontSize: 12, color: '#4b5563', lineHeight: 1.5 }}>
-            <b>Why it looked like the cause:</b> the durable step-down is the week of May 25 and #626 shipped May 29 — notable timing, systemic across sources, invisible to errors/carts. <b>But the fast-payer split (chart above) rules it out as the cause.</b> Separate these same weeks into fast-payers (checked out ≤3 weeks — they hit the new button in June) and win-backs (checked out later): the fast-payer line holds ~22–28% straight across May 29 and never steps down. A button that caused this drop would have pulled the fast-payers down; it didn&apos;t move. So the 39%→27% total drop is the <b>win-back</b> portion, landing in <b>July</b> on the price increase — not the button. <b>What this does not prove:</b> that the button does nothing. The weekly line is noisy, so a small effect (a point or two, on either group) could hide inside it, and a modest button effect on the marginal win-back group can&apos;t be separated from the price/re-fire effects. <b>The only clean measure</b> is the experiment: flip the copy back to &quot;Enroll Now,&quot; change nothing else, and watch the fast-payer line. Cheap, worth doing to learn its true (likely small) effect — just don&apos;t expect it to recover the drop.
+            <b>Why it looked like the cause:</b> the durable step-down is the week of May 25 and #626 shipped May 29 â notable timing, systemic across sources, invisible to errors/carts. <b>But the fast-payer split (chart above) rules it out as the cause.</b> Separate these same weeks into fast-payers (checked out â¤3 weeks â they hit the new button in June) and win-backs (checked out later): the fast-payer line holds ~22â28% straight across May 29 and never steps down. A button that caused this drop would have pulled the fast-payers down; it didn&apos;t move. So the 39%â27% total drop is the <b>win-back</b> portion, landing in <b>July</b> on the price increase â not the button. <b>What this does not prove:</b> that the button does nothing. The weekly line is noisy, so a small effect (a point or two, on either group) could hide inside it, and a modest button effect on the marginal win-back group can&apos;t be separated from the price/re-fire effects. <b>The only clean measure</b> is the experiment: flip the copy back to &quot;Enroll Now,&quot; change nothing else, and watch the fast-payer line. Cheap, worth doing to learn its true (likely small) effect â just don&apos;t expect it to recover the drop.
           </div>
         </div>
       </Card>
 
       <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Why conversion fell from our Feb–Apr rate</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Overall conversion is a blend of regular approvals (check out most), Expanders First (less), and denied (almost never). Two things changed: <b>fewer denials / more approvals helped (+2)</b>, but <b>regular-approved families went from ~41 of 100 checking out to ~30 of 100, pulling the whole rate down ~7.</b> If regular approvals had held, we&apos;d be ~30% today — above where we started. The problem is regular families at checkout, not expanders.</div>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Why conversion fell from our FebâApr rate</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Overall conversion is a blend of regular approvals (check out most), Expanders First (less), and denied (almost never). Two things changed: <b>fewer denials / more approvals helped (+2)</b>, but <b>regular-approved families went from ~41 of 100 checking out to ~30 of 100, pulling the whole rate down ~7.</b> If regular approvals had held, we&apos;d be ~30% today â above where we started. The problem is regular families at checkout, not expanders.</div>
         <div style={{ height: 300 }}>
           <Bar
             data={{
-              labels: ['Our Feb–Apr rate: 27.7%', 'Regular approvals stopped converting: −7', 'Fewer denials, more approvals: +2', 'Now: 22.9%'],
+              labels: ['Our FebâApr rate: 27.7%', 'Regular approvals stopped converting: â7', 'Fewer denials, more approvals: +2', 'Now: 22.9%'],
               datasets: [{ label: 'Conversion %', data: wfData, backgroundColor: [TP.navy, '#e06666', '#6AA84F', TP.blue], borderRadius: 3 }],
             }}
             options={{ ...baseOpts, scales: { y: { beginAtZero: true, suggestedMax: 32, title: { display: true, text: 'Checkout rate %' } }, x: { ticks: { maxRotation: 0, autoSkip: false, font: { size: 10 } } } } }}
@@ -622,7 +625,7 @@ function DiagnosisTab() {
 
       <Card>
         <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Submissions, enrollments &amp; conversion by month</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Bars = submissions &amp; enrollments (left axis). Lines (right axis) = <b>submission→checkout</b> (overall) and <b>checkout-link→checkout</b> (the closing step). Markers: the May break and the July price increase.</div>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Bars = submissions &amp; enrollments (left axis). Lines (right axis) = <b>submissionâcheckout</b> (overall) and <b>checkout-linkâcheckout</b> (the closing step). Markers: the May break and the July price increase.</div>
         <div style={{ height: 360 }}>
           <Bar
             data={{
@@ -631,9 +634,9 @@ function DiagnosisTab() {
                 { type: 'bar' as const, label: 'Submissions', data: diagnosisMonthly.map((d) => d.submissions), backgroundColor: `${TP.skyBlue}B3`, borderRadius: 3, yAxisID: 'y', order: 4 },
                 { type: 'bar' as const, label: 'Enrollments (checkouts)', data: monthly.map((m) => m.checkouts), backgroundColor: TP.blue, borderRadius: 3, yAxisID: 'y', order: 3 },
                 // @ts-expect-error mixed line
-                { type: 'line' as const, label: 'Submission → checkout %', data: diagnosisMonthly.map((d) => d.convRate), borderColor: '#c0392b', backgroundColor: '#c0392b', borderWidth: 3, pointRadius: 3, yAxisID: 'y1', order: 1 },
+                { type: 'line' as const, label: 'Submission â checkout %', data: diagnosisMonthly.map((d) => d.convRate), borderColor: '#c0392b', backgroundColor: '#c0392b', borderWidth: 3, pointRadius: 3, yAxisID: 'y1', order: 1 },
                 // @ts-expect-error mixed line
-                { type: 'line' as const, label: 'Checkout link → checkout %', data: conversionMonthly.map((m) => m.linkToCO), borderColor: '#6AA84F', backgroundColor: '#6AA84F', borderWidth: 3, pointRadius: 3, borderDash: [6, 3], yAxisID: 'y1', order: 2 },
+                { type: 'line' as const, label: 'Checkout link â checkout %', data: conversionMonthly.map((m) => m.linkToCO), borderColor: '#6AA84F', backgroundColor: '#6AA84F', borderWidth: 3, pointRadius: 3, borderDash: [6, 3], yAxisID: 'y1', order: 2 },
               ],
             }}
             options={{
@@ -646,7 +649,7 @@ function DiagnosisTab() {
             }}
           />
         </div>
-        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>Aug–Oct conversion is still maturing (recent cohorts).</div>
+        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>AugâOct conversion is still maturing (recent cohorts).</div>
       </Card>
 
       <Card>
@@ -658,8 +661,8 @@ function DiagnosisTab() {
       </Card>
 
       <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>New (fresh) vs re-sent (stale) leads — link→checkout</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Line = conversion of <b>fresh</b> leads (link sent within 2 weeks of submitting — brand-new families). Bars = volume of <b>stale</b> re-sends (promo blasts to 30+ day-old leads). Fresh conversion held ~38% through April, then broke to ~30% in <b>May</b> — so the decline is real, not just blasting old leads. April&apos;s big stale bar (328 re-sends at ~9%) is what made April look worse than it was.</div>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>New (fresh) vs re-sent (stale) leads â linkâcheckout</h3>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Line = conversion of <b>fresh</b> leads (link sent within 2 weeks of submitting â brand-new families). Bars = volume of <b>stale</b> re-sends (promo blasts to 30+ day-old leads). Fresh conversion held ~38% through April, then broke to ~30% in <b>May</b> â so the decline is real, not just blasting old leads. April&apos;s big stale bar (328 re-sends at ~9%) is what made April look worse than it was.</div>
         <div style={{ height: 320 }}>
           <Bar
             data={{
@@ -667,14 +670,14 @@ function DiagnosisTab() {
               datasets: [
                 { type: 'bar' as const, label: 'Stale re-sends (count)', data: linkFreshStale.map((d) => d.staleN), backgroundColor: `${TP.yellow}99`, borderRadius: 3, yAxisID: 'y1', order: 3 },
                 // @ts-expect-error mixed line
-                { type: 'line' as const, label: 'Fresh lead → checkout %', data: linkFreshStale.map((d) => d.freshConv), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 3, pointRadius: 3, yAxisID: 'y', order: 1 },
+                { type: 'line' as const, label: 'Fresh lead â checkout %', data: linkFreshStale.map((d) => d.freshConv), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 3, pointRadius: 3, yAxisID: 'y', order: 1 },
               ],
             }}
             options={{
               responsive: true, maintainAspectRatio: false,
               plugins: { legend: { display: true, position: 'top' as const }, annotation: { annotations: breakLines } },
               scales: {
-                y: { beginAtZero: true, max: 50, position: 'left' as const, title: { display: true, text: 'Fresh link→checkout %' } },
+                y: { beginAtZero: true, max: 50, position: 'left' as const, title: { display: true, text: 'Fresh linkâcheckout %' } },
                 y1: { beginAtZero: true, position: 'right' as const, grid: { drawOnChartArea: false }, title: { display: true, text: 'Stale re-sends' } },
               },
             }}
@@ -705,7 +708,7 @@ function OverviewTab() {
   ];
   const top = [...conversionByReferrer].filter((r) => r.referrer !== '(blank)').sort((a, b) => b.rate - a.rate).slice(0, 4);
   const bottom = [...conversionByReferrer].filter((r) => r.referrer !== '(blank)').sort((a, b) => a.rate - b.rate).slice(0, 4);
-  const mature = conversionMonthly; // full year Jan–Oct; Aug+ still maturing (rendered faded)
+  const mature = conversionMonthly; // full year JanâOct; Aug+ still maturing (rendered faded)
   const matureLabels = mature.map((m) => monLabel(m.month).replace(' 2026', ''));
   const firstMaturing = conversionMonthly.findIndex((m) => m.month > conversionMatureThrough); // Aug = 7
   const fadeBars = (solid: string, pale: string) => conversionMonthly.map((m) => (m.month > conversionMatureThrough ? pale : solid));
@@ -720,14 +723,14 @@ function OverviewTab() {
     <>
       {/* Exec header */}
       <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 22, fontWeight: 800, color: TP.navy }}>Enrollment — Executive Summary</div>
-        <div style={{ fontSize: 12, color: '#9ca3af' }}>2026 year-to-date · as of Oct 14, 2026 · source: Salesforce</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: TP.navy }}>Enrollment â Executive Summary</div>
+        <div style={{ fontSize: 12, color: '#9ca3af' }}>2026 year-to-date Â· as of Oct 14, 2026 Â· source: Salesforce</div>
       </div>
 
       {/* KPI row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 18 }}>
         <KPI label="Leads submitted (2026)" value={convSummary.submissions.toLocaleString()} />
-        <KPI label="Conversion rate" value={`${overall.toFixed(1)}%`} sub="submission → checkout" accent />
+        <KPI label="Conversion rate" value={`${overall.toFixed(1)}%`} sub="submission â checkout" accent />
         <KPI label="Checkouts (YTD)" value={summary.checkouts.toLocaleString()} />
         <KPI label="Collected (YTD)" value={money(summary.amountPaid)} />
         <KPI label="Avg deal" value={money(summary.totalAmountPaid / summary.checkouts)} />
@@ -750,7 +753,7 @@ function OverviewTab() {
               </div>
               {i < funnel.length - 1 && (
                 <div style={{ marginLeft: 204, fontSize: 12, padding: '3px 0' }}>
-                  <span style={{ color: '#c0392b', fontWeight: 700 }}>↓ −{f.lost.toLocaleString()}</span> <span style={{ color: '#9ca3af' }}>{f.lostNote}</span>
+                  <span style={{ color: '#c0392b', fontWeight: 700 }}>â â{f.lost.toLocaleString()}</span> <span style={{ color: '#9ca3af' }}>{f.lostNote}</span>
                 </div>
               )}
             </div>
@@ -760,36 +763,36 @@ function OverviewTab() {
 
       {/* Conversion health: two side-by-side + combined */}
       <Card>
-        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Conversion health — two ways to read it</h3>
+        <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Conversion health â two ways to read it</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>
-          <b>Submission→checkout</b> = overall funnel health (lead quality + nurture + close). <b>Checkout-link→checkout</b> = how well we close once a family is ready to pay. Both have slid this year — so it&apos;s not just lead quality; closing weakened too. <b>Jan–Jul are final; Aug–Oct are faded/dashed</b> because those are submission-month cohorts still converting (a family who submitted in Sept can still check out in Nov), so they read low and will rise.
+          <b>Submissionâcheckout</b> = overall funnel health (lead quality + nurture + close). <b>Checkout-linkâcheckout</b> = how well we close once a family is ready to pay. Both have slid this year â so it&apos;s not just lead quality; closing weakened too. <b>JanâJul are final; AugâOct are faded/dashed</b> because those are submission-month cohorts still converting (a family who submitted in Sept can still check out in Nov), so they read low and will rise.
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: TP.blue, marginBottom: 6 }}>Submission → checkout</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: TP.blue, marginBottom: 6 }}>Submission â checkout</div>
             <div style={{ height: 210 }}>
-              <Bar data={{ labels: matureLabels, datasets: [{ type: 'bar' as const, label: 'Sub→CO %', data: mature.map((m) => m.subToCO), backgroundColor: fadeBars(TP.blue, '#b9c6da'), borderRadius: 4 }] }} options={pctAxis} />
+              <Bar data={{ labels: matureLabels, datasets: [{ type: 'bar' as const, label: 'SubâCO %', data: mature.map((m) => m.subToCO), backgroundColor: fadeBars(TP.blue, '#b9c6da'), borderRadius: 4 }] }} options={pctAxis} />
             </div>
           </div>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: TP.green, marginBottom: 6 }}>Checkout link → checkout</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: TP.green, marginBottom: 6 }}>Checkout link â checkout</div>
             <div style={{ height: 210 }}>
-              <Bar data={{ labels: matureLabels, datasets: [{ type: 'bar' as const, label: 'Link→CO %', data: mature.map((m) => m.linkToCO), backgroundColor: fadeBars(TP.green, '#c4e0d5'), borderRadius: 4 }] }} options={pctAxis} />
+              <Bar data={{ labels: matureLabels, datasets: [{ type: 'bar' as const, label: 'LinkâCO %', data: mature.map((m) => m.linkToCO), backgroundColor: fadeBars(TP.green, '#c4e0d5'), borderRadius: 4 }] }} options={pctAxis} />
             </div>
           </div>
         </div>
         <div style={{ marginTop: 18 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: TP.navy, marginBottom: 6 }}>Both rates over time — with what changed, when</div>
-          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Both rates broke in <b>May</b>. It is <b>not</b> the sales flow or the checkout page — those were ruled out by the Checkout Error Reports. It sits at the <b>payment step</b> (JotForm + financing), where approved families stopped completing. See the <b>&quot;Why (May break)&quot;</b> tab.</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: TP.navy, marginBottom: 6 }}>Both rates over time â with what changed, when</div>
+          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Both rates broke in <b>May</b>. It is <b>not</b> the sales flow or the checkout page â those were ruled out by the Checkout Error Reports. It sits at the <b>payment step</b> (JotForm + financing), where approved families stopped completing. See the <b>&quot;Why (May break)&quot;</b> tab.</div>
           <div style={{ height: 260 }}>
             <Bar
               data={{
                 labels: matureLabels,
                 datasets: [
                   // @ts-expect-error mixed line on Bar
-                  { type: 'line' as const, label: 'Submission → checkout %', data: mature.map((m) => m.subToCO), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 3, pointBackgroundColor: fadeBars(TP.blue, '#b9c6da'), tension: 0.3, segment: { borderDash: (ctx: { p1DataIndex: number }) => (ctx.p1DataIndex >= firstMaturing ? [6, 4] : undefined), borderColor: (ctx: { p1DataIndex: number }) => (ctx.p1DataIndex >= firstMaturing ? '#b9c6da' : TP.blue) } },
+                  { type: 'line' as const, label: 'Submission â checkout %', data: mature.map((m) => m.subToCO), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 3, pointBackgroundColor: fadeBars(TP.blue, '#b9c6da'), tension: 0.3, segment: { borderDash: (ctx: { p1DataIndex: number }) => (ctx.p1DataIndex >= firstMaturing ? [6, 4] : undefined), borderColor: (ctx: { p1DataIndex: number }) => (ctx.p1DataIndex >= firstMaturing ? '#b9c6da' : TP.blue) } },
                   // @ts-expect-error mixed line on Bar
-                  { type: 'line' as const, label: 'Checkout link → checkout %', data: mature.map((m) => m.linkToCO), borderColor: TP.green, backgroundColor: TP.green, borderWidth: 2.5, pointRadius: 3, pointBackgroundColor: fadeBars(TP.green, '#c4e0d5'), tension: 0.3, segment: { borderDash: (ctx: { p1DataIndex: number }) => (ctx.p1DataIndex >= firstMaturing ? [6, 4] : undefined), borderColor: (ctx: { p1DataIndex: number }) => (ctx.p1DataIndex >= firstMaturing ? '#c4e0d5' : TP.green) } },
+                  { type: 'line' as const, label: 'Checkout link â checkout %', data: mature.map((m) => m.linkToCO), borderColor: TP.green, backgroundColor: TP.green, borderWidth: 2.5, pointRadius: 3, pointBackgroundColor: fadeBars(TP.green, '#c4e0d5'), tension: 0.3, segment: { borderDash: (ctx: { p1DataIndex: number }) => (ctx.p1DataIndex >= firstMaturing ? [6, 4] : undefined), borderColor: (ctx: { p1DataIndex: number }) => (ctx.p1DataIndex >= firstMaturing ? '#c4e0d5' : TP.green) } },
                 ],
               }}
               options={{
@@ -808,7 +811,7 @@ function OverviewTab() {
       {/* Channels (full width) */}
       <Card>
         <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Which channels convert?</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Warm/referral sources convert ~2× paid/cold ones. (Overall {overall.toFixed(1)}%. Count = leads sent.)</div>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Warm/referral sources convert ~2Ã paid/cold ones. (Overall {overall.toFixed(1)}%. Count = leads sent.)</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
           <div>
             <div style={{ fontSize: 12, fontWeight: 700, color: '#1a7f5a', marginBottom: 4 }}>BEST</div>
@@ -900,7 +903,7 @@ function WeeklyTab() {
       <Card>
         <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Checkouts by week</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Week starting Sunday (MM-DD). Noisy week to week (partial weeks at month edges swing it) — the By Coordinator and Events tabs show the real trend. <b style={{ color: '#8B5CF6' }}>Purple</b> marks promo/&quot;blast&quot; pushes that spike checkouts; other blast dates still need to be supplied.
+          Week starting Sunday (MM-DD). Noisy week to week (partial weeks at month edges swing it) â the By Coordinator and Events tabs show the real trend. <b style={{ color: '#8B5CF6' }}>Purple</b> marks promo/&quot;blast&quot; pushes that spike checkouts; other blast dates still need to be supplied.
         </div>
         <div style={{ height: 340 }}>
           <Bar
@@ -912,7 +915,7 @@ function WeeklyTab() {
       <Card>
         <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Checkouts by day of week</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Checkouts are a weekday, coordinator-driven business — Wed/Thu peak, weekends near zero. Staffing and link-send timing should follow this.
+          Checkouts are a weekday, coordinator-driven business â Wed/Thu peak, weekends near zero. Staffing and link-send timing should follow this.
         </div>
         <div style={{ height: 260 }}>
           <Bar
@@ -1003,7 +1006,7 @@ function EventsTab() {
             const d = daily[index]?.date;
             if (!d) return '';
             if (d.slice(8) === '01') return MON[parseInt(d.slice(5, 7), 10) - 1];
-            return d.slice(8) === '15' ? '·' : '';
+            return d.slice(8) === '15' ? 'Â·' : '';
           },
         },
         grid: { display: false },
@@ -1016,7 +1019,7 @@ function EventsTab() {
       <Card>
         <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Daily checkouts + 7-day average, with enrollment events</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 6 }}>
-          Light bars = daily checkouts. Bold line = 7-day average (the real trend). Numbered pins (top) = events — <b>hover a pin for details</b>, or match the number to the legend below. <b>Scroll sideways →</b> for Jul–Oct. Solid pin = likely moved conversion; dashed = measurement-only.
+          Light bars = daily checkouts. Bold line = 7-day average (the real trend). Numbered pins (top) = events â <b>hover a pin for details</b>, or match the number to the legend below. <b>Scroll sideways â</b> for JulâOct. Solid pin = likely moved conversion; dashed = measurement-only.
         </div>
         <CategoryLegend />
         <HoverDetail e={hovered !== null ? events[hovered] : null} n={hovered !== null ? hovered + 1 : null} />
@@ -1035,7 +1038,7 @@ function EventsTab() {
             />
           </div>
         </div>
-        <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>Tip: the chart is wider than the screen — drag or shift-scroll to see Jul–Oct.</div>
+        <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>Tip: the chart is wider than the screen â drag or shift-scroll to see JulâOct.</div>
       </Card>
       <Card>
         <h3 style={{ margin: '0 0 12px', color: TP.navy, fontWeight: 600 }}>Event legend</h3>
@@ -1057,7 +1060,7 @@ function EventsTab() {
           </tbody>
         </table>
         <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 14, lineHeight: 1.5 }}>
-          Not yet placed (undated — pin from git / HR before charting): photo-button change that lifted assessment completion; the two salesperson departures.
+          Not yet placed (undated â pin from git / HR before charting): photo-button change that lifted assessment completion; the two salesperson departures.
         </div>
       </Card>
     </>
@@ -1080,10 +1083,10 @@ function HoverDetail({ e, n }: { e: EventRow | null; n: number | null }) {
         <div>
           <div style={{ fontWeight: 700, color: TP.navy, fontSize: 14 }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: 10, background: color, color: '#fff', fontSize: 11, marginRight: 8 }}>{n}</span>
-            {e.date}{e.approx ? ' (approx)' : ''} · {e.label}
+            {e.date}{e.approx ? ' (approx)' : ''} Â· {e.label}
           </div>
           <div style={{ fontSize: 13, color: TP.text, marginTop: 4 }}>
-            <b>{e.category}</b> · {IMPACT_LABEL[e.impact]} — {e.note}
+            <b>{e.category}</b> Â· {IMPACT_LABEL[e.impact]} â {e.note}
           </div>
         </div>
       ) : (
@@ -1124,14 +1127,14 @@ function ConversionTab() {
       label: { display: true, content: 'still maturing', position: { x: 'center', y: 'start' } as const, color: '#b4791f', font: { size: 10, weight: 'bold' as const }, backgroundColor: 'transparent' },
     },
   } : {};
-  // Label the Apr→May link→checkout drop magnitude (the week-of-May-25 break at monthly resolution).
+  // Label the AprâMay linkâcheckout drop magnitude (the week-of-May-25 break at monthly resolution).
   const aprIdx = conversionMonthly.findIndex((m) => m.month === '2026-04');
   const mayIdx = conversionMonthly.findIndex((m) => m.month === '2026-05');
   if (aprIdx >= 0 && mayIdx >= 0) {
     const drop = conversionMonthly[aprIdx].linkToCO - conversionMonthly[mayIdx].linkToCO;
     annotations.mayDrop = {
       type: 'label', xValue: mayIdx, yValue: conversionMonthly[mayIdx].linkToCO,
-      content: [`−${drop.toFixed(1)} pts`, 'Apr→May link→CO'],
+      content: [`â${drop.toFixed(1)} pts`, 'AprâMay linkâCO'],
       color: '#C0392B', font: { size: 10, weight: 'bold' as const }, backgroundColor: 'rgba(255,255,255,0.88)',
       borderColor: '#C0392B', borderWidth: 1, borderRadius: 4, padding: 4, yAdjust: -26,
     };
@@ -1139,12 +1142,12 @@ function ConversionTab() {
   return (
     <>
       <div style={{ marginBottom: 14, fontSize: 13, color: TP.text, background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 8, padding: '10px 14px' }}>
-        <b>{convSummary.submissions.toLocaleString()}</b> leads submitted in 2026 → <b>{convSummary.linkSent.toLocaleString()}</b> got a checkout link ({Math.round((100 * convSummary.linkSent) / convSummary.submissions)}%) → <b>{convSummary.checkouts.toLocaleString()}</b> checked out (<b>{overall.toFixed(1)}%</b> submission→checkout). Of those who got a link, <b>{((100 * convSummary.checkouts) / convSummary.linkSent).toFixed(1)}%</b> converted. Cohorted by submission month. <span style={{ color: '#b4791f' }}>Aug–Oct still maturing — read Jan–Jul as final.</span> <span style={{ color: '#6b7280' }}>Note: April reads clean here (submission-cohort); its inflated-link artifact — 360 re-sent &quot;refer only&quot; links, never fixed — only distorts the link-SENT-month views in the Why tab.</span>
+        <b>{convSummary.submissions.toLocaleString()}</b> leads submitted in 2026 â <b>{convSummary.linkSent.toLocaleString()}</b> got a checkout link ({Math.round((100 * convSummary.linkSent) / convSummary.submissions)}%) â <b>{convSummary.checkouts.toLocaleString()}</b> checked out (<b>{overall.toFixed(1)}%</b> submissionâcheckout). Of those who got a link, <b>{((100 * convSummary.checkouts) / convSummary.linkSent).toFixed(1)}%</b> converted. Cohorted by submission month. <span style={{ color: '#b4791f' }}>AugâOct still maturing â read JanâJul as final.</span> <span style={{ color: '#6b7280' }}>Note: April reads clean here (submission-cohort); its inflated-link artifact â 360 re-sent &quot;refer only&quot; links, never fixed â only distorts the link-SENT-month views in the Why tab.</span>
       </div>
       <Card>
         <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Conversion rate by submission month</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Blue = submission→checkout. Green = of those who got a link, what % converted. Bars = submissions (volume, right axis). The shaded months haven&apos;t finished converting yet.
+          Blue = submissionâcheckout. Green = of those who got a link, what % converted. Bars = submissions (volume, right axis). The shaded months haven&apos;t finished converting yet.
         </div>
         <div style={{ height: 340 }}>
           <Bar
@@ -1153,9 +1156,9 @@ function ConversionTab() {
               datasets: [
                 { type: 'bar' as const, label: 'Submissions', data: conversionMonthly.map((m) => m.submissions), backgroundColor: `${TP.skyBlue}80`, borderRadius: 3, yAxisID: 'y1', order: 3 },
                 // @ts-expect-error mixed line
-                { type: 'line' as const, label: 'Submission → checkout %', data: conversionMonthly.map((m) => m.subToCO), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 3, yAxisID: 'y', order: 1 },
+                { type: 'line' as const, label: 'Submission â checkout %', data: conversionMonthly.map((m) => m.subToCO), borderColor: TP.blue, backgroundColor: TP.blue, borderWidth: 2.5, pointRadius: 3, yAxisID: 'y', order: 1 },
                 // @ts-expect-error mixed line
-                { type: 'line' as const, label: 'Link sent → checkout %', data: conversionMonthly.map((m) => m.linkToCO), borderColor: TP.green, backgroundColor: TP.green, borderWidth: 2.5, pointRadius: 3, yAxisID: 'y', order: 2 },
+                { type: 'line' as const, label: 'Link sent â checkout %', data: conversionMonthly.map((m) => m.linkToCO), borderColor: TP.green, backgroundColor: TP.green, borderWidth: 2.5, pointRadius: 3, yAxisID: 'y', order: 2 },
               ],
             }}
             options={{
@@ -1172,7 +1175,7 @@ function ConversionTab() {
       <Card>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr><Th>Submission month</Th><Th right>Submissions</Th><Th right>Link sent</Th><Th right>Checkouts</Th><Th right>Sub→CO %</Th><Th right>Link→CO %</Th></tr>
+            <tr><Th>Submission month</Th><Th right>Submissions</Th><Th right>Link sent</Th><Th right>Checkouts</Th><Th right>SubâCO %</Th><Th right>LinkâCO %</Th></tr>
           </thead>
           <tbody>
             {conversionMonthly.map((m) => {
@@ -1190,7 +1193,7 @@ function ConversionTab() {
             })}
           </tbody>
         </table>
-        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 10 }}>* still maturing — recent submitters can still check out, so these rates will rise.</div>
+        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 10 }}>* still maturing â recent submitters can still check out, so these rates will rise.</div>
       </Card>
     </>
   );
@@ -1199,7 +1202,7 @@ function ConversionTab() {
 function LeadSourceTab() {
   const overall = (100 * convSummary.checkouts) / convSummary.submissions;
   const byRate = [...conversionByReferrer].sort((a, b) => b.rate - a.rate);
-  const matureSrc = sourceMonthly; // extended to current — Aug–Oct still maturing (noted in caption)
+  const matureSrc = sourceMonthly; // extended to current â AugâOct still maturing (noted in caption)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const convSrcData: any = {
     labels: matureSrc.map((m) => monLabel(m.month).replace(' 2026', '')),
@@ -1218,12 +1221,12 @@ function LeadSourceTab() {
   return (
     <>
       <div style={{ marginBottom: 14, fontSize: 13, color: TP.text, background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 8, padding: '10px 14px' }}>
-        Which channels actually convert (not just which send leads). Overall is <b>{overall.toFixed(1)}%</b>. Warm/referral sources (Ambassador, Parent) convert ~2× paid/cold ones. <b>Dental Office sends the 2nd-most leads but converts far below average; Google Ads is the weakest.</b> Note: <b>Google Ads is only ~3% of submissions</b> — even at 0% conversion it would move the overall rate by ~0.3 pts, so it can&apos;t explain the May drop.
+        Which channels actually convert (not just which send leads). Overall is <b>{overall.toFixed(1)}%</b>. Warm/referral sources (Ambassador, Parent) convert ~2Ã paid/cold ones. <b>Dental Office sends the 2nd-most leads but converts far below average; Google Ads is the weakest.</b> Note: <b>Google Ads is only ~3% of submissions</b> â even at 0% conversion it would move the overall rate by ~0.3 pts, so it can&apos;t explain the May drop.
       </div>
 
       <Card>
         <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Lead mix by submission month (share of submissions)</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>What we actually get each month. The low-converters (Google Ads, the pale sliver) are a small share — so a channel can&apos;t swing the overall rate unless it&apos;s big.</div>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>What we actually get each month. The low-converters (Google Ads, the pale sliver) are a small share â so a channel can&apos;t swing the overall rate unless it&apos;s big.</div>
         <div style={{ height: 300 }}>
           <Bar
             data={{
@@ -1245,7 +1248,7 @@ function LeadSourceTab() {
 
       <Card>
         <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Checkout mix by month (share of each month&apos;s checkouts by source)</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Chad&apos;s &quot;blend of lead source to checkout&quot; — of the families who actually <b>checked out</b> each month, what share came from each source. Shares sum to 100%, Jan–Oct 2026. (Oct is only a few days in.)</div>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Chad&apos;s &quot;blend of lead source to checkout&quot; â of the families who actually <b>checked out</b> each month, what share came from each source. Shares sum to 100%, JanâOct 2026. (Oct is only a few days in.)</div>
         <div style={{ height: 300 }}>
           <Bar
             data={{
@@ -1267,14 +1270,14 @@ function LeadSourceTab() {
 
       <Card>
         <h3 style={{ margin: '0 0 2px', color: TP.navy, fontWeight: 600 }}>Conversion by source, over time</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Submission→checkout by source, Jan–Oct 2026 (extended to current). The May drop shows up in <b>every</b> major source at once — the signature of a system/checkout change, not a channel problem. <span style={{ color: '#b4791f' }}>Aug–Oct still maturing — recent submitters can still check out, so those points read low.</span></div>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Submissionâcheckout by source, JanâOct 2026 (extended to current). The May drop shows up in <b>every</b> major source at once â the signature of a system/checkout change, not a channel problem. <span style={{ color: '#b4791f' }}>AugâOct still maturing â recent submitters can still check out, so those points read low.</span></div>
         <div style={{ height: 300 }}>
           <Bar data={convSrcData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom' as const } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Conversion %' } } } }} />
         </div>
       </Card>
       <Card>
         <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Conversion rate by lead source</h3>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Sorted best → worst. Green = above the {overall.toFixed(1)}% overall rate, red = below.</div>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>Sorted best â worst. Green = above the {overall.toFixed(1)}% overall rate, red = below.</div>
         <div style={{ height: 340 }}>
           <Bar
             data={{ labels: byRate.map((r) => r.referrer), datasets: [{ label: 'Conversion %', data: byRate.map((r) => r.rate), backgroundColor: byRate.map((r) => (r.rate >= overall ? TP.green : '#e06666')), borderRadius: 4 }] }}
@@ -1299,7 +1302,7 @@ function LeadSourceTab() {
             ))}
           </tbody>
         </table>
-        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 10 }}>Cohorted by 2026 submission date; sources with ≥30 leads. Recent-month maturation slightly understates every source equally, so the ranking holds.</div>
+        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 10 }}>Cohorted by 2026 submission date; sources with â¥30 leads. Recent-month maturation slightly understates every source equally, so the ranking holds.</div>
       </Card>
     </>
   );
@@ -1312,7 +1315,7 @@ function CoordinatorTab() {
       <Card>
         <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Checkouts by coordinator, by month</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Darker = more checkouts. Shows when each TC started and who&apos;s rising vs. fading — a fair read when coordinators joined at different times.
+          Darker = more checkouts. Shows when each TC started and who&apos;s rising vs. fading â a fair read when coordinators joined at different times.
         </div>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
@@ -1342,14 +1345,14 @@ function CoordinatorTab() {
           </table>
         </div>
         <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 10 }}>
-          Veterans (Desirea / Acuna / Jolee) have slid since June; the TCs added from August are ramping. &quot;Per active mo&quot; normalizes for tenure. Excludes Savannah Valadez (not a TC — misattributed) and trivial first-month ramp counts, so rows sum to 3,386, not the 3,396 header total.
+          Veterans (Desirea / Acuna / Jolee) have slid since June; the TCs added from August are ramping. &quot;Per active mo&quot; normalizes for tenure. Excludes Savannah Valadez (not a TC â misattributed) and trivial first-month ramp counts, so rows sum to 3,386, not the 3,396 header total.
         </div>
       </Card>
 
       <Card>
         <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Headcount vs. output</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Active coordinators grew (3 → 6); total checkouts didn&apos;t grow. Added headcount split the same pie rather than expanding it.
+          Active coordinators grew (3 â 6); total checkouts didn&apos;t grow. Added headcount split the same pie rather than expanding it.
         </div>
         <div style={{ height: 300 }}>
           <Bar
@@ -1377,7 +1380,7 @@ function CoordinatorTab() {
         <h3 style={{ margin: '0 0 12px', color: TP.navy, fontWeight: 600 }}>Coordinator totals</h3>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr><Th>Treatment Coordinator</Th><Th right>Checkouts</Th><Th right>Collected</Th><Th right>Avg deal (plan)</Th><Th right>Avg days link→checkout</Th></tr>
+            <tr><Th>Treatment Coordinator</Th><Th right>Checkouts</Th><Th right>Collected</Th><Th right>Avg deal (plan)</Th><Th right>Avg days linkâcheckout</Th></tr>
           </thead>
           <tbody>
             {byTC.map((t) => (
@@ -1401,9 +1404,9 @@ function SpeedTab() {
   return (
     <>
       <Card>
-        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Days from checkout link → checkout, by month</h3>
+        <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Days from checkout link â checkout, by month</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          How fast families pay once they get the link. Lower = faster. The team got faster all year (≈33 → 18 days). Oct omitted (partial-month skew).
+          How fast families pay once they get the link. Lower = faster. The team got faster all year (â33 â 18 days). Oct omitted (partial-month skew).
         </div>
         <div style={{ height: 300 }}>
           <Bar
@@ -1415,7 +1418,7 @@ function SpeedTab() {
       <Card>
         <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Avg days to close, by coordinator</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          New TCs (Holland, Sam, Irina) close fastest; veterans carry older, slower-closing pipelines. Speed ≠ productivity — read alongside volume.
+          New TCs (Holland, Sam, Irina) close fastest; veterans carry older, slower-closing pipelines. Speed â  productivity â read alongside volume.
         </div>
         <div style={{ height: 300 }}>
           <Bar
@@ -1450,7 +1453,7 @@ function RevenueTab() {
       <Card>
         <h3 style={{ margin: '0 0 4px', color: TP.navy, fontWeight: 600 }}>Collection rate &amp; avg deal, by month</h3>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-          Collection rate = collected ÷ total plan value (how much of the plan is paid upfront). It stepped up from ~74% to ~79% starting in July — worth confirming what drove it (iCore processor? deposit policy?) so it&apos;s repeatable.
+          Collection rate = collected Ã· total plan value (how much of the plan is paid upfront). It stepped up from ~74% to ~79% starting in July â worth confirming what drove it (iCore processor? deposit policy?) so it&apos;s repeatable.
         </div>
         <div style={{ height: 300 }}>
           <Bar
