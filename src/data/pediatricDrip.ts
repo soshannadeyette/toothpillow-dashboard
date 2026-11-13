@@ -148,6 +148,30 @@ export const dripTimeline = [
   { date: '2026-11-13', event: 'First Salesforce export with post-drip data (0 new-drip checkouts yet — oldest family 11 days old)' },
 ];
 
+// ════════════════════════════════════════════════════════════════════════
+//  CARD STATUS — when the pediatric call card was on/off after submission
+// ════════════════════════════════════════════════════════════════════════
+
+export type CardStatusRow = {
+  month: string;
+  status: 'off' | 'on' | 'on+drip';
+  label: string;
+};
+
+export const cardStatus: CardStatusRow[] = [
+  { month: '2026-01', status: 'off', label: 'Off' },
+  { month: '2026-02', status: 'off', label: 'Off' },
+  { month: '2026-03', status: 'off', label: 'Off' },
+  { month: '2026-04', status: 'on', label: 'On Apr 23' },
+  { month: '2026-05', status: 'on', label: 'On' },
+  { month: '2026-06', status: 'on', label: 'On' },
+  { month: '2026-07', status: 'off', label: 'Off Jul 9' },
+  { month: '2026-08', status: 'off', label: 'Off' },
+  { month: '2026-09', status: 'off', label: 'Off' },
+  { month: '2026-10', status: 'on', label: 'On Oct 8' },
+  { month: '2026-11', status: 'on+drip', label: 'On + drip' },
+];
+
 // Key findings from the other thread's analysis:
 // - Sep + Oct pediatric checkouts dropped before the drip change
 //   (Screening Sep+Oct: 2% within 14d vs 5% Jan-Aug; Hybrid Oct: 1% vs Aug 11%)
