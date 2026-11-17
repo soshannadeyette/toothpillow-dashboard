@@ -16,7 +16,6 @@ import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar } from 'react-chartjs-2';
 import { monthly, weekly, daily, byTC, bySegment, summary, events, eventCategoryColor, tcMonthly, monthlyMetrics, capacity, dow, conversionMonthly, conversionByReferrer, funnelStages, convSummary, conversionMatureThrough, sourceMonthly, sourceOrder, sourceColors, diagnosisMonthly, priceIncreaseMonth, linkFreshStale, breakProofMonthly, breakBySource, ruledOutScoreboard, breakWeekly, breakWeeklyBaseline, lavaIceWeekly, dailyFunnel, weeklyTTCL, weeklyLavaIce, monthlyWinback, type EventRow } from '@/data/enrollmentCheckouts';
 import IceWinback from '@/components/IceWinback';
-import PediatricDrip from '@/components/PediatricDrip';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, annotationPlugin);
 
@@ -38,7 +37,6 @@ const heat = (v: number, max: number) => (v === 0 ? '#f8fafc' : `rgba(58,110,164
 const heatText = (v: number, max: number) => (v / max > 0.55 ? '#fff' : TP.text);
 
 const TABS = [
-  { id: 'pedsdrip', label: 'Pediatric Drip' },
   { id: 'overview', label: 'Overview' },
   { id: 'dailytrends', label: 'Daily Trends' },
   { id: 'icewinback', label: 'Ice / Win-back' },
@@ -122,7 +120,6 @@ export default function EnrollmentView() {
         </div>
       </nav>
 
-      {tab === 'pedsdrip' && <PediatricDrip />}
       {tab === 'overview' && <OverviewTab />}
       {tab === 'dailytrends' && <DailyTrendsTab />}
       {tab === 'icewinback' && <><IceShareChart /><IceWinback /></>}
