@@ -36,31 +36,31 @@ const TP = {
    DATA — all from the HTML source of truth
    ════════════════════════════════════════════════════════════════════════ */
 
-// Source: synced from Monthly Submissions + LBT window subs (Nov 10, 2026)
+// Source: synced from Monthly Submissions + LBT window subs (Nov 16, 2026)
 const ambSubs: Record<string, number> = {
   '2023-01':9,'2023-02':20,'2023-03':10,'2023-04':15,'2023-05':14,'2023-06':218,'2023-07':81,'2023-08':15,'2023-09':22,'2023-10':16,'2023-11':22,'2023-12':22,
   '2024-01':14,'2024-02':15,'2024-03':29,'2024-04':33,'2024-05':32,'2024-06':24,'2024-07':35,'2024-08':48,'2024-09':72,'2024-10':33,'2024-11':40,'2024-12':67,
   '2025-01':60,'2025-02':70,'2025-03':66,'2025-04':60,'2025-05':47,'2025-06':46,'2025-07':29,'2025-08':48,'2025-09':39,'2025-10':42,'2025-11':39,'2025-12':29,
-  '2026-01':53,'2026-02':62,'2026-03':70,'2026-04':68,'2026-05':53,'2026-06':47,'2026-07':93,'2026-08':51,'2026-09':30,'2026-10':35,'2026-11':8,
+  '2026-01':53,'2026-02':61,'2026-03':70,'2026-04':68,'2026-05':53,'2026-06':47,'2026-07':90,'2026-08':51,'2026-09':31,'2026-10':35,'2026-11':13,
 };
 const infSubs: Record<string, number> = {
   '2023-05':2,'2023-09':1,'2023-10':6,'2023-11':293,'2023-12':1033,
   '2024-01':429,'2024-02':313,'2024-03':1587,'2024-04':557,'2024-05':638,'2024-06':1228,'2024-07':480,'2024-08':551,'2024-09':1113,'2024-10':486,'2024-11':355,'2024-12':512,
   '2025-01':511,'2025-02':601,'2025-03':516,'2025-04':502,'2025-05':428,'2025-06':327,'2025-07':894,'2025-08':431,'2025-09':285,'2025-10':267,'2025-11':484,'2025-12':270,
-  '2026-01':309,'2026-02':509,'2026-03':461,'2026-04':233,'2026-05':269,'2026-06':306,'2026-07':597,'2026-08':523,'2026-09':226,'2026-10':171,'2026-11':65,
+  '2026-01':309,'2026-02':510,'2026-03':461,'2026-04':233,'2026-05':269,'2026-06':308,'2026-07':601,'2026-08':525,'2026-09':226,'2026-10':170,'2026-11':108,
 };
 
 const newAddsAmb: Record<string, number> = {
   '2023-02':1,'2023-04':1,'2023-06':1,'2023-11':1,
   '2024-01':4,'2024-02':7,'2024-03':7,'2024-04':6,'2024-05':3,'2024-06':7,'2024-07':10,'2024-08':2,'2024-09':6,'2024-10':7,'2024-11':7,'2024-12':6,
   '2025-01':7,'2025-02':84,'2025-03':7,'2025-04':5,'2025-05':5,'2025-06':6,'2025-07':1,'2025-08':15,'2025-09':2,'2025-10':1,'2025-11':6,'2025-12':1,
-  '2026-01':5,'2026-02':12,'2026-03':10,'2026-04':28,'2026-05':20,'2026-06':28,'2026-07':29,'2026-08':35,'2026-09':14,'2026-10':56,
+  '2026-01':5,'2026-02':12,'2026-03':10,'2026-04':28,'2026-05':20,'2026-06':28,'2026-07':29,'2026-08':35,'2026-09':14,'2026-10':57,'2026-11':6,
 };
 const newAddsInf: Record<string, number> = {
   '2023-10':1,'2023-11':1,
   '2024-01':1,'2024-02':8,'2024-03':3,'2024-04':3,'2024-05':8,'2024-06':2,'2024-07':7,'2024-08':1,'2024-09':4,'2024-10':6,'2024-11':6,'2024-12':10,
   '2025-01':11,'2025-02':3,'2025-03':6,'2025-04':2,'2025-06':4,'2025-08':2,'2025-11':2,'2025-12':1,
-  '2026-01':3,'2026-02':2,'2026-03':2,'2026-04':5,'2026-05':6,'2026-06':4,'2026-07':2,'2026-08':1,'2026-09':2,'2026-10':1,
+  '2026-01':3,'2026-02':2,'2026-03':2,'2026-04':5,'2026-05':6,'2026-06':4,'2026-07':2,'2026-08':1,'2026-09':2,'2026-10':1,'2026-11':1,
 };
 // Podcast-type adds tracked separately (split from Inf Aug 2026)
 // Note: "Podcast" (generic), "Alex Clark Newsletter", "Alex Clark Stories" are sub-entries, not separate adds
@@ -70,26 +70,26 @@ const newAddsPod: Record<string, number> = {
   '2026-03':1,'2026-07':1,'2026-08':6,'2026-09':1,
 };
 
-const ambSubsYear: Record<number, number> = {2023:464, 2024:442, 2025:575, 2026:570};
-const infSubsYear: Record<number, number> = {2023:1335, 2024:8249, 2025:5516, 2026:3669};
-const combSubsYear: Record<number, number> = {2023:1799, 2024:8691, 2025:6091, 2026:4239};
-const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:140, 2026:237};
-const addsInfYear: Record<number, number> = {2023:2, 2024:59, 2025:31, 2026:28};
+const ambSubsYear: Record<number, number> = {2023:464, 2024:442, 2025:575, 2026:572};
+const infSubsYear: Record<number, number> = {2023:1335, 2024:8249, 2025:5516, 2026:3720};
+const combSubsYear: Record<number, number> = {2023:1799, 2024:8691, 2025:6091, 2026:4292};
+const addsAmbYear: Record<number, number> = {2023:4, 2024:72, 2025:140, 2026:244};
+const addsInfYear: Record<number, number> = {2023:2, 2024:59, 2025:31, 2026:29};
 const addsPodYear: Record<number, number> = {2023:0, 2024:1, 2025:1, 2026:9};
-const addsTotalYear: Record<number, number> = {2023:6, 2024:132, 2025:172, 2026:274};
+const addsTotalYear: Record<number, number> = {2023:6, 2024:132, 2025:172, 2026:282};
 // Note: adds counts are from ambassador program tracking, not Salesforce referral exports
 
 // Active ambassadors with ≥1 submission per year (from Salesforce)
-const activeInfByYear: Record<number, number> = {2023:6, 2024:60, 2025:82, 2026:88};
-const activeAmbByYear: Record<number, number> = {2023:24, 2024:85, 2025:127, 2026:160};
-const activeTotalByYear: Record<number, number> = {2023:30, 2024:145, 2025:209, 2026:248};
+const activeInfByYear: Record<number, number> = {2023:6, 2024:60, 2025:82, 2026:87};
+const activeAmbByYear: Record<number, number> = {2023:24, 2024:85, 2025:127, 2026:165};
+const activeTotalByYear: Record<number, number> = {2023:30, 2024:145, 2025:209, 2026:253};
 
 const halfCarriedBy: Record<number, number> = {2023:1, 2024:2, 2025:5, 2026:6};
-const tenPlusByYear: Record<number, number> = {2023:8, 2024:40, 2025:55, 2026:46}; // 46 with >=10 subs as of Nov 10
+const tenPlusByYear: Record<number, number> = {2023:8, 2024:40, 2025:55, 2026:47}; // 47 with >=10 subs as of Nov 16
 // Mega-3 = top 3 producers by YTD volume
-// 2026: Shannon 741 + Lauren 604 + Sosh 256 = 1601; base = combSubs 4239 - 1601
-const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:1601};
-const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:2638};
+// 2026: Shannon 747 + Lauren 610 + Sosh 263 = 1620; base = combSubs 4292 - 1620
+const mega3ByYear: Record<number, number> = {2023:1290, 2024:5935, 2025:1508, 2026:1620};
+const baseByYear: Record<number, number> = {2023:517, 2024:2898, 2025:4642, 2026:2672};
 
 // Dynamic annualization: complete months + fractional current month
 const _now = new Date();
@@ -110,8 +110,8 @@ const recruit26: {label:string; amb:number; inf:number; pod:number; accent:strin
   {label:'Jul', amb:29, inf:2, pod:1, accent:'#F6AACB'},
   {label:'Aug', amb:35, inf:1, pod:6, accent:'#D6E5F7'},
   {label:'Sep', amb:14, inf:2, pod:1, accent:'#8CD1C8'},
-  {label:'Oct', amb:56, inf:1, pod:0, accent:'#3A6EA4'},
-  {label:'Nov', amb:0, inf:0, pod:0, accent:'#FDBE67', tag:'partial'},
+  {label:'Oct', amb:57, inf:1, pod:0, accent:'#3A6EA4'},
+  {label:'Nov', amb:6, inf:1, pod:0, accent:'#FDBE67', tag:'partial'},
 ];
 
 const concRows = [
@@ -122,7 +122,7 @@ const concRows = [
 ];
 
 // Top 3 producers by month — from LBT H1+H2 exports for each year
-// Source: LBT 2024 H1+H2, 2025 H1+H2, 2026 H1+H2, all exported 2026-11-10
+// Source: LBT 2024 H1+H2, 2025 H1+H2, 2026 H1+H2, all exported 2026-11-16
 type Top3Entry = {
   month: string; label: string; total: number;
   p1: {name: string; count: number};
@@ -159,72 +159,72 @@ const TOP3_MONTHLY: Top3Entry[] = [
   {month:'2025-12',label:'Dec',total:295,p1:{name:'Shannon Tripp',count:54},p2:{name:'Soshanna Salsman',count:42},p3:{name:'Lauren Johnson',count:31},rest:168},
   // 2026
   {month:'2026-01',label:'Jan 26',total:362,p1:{name:'Lauren Johnson',count:46},p2:{name:'Shannon Tripp',count:39},p3:{name:'Ginny Yurich',count:31},rest:246},
-  {month:'2026-02',label:'Feb',total:570,p1:{name:'Shannon Tripp',count:112},p2:{name:'Kendra Needham',count:45},p3:{name:'Soshanna Salsman',count:43},rest:370},
+  {month:'2026-02',label:'Feb',total:571,p1:{name:'Shannon Tripp',count:112},p2:{name:'Kendra Needham',count:45},p3:{name:'Soshanna Salsman',count:43},rest:371},
   {month:'2026-03',label:'Mar',total:531,p1:{name:'Shannon Tripp',count:56},p2:{name:'Soshanna Salsman',count:52},p3:{name:'Jeff Cruz',count:41},rest:382},
-  {month:'2026-04',label:'Apr',total:300,p1:{name:'Shannon Tripp',count:35},p2:{name:'Soshanna Salsman',count:28},p3:{name:'Lauren Johnson',count:25},rest:212},
+  {month:'2026-04',label:'Apr',total:301,p1:{name:'Shannon Tripp',count:35},p2:{name:'Soshanna Salsman',count:28},p3:{name:'Lauren Johnson',count:25},rest:213},
   {month:'2026-05',label:'May',total:322,p1:{name:'Soshanna Salsman',count:31},p2:{name:'Emily Boazman',count:28},p3:{name:'Shannon Tripp',count:21},rest:242},
-  {month:'2026-06',label:'Jun',total:352,p1:{name:'Amy Bernhard',count:30},p2:{name:'Shannon Tripp',count:30},p3:{name:'Soshanna Salsman',count:28},rest:264},
-  {month:'2026-07',label:'Jul',total:686,p1:{name:'Lauren Johnson',count:316},p2:{name:'Eden Lee',count:49},p3:{name:'Soshanna Salsman',count:26},rest:295},
-  {month:'2026-08',label:'Aug',total:548,p1:{name:'Shannon Tripp',count:279},p2:{name:'Lauren Johnson',count:43},p3:{name:'Emily Boazman',count:25},rest:201},
-  {month:'2026-09',label:'Sep',total:240,p1:{name:'Shannon Tripp',count:80},p2:{name:'Lauren Johnson',count:25},p3:{name:'Amy Bernhard',count:17},rest:118},
-  {month:'2026-10',label:'Oct',total:206,p1:{name:'Lauren Johnson',count:39},p2:{name:'Shannon Tripp',count:36},p3:{name:'Mary Catherine Oechslin',count:9},rest:122},
-  {month:'2026-11',label:'Nov',total:73,p1:{name:'Emily Boazman',count:11},p2:{name:'Jasyra Santiago-Hines',count:11},p3:{name:'Shannon Tripp',count:8},rest:43},
+  {month:'2026-06',label:'Jun',total:355,p1:{name:'Amy Bernhard',count:30},p2:{name:'Shannon Tripp',count:30},p3:{name:'Soshanna Salsman',count:30},rest:265},
+  {month:'2026-07',label:'Jul',total:691,p1:{name:'Lauren Johnson',count:316},p2:{name:'Eden Lee',count:49},p3:{name:'Soshanna Salsman',count:27},rest:299},
+  {month:'2026-08',label:'Aug',total:576,p1:{name:'Shannon Tripp',count:296},p2:{name:'Lauren Johnson',count:43},p3:{name:'Emily Boazman',count:25},rest:212},
+  {month:'2026-09',label:'Sep',total:257,p1:{name:'Shannon Tripp',count:89},p2:{name:'Lauren Johnson',count:25},p3:{name:'Amy Bernhard',count:17},rest:126},
+  {month:'2026-10',label:'Oct',total:205,p1:{name:'Lauren Johnson',count:38},p2:{name:'Shannon Tripp',count:36},p3:{name:'Mary Catherine Oechslin',count:9},rest:122},
+  {month:'2026-11',label:'Nov',total:121,p1:{name:'Jasyra Santiago-Hines',count:19},p2:{name:'Emily Boazman',count:17},p3:{name:'Shannon Tripp',count:14},rest:71},
 ];
 
 // Top producers — 3-year history (2024 from H1+H2 LBT exports, 2025+2026 from moversData)
 // Source: 2024 H1 LBT (Jan 1-Jul 18) + H2 LBT (Jul 18-Dec 31), overlap deduped on 7/18
 const PRODUCER_HISTORY: {name:string; y24:number; y25:number; y26:number; type:string}[] = [
-  {name:'Shannon Tripp',         y24:0,    y25:866,  y26:741,  type:'Inf'},
-  {name:'Lauren Johnson NNM',    y24:2956, y25:831,  y26:604,  type:'Inf'},
-  {name:'Soshanna Salsman',      y24:299,  y25:914,  y26:256,  type:'Inf'},
+  {name:'Shannon Tripp',         y24:0,    y25:866,  y26:747,  type:'Inf'},
+  {name:'Lauren Johnson NNM',    y24:2956, y25:831,  y26:610,  type:'Inf'},
+  {name:'Soshanna Salsman',      y24:299,  y25:914,  y26:263,  type:'Inf'},
   {name:'Kendra Needham',        y24:1851, y25:386,  y26:191,  type:'Inf'},
-  {name:'Amy Bernhard',          y24:0,    y25:112,  y26:163,  type:'Inf'},
+  {name:'Amy Bernhard',          y24:0,    y25:112,  y26:169,  type:'Inf'},
   {name:'Jeff Cruz',             y24:259,  y25:84,   y26:150,  type:'Inf'},
   {name:'Melody Brandon',        y24:137,  y25:123,  y26:138,  type:'Inf'},
-  {name:'Ginny Yurich',          y24:1110, y25:291,  y26:131,  type:'Inf'},
-  {name:'Jasyra Santiago-Hines', y24:100,  y25:57,   y26:128,  type:'Inf'},
+  {name:'Ginny Yurich',          y24:1110, y25:291,  y26:134,  type:'Inf'},
+  {name:'Jasyra Santiago-Hines', y24:100,  y25:57,   y26:136,  type:'Inf'},
   {name:'Eden Lee',              y24:25,   y25:185,  y26:118,  type:'Inf'},
-  {name:'Emily Boazman',         y24:0,    y25:0,    y26:117,  type:'Inf'},
+  {name:'Emily Boazman',         y24:0,    y25:0,    y26:123,  type:'Inf'},
   {name:'Ellen Fisher',          y24:40,   y25:53,   y26:73,   type:'Inf'},
   {name:'Taylor Kulik',          y24:156,  y25:103,  y26:69,   type:'Inf'},
   {name:'Lauren Stadler',        y24:46,   y25:93,   y26:54,   type:'Inf'},
   {name:'Amy Erickson',          y24:141,  y25:51,   y26:48,   type:'Inf'},
   {name:'Thuy Improta',          y24:204,  y25:245,  y26:36,   type:'Inf'},
   {name:'Eryn Carroll NMM',      y24:144,  y25:104,  y26:36,   type:'Inf'},
-  {name:'Erin Wilkins',          y24:285,  y25:111,  y26:25,   type:'Inf'},
+  {name:'Erin Wilkins',          y24:285,  y25:111,  y26:26,   type:'Inf'},
   {name:'Devon Kuntzman',        y24:133,  y25:90,   y26:25,   type:'Inf'},
   {name:'Wendy Ostapuk',         y24:85,   y25:104,  y26:27,   type:'Inf'},
 ];
 
 // Top-5 concentration by year (% of total amb+inf submissions from top 5 producers)
-// 2024: 8,722 total → top 5 = 74.7%  2025: 6,105 total → top 5 = 64.9%  2026: 4,239 YTD → top 5 = 46.1%
+// 2024: 8,722 total → top 5 = 74.7%  2025: 6,105 total → top 5 = 64.9%  2026: 4,292 YTD → top 5 = 46.1%
 const TOP5_CONCENTRATION: {year:number; top5Pct:number; restPct:number; top5:number; rest:number; total:number; names:string}[] = [
   {year:2024, top5Pct:74.7, restPct:25.3, top5:6513, rest:2209, total:8722, names:'Lauren, Kendra, Ginny, Sosh, Erin W.'},
   {year:2025, top5Pct:64.9, restPct:35.1, top5:3962, rest:2143, total:6105, names:'Sosh, Shannon, Lauren, Kendra, Ginny'},
-  {year:2026, top5Pct:46.1, restPct:53.9, top5:1955, rest:2284, total:4239, names:'Shannon, Lauren, Sosh, Kendra, Amy B.'},
+  {year:2026, top5Pct:46.1, restPct:53.9, top5:1980, rest:2312, total:4292, names:'Shannon, Lauren, Sosh, Kendra, Amy B.'},
 ];
 
-// Updated from Salesforce Launch Bonus Tracker export 2026-11-10
-// Source: LB Tracker combined H1 (Jan-Jun30) + H2 (Jul1-Nov10), exported 2026-11-10
+// Updated from Salesforce Launch Bonus Tracker export 2026-11-16
+// Source: LB Tracker combined H1 (Jan-Jun30) + H2 (Jul1-Nov16), exported 2026-11-16
 const moversData: Record<string, {y25:number; y26:number; type:string}> = {
-  'Shannon Tripp':        {y25:866,  y26:741, type:'Inf'},
-  'Lauren Johnson NNM':   {y25:831,  y26:604, type:'Inf'},
-  'Soshanna Salsman':     {y25:914,  y26:256, type:'Inf'},
+  'Shannon Tripp':        {y25:866,  y26:747, type:'Inf'},
+  'Lauren Johnson NNM':   {y25:831,  y26:610, type:'Inf'},
+  'Soshanna Salsman':     {y25:914,  y26:263, type:'Inf'},
   'Kendra Needham':       {y25:386,  y26:191, type:'Inf'},
-  'Amy Bernhard':         {y25:112,  y26:163, type:'Inf'},
+  'Amy Bernhard':         {y25:112,  y26:169, type:'Inf'},
   'Jeff Cruz Talia_likeitis': {y25:84, y26:150, type:'Inf'},
   'Melody Brandon':       {y25:123,  y26:138, type:'Inf'},
-  'Ginny Yurich':         {y25:291,  y26:131, type:'Inf'},
-  'Jasyra Santiago-Hines':{y25:57,   y26:128, type:'Inf'},
+  'Ginny Yurich':         {y25:291,  y26:134, type:'Inf'},
+  'Jasyra Santiago-Hines':{y25:57,   y26:136, type:'Inf'},
   'Eden Lee loverlees':   {y25:185,  y26:118, type:'Inf'},
-  'Emily Boazman':        {y25:0,    y26:117, type:'Inf'},
+  'Emily Boazman':        {y25:0,    y26:123, type:'Inf'},
   'Ellen Fisher':         {y25:53,   y26:73,  type:'Inf'},
   'Taylor Kulik':         {y25:103,  y26:69,  type:'Inf'},
   'Lauren Stadler':       {y25:93,   y26:54,  type:'Inf'},
-  'Carly Brown':          {y25:0,    y26:48,  type:'Inf'},
+  'Carly Brown':          {y25:0,    y26:49,  type:'Inf'},
   'Katelyn Alsop (James)':{y25:0,    y26:48,  type:'Inf'},
   'Amy Erickson':         {y25:51,   y26:48,  type:'Inf'},
-  'Hilary Fritsch*':      {y25:0,    y26:41,  type:'Inf'},
+  'Hilary Fritsch*':      {y25:0,    y26:43,  type:'Inf'},
   'Eryn Carroll NMM':     {y25:104,  y26:36,  type:'Inf'},
   'Thuy Improta *ministry*':{y25:245,y26:36,  type:'Inf'},
   'Melina Moses':         {y25:28,   y26:36,  type:'Amb'},
@@ -233,54 +233,62 @@ const moversData: Record<string, {y25:number; y26:number; type:string}> = {
   'Ashley Turner':        {y25:39,   y26:31,  type:'Inf'},
   'Wendy Ostapuk':        {y25:104,  y26:27,  type:'Inf'},
   'Jennie Hoglund':       {y25:29,   y26:26,  type:'Inf'},
-  'Erin Wilkins':         {y25:111,  y26:25,  type:'Inf'},
+  'Erin Wilkins':         {y25:111,  y26:26,  type:'Inf'},
   'Devon Kuntzman':       {y25:90,   y26:25,  type:'Inf'},
   'Alicia Nussbaum':      {y25:0,    y26:21,  type:'Amb'},
   'Taylor Moran':         {y25:62,   y26:20,  type:'Inf'},
   'Taylor Weimar':        {y25:0,    y26:19,  type:'Inf'},
-  'Michelle Keijner':     {y25:13,   y26:19,  type:'Amb'},
-  'Amy Migdalia Williams':{y25:0,    y26:17,  type:'Inf'},
+  'Michelle Keijner':     {y25:13,   y26:20,  type:'Amb'},
+  'Amy Migdalia Williams':{y25:0,    y26:18,  type:'Inf'},
   'Hillary Ha':           {y25:0,    y26:14,  type:'Amb'},
-  'Elise Hylden':         {y25:20,   y26:14,  type:'Amb'},
+  'Elise Hylden':         {y25:20,   y26:16,  type:'Amb'},
   'Laura Manns':          {y25:0,    y26:13,  type:'Amb'},
   'Courtland Nall':       {y25:10,   y26:13,  type:'Amb'},
-  'Christina Franco':     {y25:0,    y26:12,  type:'Inf'},
-  'Karyna Cast Korotkykh':{y25:24,   y26:12,  type:'Amb'},
+  'Christina Franco':     {y25:0,    y26:14,  type:'Inf'},
+  'Karyna Cast Korotkykh':{y25:24,   y26:13,  type:'Amb'},
   'Dr. Ameet Trivedi':    {y25:105,  y26:12,  type:'Inf'},
   'Lexi Fitzgerald':      {y25:0,    y26:11,  type:'Inf'},
-  'Rachel Jayroe':        {y25:0,    y26:11,  type:'Amb'},
+  'Rachel Jayroe':        {y25:0,    y26:13,  type:'Amb'},
   'Lauren Peter':         {y25:37,   y26:10,  type:'Amb'},
-  'Carly Hartwig':        {y25:0,    y26:10,  type:'Inf'},
+  'Carly Hartwig':        {y25:0,    y26:11,  type:'Inf'},
   'Brianna Reiser':       {y25:22,   y26:10,  type:'Amb'},
   'Taylor Dukes':         {y25:0,    y26:10,  type:'Inf'},
+  'Juanique Grover':      {y25:0,    y26:9,   type:'Inf'},
+  'Janell Hampton':       {y25:0,    y26:9,   type:'Amb'},
   'Jessi Meeks':          {y25:0,    y26:8,   type:'Amb'},
+  'Megan Crivelli':       {y25:0,    y26:8,   type:'Amb'},
+  'Jessica Haizman':      {y25:0,    y26:8,   type:'Inf'},
+  'Anna Brayton riseandclimb':{y25:0,y26:8,   type:'Amb'},
   'Jennee Guerrero':      {y25:0,    y26:8,   type:'Amb'},
+  'Julia Lee':            {y25:0,    y26:8,   type:'Amb'},
+  'Craig Clayton':        {y25:0,    y26:8,   type:'Inf'},
   'Sara Lininger':        {y25:0,    y26:7,   type:'Inf'},
   'Tania O\'Donnell':     {y25:0,    y26:7,   type:'Amb'},
   'Kelsey Tweeton':       {y25:0,    y26:7,   type:'Amb'},
   'Kelsey Sem':           {y25:0,    y26:7,   type:'Inf'},
-  'Julia Lee':            {y25:0,    y26:7,   type:'Amb'},
   'Jordan Schoen':        {y25:0,    y26:7,   type:'Amb'},
-  'Craig Clayton':        {y25:0,    y26:7,   type:'Inf'},
   'Laura Bruner':         {y25:0,    y26:7,   type:'Amb'},
+  'Lori Beth Auldridge':  {y25:0,    y26:7,   type:'Amb'},
+  'Ashlee Boyson':        {y25:0,    y26:7,   type:'Inf'},
+  'Bodybybree':           {y25:0,    y26:7,   type:'Inf'},
   'Bailey King':          {y25:0,    y26:6,   type:'Amb'},
-  'Lori Beth Auldridge':  {y25:0,    y26:6,   type:'Amb'},
   'Emily Morrow':         {y25:31,   y26:6,   type:'Inf'},
   'Samantha Mauermann':   {y25:0,    y26:6,   type:'Inf'},
-  'Janell Hampton':       {y25:0,    y26:6,   type:'Amb'},
-  'Anna Brayton riseandclimb':{y25:0,y26:7,   type:'Amb'},
   'Tiffany Hubbard':      {y25:11,   y26:6,   type:'Amb'},
-  'Cy Tidwell':           {y25:0,    y26:5,   type:'Amb'},
+  'Cy Tidwell':           {y25:0,    y26:6,   type:'Amb'},
   'Ashley Vogt':          {y25:0,    y26:6,   type:'Amb'},
-  'Ashlee Boyson':        {y25:0,    y26:5,   type:'Inf'},
   'Natalie Stahl':        {y25:0,    y26:6,   type:'Amb'},
-  'Chad Rasmussen':       {y25:0,    y26:5,   type:'Amb'},
+  'Chad Rasmussen':       {y25:0,    y26:6,   type:'Amb'},
   'Kayla Monson':         {y25:0,    y26:5,   type:'Inf'},
   'Beth Leon':            {y25:0,    y26:5,   type:'Inf'},
+  'Allison Ososkie':      {y25:0,    y26:5,   type:'Amb'},
+  'Gina Primavera':       {y25:0,    y26:5,   type:'Amb'},
+  'Abby Tastad':          {y25:0,    y26:5,   type:'Amb'},
+  'Kara Garcia':          {y25:0,    y26:5,   type:'Inf'},
 };
 
-// Launch Bonus Tracker — updated from Salesforce export 2026-11-10
-// 179 ambassadors with ≥1 window sub. Pre-2026 onboards: window starts 04/01/2026.
+// Launch Bonus Tracker — updated from Salesforce export 2026-11-16
+// 186 ambassadors with ≥1 window sub. Pre-2026 onboards: window starts 04/01/2026.
 // 2026 onboards: window starts at onboard date. Tier: Tier 2 = 50+, Tier 1 = 25-49.
 // paid = cumulative amount paid out so far. Payouts happen on 1st of each month for prior month earnings.
 
@@ -326,20 +334,20 @@ const LAUNCH_BONUS_PAYOUTS: {month:string; payouts:{name:string;amount:number;ti
 ];
 
 const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;paid:number;winStart:string;winEnd:string;tier1Date?:string;tier2Date?:string;is2026?:boolean;omit?:boolean;pendingPayout?:boolean}[] = [
-  {name:'Shannon Tripp',bonusSubs:534,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/21',tier2Date:'05/26'},
-  {name:'Lauren Johnson NNM',bonusSubs:489,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/27',tier2Date:'06/11'},
-  {name:'Soshanna Salsman',bonusSubs:135,tier:2,earned:1250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/25',tier2Date:'05/28',omit:true},
-  {name:'Emily Boazman',bonusSubs:116,tier:2,earned:1250,paid:1250,winStart:'04/02/2026',winEnd:'12/31/2026',tier1Date:'05/24',tier2Date:'06/26',is2026:true},
+  {name:'Shannon Tripp',bonusSubs:540,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/21',tier2Date:'05/26'},
+  {name:'Lauren Johnson NNM',bonusSubs:495,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/27',tier2Date:'06/11'},
+  {name:'Soshanna Salsman',bonusSubs:142,tier:2,earned:1250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'04/25',tier2Date:'05/28',omit:true},
+  {name:'Emily Boazman',bonusSubs:120,tier:2,earned:1250,paid:1250,winStart:'04/02/2026',winEnd:'12/31/2026',tier1Date:'05/24',tier2Date:'06/26',is2026:true},
   {name:'Eden Lee loverlees',bonusSubs:87,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'07/10',tier2Date:'07/30'},
-  {name:'Amy Bernhard',bonusSubs:82,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/03',tier2Date:'07/29'},
+  {name:'Amy Bernhard',bonusSubs:88,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/03',tier2Date:'07/29'},
   {name:'Kendra Needham',bonusSubs:80,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'05/14',tier2Date:'07/13'},
-  {name:'Jasyra Santiago-Hines',bonusSubs:76,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/10',tier2Date:'08/24'},
+  {name:'Jasyra Santiago-Hines',bonusSubs:84,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/10',tier2Date:'08/24'},
   {name:'Melody Brandon',bonusSubs:74,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/08',tier2Date:'08/03'},
-  {name:'Ginny Yurich',bonusSubs:73,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/02',tier2Date:'08/31'},
+  {name:'Ginny Yurich',bonusSubs:76,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'06/02',tier2Date:'08/31'},
   {name:'Jeff Cruz Talia_likeitis',bonusSubs:65,tier:2,earned:1250,paid:1250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'05/19',tier2Date:'07/31'},
   {name:'Carly Brown',bonusSubs:48,tier:1,earned:250,paid:250,winStart:'04/21/2026',winEnd:'12/31/2026',tier1Date:'06/26',is2026:true},
   {name:'Katelyn Alsop (James)',bonusSubs:48,tier:1,earned:250,paid:250,winStart:'01/19/2026',winEnd:'12/31/2026',tier1Date:'02/21',is2026:true},
-  {name:'Hilary Fritsch*',bonusSubs:40,tier:1,earned:250,paid:250,winStart:'05/08/2026',winEnd:'12/31/2026',tier1Date:'07/31',is2026:true},
+  {name:'Hilary Fritsch*',bonusSubs:41,tier:1,earned:250,paid:250,winStart:'05/08/2026',winEnd:'12/31/2026',tier1Date:'07/31',is2026:true},
   {name:'Taylor Kulik',bonusSubs:34,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'07/25'},
   {name:'Hayley Lombard',bonusSubs:32,tier:1,earned:250,paid:250,winStart:'05/19/2026',winEnd:'12/31/2026',tier1Date:'07/16',is2026:true},
   {name:'Lauren Stadler',bonusSubs:31,tier:1,earned:250,paid:250,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'09/11'},
@@ -350,14 +358,14 @@ const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;p
   {name:'Wendy Ostapuk toxinfreeish',bonusSubs:25,tier:1,earned:250,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026',tier1Date:'10/30'},
   {name:'Ellen Fisher',bonusSubs:23,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Alicia Nussbaum',bonusSubs:21,tier:0,earned:0,paid:0,winStart:'07/06/2026',winEnd:'12/31/2026',is2026:true},
-  {name:'Thuy Improta *ministry*',bonusSubs:20,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Erin Wilkins essentiallyerin',bonusSubs:15,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Amy Migdalia Williams',bonusSubs:14,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Thuy Improta *ministry*',bonusSubs:21,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Erin Wilkins essentiallyerin',bonusSubs:16,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Amy Migdalia Williams',bonusSubs:15,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Christina Franco',bonusSubs:14,tier:0,earned:0,paid:0,winStart:'05/27/2026',winEnd:'12/31/2026',is2026:true},
-  {name:'Devon Kuntzman *Transforming Toddlerhood*',bonusSubs:14,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Devon Kuntzman *Transforming Toddlerhood*',bonusSubs:15,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Ashley Turner',bonusSubs:12,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Courtland Nall',bonusSubs:12,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Rachel Jayroe',bonusSubs:12,tier:0,earned:0,paid:0,winStart:'02/06/2026',winEnd:'12/31/2026',is2026:true},
+  {name:'Rachel Jayroe',bonusSubs:13,tier:0,earned:0,paid:0,winStart:'02/06/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Carly Hartwig',bonusSubs:11,tier:0,earned:0,paid:0,winStart:'04/06/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Lexi Fitzgerald',bonusSubs:11,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Hillary Ha',bonusSubs:10,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
@@ -375,20 +383,20 @@ const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;p
   {name:'Anna Brayton riseandclimb',bonusSubs:6,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Jennee Guerrero',bonusSubs:6,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Lauren Peter',bonusSubs:6,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Megan Crivelli',bonusSubs:6,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Megan Crivelli',bonusSubs:8,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Allison Ososkie',bonusSubs:5,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Ashley Vogt',bonusSubs:5,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Bailey King',bonusSubs:5,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Beth Leon',bonusSubs:5,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Jordan Schoen',bonusSubs:5,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Juanique Grover',bonusSubs:5,tier:0,earned:0,paid:0,winStart:'07/22/2026',winEnd:'12/31/2026',is2026:true},
+  {name:'Juanique Grover',bonusSubs:9,tier:0,earned:0,paid:0,winStart:'07/22/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Kara Garcia',bonusSubs:5,tier:0,earned:0,paid:0,winStart:'01/16/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Lori Beth Auldridge',bonusSubs:5,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Natalie Stahl',bonusSubs:5,tier:0,earned:0,paid:0,winStart:'04/07/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Tania O\'Donnell',bonusSubs:5,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Taylor Dukes',bonusSubs:5,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Abby Tastad',bonusSubs:4,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Bodybybree',bonusSubs:4,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Bodybybree',bonusSubs:6,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Bryan Martin',bonusSubs:4,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Chad Rasmussen',bonusSubs:4,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Erika Xavier',bonusSubs:4,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
@@ -404,7 +412,7 @@ const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;p
   {name:'Elizabeth Bagwell',bonusSubs:3,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Gina Primavera',bonusSubs:3,tier:0,earned:0,paid:0,winStart:'04/22/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Jackie Parliament',bonusSubs:3,tier:0,earned:0,paid:0,winStart:'01/27/2026',winEnd:'12/31/2026',is2026:true},
-  {name:'Janell Hampton',bonusSubs:3,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Janell Hampton',bonusSubs:6,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Kara Barber',bonusSubs:3,tier:0,earned:0,paid:0,winStart:'04/22/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Kristin Tigges',bonusSubs:3,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Laura Manns',bonusSubs:3,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
@@ -420,7 +428,7 @@ const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;p
   {name:'Sarah Fuller',bonusSubs:3,tier:0,earned:0,paid:0,winStart:'04/29/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Tanya Marquez',bonusSubs:3,tier:0,earned:0,paid:0,winStart:'06/01/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Airwaymyos -Chantal Duhaime / Michelle Quinto',bonusSubs:2,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Alex Pettingill',bonusSubs:2,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Alex Pettingill',bonusSubs:3,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Alexis Eline',bonusSubs:2,tier:0,earned:0,paid:0,winStart:'06/03/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Alisabeth Dixon',bonusSubs:2,tier:0,earned:0,paid:0,winStart:'07/20/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Amanda Cruz (closequartersmom)',bonusSubs:2,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
@@ -464,7 +472,8 @@ const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;p
   {name:'Brooke Winter',bonusSubs:1,tier:0,earned:0,paid:0,winStart:'06/02/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Cami Andersen',bonusSubs:1,tier:0,earned:0,paid:0,winStart:'01/26/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Carly Patterson',bonusSubs:1,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
-  {name:'Craig Clayton *Restoration Dentistry*',bonusSubs:1,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Craig Clayton *Restoration Dentistry*',bonusSubs:2,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Elizabeth Tonneson',bonusSubs:2,tier:0,earned:0,paid:0,winStart:'03/25/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Ellie Gilbert',bonusSubs:1,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Emily Bentow/buckingham',bonusSubs:1,tier:0,earned:0,paid:0,winStart:'06/10/2026',winEnd:'12/31/2026',is2026:true},
   {name:'Emily Sexton',bonusSubs:1,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
@@ -505,6 +514,12 @@ const launchBonusData: {name:string;bonusSubs:number;tier:number;earned:number;p
   {name:'Tiffany Hubbard',bonusSubs:1,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Travis Jones',bonusSubs:1,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
   {name:'Vicki LaBarthe',bonusSubs:1,tier:0,earned:0,paid:0,winStart:'06/08/2026',winEnd:'12/31/2026',is2026:true},
+  {name:'Allie Buquet',bonusSubs:1,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Dolly Garnecki',bonusSubs:1,tier:0,earned:0,paid:0,winStart:'10/27/2026',winEnd:'12/31/2026',is2026:true},
+  {name:'Haleigh Markar',bonusSubs:1,tier:0,earned:0,paid:0,winStart:'08/03/2026',winEnd:'12/31/2026',is2026:true},
+  {name:'Kara Lowry',bonusSubs:1,tier:0,earned:0,paid:0,winStart:'10/30/2026',winEnd:'12/31/2026',is2026:true},
+  {name:'Paige Cameron',bonusSubs:1,tier:0,earned:0,paid:0,winStart:'04/01/2026',winEnd:'12/31/2026'},
+  {name:'Sarah Huff',bonusSubs:1,tier:0,earned:0,paid:0,winStart:'10/30/2026',winEnd:'12/31/2026',is2026:true},
 ];
 
 /* ════════════════════════════════════════════════════════════════════════════
