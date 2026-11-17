@@ -55,7 +55,7 @@ const GOOGLE_ADS_PRIOR_MONTHS: { month: string; year: number; monthIdx: number; 
 ];
 
 // Google Ads daily Salesforce leads by submission date (source: Google Ads Salesforce export)
-// Source: SOSH Google Ads 2026-2026-11-02 export, "Date: Submission" column
+// Source: SOSH Google Ads 2026-11-16 export, "Date: Submission" column
 // Update this array each time a new Google Ads Salesforce export is uploaded
 const GOOGLE_ADS_DAILY_LEADS: Record<string, number> = {
   '2026-04-07':2,'2026-04-10':1,'2026-04-11':1,'2026-04-13':2,'2026-04-18':2,'2026-04-19':2,'2026-04-20':1,
@@ -284,44 +284,44 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
 
 /* ════════════════════════════════════════════
    DATA SOURCE 2: SALESFORCE (hardcoded constants)
-   Source: Salesforce "Google Ads 2026" export, November 2, 2026.
+   Source: Salesforce "Google Ads 2026" export, November 16, 2026.
    Note: Export filter includes "Up 1 equals Google Ads,Meta Ads"
    but Apr–Jun numbers are unchanged from Google-only pulls,
    so Meta contribution is negligible in those months.
    ════════════════════════════════════════════ */
 
-// Pipeline totals — Salesforce export November 2, 2026
+// Pipeline totals — Salesforce export November 16, 2026
 const GOOGLE_SF_PIPELINE = {
-  total: 837,           // leads created (started form)
-  completed: 393,       // submitted (have submission date) = total - waitingInfo
-  waitingInfo: 444,     // WAITING - Needs info
-  sentCheckout: 99,     // Sent Checkout Link (98) + Sent Checkout Link - Temp Hold (1)
-  sentToTxP: 18,        // Sent to TxP (15) + Treatment Consult Scheduled (3)
-  txpApproved: 2,
-  checkedOut: 58,
-  referredOut: 42,
-  closedLost: 156,      // Closed Lost (138) + Do Not Contact (18)
-  tempHold: 20,         // Temp Hold (3) + Assessment On Hold-Non Responsive (16) + ON HOLD - No Doctor (1)
+  total: 869,           // leads created (started form)
+  completed: 235,       // completed assessment (have submission date)
+  waitingInfo: 473,     // WAITING - Needs info (457) + Assessment On Hold-Non Responsive (13) + Assessment Sent-Non Responsive (3)
+  sentCheckout: 98,     // Sent Checkout Link (98)
+  sentToTxP: 26,        // Sent to TxP (20) + Treatment Consult Scheduled (4) + Waiting for TxP Assignment (2)
+  txpApproved: 1,
+  checkedOut: 60,
+  referredOut: 44,
+  closedLost: 161,      // Closed Lost (142) + Do Not Contact (19)
+  tempHold: 6,          // Temp Hold (4) + Sent Checkout Link - Temp Hold (1) + ON HOLD - No Doctor (1)
   denied: 0,
   formOpens: 0,
 };
 
-// Revenue from checkouts — 58 CHECKED OUT records
-// Source: Salesforce "Google Ads 2026" export, November 2, 2026
-const GOOGLE_REVENUE: number = 109294;
+// Revenue from checkouts — 60 CHECKED OUT records
+// Source: Salesforce "Google Ads 2026" export, November 16, 2026
+const GOOGLE_REVENUE: number = 113084;
 
 // Monthly breakdown from Salesforce — grouped by SUBMISSION date.
 // Checkouts/revenue = leads submitted that month that have checked out to date.
-// Source: Salesforce "Google Ads 2026" export, November 2, 2026
+// Source: Salesforce "Google Ads 2026" export, November 16, 2026
 const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: number; checkouts: number; revenue: number }[] = [
-  { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 20, completed: 20, checkouts: 2, revenue: 3291 },
-  { month: 'May 2026', monthKey: 'May 2026', leads: 28, completed: 28, checkouts: 5, revenue: 8676 },
-  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 81, completed: 81, checkouts: 17, revenue: 29377 },
-  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 91, completed: 91, checkouts: 12, revenue: 24096 },
-  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 89, completed: 89, checkouts: 11, revenue: 21605 },
-  { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 53, completed: 53, checkouts: 9, revenue: 17759 },
-  { month: 'Oct 2026', monthKey: 'Oct 2026', leads: 30, completed: 30, checkouts: 2, revenue: 4490 },
-  { month: 'Nov 2026', monthKey: 'Nov 2026', leads: 1, completed: 1, checkouts: 0, revenue: 0 },
+  { month: 'Apr 2026', monthKey: 'Apr 2026', leads: 20, completed: 4, checkouts: 2, revenue: 3291 },
+  { month: 'May 2026', monthKey: 'May 2026', leads: 28, completed: 11, checkouts: 5, revenue: 8676 },
+  { month: 'Jun 2026', monthKey: 'Jun 2026', leads: 81, completed: 29, checkouts: 17, revenue: 29377 },
+  { month: 'Jul 2026', monthKey: 'Jul 2026', leads: 91, completed: 41, checkouts: 12, revenue: 24096 },
+  { month: 'Aug 2026', monthKey: 'Aug 2026', leads: 89, completed: 73, checkouts: 12, revenue: 23600 },
+  { month: 'Sep 2026', monthKey: 'Sep 2026', leads: 53, completed: 37, checkouts: 10, revenue: 19554 },
+  { month: 'Oct 2026', monthKey: 'Oct 2026', leads: 30, completed: 22, checkouts: 2, revenue: 4490 },
+  { month: 'Nov 2026', monthKey: 'Nov 2026', leads: 18, completed: 18, checkouts: 0, revenue: 0 },
 ];
 
 /* ════════════════════════════════════════════
@@ -855,7 +855,7 @@ export default function PaidAds() {
       {/* ═══════ COST PER CONVERSION TREND ═══════ */}
       <SectionHeader>Cost per Conversion Over Time</SectionHeader>
       <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>
-        Monthly Google Ads spend ÷ Salesforce conversions at each funnel stage. October is partial ({(() => { const oct = SF_MONTHLY.find(s => s.monthKey === 'Oct 2026'); return oct ? `${oct.leads} leads` : 'in progress'; })()}).
+        Monthly Google Ads spend ÷ Salesforce conversions at each funnel stage. November is partial ({(() => { const nov = SF_MONTHLY.find(s => s.monthKey === 'Nov 2026'); return nov ? `${nov.leads} leads` : 'in progress'; })()}).
       </div>
       <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', marginBottom: 32 }}>
         <div style={{ height: 320 }}>
