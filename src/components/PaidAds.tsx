@@ -19,7 +19,7 @@ import type { GoogleAdsDaily } from '@/lib/types';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler);
 
-/* ────── TP Kids Color Palette ────── */
+/* ââââââ TP Kids Color Palette ââââââ */
 const TP = {
   blue: '#3A6EA4', skyBlue: '#B6CAE3', lightBlue: '#D6E5F7',
   cream: '#FEF8EE', green: '#8CD1C8', yellow: '#FDBE67',
@@ -27,28 +27,28 @@ const TP = {
   text: '#333333', navy: '#1B2A4A',
 };
 
-/* ════════════════════════════════════════════
-   TRACKING BLACKOUT — go.toothpillow link was
+/* ââââââââââââââââââââââââââââââââââââââââââââ
+   TRACKING BLACKOUT â go.toothpillow link was
    broken May 11-20, so lead/conversion fields
    captured in Google Ads daily data during this
    window are unreliable. Spend/impressions/clicks
    from Google are unaffected and always accurate.
-   ════════════════════════════════════════════ */
+   ââââââââââââââââââââââââââââââââââââââââââââ */
 const BLACKOUT_START = '2026-05-11';
 const BLACKOUT_END   = '2026-05-20';
 const isBlackout = (date: string) => date >= BLACKOUT_START && date <= BLACKOUT_END;
 
-/* ════════════════════════════════════════════
+/* ââââââââââââââââââââââââââââââââââââââââââââ
    DATA SOURCE 1: GOOGLE ADS DAILY (Supabase + seed)
    Use ONLY for spend, clicks, impressions.
-   Do NOT derive leads/checkouts/conversions from this data —
+   Do NOT derive leads/checkouts/conversions from this data â
    the submit/started/finished/treatment fields captured here
    do not reconcile with Salesforce and should only be used
    for the Add/Update Day entry form.
-   ════════════════════════════════════════════ */
+   ââââââââââââââââââââââââââââââââââââââââââââ */
 
 // Monthly aggregates for months before June (no daily data available).
-// Pulled from Google Ads Campaigns view, All Time, Segment: Month — July 14, 2026.
+// Pulled from Google Ads Campaigns view, All Time, Segment: Month â July 14, 2026.
 const GOOGLE_ADS_PRIOR_MONTHS: { month: string; year: number; monthIdx: number; spend: number; clicks: number; impressions: number }[] = [
   { month: 'Apr 2026', year: 2026, monthIdx: 4, spend: 5021.47, clicks: 1396, impressions: 24974 },
   { month: 'May 2026', year: 2026, monthIdx: 5, spend: 9728.21, clicks: 3093, impressions: 49404 },
@@ -90,19 +90,19 @@ const GOOGLE_ADS_DAILY_LEADS: Record<string, number> = {
   '2026-11-23':2,
 };
 
-// Google Ads daily form starts (Google's conversion tracking — HIPAA-limited, counts assessment starts)
+// Google Ads daily form starts (Google's conversion tracking â HIPAA-limited, counts assessment starts)
 // Source: Google Ads Report Editor "When your ads showed" report, pulled via Chrome
-// These are NOT actual submissions — compare with GOOGLE_ADS_DAILY_LEADS for completion rate
+// These are NOT actual submissions â compare with GOOGLE_ADS_DAILY_LEADS for completion rate
 // Update: pull from Chrome each time you pull daily spend/clicks/impressions
 const GOOGLE_ADS_FORM_STARTS: Record<string, number> = {
-  // Aug 18–Sep 13, 2026 — from Chrome pull September 14, 2026
+  // Aug 18âSep 13, 2026 â from Chrome pull September 14, 2026
   '2026-08-18':22,'2026-08-19':23,'2026-08-20':21,'2026-08-21':13,'2026-08-22':24,'2026-08-23':25,'2026-08-24':24,
   '2026-08-25':18,'2026-08-26':19,'2026-08-27':16,'2026-08-28':15,'2026-08-29':15,'2026-08-30':19,'2026-08-31':10,
   '2026-09-01':32,'2026-09-02':23,'2026-09-03':17,'2026-09-04':19,'2026-09-05':13,'2026-09-06':10,'2026-09-07':16,
   '2026-09-08':19,'2026-09-09':17,'2026-09-10':9,'2026-09-11':10,'2026-09-12':14,'2026-09-13':13,
 };
 
-// Google Ads daily seed data (source of truth — merged with Supabase on load)
+// Google Ads daily seed data (source of truth â merged with Supabase on load)
 // June 1-15 spend/clicks/impressions from Google Ads Report Editor, June 15, 2026
 // June 16-22 spend/clicks/impressions from Google Ads Report Editor, June 22, 2026
 // June 23-25 spend/clicks/impressions from Google Ads Campaigns view, June 25, 2026
@@ -115,10 +115,10 @@ const GOOGLE_ADS_FORM_STARTS: Record<string, number> = {
 // Aug 5 corrected to final + Aug 6 partial added from Google Ads Report Editor, August 6, 2026
 // Aug 6 corrected to final + Aug 7-9 added from Google Ads Campaigns view (day-by-day), August 10, 2026
 // Sep 8-13 + Aug 24/31 corrections from Google Ads Report Editor "When your ads showed", September 14, 2026
-// Sep 29 – Oct 8 added from Google Ads Campaigns view (day-by-day), October 9, 2026
-// Oct 9 – Oct 12 added from Google Ads Campaigns view (day-by-day), October 13, 2026
-// Nov 2 – Nov 23 added from Google Ads AI Dashboards daily metrics, November 24, 2026
-// submit/started/finished/treatment fields retained for the entry form only —
+// Sep 29 â Oct 8 added from Google Ads Campaigns view (day-by-day), October 9, 2026
+// Oct 9 â Oct 12 added from Google Ads Campaigns view (day-by-day), October 13, 2026
+// Nov 2 â Nov 23 added from Google Ads AI Dashboards daily metrics, November 24, 2026
+// submit/started/finished/treatment fields retained for the entry form only â
 // NOT used anywhere in this page's analysis (see Salesforce constants below instead).
 const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-06-01', spend: 504.80, clicks: 155, impressions: 2273, submit: 7, started: 7, finished: 6, treatment: 0 },
@@ -299,7 +299,7 @@ const GOOGLE_ADS_SEED: GoogleAdsDaily[] = [
   { date: '2026-11-23', spend: 100.32, clicks: 86, impressions: 829, submit: 0, started: 0, finished: 0, treatment: 0 },
 ];
 
-// Merge seed data with Supabase data (seed wins on conflict — hardcoded is source of truth)
+// Merge seed data with Supabase data (seed wins on conflict â hardcoded is source of truth)
 function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
   const byDate = new Map<string, GoogleAdsDaily>();
   apiData.forEach(a => byDate.set(a.date, a));
@@ -307,15 +307,15 @@ function mergeWithSeed(apiData: GoogleAdsDaily[]): GoogleAdsDaily[] {
   return Array.from(byDate.values());
 }
 
-/* ════════════════════════════════════════════
+/* ââââââââââââââââââââââââââââââââââââââââââââ
    DATA SOURCE 2: SALESFORCE (hardcoded constants)
    Source: Salesforce "Google Ads 2026" export, November 24, 2026.
    Note: Export filter includes "Up 1 equals Google Ads,Meta Ads"
-   but Apr–Jun numbers are unchanged from Google-only pulls,
+   but AprâJun numbers are unchanged from Google-only pulls,
    so Meta contribution is negligible in those months.
-   ════════════════════════════════════════════ */
+   ââââââââââââââââââââââââââââââââââââââââââââ */
 
-// Pipeline totals — Salesforce export November 24, 2026
+// Pipeline totals â Salesforce export November 24, 2026
 const GOOGLE_SF_PIPELINE = {
   total: 882,           // leads created (started form)
   completed: 397,       // completed assessment (have PEF Completed date)
@@ -331,11 +331,11 @@ const GOOGLE_SF_PIPELINE = {
   formOpens: 0,
 };
 
-// Revenue from checkouts — 63 CHECKED OUT records
+// Revenue from checkouts â 63 CHECKED OUT records
 // Source: Salesforce "Google Ads 2026" export, November 24, 2026
 const GOOGLE_REVENUE: number = 117447;
 
-// Monthly breakdown from Salesforce — grouped by SUBMISSION date.
+// Monthly breakdown from Salesforce â grouped by SUBMISSION date.
 // Checkouts/revenue = leads submitted that month that have checked out to date.
 // "completed" = records with PEF Completed date (assessment fully reviewed).
 // Source: Salesforce "Google Ads 2026" export, November 24, 2026
@@ -350,14 +350,14 @@ const SF_MONTHLY: { month: string; monthKey: string; leads: number; completed: n
   { month: 'Nov 2026', monthKey: 'Nov 2026', leads: 25, completed: 18, checkouts: 0, revenue: 0 },
 ];
 
-/* ════════════════════════════════════════════
-   MATURITY CURVE — from Enrollment Timing Analysis
+/* ââââââââââââââââââââââââââââââââââââââââââââ
+   MATURITY CURVE â from Enrollment Timing Analysis
    Cumulative % of eventual checkouts by cohort age.
    Source: Enrollment (Conversion) Timing Analysis, 2,657 enrollments
-   across all channels (Jan–Jul 2026). Updated July 24, 2026.
+   across all channels (JanâJul 2026). Updated July 24, 2026.
    Same Day 4.3%, 1-15d 36.7%, 16-30d 25.0%, 31-45d 10.8%,
    46-60d 5.3%, 61-90d 6.2%, 91+d 10.8%, Unknown 0.9%.
-   ════════════════════════════════════════════ */
+   ââââââââââââââââââââââââââââââââââââââââââââ */
 const ENROLLMENT_MATURITY = [
   { days: 0, pct: 0 },
   { days: 1, pct: 0.043 },
@@ -386,11 +386,11 @@ function getMaturity(ageDays: number): number {
   return 1.0;
 }
 
-/* ════════════════════════════════════════════
-   META ADS — Toothpillow Ads Account (569515626136665)
-   Source: Meta Ads Manager (Maximum: Oct 24, 2023 – Nov 24, 2026)
+/* ââââââââââââââââââââââââââââââââââââââââââââ
+   META ADS â Toothpillow Ads Account (569515626136665)
+   Source: Meta Ads Manager (Maximum: Oct 24, 2023 â Nov 24, 2026)
    + Salesforce "Meta Ads 2026" export, November 24, 2026
-   ════════════════════════════════════════════ */
+   ââââââââââââââââââââââââââââââââââââââââââââ */
 
 // Monthly ad spend from Meta Ads Manager (all campaigns combined)
 const META_MONTHLY = [
@@ -409,7 +409,7 @@ const META_MONTHLY = [
   { month: 'Nov 2026', spend: 197.57, leads: 0 },
 ];
 
-// Pipeline from Salesforce — "Meta Ads 2026" export, November 24, 2026
+// Pipeline from Salesforce â "Meta Ads 2026" export, November 24, 2026
 // Filter: Created Date 11/23/2023 to 11/24/2026, Up 1 = Meta Ads + old_Meta Ad variants
 const META_SF_PIPELINE = {
   total: 83,
@@ -427,7 +427,7 @@ const META_SF_PIPELINE = {
 
 const META_REVENUE = 8978;
 
-// Campaign-level data from Meta Ads Manager — Maximum date range
+// Campaign-level data from Meta Ads Manager â Maximum date range
 // Sorted by Amount Spent descending
 const META_CAMPAIGNS: { name: string; type: string; results: number; resultType: string; cpr: number; spend: number; impressions: number; reach: number }[] = [
   { name: 'Alex Clark Campaign', type: 'Link Clicks', results: 44905, resultType: 'Link clicks', cpr: 0.18, spend: 8182.86, impressions: 867493, reach: 425224 },
@@ -452,16 +452,16 @@ const META_FUNNEL = { entered: META_SF_PIPELINE.total, waitingInfo: META_SF_PIPE
 
 const MONTH_SHORT = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-/* ════════════════════════════════════════════
+/* ââââââââââââââââââââââââââââââââââââââââââââ
    COMPONENT
-   ════════════════════════════════════════════ */
+   ââââââââââââââââââââââââââââââââââââââââââââ */
 
 export default function PaidAds() {
   const [entries, setEntries] = useState<GoogleAdsDaily[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showMeta, setShowMeta] = useState(false);
+  // const [showMeta, setShowMeta] = useState(false); // moved to PaidAdsComparison
 
   // Form state
   const [formDate, setFormDate] = useState(todayStr());
@@ -524,10 +524,10 @@ export default function PaidAds() {
     setFormTreatment(String(e.treatment));
   };
 
-  /* ──── Sorted daily data ──── */
+  /* ââââ Sorted daily data ââââ */
   const sorted = useMemo(() => [...entries].sort((a, b) => a.date.localeCompare(b.date)), [entries]);
 
-  /* ──── Total spend from Google Ads (daily + prior months) ──── */
+  /* ââââ Total spend from Google Ads (daily + prior months) ââââ */
   const googleTotalSpend = useMemo(() => {
     let spend = 0;
     sorted.forEach((e) => { spend += e.spend || 0; });
@@ -541,7 +541,7 @@ export default function PaidAds() {
     return spend;
   }, [sorted]);
 
-  /* ──── Monthly spend from Google Ads ──── */
+  /* ââââ Monthly spend from Google Ads ââââ */
   const monthlySpend = useMemo(() => {
     const byMonth = new Map<string, { spend: number; clicks: number; impressions: number }>();
     GOOGLE_ADS_PRIOR_MONTHS.forEach((m) => {
@@ -563,7 +563,7 @@ export default function PaidAds() {
     return Array.from(byMonth.entries()).map(([label, v]) => ({ label, ...v }));
   }, [sorted]);
 
-  /* ──── Daily spend trend ──── */
+  /* ââââ Daily spend trend ââââ */
   const spendTrend = useMemo(() => {
     const labels = sorted.map((e) => e.date.substring(5).replace('-', '/'));
     const spendVals = sorted.map((e) => e.spend || 0);
@@ -621,7 +621,7 @@ export default function PaidAds() {
     },
   }), []);
 
-  /* ──── Meta stats ──── */
+  /* ââââ Meta stats ââââ */
   const metaTotalSpend = META_CAMPAIGNS.reduce((s, c) => s + c.spend, 0);
   const metaTotalImpressions = META_CAMPAIGNS.reduce((s, c) => s + c.impressions, 0);
   const metaTotalLeads = META_SF_PIPELINE.total;
@@ -631,24 +631,24 @@ export default function PaidAds() {
   const metaLeadToCheckout = metaTotalLeads > 0 ? (META_SF_PIPELINE.checkedOut / metaTotalLeads * 100) : 0;
   const metaCompletedToCheckout = META_SF_PIPELINE.completed > 0 ? (META_SF_PIPELINE.checkedOut / META_SF_PIPELINE.completed * 100) : 0;
 
-  /* ──── Google comparison stats ──── */
+  /* ââââ Google comparison stats ââââ */
   const googleCAC = GOOGLE_SF_PIPELINE.checkedOut > 0 ? googleTotalSpend / GOOGLE_SF_PIPELINE.checkedOut : 0;
   const googleCPL = GOOGLE_SF_PIPELINE.total > 0 ? googleTotalSpend / GOOGLE_SF_PIPELINE.total : 0;
   const googleRevenuePerDollar = googleTotalSpend > 0 ? GOOGLE_REVENUE / googleTotalSpend : 0;
   const googleLeadToCheckout = GOOGLE_SF_PIPELINE.total > 0 ? (GOOGLE_SF_PIPELINE.checkedOut / GOOGLE_SF_PIPELINE.total * 100) : 0;
   const googleCompletedToCheckout = GOOGLE_SF_PIPELINE.completed > 0 ? (GOOGLE_SF_PIPELINE.checkedOut / GOOGLE_SF_PIPELINE.completed * 100) : 0;
 
-  /* ──── Derived KPIs ──── */
+  /* ââââ Derived KPIs ââââ */
   const net = GOOGLE_REVENUE - googleTotalSpend;
   const costPerCheckout = GOOGLE_SF_PIPELINE.checkedOut > 0 ? googleTotalSpend / GOOGLE_SF_PIPELINE.checkedOut : 0;
 
-  /* ──── Maturity-adjusted CAC ──── */
+  /* ââââ Maturity-adjusted CAC ââââ */
   const maturityAdjCAC = useMemo(() => {
     const now = new Date();
     let totalProjected = 0;
     let totalSpendForProj = 0;
 
-    // Checkout rate from months ≥60 days old
+    // Checkout rate from months â¥60 days old
     const matureMonths = SF_MONTHLY.filter(sf => {
       const parts = sf.monthKey.split(' ');
       const mi = MONTH_SHORT.indexOf(parts[0]);
@@ -684,13 +684,13 @@ export default function PaidAds() {
     return totalProjected > 0 ? totalSpendForProj / totalProjected : null;
   }, [monthlySpend]);
 
-  /* ──── RENDER ──── */
+  /* ââââ RENDER ââââ */
 
   if (loading) {
     return <div style={{ color: '#999', padding: '48px 0', textAlign: 'center' }}>Loading paid ads data...</div>;
   }
 
-  // Funnel steps — cumulative passage through each stage.
+  // Funnel steps â cumulative passage through each stage.
   // "Sent Checkout Link" includes everyone who ever got one: those still waiting (sentCheckout),
   // those who checked out, and those who got a link but ended up closed-lost.
   const everSentCheckout = GOOGLE_SF_PIPELINE.sentCheckout + GOOGLE_SF_PIPELINE.checkedOut + GOOGLE_SF_PIPELINE.closedLost;
@@ -702,7 +702,7 @@ export default function PaidAds() {
   ];
   const maxFunnel = funnel[0].count;
 
-  // Current pipeline status — where each lead sits RIGHT NOW
+  // Current pipeline status â where each lead sits RIGHT NOW
   const pipelineStatus = [
     { label: 'Still filling out form', count: GOOGLE_SF_PIPELINE.waitingInfo, color: '#999', note: 'incomplete' },
     { label: 'Waiting at checkout link', count: GOOGLE_SF_PIPELINE.sentCheckout, color: TP.yellow, note: 'sent link, haven\'t bought' },
@@ -718,9 +718,9 @@ export default function PaidAds() {
         <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', padding: '12px 16px', borderRadius: 8, fontSize: 14, marginBottom: 16 }}>{error}</div>
       )}
 
-      {/* ═══════ TOP SUMMARY ═══════ */}
+      {/* âââââââ TOP SUMMARY âââââââ */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
-        <SummaryCard label="Total Spend" value={`$${Math.round(googleTotalSpend).toLocaleString()}`} color="#E57373" sub="Google Ads, Apr–present" />
+        <SummaryCard label="Total Spend" value={`$${Math.round(googleTotalSpend).toLocaleString()}`} color="#E57373" sub="Google Ads, Aprâpresent" />
         <SummaryCard label="Revenue" value={`$${GOOGLE_REVENUE.toLocaleString()}`} color="#00C853" sub={`${GOOGLE_SF_PIPELINE.checkedOut} checkouts`} />
         <SummaryCard
           label="Net"
@@ -730,10 +730,10 @@ export default function PaidAds() {
         />
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 32 }}>
-        <SummaryCard label="Raw CAC" value={costPerCheckout > 0 ? `$${Math.round(costPerCheckout).toLocaleString()}` : '—'} color="#E57373" sub={`${GOOGLE_SF_PIPELINE.checkedOut} checkouts so far`} />
+        <SummaryCard label="Raw CAC" value={costPerCheckout > 0 ? `$${Math.round(costPerCheckout).toLocaleString()}` : 'â'} color="#E57373" sub={`${GOOGLE_SF_PIPELINE.checkedOut} checkouts so far`} />
         <SummaryCard
           label="Adjusted CAC"
-          value={maturityAdjCAC ? `$${Math.round(maturityAdjCAC).toLocaleString()}` : '—'}
+          value={maturityAdjCAC ? `$${Math.round(maturityAdjCAC).toLocaleString()}` : 'â'}
           color={maturityAdjCAC && maturityAdjCAC <= CAC_TARGET ? '#00C853' : '#FF9800'}
           sub="Maturity-projected"
         />
@@ -741,7 +741,7 @@ export default function PaidAds() {
         <SummaryCard label="Completion Rate" value={`${Math.round(GOOGLE_SF_PIPELINE.completed / GOOGLE_SF_PIPELINE.total * 100)}%`} color={TP.navy} sub={`${GOOGLE_SF_PIPELINE.completed} of ${GOOGLE_SF_PIPELINE.total} finished the form`} />
       </div>
 
-      {/* ═══════ FUNNEL ═══════ */}
+      {/* âââââââ FUNNEL âââââââ */}
       <SectionHeader>Where People Drop Off</SectionHeader>
       <div style={{ background: '#fff', borderRadius: 12, padding: '24px', boxShadow: '0 4px 15px rgba(0,0,0,0.08)', marginBottom: 32 }}>
         {funnel.map((step, i) => {
@@ -752,7 +752,7 @@ export default function PaidAds() {
             <div key={step.label} style={{ marginBottom: i < funnel.length - 1 ? 12 : 0 }}>
               {dropPct !== null && (
                 <div style={{ fontSize: '0.75em', color: '#E57373', marginBottom: 4, paddingLeft: 4 }}>
-                  ↓ {dropPct}% drop
+                  â {dropPct}% drop
                 </div>
               )}
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -775,7 +775,7 @@ export default function PaidAds() {
         </div>
       </div>
 
-      {/* ═══════ WHERE LEADS ARE NOW ═══════ */}
+      {/* âââââââ WHERE LEADS ARE NOW âââââââ */}
       <SectionHeader>Where Your {GOOGLE_SF_PIPELINE.total} Leads Are Right Now</SectionHeader>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 32 }}>
         {pipelineStatus.map((s) => (
@@ -790,7 +790,7 @@ export default function PaidAds() {
         ))}
       </div>
 
-      {/* ═══════ MONTHLY SUMMARY ═══════ */}
+      {/* âââââââ MONTHLY SUMMARY âââââââ */}
       <SectionHeader>Month by Month</SectionHeader>
       <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>Google Ads spend + Salesforce leads/checkouts/revenue</div>
 
@@ -813,9 +813,9 @@ export default function PaidAds() {
                   <td style={{ padding: '8px 12px', fontWeight: 600 }}>{m.label}</td>
                   <td style={{ padding: '8px 12px', textAlign: 'right' }}>${Math.round(m.spend).toLocaleString()}</td>
                   <td style={{ padding: '8px 12px', textAlign: 'right' }}>{m.clicks.toLocaleString()}</td>
-                  <td style={{ padding: '8px 12px', textAlign: 'right' }}>{sf?.leads ?? '—'}</td>
-                  <td style={{ padding: '8px 12px', textAlign: 'right' }}>{sf?.completed ?? '—'}</td>
-                  <td style={{ padding: '8px 12px', textAlign: 'right' }}>{sf?.checkouts ?? '—'}</td>
+                  <td style={{ padding: '8px 12px', textAlign: 'right' }}>{sf?.leads ?? 'â'}</td>
+                  <td style={{ padding: '8px 12px', textAlign: 'right' }}>{sf?.completed ?? 'â'}</td>
+                  <td style={{ padding: '8px 12px', textAlign: 'right' }}>{sf?.checkouts ?? 'â'}</td>
                   <td style={{ padding: '8px 12px', textAlign: 'right' }}>{rev > 0 ? `$${rev.toLocaleString()}` : '$0'}</td>
                   <td style={{
                     padding: '8px 12px', textAlign: 'right', fontWeight: 600,
@@ -843,10 +843,10 @@ export default function PaidAds() {
         </table>
       </div>
 
-      {/* ═══════ MATURITY-ADJUSTED CAC (Kenny's model) ═══════ */}
+      {/* âââââââ MATURITY-ADJUSTED CAC (Kenny's model) âââââââ */}
       <SectionHeader>What Google Ads Actually Costs (Maturity-Adjusted)</SectionHeader>
       <div style={{ fontSize: '0.85em', color: '#555', marginBottom: 16, lineHeight: 1.6 }}>
-        Raw CAC (spend ÷ checkouts) overstates the true cost because recent months haven&#39;t finished converting. Leads take up to 150 days to fully settle. This table projects how many checkouts each month will end up with based on how far along it is. <strong style={{ color: TP.navy }}>Target: ${CAC_TARGET} CAC.</strong>
+        Raw CAC (spend Ã· checkouts) overstates the true cost because recent months haven&#39;t finished converting. Leads take up to 150 days to fully settle. This table projects how many checkouts each month will end up with based on how far along it is. <strong style={{ color: TP.navy }}>Target: ${CAC_TARGET} CAC.</strong>
       </div>
 
       <div style={{ overflowX: 'auto', marginBottom: 16 }}>
@@ -862,7 +862,7 @@ export default function PaidAds() {
             {(() => {
               const now = new Date();
 
-              // Checkout rate from months ≥60 days old (mature enough to be meaningful)
+              // Checkout rate from months â¥60 days old (mature enough to be meaningful)
               // Used to estimate months that have 0 checkouts because they're too young
               const matureMonths = SF_MONTHLY.filter(sf => {
                 const parts = sf.monthKey.split(' ');
@@ -890,10 +890,10 @@ export default function PaidAds() {
                 let projected: number | null;
                 let isEstimate = false;
                 if (sf.checkouts > 0 && maturity > 0.05) {
-                  // Has checkouts — project by dividing by maturity
+                  // Has checkouts â project by dividing by maturity
                   projected = sf.checkouts / maturity;
                 } else if (sf.completed > 0 && histCheckoutRate > 0) {
-                  // No checkouts yet but has completed subs — estimate from historical rate
+                  // No checkouts yet but has completed subs â estimate from historical rate
                   projected = sf.completed * histCheckoutRate;
                   isEstimate = true;
                 } else {
@@ -908,17 +908,17 @@ export default function PaidAds() {
                     <td style={{ padding: '8px 12px', fontWeight: 600 }}>{m.label}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'right' }}>${Math.round(m.spend).toLocaleString()}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'right' }}>{sf.checkouts}</td>
-                    <td style={{ padding: '8px 12px', textAlign: 'right', color: sf.revenue > 0 ? '#00C853' : '#888' }}>{sf.revenue > 0 ? `$${sf.revenue.toLocaleString()}` : '—'}</td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right', color: sf.revenue > 0 ? '#00C853' : '#888' }}>{sf.revenue > 0 ? `$${sf.revenue.toLocaleString()}` : 'â'}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'right', color: '#888' }}>{ageDays}d</td>
                     <td style={{ padding: '8px 12px', textAlign: 'right' }}>{Math.round(maturity * 100)}%</td>
                     <td style={{ padding: '8px 12px', textAlign: 'right' }}>
-                      {projected !== null ? <span>{isEstimate ? '~' : '~'}{projected.toFixed(1)}{isEstimate ? '*' : ''}</span> : '—'}
+                      {projected !== null ? <span>{isEstimate ? '~' : '~'}{projected.toFixed(1)}{isEstimate ? '*' : ''}</span> : 'â'}
                     </td>
                     <td style={{ padding: '8px 12px', textAlign: 'right', color: '#888' }}>
-                      {rawCAC !== null ? `$${Math.round(rawCAC).toLocaleString()}` : '—'}
+                      {rawCAC !== null ? `$${Math.round(rawCAC).toLocaleString()}` : 'â'}
                     </td>
                     <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 700, color: adjCAC !== null && adjCAC <= CAC_TARGET ? '#00C853' : adjCAC !== null && adjCAC <= CAC_TARGET * 2 ? '#FF9800' : TP.navy }}>
-                      {adjCAC !== null ? <span>~${Math.round(adjCAC).toLocaleString()}{isEstimate ? '*' : ''}</span> : '—'}
+                      {adjCAC !== null ? <span>~${Math.round(adjCAC).toLocaleString()}{isEstimate ? '*' : ''}</span> : 'â'}
                     </td>
                   </tr>
                 );
@@ -936,10 +936,10 @@ export default function PaidAds() {
         * Months with 0 checkouts are estimated using the checkout rate from older months ({Math.round((() => { const mm = SF_MONTHLY.filter(sf => { const p = sf.monthKey.split(' '); const mi = MONTH_SHORT.indexOf(p[0]); const yr = parseInt(p[1]); const mid = new Date(yr, mi - 1, 15); return Math.floor((new Date().getTime() - mid.getTime()) / 86400000) >= 60 && sf.completed > 0; }); return mm.length > 0 ? mm.reduce((s, m) => s + m.checkouts, 0) / mm.reduce((s, m) => s + m.completed, 0) * 100 : 0; })())}% of completed submissions eventually check out) instead of the maturity curve. This is a rougher estimate.
       </div>
 
-      {/* ═══════ COST PER CONVERSION TREND ═══════ */}
+      {/* âââââââ COST PER CONVERSION TREND âââââââ */}
       <SectionHeader>Cost per Conversion Over Time</SectionHeader>
       <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>
-        Monthly Google Ads spend ÷ Salesforce conversions at each funnel stage. November is partial ({(() => { const nov = SF_MONTHLY.find(s => s.monthKey === 'Nov 2026'); return nov ? `${nov.leads} leads` : 'in progress'; })()}).
+        Monthly Google Ads spend Ã· Salesforce conversions at each funnel stage. November is partial ({(() => { const nov = SF_MONTHLY.find(s => s.monthKey === 'Nov 2026'); return nov ? `${nov.leads} leads` : 'in progress'; })()}).
       </div>
       <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', marginBottom: 32 }}>
         <div style={{ height: 320 }}>
@@ -998,7 +998,7 @@ export default function PaidAds() {
                 legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
                 tooltip: {
                   callbacks: {
-                    label: (ctx) => `${ctx.dataset.label}: $${ctx.parsed.y?.toLocaleString() ?? '—'}`,
+                    label: (ctx) => `${ctx.dataset.label}: $${ctx.parsed.y?.toLocaleString() ?? 'â'}`,
                   },
                 },
               },
@@ -1014,7 +1014,7 @@ export default function PaidAds() {
         </div>
       </div>
 
-      {/* ═══════ DAILY GOOGLE ADS CONVERSIONS ═══════ */}
+      {/* âââââââ DAILY GOOGLE ADS CONVERSIONS âââââââ */}
       <SectionHeader>Daily Google Ads Conversions</SectionHeader>
       <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>
         Total Google Ads conversions per day (all conversion actions combined). Conversion tracking broke ~Jul 14 and was fixed ~Jul 26.
@@ -1054,9 +1054,9 @@ export default function PaidAds() {
             const jul = sorted.filter(e => e.date.startsWith('2026-07'));
             const jun = sorted.filter(e => e.date.startsWith('2026-06'));
             const sum = (arr: typeof sorted) => arr.reduce((s, e) => s + e.submit + e.started + e.finished + e.treatment, 0);
-            const avg = (arr: typeof sorted) => arr.length > 0 ? (sum(arr) / arr.length).toFixed(1) : '—';
+            const avg = (arr: typeof sorted) => arr.length > 0 ? (sum(arr) / arr.length).toFixed(1) : 'â';
             const spendArr = (arr: typeof sorted) => arr.reduce((s, e) => s + e.spend, 0);
-            const cpc = (arr: typeof sorted) => { const t = sum(arr); return t > 0 ? `$${Math.round(spendArr(arr) / t)}` : '—'; };
+            const cpc = (arr: typeof sorted) => { const t = sum(arr); return t > 0 ? `$${Math.round(spendArr(arr) / t)}` : 'â'; };
             return [
               { label: `Aug (${aug.length}d)`, total: sum(aug), avg: avg(aug), cpc: cpc(aug) },
               { label: `Jul`, total: sum(jul), avg: avg(jul), cpc: cpc(jul) },
@@ -1065,14 +1065,14 @@ export default function PaidAds() {
               <div key={m.label} style={{ background: '#f8f9fa', borderRadius: 8, padding: 12, textAlign: 'center' }}>
                 <div style={{ fontWeight: 700, fontSize: '1.3em' }}>{m.total}</div>
                 <div style={{ color: '#666' }}>{m.label} conversions</div>
-                <div style={{ color: '#888', fontSize: '0.9em', marginTop: 4 }}>{m.avg}/day avg · {m.cpc} CPC</div>
+                <div style={{ color: '#888', fontSize: '0.9em', marginTop: 4 }}>{m.avg}/day avg Â· {m.cpc} CPC</div>
               </div>
             ));
           })()}
         </div>
       </div>
 
-      {/* ═══════ FORM STARTS vs SUBMISSIONS ═══════ */}
+      {/* âââââââ FORM STARTS vs SUBMISSIONS âââââââ */}
       {(() => {
         const dates = Object.keys(GOOGLE_ADS_FORM_STARTS).sort();
         if (dates.length === 0) return null;
@@ -1081,7 +1081,7 @@ export default function PaidAds() {
         const submissions = dates.map(d => GOOGLE_ADS_DAILY_LEADS[d] || 0);
         const totalStarts = formStarts.reduce((s, v) => s + v, 0);
         const totalSubs = submissions.reduce((s, v) => s + v, 0);
-        const completionRate = totalStarts > 0 ? ((totalSubs / totalStarts) * 100).toFixed(1) : '—';
+        const completionRate = totalStarts > 0 ? ((totalSubs / totalStarts) * 100).toFixed(1) : 'â';
         // Weekly aggregation
         const weeks: { label: string; starts: number; subs: number }[] = [];
         let wStart = 0;
@@ -1092,7 +1092,7 @@ export default function PaidAds() {
           const wSubs = wDates.reduce((s, d) => s + (GOOGLE_ADS_DAILY_LEADS[d] || 0), 0);
           const [,m1,d1] = wDates[0].split('-');
           const [,m2,d2] = wDates[wDates.length - 1].split('-');
-          weeks.push({ label: `${parseInt(m1)}/${parseInt(d1)}–${parseInt(m2)}/${parseInt(d2)}`, starts: wStarts, subs: wSubs });
+          weeks.push({ label: `${parseInt(m1)}/${parseInt(d1)}â${parseInt(m2)}/${parseInt(d2)}`, starts: wStarts, subs: wSubs });
           wStart = wEnd;
         }
         return (
@@ -1188,7 +1188,7 @@ export default function PaidAds() {
                       <td style={{ textAlign: 'right', padding: '6px 8px', color: '#1565C0' }}>{w.starts}</td>
                       <td style={{ textAlign: 'right', padding: '6px 8px', color: '#E65100' }}>{w.subs}</td>
                       <td style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>
-                        {w.starts > 0 ? `${Math.round((w.subs / w.starts) * 100)}%` : '—'}
+                        {w.starts > 0 ? `${Math.round((w.subs / w.starts) * 100)}%` : 'â'}
                       </td>
                     </tr>
                   ))}
@@ -1199,7 +1199,7 @@ export default function PaidAds() {
         );
       })()}
 
-      {/* ═══════ DAILY SPEND ═══════ */}
+      {/* âââââââ DAILY SPEND âââââââ */}
       <SectionHeader>Daily Spend</SectionHeader>
       <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>Source: Google Ads. June onward (no daily data for Apr/May).</div>
 
@@ -1231,7 +1231,7 @@ export default function PaidAds() {
         </div>
       </div>
 
-      {/* ═══════ SPEND vs LEADS ═══════ */}
+      {/* âââââââ SPEND vs LEADS âââââââ */}
       <SectionHeader>Daily Spend vs Leads</SectionHeader>
       <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>Daily Google Ads spend (left axis) vs Salesforce leads by submission date (right axis) with 7-day moving averages.</div>
       <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', marginBottom: 32 }}>
@@ -1274,7 +1274,7 @@ export default function PaidAds() {
         </div>
       </div>
 
-      {/* ═══════ ADD / UPDATE DAY ═══════ */}
+      {/* âââââââ ADD / UPDATE DAY âââââââ */}
       <SectionHeader color="#E57373">Daily Entry</SectionHeader>
 
       <div style={{ background: '#fff', borderRadius: 12, padding: '16px 20px', boxShadow: '0 4px 15px rgba(0,0,0,0.08)', marginBottom: 16 }}>
@@ -1325,185 +1325,14 @@ export default function PaidAds() {
         <div style={{ fontSize: '0.75em', color: '#aaa', marginTop: 6 }}>Most recent 10 days. Click a row to edit.</div>
       </div>
 
-      {/* ═══════ GOOGLE vs META COMPARISON ═══════ */}
-      <div style={{ marginTop: 32 }}>
-        <button
-          onClick={() => setShowMeta(!showMeta)}
-          style={{
-            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-            fontSize: 16, fontWeight: 700, color: TP.navy, borderBottom: `2px solid ${TP.navy}`,
-            paddingBottom: 8, marginBottom: 12, width: '100%', textAlign: 'left',
-          }}
-        >
-          {showMeta ? '▾' : '▸'} Google Ads vs Meta Ads — Full Comparison
-        </button>
-        {showMeta && (
-          <div>
-            {/* Head-to-head summary */}
-            <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>
-              All-time performance comparison. Google Ads: Apr 2026–present. Meta Ads: Mar 2025–present (15 campaigns, 1 currently active). Salesforce pipeline data as of Nov 24, 2026.
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
-              {/* Google column */}
-              <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', borderTop: `4px solid ${TP.blue}` }}>
-                <div style={{ fontSize: '1.1em', fontWeight: 700, color: TP.blue, marginBottom: 12, textAlign: 'center' }}>Google Ads</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                  <MiniStat label="Total Spend" value={`$${Math.round(googleTotalSpend).toLocaleString()}`} />
-                  <MiniStat label="Revenue" value={`$${GOOGLE_REVENUE.toLocaleString()}`} />
-                  <MiniStat label="Leads" value={GOOGLE_SF_PIPELINE.total.toLocaleString()} />
-                  <MiniStat label="Checkouts" value={`${GOOGLE_SF_PIPELINE.checkedOut}`} />
-                  <MiniStat label="CAC" value={`$${Math.round(googleCAC).toLocaleString()}`} />
-                  <MiniStat label="Cost/Lead" value={`$${Math.round(googleCPL)}`} />
-                  <MiniStat label="Revenue/$1" value={`$${googleRevenuePerDollar.toFixed(2)}`} />
-                  <MiniStat label="Lead→Checkout" value={`${googleLeadToCheckout.toFixed(1)}%`} />
-                </div>
-              </div>
-              {/* Meta column */}
-              <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', borderTop: '4px solid #1877F2' }}>
-                <div style={{ fontSize: '1.1em', fontWeight: 700, color: '#1877F2', marginBottom: 12, textAlign: 'center' }}>Meta Ads</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                  <MiniStat label="Total Spend" value={`$${Math.round(metaTotalSpend).toLocaleString()}`} />
-                  <MiniStat label="Revenue" value={`$${META_REVENUE.toLocaleString()}`} />
-                  <MiniStat label="Leads" value={META_SF_PIPELINE.total.toLocaleString()} />
-                  <MiniStat label="Checkouts" value={`${META_SF_PIPELINE.checkedOut}`} />
-                  <MiniStat label="CAC" value={`$${Math.round(metaCAC).toLocaleString()}`} />
-                  <MiniStat label="Cost/Lead" value={`$${Math.round(metaCPL)}`} />
-                  <MiniStat label="Revenue/$1" value={`$${metaRevenuePerDollar.toFixed(2)}`} />
-                  <MiniStat label="Lead→Checkout" value={`${metaLeadToCheckout.toFixed(1)}%`} />
-                </div>
-              </div>
-            </div>
-
-            {/* The story */}
-            <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', marginBottom: 24 }}>
-              <div style={{ fontWeight: 700, color: TP.navy, marginBottom: 8 }}>What the numbers say</div>
-              <div style={{ fontSize: '0.85em', color: '#555', lineHeight: 1.6 }}>
-                Google Ads has spent {(googleTotalSpend / metaTotalSpend).toFixed(1)}x more than Meta (${Math.round(googleTotalSpend).toLocaleString()} vs ${Math.round(metaTotalSpend).toLocaleString()}) and produced {Math.round(GOOGLE_SF_PIPELINE.total / META_SF_PIPELINE.total)}x more leads ({GOOGLE_SF_PIPELINE.total} vs {META_SF_PIPELINE.total}).
-                Google&apos;s cost per lead is ${Math.round(googleCPL)} vs Meta&apos;s ${Math.round(metaCPL)} — {(metaCPL / googleCPL).toFixed(1)}x more expensive on Meta.
-                Google returns ${googleRevenuePerDollar.toFixed(2)} for every $1 spent; Meta returns ${metaRevenuePerDollar.toFixed(2)}.
-                However, most Meta spend went to awareness/branding campaigns (carousels, whitelist reels, Dr Ben content), not direct-response lead gen. Only $290 of ${Math.round(metaTotalSpend).toLocaleString()} total was spent on actual lead-gen-optimized campaigns.
-              </div>
-            </div>
-
-            {/* Pipeline comparison */}
-            <div style={{ fontWeight: 700, color: TP.navy, marginBottom: 8, fontSize: 14 }}>Pipeline Comparison</div>
-            <div style={{ overflowX: 'auto', marginBottom: 24 }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
-                <thead>
-                  <tr style={{ background: TP.navy }}>
-                    <th style={{ padding: '8px 12px', textAlign: 'left', color: '#fff' }}>Stage</th>
-                    <th style={{ padding: '8px 12px', textAlign: 'right', color: '#fff' }}>Google</th>
-                    <th style={{ padding: '8px 12px', textAlign: 'right', color: '#fff' }}>Google %</th>
-                    <th style={{ padding: '8px 12px', textAlign: 'right', color: '#fff' }}>Meta</th>
-                    <th style={{ padding: '8px 12px', textAlign: 'right', color: '#fff' }}>Meta %</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { label: 'Total Leads', g: GOOGLE_SF_PIPELINE.total, m: META_SF_PIPELINE.total },
-                    { label: 'Still Filling Out Form', g: GOOGLE_SF_PIPELINE.waitingInfo, m: META_SF_PIPELINE.waitingInfo },
-                    { label: 'Completed Assessment', g: GOOGLE_SF_PIPELINE.completed, m: META_SF_PIPELINE.completed },
-                    { label: 'Sent Checkout Link', g: GOOGLE_SF_PIPELINE.sentCheckout, m: META_SF_PIPELINE.sentCheckout },
-                    { label: 'Sent to Provider', g: GOOGLE_SF_PIPELINE.sentToTxP + GOOGLE_SF_PIPELINE.txpApproved, m: META_SF_PIPELINE.sentToTxP + META_SF_PIPELINE.txpApproved },
-                    { label: 'Checked Out', g: GOOGLE_SF_PIPELINE.checkedOut, m: META_SF_PIPELINE.checkedOut },
-                    { label: 'Referred Out', g: GOOGLE_SF_PIPELINE.referredOut, m: META_SF_PIPELINE.referredOut },
-                    { label: 'Denied', g: GOOGLE_SF_PIPELINE.denied, m: META_SF_PIPELINE.denied },
-                    { label: 'Closed / Lost', g: GOOGLE_SF_PIPELINE.closedLost + GOOGLE_SF_PIPELINE.tempHold, m: META_SF_PIPELINE.closedLost + META_SF_PIPELINE.tempHold },
-                  ].map((row, idx) => (
-                    <tr key={row.label} style={{ background: idx % 2 === 0 ? '#f9f9f9' : '#fff', fontWeight: row.label === 'Total Leads' || row.label === 'Checked Out' ? 700 : 400 }}>
-                      <td style={{ padding: '6px 12px' }}>{row.label}</td>
-                      <td style={{ padding: '6px 12px', textAlign: 'right' }}>{row.g.toLocaleString()}</td>
-                      <td style={{ padding: '6px 12px', textAlign: 'right', color: '#888' }}>{GOOGLE_SF_PIPELINE.total > 0 ? `${(row.g / GOOGLE_SF_PIPELINE.total * 100).toFixed(1)}%` : '—'}</td>
-                      <td style={{ padding: '6px 12px', textAlign: 'right' }}>{row.m.toLocaleString()}</td>
-                      <td style={{ padding: '6px 12px', textAlign: 'right', color: '#888' }}>{META_SF_PIPELINE.total > 0 ? `${(row.m / META_SF_PIPELINE.total * 100).toFixed(1)}%` : '—'}</td>
-                    </tr>
-                  ))}
-                  <tr style={{ background: TP.navy, color: '#fff', fontWeight: 700 }}>
-                    <td style={{ padding: '8px 12px' }}>Revenue</td>
-                    <td style={{ padding: '8px 12px', textAlign: 'right' }}>${GOOGLE_REVENUE.toLocaleString()}</td>
-                    <td style={{ padding: '8px 12px', textAlign: 'right' }}></td>
-                    <td style={{ padding: '8px 12px', textAlign: 'right' }}>${META_REVENUE.toLocaleString()}</td>
-                    <td style={{ padding: '8px 12px', textAlign: 'right' }}></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* Meta campaign breakdown */}
-            <div style={{ fontWeight: 700, color: TP.navy, marginBottom: 8, fontSize: 14 }}>Meta Campaigns — All Time Breakdown</div>
-            <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 8 }}>
-              15 campaigns total. Most spend went to awareness/traffic campaigns, not lead gen. Only the current &quot;Lead Gen - Evergreen&quot; campaign and &quot;Symptom Checklist - Leads&quot; targeted conversions.
-            </div>
-            <div style={{ overflowX: 'auto', marginBottom: 24 }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
-                <thead>
-                  <tr style={{ background: '#1877F2' }}>
-                    <th style={{ padding: '8px 10px', textAlign: 'left', color: '#fff' }}>Campaign</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'left', color: '#fff' }}>Type</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'right', color: '#fff' }}>Spend</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'right', color: '#fff' }}>Results</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'right', color: '#fff' }}>CPR</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'right', color: '#fff' }}>Impressions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {META_CAMPAIGNS.map((c, idx) => (
-                    <tr key={c.name} style={{ background: idx % 2 === 0 ? '#f9f9f9' : '#fff' }}>
-                      <td style={{ padding: '5px 10px', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</td>
-                      <td style={{ padding: '5px 10px', color: c.type === 'Lead Gen' ? '#00C853' : c.type === 'Engagement' ? '#FF9800' : '#666' }}>{c.type}</td>
-                      <td style={{ padding: '5px 10px', textAlign: 'right' }}>${c.spend.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
-                      <td style={{ padding: '5px 10px', textAlign: 'right' }}>{c.results > 0 ? c.results.toLocaleString() : '—'} <span style={{ color: '#aaa', fontSize: '0.85em' }}>{c.resultType}</span></td>
-                      <td style={{ padding: '5px 10px', textAlign: 'right' }}>{c.cpr > 0 ? `$${c.cpr.toFixed(2)}` : '—'}</td>
-                      <td style={{ padding: '5px 10px', textAlign: 'right' }}>{c.impressions.toLocaleString()}</td>
-                    </tr>
-                  ))}
-                  <tr style={{ background: '#1877F2', color: '#fff', fontWeight: 700 }}>
-                    <td style={{ padding: '8px 10px' }} colSpan={2}>Total</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>${Math.round(metaTotalSpend).toLocaleString()}</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right' }}></td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right' }}></td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>{metaTotalImpressions.toLocaleString()}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* Meta monthly spend */}
-            <div style={{ fontWeight: 700, color: TP.navy, marginBottom: 8, fontSize: 14 }}>Meta Monthly Spend History</div>
-            <div style={{ overflowX: 'auto', marginBottom: 16 }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
-                <thead>
-                  <tr style={{ background: '#1877F2' }}>
-                    <th style={{ padding: '8px 12px', textAlign: 'left', color: '#fff' }}>Month</th>
-                    <th style={{ padding: '8px 12px', textAlign: 'right', color: '#fff' }}>Spend</th>
-                    <th style={{ padding: '8px 12px', textAlign: 'right', color: '#fff' }}>SF Leads</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {META_MONTHLY.map((m, idx) => (
-                    <tr key={m.month} style={{ background: idx % 2 === 0 ? '#f9f9f9' : '#fff' }}>
-                      <td style={{ padding: '6px 12px' }}>{m.month}</td>
-                      <td style={{ padding: '6px 12px', textAlign: 'right' }}>${m.spend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                      <td style={{ padding: '6px 12px', textAlign: 'right' }}>{m.leads}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div style={{ fontSize: '0.78em', color: '#888', marginBottom: 8 }}>
-              Most Meta campaigns were paused May–Oct 2026. A new Lead Gen - Evergreen campaign was started in Nov 2026 at $197.57 spent so far.
-              Meta campaigns were primarily awareness/traffic (carousels, whitelist reels), not conversion-optimized. This makes the CPL/CAC comparison somewhat apples-to-oranges — Google Ads ran conversion-optimized campaigns from day one.
-            </div>
-          </div>
-        )}
-      </div>
+      {/* Google vs Meta comparison is now its own tab: PaidAdsComparison */}
     </div>
   );
 }
 
-/* ════════════════════════════════════════════
+/* ââââââââââââââââââââââââââââââââââââââââââââ
    Sub-Components
-   ════════════════════════════════════════════ */
+   ââââââââââââââââââââââââââââââââââââââââââââ */
 
 const inputStyle: React.CSSProperties = {
   padding: '5px 8px', border: '1px solid #ddd', borderRadius: 6, fontSize: '0.85em',
