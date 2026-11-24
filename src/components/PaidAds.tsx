@@ -387,9 +387,12 @@ function getMaturity(ageDays: number): number {
 }
 
 /* ════════════════════════════════════════════
-   META ADS (Paused — Historical)
+   META ADS — Toothpillow Ads Account (569515626136665)
+   Source: Meta Ads Manager (Maximum: Oct 24, 2023 – Nov 24, 2026)
+   + Salesforce "Meta Ads 2026" export, November 24, 2026
    ════════════════════════════════════════════ */
 
+// Monthly ad spend from Meta Ads Manager (all campaigns combined)
 const META_MONTHLY = [
   { month: 'Mar 2025', spend: 838.67, leads: 0 },
   { month: 'Apr 2025', spend: 170.97, leads: 0 },
@@ -403,9 +406,49 @@ const META_MONTHLY = [
   { month: 'Feb 2026', spend: 2444.53, leads: 9 },
   { month: 'Mar 2026', spend: 1024.00, leads: 7 },
   { month: 'Apr 2026', spend: 72.42, leads: 0 },
+  { month: 'Nov 2026', spend: 197.57, leads: 0 },
 ];
 
-const META_FUNNEL = { entered: 58, waitingInfo: 30, sentCheckout: 13, checkedOut: 0, amountReceived: 0, denied: 7, closedLost: 8 };
+// Pipeline from Salesforce — "Meta Ads 2026" export, November 24, 2026
+// Filter: Created Date 11/23/2023 to 11/24/2026, Up 1 = Meta Ads + old_Meta Ad variants
+const META_SF_PIPELINE = {
+  total: 83,
+  completed: 42,     // 83 - 41 WOI
+  waitingInfo: 41,    // WAITING - Needs info
+  sentCheckout: 4,    // Sent Checkout Link
+  sentToTxP: 3,       // Sent to TxP
+  txpApproved: 1,
+  checkedOut: 5,
+  referredOut: 1,
+  closedLost: 21,     // Closed Lost (20) + Do Not Contact (1)
+  tempHold: 0,
+  denied: 7,
+};
+
+const META_REVENUE = 8978;
+
+// Campaign-level data from Meta Ads Manager — Maximum date range
+// Sorted by Amount Spent descending
+const META_CAMPAIGNS: { name: string; type: string; results: number; resultType: string; cpr: number; spend: number; impressions: number; reach: number }[] = [
+  { name: 'Alex Clark Campaign', type: 'Link Clicks', results: 44905, resultType: 'Link clicks', cpr: 0.18, spend: 8182.86, impressions: 867493, reach: 425224 },
+  { name: 'Braces Exist - Metaadben', type: 'Traffic', results: 17363, resultType: 'LPV', cpr: 0.31, spend: 5432.22, impressions: 881560, reach: 483548 },
+  { name: 'Dr Ben - Tonsils Reel', type: 'Link Clicks', results: 19653, resultType: 'Link clicks', cpr: 0.27, spend: 5294.47, impressions: 863329, reach: 566984 },
+  { name: 'Braces Exist - TP 4', type: 'Traffic', results: 6358, resultType: 'LPV', cpr: 0.33, spend: 2121.75, impressions: 329747, reach: 262412 },
+  { name: 'Braces Exist - TP 1', type: 'Traffic', results: 3016, resultType: 'LPV', cpr: 0.39, spend: 1167.51, impressions: 266043, reach: 234942 },
+  { name: 'Braces Exist - TP 2', type: 'Traffic', results: 4048, resultType: 'LPV', cpr: 0.29, spend: 1167.27, impressions: 208789, reach: 0 },
+  { name: 'Symptom Checklist - Traffic', type: 'Traffic', results: 1462, resultType: 'LPV', cpr: 0.55, spend: 804.26, impressions: 121708, reach: 97295 },
+  { name: 'Wendy Whitelist Reel', type: 'Traffic', results: 2306, resultType: 'LPV', cpr: 0.22, spend: 500.57, impressions: 30082, reach: 0 },
+  { name: 'Wendy - Wendy Lookalike', type: 'Traffic', results: 1528, resultType: 'LPV', cpr: 0.26, spend: 399.13, impressions: 18396, reach: 0 },
+  { name: 'Wendy - IG Lookalike', type: 'Traffic', results: 1276, resultType: 'LPV', cpr: 0.31, spend: 397.35, impressions: 19317, reach: 0 },
+  { name: 'Braces Exist - TP 3', type: 'Traffic', results: 496, resultType: 'LPV', cpr: 0.39, spend: 194.68, impressions: 37346, reach: 35866 },
+  { name: 'Lead Gen - Evergreen', type: 'Lead Gen', results: 1, resultType: 'StartAssessment', cpr: 197.57, spend: 197.57, impressions: 5980, reach: 0 },
+  { name: 'Symptom Checklist - Leads', type: 'Lead Gen', results: 0, resultType: 'Website Lead', cpr: 0, spend: 92.71, impressions: 6353, reach: 5581 },
+  { name: 'New LP Trial', type: 'Traffic', results: 174, resultType: 'LPV', cpr: 0.48, spend: 82.88, impressions: 7727, reach: 7727 },
+  { name: 'Symptom Checklist - Engage', type: 'Engagement', results: 440, resultType: 'Post engagements', cpr: 0.14, spend: 60.37, impressions: 4171, reach: 4000 },
+];
+
+// Legacy constant for backward compat
+const META_FUNNEL = { entered: META_SF_PIPELINE.total, waitingInfo: META_SF_PIPELINE.waitingInfo, sentCheckout: META_SF_PIPELINE.sentCheckout, checkedOut: META_SF_PIPELINE.checkedOut, amountReceived: META_REVENUE, denied: META_SF_PIPELINE.denied, closedLost: META_SF_PIPELINE.closedLost };
 
 const MONTH_SHORT = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -578,10 +621,22 @@ export default function PaidAds() {
     },
   }), []);
 
-  /* ──── Meta historical stats ──── */
-  const metaTotalSpend = META_MONTHLY.reduce((s, m) => s + m.spend, 0);
-  const metaTotalLeads = META_MONTHLY.reduce((s, m) => s + m.leads, 0);
+  /* ──── Meta stats ──── */
+  const metaTotalSpend = META_CAMPAIGNS.reduce((s, c) => s + c.spend, 0);
+  const metaTotalImpressions = META_CAMPAIGNS.reduce((s, c) => s + c.impressions, 0);
+  const metaTotalLeads = META_SF_PIPELINE.total;
   const metaCPL = metaTotalLeads > 0 ? metaTotalSpend / metaTotalLeads : 0;
+  const metaCAC = META_SF_PIPELINE.checkedOut > 0 ? metaTotalSpend / META_SF_PIPELINE.checkedOut : 0;
+  const metaRevenuePerDollar = metaTotalSpend > 0 ? META_REVENUE / metaTotalSpend : 0;
+  const metaLeadToCheckout = metaTotalLeads > 0 ? (META_SF_PIPELINE.checkedOut / metaTotalLeads * 100) : 0;
+  const metaCompletedToCheckout = META_SF_PIPELINE.completed > 0 ? (META_SF_PIPELINE.checkedOut / META_SF_PIPELINE.completed * 100) : 0;
+
+  /* ──── Google comparison stats ──── */
+  const googleCAC = GOOGLE_SF_PIPELINE.checkedOut > 0 ? googleTotalSpend / GOOGLE_SF_PIPELINE.checkedOut : 0;
+  const googleCPL = GOOGLE_SF_PIPELINE.total > 0 ? googleTotalSpend / GOOGLE_SF_PIPELINE.total : 0;
+  const googleRevenuePerDollar = googleTotalSpend > 0 ? GOOGLE_REVENUE / googleTotalSpend : 0;
+  const googleLeadToCheckout = GOOGLE_SF_PIPELINE.total > 0 ? (GOOGLE_SF_PIPELINE.checkedOut / GOOGLE_SF_PIPELINE.total * 100) : 0;
+  const googleCompletedToCheckout = GOOGLE_SF_PIPELINE.completed > 0 ? (GOOGLE_SF_PIPELINE.checkedOut / GOOGLE_SF_PIPELINE.completed * 100) : 0;
 
   /* ──── Derived KPIs ──── */
   const net = GOOGLE_REVENUE - googleTotalSpend;
@@ -635,7 +690,6 @@ export default function PaidAds() {
     return <div style={{ color: '#999', padding: '48px 0', textAlign: 'center' }}>Loading paid ads data...</div>;
   }
 
-  // Funnel steps
   // Funnel steps — cumulative passage through each stage.
   // "Sent Checkout Link" includes everyone who ever got one: those still waiting (sentCheckout),
   // those who checked out, and those who got a link but ended up closed-lost.
@@ -648,7 +702,7 @@ export default function PaidAds() {
   ];
   const maxFunnel = funnel[0].count;
 
-  // Current pipeline status
+  // Current pipeline status — where each lead sits RIGHT NOW
   const pipelineStatus = [
     { label: 'Still filling out form', count: GOOGLE_SF_PIPELINE.waitingInfo, color: '#999', note: 'incomplete' },
     { label: 'Waiting at checkout link', count: GOOGLE_SF_PIPELINE.sentCheckout, color: TP.yellow, note: 'sent link, haven\'t bought' },
@@ -1271,32 +1325,158 @@ export default function PaidAds() {
         <div style={{ fontSize: '0.75em', color: '#aaa', marginTop: 6 }}>Most recent 10 days. Click a row to edit.</div>
       </div>
 
-      {/* ═══════ META ADS (PAUSED — HISTORICAL) ═══════ */}
+      {/* ═══════ GOOGLE vs META COMPARISON ═══════ */}
       <div style={{ marginTop: 32 }}>
         <button
           onClick={() => setShowMeta(!showMeta)}
           style={{
             background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-            fontSize: 16, fontWeight: 700, color: '#999', borderBottom: '2px solid #ccc',
+            fontSize: 16, fontWeight: 700, color: TP.navy, borderBottom: `2px solid ${TP.navy}`,
             paddingBottom: 8, marginBottom: 12, width: '100%', textAlign: 'left',
           }}
         >
-          {showMeta ? '▾' : '▸'} Meta Ads (Paused — Historical)
+          {showMeta ? '▾' : '▸'} Google Ads vs Meta Ads — Full Comparison
         </button>
         {showMeta && (
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
-              <SummaryCard color="#999" label="Total Spend" value={`$${Math.round(metaTotalSpend).toLocaleString()}`} sub="Mar 2025–Apr 2026" />
-              <SummaryCard color="#999" label="Total Leads" value={`${metaTotalLeads}`} sub="Mar 2025–Apr 2026" />
-              <SummaryCard color="#999" label="Cost per Lead" value={metaCPL > 0 ? `$${Math.round(metaCPL).toLocaleString()}` : '—'} sub="Historical" />
+            {/* Head-to-head summary */}
+            <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 12 }}>
+              All-time performance comparison. Google Ads: Apr 2026–present. Meta Ads: Mar 2025–present (15 campaigns, 1 currently active). Salesforce pipeline data as of Nov 24, 2026.
             </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+              {/* Google column */}
+              <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', borderTop: `4px solid ${TP.blue}` }}>
+                <div style={{ fontSize: '1.1em', fontWeight: 700, color: TP.blue, marginBottom: 12, textAlign: 'center' }}>Google Ads</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <MiniStat label="Total Spend" value={`$${Math.round(googleTotalSpend).toLocaleString()}`} />
+                  <MiniStat label="Revenue" value={`$${GOOGLE_REVENUE.toLocaleString()}`} />
+                  <MiniStat label="Leads" value={GOOGLE_SF_PIPELINE.total.toLocaleString()} />
+                  <MiniStat label="Checkouts" value={`${GOOGLE_SF_PIPELINE.checkedOut}`} />
+                  <MiniStat label="CAC" value={`$${Math.round(googleCAC).toLocaleString()}`} />
+                  <MiniStat label="Cost/Lead" value={`$${Math.round(googleCPL)}`} />
+                  <MiniStat label="Revenue/$1" value={`$${googleRevenuePerDollar.toFixed(2)}`} />
+                  <MiniStat label="Lead→Checkout" value={`${googleLeadToCheckout.toFixed(1)}%`} />
+                </div>
+              </div>
+              {/* Meta column */}
+              <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', borderTop: '4px solid #1877F2' }}>
+                <div style={{ fontSize: '1.1em', fontWeight: 700, color: '#1877F2', marginBottom: 12, textAlign: 'center' }}>Meta Ads</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <MiniStat label="Total Spend" value={`$${Math.round(metaTotalSpend).toLocaleString()}`} />
+                  <MiniStat label="Revenue" value={`$${META_REVENUE.toLocaleString()}`} />
+                  <MiniStat label="Leads" value={META_SF_PIPELINE.total.toLocaleString()} />
+                  <MiniStat label="Checkouts" value={`${META_SF_PIPELINE.checkedOut}`} />
+                  <MiniStat label="CAC" value={`$${Math.round(metaCAC).toLocaleString()}`} />
+                  <MiniStat label="Cost/Lead" value={`$${Math.round(metaCPL)}`} />
+                  <MiniStat label="Revenue/$1" value={`$${metaRevenuePerDollar.toFixed(2)}`} />
+                  <MiniStat label="Lead→Checkout" value={`${metaLeadToCheckout.toFixed(1)}%`} />
+                </div>
+              </div>
+            </div>
+
+            {/* The story */}
+            <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', marginBottom: 24 }}>
+              <div style={{ fontWeight: 700, color: TP.navy, marginBottom: 8 }}>What the numbers say</div>
+              <div style={{ fontSize: '0.85em', color: '#555', lineHeight: 1.6 }}>
+                Google Ads has spent {(googleTotalSpend / metaTotalSpend).toFixed(1)}x more than Meta (${Math.round(googleTotalSpend).toLocaleString()} vs ${Math.round(metaTotalSpend).toLocaleString()}) and produced {Math.round(GOOGLE_SF_PIPELINE.total / META_SF_PIPELINE.total)}x more leads ({GOOGLE_SF_PIPELINE.total} vs {META_SF_PIPELINE.total}).
+                Google&apos;s cost per lead is ${Math.round(googleCPL)} vs Meta&apos;s ${Math.round(metaCPL)} — {(metaCPL / googleCPL).toFixed(1)}x more expensive on Meta.
+                Google returns ${googleRevenuePerDollar.toFixed(2)} for every $1 spent; Meta returns ${metaRevenuePerDollar.toFixed(2)}.
+                However, most Meta spend went to awareness/branding campaigns (carousels, whitelist reels, Dr Ben content), not direct-response lead gen. Only $290 of ${Math.round(metaTotalSpend).toLocaleString()} total was spent on actual lead-gen-optimized campaigns.
+              </div>
+            </div>
+
+            {/* Pipeline comparison */}
+            <div style={{ fontWeight: 700, color: TP.navy, marginBottom: 8, fontSize: 14 }}>Pipeline Comparison</div>
+            <div style={{ overflowX: 'auto', marginBottom: 24 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
+                <thead>
+                  <tr style={{ background: TP.navy }}>
+                    <th style={{ padding: '8px 12px', textAlign: 'left', color: '#fff' }}>Stage</th>
+                    <th style={{ padding: '8px 12px', textAlign: 'right', color: '#fff' }}>Google</th>
+                    <th style={{ padding: '8px 12px', textAlign: 'right', color: '#fff' }}>Google %</th>
+                    <th style={{ padding: '8px 12px', textAlign: 'right', color: '#fff' }}>Meta</th>
+                    <th style={{ padding: '8px 12px', textAlign: 'right', color: '#fff' }}>Meta %</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { label: 'Total Leads', g: GOOGLE_SF_PIPELINE.total, m: META_SF_PIPELINE.total },
+                    { label: 'Still Filling Out Form', g: GOOGLE_SF_PIPELINE.waitingInfo, m: META_SF_PIPELINE.waitingInfo },
+                    { label: 'Completed Assessment', g: GOOGLE_SF_PIPELINE.completed, m: META_SF_PIPELINE.completed },
+                    { label: 'Sent Checkout Link', g: GOOGLE_SF_PIPELINE.sentCheckout, m: META_SF_PIPELINE.sentCheckout },
+                    { label: 'Sent to Provider', g: GOOGLE_SF_PIPELINE.sentToTxP + GOOGLE_SF_PIPELINE.txpApproved, m: META_SF_PIPELINE.sentToTxP + META_SF_PIPELINE.txpApproved },
+                    { label: 'Checked Out', g: GOOGLE_SF_PIPELINE.checkedOut, m: META_SF_PIPELINE.checkedOut },
+                    { label: 'Referred Out', g: GOOGLE_SF_PIPELINE.referredOut, m: META_SF_PIPELINE.referredOut },
+                    { label: 'Denied', g: GOOGLE_SF_PIPELINE.denied, m: META_SF_PIPELINE.denied },
+                    { label: 'Closed / Lost', g: GOOGLE_SF_PIPELINE.closedLost + GOOGLE_SF_PIPELINE.tempHold, m: META_SF_PIPELINE.closedLost + META_SF_PIPELINE.tempHold },
+                  ].map((row, idx) => (
+                    <tr key={row.label} style={{ background: idx % 2 === 0 ? '#f9f9f9' : '#fff', fontWeight: row.label === 'Total Leads' || row.label === 'Checked Out' ? 700 : 400 }}>
+                      <td style={{ padding: '6px 12px' }}>{row.label}</td>
+                      <td style={{ padding: '6px 12px', textAlign: 'right' }}>{row.g.toLocaleString()}</td>
+                      <td style={{ padding: '6px 12px', textAlign: 'right', color: '#888' }}>{GOOGLE_SF_PIPELINE.total > 0 ? `${(row.g / GOOGLE_SF_PIPELINE.total * 100).toFixed(1)}%` : '—'}</td>
+                      <td style={{ padding: '6px 12px', textAlign: 'right' }}>{row.m.toLocaleString()}</td>
+                      <td style={{ padding: '6px 12px', textAlign: 'right', color: '#888' }}>{META_SF_PIPELINE.total > 0 ? `${(row.m / META_SF_PIPELINE.total * 100).toFixed(1)}%` : '—'}</td>
+                    </tr>
+                  ))}
+                  <tr style={{ background: TP.navy, color: '#fff', fontWeight: 700 }}>
+                    <td style={{ padding: '8px 12px' }}>Revenue</td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right' }}>${GOOGLE_REVENUE.toLocaleString()}</td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right' }}></td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right' }}>${META_REVENUE.toLocaleString()}</td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right' }}></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Meta campaign breakdown */}
+            <div style={{ fontWeight: 700, color: TP.navy, marginBottom: 8, fontSize: 14 }}>Meta Campaigns — All Time Breakdown</div>
+            <div style={{ fontSize: '0.8em', color: '#888', marginBottom: 8 }}>
+              15 campaigns total. Most spend went to awareness/traffic campaigns, not lead gen. Only the current &quot;Lead Gen - Evergreen&quot; campaign and &quot;Symptom Checklist - Leads&quot; targeted conversions.
+            </div>
+            <div style={{ overflowX: 'auto', marginBottom: 24 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
+                <thead>
+                  <tr style={{ background: '#1877F2' }}>
+                    <th style={{ padding: '8px 10px', textAlign: 'left', color: '#fff' }}>Campaign</th>
+                    <th style={{ padding: '8px 10px', textAlign: 'left', color: '#fff' }}>Type</th>
+                    <th style={{ padding: '8px 10px', textAlign: 'right', color: '#fff' }}>Spend</th>
+                    <th style={{ padding: '8px 10px', textAlign: 'right', color: '#fff' }}>Results</th>
+                    <th style={{ padding: '8px 10px', textAlign: 'right', color: '#fff' }}>CPR</th>
+                    <th style={{ padding: '8px 10px', textAlign: 'right', color: '#fff' }}>Impressions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {META_CAMPAIGNS.map((c, idx) => (
+                    <tr key={c.name} style={{ background: idx % 2 === 0 ? '#f9f9f9' : '#fff' }}>
+                      <td style={{ padding: '5px 10px', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</td>
+                      <td style={{ padding: '5px 10px', color: c.type === 'Lead Gen' ? '#00C853' : c.type === 'Engagement' ? '#FF9800' : '#666' }}>{c.type}</td>
+                      <td style={{ padding: '5px 10px', textAlign: 'right' }}>${c.spend.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+                      <td style={{ padding: '5px 10px', textAlign: 'right' }}>{c.results > 0 ? c.results.toLocaleString() : '—'} <span style={{ color: '#aaa', fontSize: '0.85em' }}>{c.resultType}</span></td>
+                      <td style={{ padding: '5px 10px', textAlign: 'right' }}>{c.cpr > 0 ? `$${c.cpr.toFixed(2)}` : '—'}</td>
+                      <td style={{ padding: '5px 10px', textAlign: 'right' }}>{c.impressions.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                  <tr style={{ background: '#1877F2', color: '#fff', fontWeight: 700 }}>
+                    <td style={{ padding: '8px 10px' }} colSpan={2}>Total</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>${Math.round(metaTotalSpend).toLocaleString()}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right' }}></td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right' }}></td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right' }}>{metaTotalImpressions.toLocaleString()}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Meta monthly spend */}
+            <div style={{ fontWeight: 700, color: TP.navy, marginBottom: 8, fontSize: 14 }}>Meta Monthly Spend History</div>
             <div style={{ overflowX: 'auto', marginBottom: 16 }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em', background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
                 <thead>
-                  <tr style={{ background: '#999' }}>
+                  <tr style={{ background: '#1877F2' }}>
                     <th style={{ padding: '8px 12px', textAlign: 'left', color: '#fff' }}>Month</th>
                     <th style={{ padding: '8px 12px', textAlign: 'right', color: '#fff' }}>Spend</th>
-                    <th style={{ padding: '8px 12px', textAlign: 'right', color: '#fff' }}>Leads</th>
+                    <th style={{ padding: '8px 12px', textAlign: 'right', color: '#fff' }}>SF Leads</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1310,8 +1490,9 @@ export default function PaidAds() {
                 </tbody>
               </table>
             </div>
-            <div style={{ fontSize: '0.82em', color: '#888' }}>
-              Final funnel: {META_FUNNEL.entered} entered, {META_FUNNEL.waitingInfo} waiting on info, {META_FUNNEL.sentCheckout} sent checkout, {META_FUNNEL.checkedOut} checked out, {META_FUNNEL.denied} denied, {META_FUNNEL.closedLost} closed lost. Campaigns paused — budget moved to Google Ads.
+            <div style={{ fontSize: '0.78em', color: '#888', marginBottom: 8 }}>
+              Most Meta campaigns were paused May–Oct 2026. A new Lead Gen - Evergreen campaign was started in Nov 2026 at $197.57 spent so far.
+              Meta campaigns were primarily awareness/traffic (carousels, whitelist reels), not conversion-optimized. This makes the CPL/CAC comparison somewhat apples-to-oranges — Google Ads ran conversion-optimized campaigns from day one.
             </div>
           </div>
         )}
@@ -1327,6 +1508,15 @@ export default function PaidAds() {
 const inputStyle: React.CSSProperties = {
   padding: '5px 8px', border: '1px solid #ddd', borderRadius: 6, fontSize: '0.85em',
 };
+
+function MiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ textAlign: 'center', padding: '6px 4px' }}>
+      <div style={{ fontSize: '0.68em', color: '#888', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: 2 }}>{label}</div>
+      <div style={{ fontSize: '1.1em', fontWeight: 700, color: '#1B2A4A' }}>{value}</div>
+    </div>
+  );
+}
 
 function SummaryCard({ color, label, value, sub }: { color: string; label: string; value: string; sub: React.ReactNode }) {
   return (
