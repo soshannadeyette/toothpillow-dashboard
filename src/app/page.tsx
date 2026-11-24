@@ -14,6 +14,7 @@ import AVDiagnostics from '@/components/AVDiagnostics';
 import AccountStatus from '@/components/AccountStatus';
 import Creators from '@/components/Creators';
 import EnrollmentView from '@/components/EnrollmentView';
+import PaidAdsComparison from '@/components/PaidAdsComparison';
 // IceWinback is now a tab inside EnrollmentView
 const TABS = [
   { id: 'daily', label: 'Daily Tracker' },
@@ -22,6 +23,7 @@ const TABS = [
   { id: 'online', label: 'Online' },
   { id: 'referrer', label: 'Referrer' },
   { id: 'paid', label: 'Paid Ads' },
+  { id: 'paidcompare', label: 'Google vs Meta' },
   { id: 'ambassador', label: 'Ambassador Growth' },
   { id: 'organic', label: 'Organic Growth' },
   { id: 'avdiag', label: 'AV Diagnostics' },
@@ -99,6 +101,7 @@ export default function Dashboard() {
             {activeTab === 'online' && <OnlineTrends />}
             {activeTab === 'referrer' && <ReferrerView />}
             {activeTab === 'paid' && <PaidAds />}
+            {activeTab === 'paidcompare' && <PaidAdsComparison />}
             {activeTab === 'ambassador' && <AmbassadorGrowth />}
             {activeTab === 'organic' && <OrganicGrowth />}
             {activeTab === 'avdiag' && <AVDiagnostics />}
