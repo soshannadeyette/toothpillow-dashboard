@@ -7,7 +7,7 @@ import {
   LinearScale,
   BarElement,
   LineElement,
-  PointElement
+  PointElement,
   Title,
   Tooltip,
   Legend,
@@ -643,7 +643,7 @@ export default function PaidAds() {
   const funnel = [
     { label: 'Started Assessment', count: GOOGLE_SF_PIPELINE.total, color: TP.skyBlue },
     { label: 'Completed Submission', count: GOOGLE_SF_PIPELINE.completed, color: TP.blue },
-    { label: 'Sent Checkout Link', count: everSentCheckoutt, color: TP.yellow },
+    { label: 'Sent Checkout Link', count: everSentCheckout, color: TP.yellow },
     { label: 'Checked Out', count: GOOGLE_SF_PIPELINE.checkedOut, color: '#00C853' },
   ];
   const maxFunnel = funnel[0].count;
