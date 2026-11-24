@@ -7,7 +7,7 @@ import {
   LinearScale,
   BarElement,
   LineElement,
-  PointElement,
+  PointElement
   Title,
   Tooltip,
   Legend,
@@ -636,10 +636,14 @@ export default function PaidAds() {
   }
 
   // Funnel steps
+  // Funnel steps — cumulative passage through each stage.
+  // "Sent Checkout Link" includes everyone who ever got one: those still waiting (sentCheckout),
+  // those who checked out, and those who got a link but ended up closed-lost.
+  const everSentCheckout = GOOGLE_SF_PIPELINE.sentCheckout + GOOGLE_SF_PIPELINE.checkedOut + GOOGLE_SF_PIPELINE.closedLost;
   const funnel = [
     { label: 'Started Assessment', count: GOOGLE_SF_PIPELINE.total, color: TP.skyBlue },
     { label: 'Completed Submission', count: GOOGLE_SF_PIPELINE.completed, color: TP.blue },
-    { label: 'Sent Checkout Link', count: GOOGLE_SF_PIPELINE.sentCheckout, color: TP.yellow },
+    { label: 'Sent Checkout Link', count: everSentCheckoutt, color: TP.yellow },
     { label: 'Checked Out', count: GOOGLE_SF_PIPELINE.checkedOut, color: '#00C853' },
   ];
   const maxFunnel = funnel[0].count;
@@ -647,7 +651,7 @@ export default function PaidAds() {
   // Current pipeline status
   const pipelineStatus = [
     { label: 'Still filling out form', count: GOOGLE_SF_PIPELINE.waitingInfo, color: '#999', note: 'incomplete' },
-    { label: 'Waiting at checkout link', count: GOOGLE_SF_PIPELINE.sentCheckout - GOOGLE_SF_PIPELINE.checkedOut, color: TP.yellow, note: 'sent link, haven\'t bought' },
+    { label: 'Waiting at checkout link', count: GOOGLE_SF_PIPELINE.sentCheckout, color: TP.yellow, note: 'sent link, haven\'t bought' },
     { label: 'Checked out', count: GOOGLE_SF_PIPELINE.checkedOut, color: '#00C853', note: `$${GOOGLE_REVENUE.toLocaleString()} revenue` },
     { label: 'Sent to provider', count: GOOGLE_SF_PIPELINE.sentToTxP + GOOGLE_SF_PIPELINE.txpApproved, color: TP.darkPurple, note: 'in review' },
     { label: 'Referred out', count: GOOGLE_SF_PIPELINE.referredOut, color: TP.blue, note: 'outside network' },
